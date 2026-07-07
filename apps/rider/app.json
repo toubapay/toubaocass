@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "ToubaCass Rider",
-    "slug": "toubacass-rider",
+    "name": "Intercity Rider",
+    "slug": "intercity-rider",
     "version": "1.0.0",
-    "scheme": "toubacass-rider",
+    "scheme": "intercity-rider",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": ["expo-notifications"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.toubacass.rider"
+      "bundleIdentifier": "com.intercity.rider"
     },
     "android": {
-      "package": "com.toubacass.rider",
+      "package": "com.intercity.rider",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

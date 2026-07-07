@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "ToubaCass Driver",
-    "slug": "toubacass-driver",
+    "name": "Intercity Driver",
+    "slug": "intercity-driver",
     "version": "1.0.0",
-    "scheme": "toubacass-driver",
+    "scheme": "intercity-driver",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": ["expo-notifications", "expo-image-picker"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.toubacass.driver"
+      "bundleIdentifier": "com.intercity.driver"
     },
     "android": {
-      "package": "com.toubacass.driver",
+      "package": "com.intercity.driver",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

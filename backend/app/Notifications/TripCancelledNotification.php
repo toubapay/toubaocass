@@ -36,6 +36,6 @@ class TripCancelledNotification extends Notification
 
     public function toSms(object $notifiable): string
     {
-        return "ToubaCass: Your trip from {$this->trip->originCity->name} to {$this->trip->destinationCity->name} on {$this->trip->departure_date->format('d/m/Y')} was cancelled by the driver. Sorry for the inconvenience.";
+        return "Intercity: Your trip from {$this->trip->originCity->name} to {$this->trip->destinationCity->name} on {$this->trip->departure_date->format('d/m/Y')} was cancelled by the driver. Sorry for the inconvenience.";
     }
 }

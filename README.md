@@ -1,4 +1,4 @@
-# ToubaCass — Intercity Taxi Platform
+# Intercity — Book a Seat, City to City
 
 An Uber-style platform for **intercity** ride-sharing: taxi owners (drivers) post
 seat availability for a scheduled trip between two cities, and riders search,

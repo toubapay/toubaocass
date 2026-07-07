@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import axios from 'axios';
 
-const TOKEN_KEY = 'toubacass_rider_token';
+const TOKEN_KEY = 'intercity_rider_token';
 
 export const apiBaseUrl =
   (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ?? 'http://localhost:8000/api';

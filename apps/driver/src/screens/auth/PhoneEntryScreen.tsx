@@ -34,7 +34,7 @@ export function PhoneEntryScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.hero}>
-        <Text style={styles.title}>ToubaCass Driver</Text>
+        <Text style={styles.title}>Intercity Driver</Text>
         <Text style={styles.subtitle}>Post your trips and pick up riders across Senegal.</Text>
       </View>
 
