@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Database\Factories\BookingFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+#[Fillable(['trip_id', 'rider_id', 'seats_booked', 'fare_total', 'status'])]
+class Booking extends Model
+{
+    /** @use HasFactory<BookingFactory> */
+    use HasFactory;
+
+    const STATUS_CONFIRMED = 'confirmed';
+
+    const STATUS_CANCELLED = 'cancelled';
+
+    public function trip(): BelongsTo
+    {
+        return $this->belongsTo(Trip::class);
+    }
+
+    public function rider(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rider_id');
+    }
+}

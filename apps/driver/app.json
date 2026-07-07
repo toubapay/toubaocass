@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "ToubaCass Driver",
+    "slug": "toubacass-driver",
+    "version": "1.0.0",
+    "scheme": "toubacass-driver",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-notifications", "expo-image-picker"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.toubacass.driver"
+    },
+    "android": {
+      "package": "com.toubacass.driver",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiBaseUrl": "http://localhost:8000/api"
+    }
+  }
+}

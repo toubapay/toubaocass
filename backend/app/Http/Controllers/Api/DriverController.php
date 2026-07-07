@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Driver\SubmitKycRequest;
+use App\Http\Resources\DriverProfileResource;
+use App\Models\DriverProfile;
+use Illuminate\Http\Request;
+
+class DriverController extends Controller
+{
+    public function showKyc(Request $request)
+    {
+        $profile = $request->user()->driverProfile;
+
+        return new DriverProfileResource($profile);
+    }
+
+    public function submitKyc(SubmitKycRequest $request)
+    {
+        $user = $request->user();
+
+        $paths = [
+            'id_document_path' => $request->file('id_document')->store("kyc/{$user->id}", 'public'),
+            'license_document_path' => $request->file('license_document')->store("kyc/{$user->id}", 'public'),
+            'selfie_path' => $request->file('selfie')->store("kyc/{$user->id}", 'public'),
+        ];
+
+        $profile = DriverProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            array_merge($request->only('license_number', 'license_expiry', 'national_id_number'), $paths, [
+                'kyc_status' => DriverProfile::STATUS_SUBMITTED,
+                'kyc_rejection_reason' => null,
+            ]),
+        );
+
+        return new DriverProfileResource($profile);
+    }
+}

@@ -1,0 +1,16 @@
+import { apiClient } from './client';
+import { Booking, Paginated } from './types';
+
+export async function bookTrip(tripId: number, seats: number): Promise<Booking> {
+  const { data } = await apiClient.post(`/trips/${tripId}/bookings`, { seats });
+  return data;
+}
+
+export async function fetchMyBookings(): Promise<Paginated<Booking>> {
+  const { data } = await apiClient.get('/bookings');
+  return data;
+}
+
+export async function cancelBooking(bookingId: number): Promise<void> {
+  await apiClient.delete(`/bookings/${bookingId}`);
+}

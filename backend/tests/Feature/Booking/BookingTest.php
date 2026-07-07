@@ -1,0 +1,154 @@
+<?php
+
+namespace Tests\Feature\Booking;
+
+use App\Models\Booking;
+use App\Models\Car;
+use App\Models\City;
+use App\Models\Trip;
+use App\Models\User;
+use App\Notifications\TripFullNotification;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
+use Tests\TestCase;
+
+class BookingTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function makeTrip(int $seats = 4): Trip
+    {
+        $driver = User::factory()->driver()->create();
+        $car = Car::factory()->create(['driver_id' => $driver->id, 'seats' => $seats]);
+        [$origin, $destination] = City::factory()->count(2)->create();
+
+        return Trip::factory()->create([
+            'driver_id' => $driver->id,
+            'car_id' => $car->id,
+            'origin_city_id' => $origin->id,
+            'destination_city_id' => $destination->id,
+            'total_seats' => $seats,
+            'available_seats' => $seats,
+        ]);
+    }
+
+    public function test_rider_can_book_available_seats(): void
+    {
+        $trip = $this->makeTrip(4);
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2])
+            ->assertCreated()
+            ->assertJsonPath('seats_booked', 2);
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'available_seats' => 2, 'status' => 'scheduled']);
+    }
+
+    public function test_booking_all_seats_marks_the_trip_full_and_notifies_driver(): void
+    {
+        Notification::fake();
+
+        $trip = $this->makeTrip(4);
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 4])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'available_seats' => 0, 'status' => 'full']);
+
+        Notification::assertSentTo($trip->driver, TripFullNotification::class);
+    }
+
+    public function test_rider_cannot_book_more_seats_than_available(): void
+    {
+        $trip = $this->makeTrip(4);
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 5])
+            ->assertUnprocessable();
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'available_seats' => 4]);
+    }
+
+    public function test_a_full_trip_rejects_further_bookings(): void
+    {
+        $trip = $this->makeTrip(2);
+        $riderA = User::factory()->create();
+        $riderB = User::factory()->create();
+
+        $this->actingAs($riderA, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2])
+            ->assertCreated();
+
+        $this->actingAs($riderB, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('trip');
+    }
+
+    public function test_a_driver_account_cannot_use_the_rider_booking_endpoint(): void
+    {
+        $trip = $this->makeTrip(4);
+
+        $this->actingAs($trip->driver, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
+            ->assertForbidden();
+    }
+
+    public function test_cancelling_a_booking_frees_the_seats_and_reopens_a_full_trip(): void
+    {
+        $trip = $this->makeTrip(2);
+        $rider = User::factory()->create();
+
+        $booking = $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2])
+            ->assertCreated()
+            ->json();
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'status' => 'full']);
+
+        $this->actingAs($rider, 'sanctum')
+            ->deleteJson("/api/bookings/{$booking['id']}")
+            ->assertOk();
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'available_seats' => 2, 'status' => 'scheduled']);
+        $this->assertDatabaseHas('bookings', ['id' => $booking['id'], 'status' => 'cancelled']);
+    }
+
+    public function test_rider_cannot_cancel_another_riders_booking(): void
+    {
+        $trip = $this->makeTrip(4);
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+
+        $booking = Booking::factory()->create([
+            'trip_id' => $trip->id,
+            'rider_id' => $owner->id,
+            'seats_booked' => 1,
+        ]);
+
+        $this->actingAs($intruder, 'sanctum')
+            ->deleteJson("/api/bookings/{$booking->id}")
+            ->assertForbidden();
+    }
+
+    public function test_driver_cancelling_a_trip_cancels_confirmed_bookings(): void
+    {
+        $trip = $this->makeTrip(4);
+        $rider = User::factory()->create();
+
+        $booking = $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2])
+            ->json();
+
+        $this->actingAs($trip->driver, 'sanctum')
+            ->deleteJson("/api/driver/trips/{$trip->id}")
+            ->assertOk();
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('bookings', ['id' => $booking['id'], 'status' => 'cancelled']);
+    }
+}
