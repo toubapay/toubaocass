@@ -32,16 +32,16 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Text style={styles.locateText}>📍 Use my current location</Text>
+          <Text style={styles.locateText}>📍 Utiliser ma position actuelle</Text>
         )}
       </Pressable>
       {error && <Text style={styles.error}>{error}</Text>}
       {hasPin ? (
         <Text style={styles.coords}>
-          Pin set at {(latitude as number).toFixed(5)}, {(longitude as number).toFixed(5)}
+          Repère placé à {(latitude as number).toFixed(5)}, {(longitude as number).toFixed(5)}
         </Text>
       ) : (
-        <Text style={styles.hint}>An interactive map to drop a pin is available in the mobile app.</Text>
+        <Text style={styles.hint}>Une carte interactive pour placer un repère est disponible dans l'application mobile.</Text>
       )}
     </View>
   );

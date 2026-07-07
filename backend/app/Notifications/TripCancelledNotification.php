@@ -25,8 +25,8 @@ class TripCancelledNotification extends Notification
     public function toFcm(object $notifiable): array
     {
         return [
-            'title' => 'Trip cancelled',
-            'body' => "Your {$this->trip->originCity->name} → {$this->trip->destinationCity->name} trip on {$this->trip->departure_date->format('d/m/Y')} was cancelled by the driver.",
+            'title' => 'Trajet annulé',
+            'body' => "Votre trajet {$this->trip->originCity->name} → {$this->trip->destinationCity->name} du {$this->trip->departure_date->format('d/m/Y')} a été annulé par le conducteur.",
             'data' => [
                 'type' => 'trip_cancelled',
                 'trip_id' => $this->trip->id,
@@ -36,6 +36,6 @@ class TripCancelledNotification extends Notification
 
     public function toSms(object $notifiable): string
     {
-        return "Intercity: Your trip from {$this->trip->originCity->name} to {$this->trip->destinationCity->name} on {$this->trip->departure_date->format('d/m/Y')} was cancelled by the driver. Sorry for the inconvenience.";
+        return "Intercity : Votre trajet de {$this->trip->originCity->name} à {$this->trip->destinationCity->name} du {$this->trip->departure_date->format('d/m/Y')} a été annulé par le conducteur. Désolé pour la gêne occasionnée.";
     }
 }

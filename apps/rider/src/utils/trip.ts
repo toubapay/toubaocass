@@ -21,7 +21,7 @@ export function bookingFillState(trip: Trip): BookingFillState {
 }
 
 export const FILL_STATE_LABEL: Record<BookingFillState, string> = {
-  open: 'Open',
-  filling: 'Filling up',
-  full: 'Full',
+  open: 'Disponible',
+  filling: 'Se remplit',
+  full: 'Complet',
 };

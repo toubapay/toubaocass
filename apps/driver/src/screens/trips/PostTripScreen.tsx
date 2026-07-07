@@ -22,7 +22,7 @@ type Props = NativeStackScreenProps<TripsStackParamList, 'PostTrip'>;
 
 const RIDE_TYPES: { value: RideType; label: string }[] = [
   { value: 'standard', label: 'Standard' },
-  { value: 'comfort', label: 'Comfort' },
+  { value: 'comfort', label: 'Confort' },
   { value: 'xl', label: 'XL' },
 ];
 
@@ -99,9 +99,9 @@ export function PostTripScreen({ navigation }: Props) {
   if (!kycApproved) {
     return (
       <Screen>
-        <Text style={styles.title}>Post a trip</Text>
+        <Text style={styles.title}>Publier un trajet</Text>
         <Text style={styles.notice}>
-          Your driver verification must be approved before you can post trips. Check the Verification tab.
+          Votre vérification conducteur doit être approuvée avant de pouvoir publier des trajets. Consultez l'onglet Vérification.
         </Text>
       </Screen>
     );
@@ -110,8 +110,8 @@ export function PostTripScreen({ navigation }: Props) {
   if (!cars.length) {
     return (
       <Screen>
-        <Text style={styles.title}>Post a trip</Text>
-        <Text style={styles.notice}>Add a vehicle first from the Fleet tab.</Text>
+        <Text style={styles.title}>Publier un trajet</Text>
+        <Text style={styles.notice}>Ajoutez d'abord un véhicule depuis l'onglet Flotte.</Text>
       </Screen>
     );
   }
@@ -119,9 +119,9 @@ export function PostTripScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Post a trip</Text>
+        <Text style={styles.title}>Publier un trajet</Text>
 
-        <Text style={styles.label}>Vehicle</Text>
+        <Text style={styles.label}>Véhicule</Text>
         <View style={styles.chipRow}>
           {cars.map((c) => (
             <Pressable
@@ -136,36 +136,36 @@ export function PostTripScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <CityPicker label="From" cities={cities} value={origin} onChange={setOrigin} placeholder="Departure city" />
+        <CityPicker label="Départ" cities={cities} value={origin} onChange={setOrigin} placeholder="Ville de départ" />
         <CityPicker
-          label="To"
+          label="Arrivée"
           cities={cities}
           value={destination}
           onChange={setDestination}
-          placeholder="Destination city"
+          placeholder="Ville de destination"
         />
 
-        <Text style={styles.label}>Exact meeting point (optional)</Text>
+        <Text style={styles.label}>Point de rendez-vous exact (facultatif)</Text>
         <DeparturePicker latitude={departureLat} longitude={departureLng} onChange={handleDepartureChange} />
         <TextField
-          label="Meeting point description"
-          placeholder="e.g. Total station, Route de l'Aéroport"
+          label="Description du point de rendez-vous"
+          placeholder="ex. Station Total, Route de l'Aéroport"
           value={departureAddress}
           onChangeText={setDepartureAddress}
         />
 
-        <DateField label="Departure date" value={date} onChange={setDate} minimumDate={new Date()} />
-        <DateField label="Departure time" mode="time" value={time} onChange={setTime} />
+        <DateField label="Date de départ" value={date} onChange={setDate} minimumDate={new Date()} />
+        <DateField label="Heure de départ" mode="time" value={time} onChange={setTime} />
 
         <TextField
-          label="Fare per seat (FCFA)"
+          label="Tarif par place (FCFA)"
           keyboardType="number-pad"
           value={fare}
           onChangeText={setFare}
           error={error}
         />
 
-        <Text style={styles.label}>Ride type</Text>
+        <Text style={styles.label}>Type de trajet</Text>
         <View style={styles.chipRow}>
           {RIDE_TYPES.map((t) => (
             <Pressable
@@ -178,9 +178,9 @@ export function PostTripScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <TextField label="Notes (optional)" value={notes} onChangeText={setNotes} multiline />
+        <TextField label="Remarques (facultatif)" value={notes} onChangeText={setNotes} multiline />
 
-        <Button label="Post trip" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+        <Button label="Publier le trajet" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
       </ScrollView>
     </Screen>
   );

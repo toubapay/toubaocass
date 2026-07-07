@@ -18,7 +18,7 @@ export function DepartureMap({ address }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>📍</Text>
-      <Text style={styles.text}>{address ?? 'Map preview available in the mobile app'}</Text>
+      <Text style={styles.text}>{address ?? 'Aperçu de la carte disponible dans l\'application mobile'}</Text>
     </View>
   );
 }

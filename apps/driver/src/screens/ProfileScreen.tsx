@@ -7,10 +7,10 @@ import { Screen } from '../components/Screen';
 import { colors, radius, spacing } from '../theme';
 
 const KYC_LABEL: Record<string, string> = {
-  pending: 'Not submitted',
-  submitted: 'Under review',
-  approved: 'Verified',
-  rejected: 'Rejected',
+  pending: 'Non soumis',
+  submitted: 'En cours d\'examen',
+  approved: 'Vérifié',
+  rejected: 'Refusé',
 };
 
 export function ProfileScreen() {
@@ -18,19 +18,19 @@ export function ProfileScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>My profile</Text>
+      <Text style={styles.title}>Mon profil</Text>
 
       <View style={styles.card}>
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.meta}>{user?.phone}</Text>
         {user?.email ? <Text style={styles.meta}>{user.email}</Text> : null}
         <Text style={styles.kyc}>
-          Verification: {KYC_LABEL[user?.driver_profile?.kyc_status ?? 'pending']}
+          Vérification : {KYC_LABEL[user?.driver_profile?.kyc_status ?? 'pending']}
         </Text>
-        <Text style={styles.meta}>Rating: {(user?.driver_profile?.rating ?? 5).toFixed(1)} ★</Text>
+        <Text style={styles.meta}>Note : {(user?.driver_profile?.rating ?? 5).toFixed(1)} ★</Text>
       </View>
 
-      <Button label="Log out" onPress={signOut} variant="outline" />
+      <Button label="Déconnexion" onPress={signOut} variant="outline" />
     </Screen>
   );
 }

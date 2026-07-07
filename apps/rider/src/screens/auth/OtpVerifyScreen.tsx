@@ -49,11 +49,11 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Enter the code</Text>
-      <Text style={styles.subtitle}>We sent a verification code by SMS to {phone}.</Text>
+      <Text style={styles.title}>Saisissez le code</Text>
+      <Text style={styles.subtitle}>Nous avons envoyé un code de vérification par SMS au {phone}.</Text>
 
       <TextField
-        label="Verification code"
+        label="Code de vérification"
         placeholder="123456"
         keyboardType="number-pad"
         maxLength={6}
@@ -62,9 +62,9 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
         error={error}
       />
 
-      <Button label="Verify" onPress={handleVerify} loading={loading} disabled={code.length < 4} />
+      <Button label="Vérifier" onPress={handleVerify} loading={loading} disabled={code.length < 4} />
       <Button
-        label={resending ? 'Sending...' : 'Resend code'}
+        label={resending ? 'Envoi en cours...' : 'Renvoyer le code'}
         onPress={handleResend}
         loading={resending}
         variant="outline"

@@ -22,7 +22,7 @@ export function useMyLocation() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setError('Location permission was denied.');
+        setError('L\'autorisation de localisation a été refusée.');
         return null;
       }
 
@@ -33,7 +33,7 @@ export function useMyLocation() {
       setLocation(coords);
       return coords;
     } catch {
-      setError('Could not get your location. Check your device settings.');
+      setError('Impossible d\'obtenir votre position. Vérifiez les paramètres de votre appareil.');
       return null;
     } finally {
       setLoading(false);

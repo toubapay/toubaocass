@@ -31,12 +31,12 @@ export function ProfileSetupScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>Tell us about you</Text>
-      <Text style={styles.subtitle}>Just your name is enough to get started.</Text>
+      <Text style={styles.title}>Parlez-nous de vous</Text>
+      <Text style={styles.subtitle}>Votre nom suffit pour commencer.</Text>
 
-      <TextField label="Full name" placeholder="Awa Ndiaye" value={name} onChangeText={setName} error={error} />
+      <TextField label="Nom complet" placeholder="Awa Ndiaye" value={name} onChangeText={setName} error={error} />
       <TextField
-        label="Email (optional)"
+        label="E-mail (facultatif)"
         placeholder="awa@example.com"
         keyboardType="email-address"
         autoCapitalize="none"
@@ -44,7 +44,7 @@ export function ProfileSetupScreen() {
         onChangeText={setEmail}
       />
 
-      <Button label="Finish" onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
+      <Button label="Terminer" onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
     </Screen>
   );
 }

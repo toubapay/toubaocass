@@ -36,13 +36,13 @@ class BookingController extends Controller
 
             if ($locked->status !== Trip::STATUS_SCHEDULED) {
                 throw ValidationException::withMessages([
-                    'trip' => ['This trip is no longer accepting bookings.'],
+                    'trip' => ['Ce trajet n\'accepte plus de réservations.'],
                 ]);
             }
 
             if ($locked->available_seats < $seatsRequested) {
                 throw ValidationException::withMessages([
-                    'seats' => ["Only {$locked->available_seats} seat(s) left on this trip."],
+                    'seats' => ["Il ne reste que {$locked->available_seats} place(s) sur ce trajet."],
                 ]);
             }
 
@@ -53,7 +53,7 @@ class BookingController extends Controller
 
             if ($alreadyBooked) {
                 throw ValidationException::withMessages([
-                    'trip' => ['You already have a booking on this trip. Cancel it first to change your seat count.'],
+                    'trip' => ['Vous avez déjà une réservation sur ce trajet. Annulez-la d\'abord pour modifier le nombre de places.'],
                 ]);
             }
 
@@ -83,7 +83,7 @@ class BookingController extends Controller
         $this->authorize('delete', $booking);
 
         if ($booking->status !== Booking::STATUS_CONFIRMED) {
-            return response()->json(['message' => 'This booking is already cancelled.'], 422);
+            return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
         }
 
         DB::transaction(function () use ($booking) {
@@ -102,6 +102,6 @@ class BookingController extends Controller
 
         BookingCancelled::dispatch($booking->fresh());
 
-        return response()->json(['message' => 'Booking cancelled.']);
+        return response()->json(['message' => 'Réservation annulée.']);
     }
 }

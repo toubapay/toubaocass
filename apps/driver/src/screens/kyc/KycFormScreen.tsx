@@ -38,7 +38,7 @@ function DocumentPicker({ label, file, onPick }: { label: string; file: KycFile 
         {file ? (
           <Image source={{ uri: file.uri }} style={styles.preview} />
         ) : (
-          <Text style={styles.pickerPlaceholder}>Tap to upload photo</Text>
+          <Text style={styles.pickerPlaceholder}>Appuyez pour envoyer une photo</Text>
         )}
       </Pressable>
     </View>
@@ -77,11 +77,11 @@ export function KycFormScreen({ navigation }: Props) {
         selfie,
       });
       await refreshUser();
-      Alert.alert('Documents submitted', 'We will review your documents shortly.', [
+      Alert.alert('Documents soumis', 'Nous examinerons vos documents sous peu.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
-      Alert.alert('Could not submit', extractErrorMessage(e));
+      Alert.alert('Envoi impossible', extractErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -89,22 +89,22 @@ export function KycFormScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Submit KYC documents</Text>
+      <Text style={styles.title}>Soumettre les documents KYC</Text>
 
-      <TextField label="Driving license number" value={licenseNumber} onChangeText={setLicenseNumber} />
-      <DateField label="License expiry" value={licenseExpiry} onChange={setLicenseExpiry} minimumDate={new Date()} />
+      <TextField label="Numéro de permis de conduire" value={licenseNumber} onChangeText={setLicenseNumber} />
+      <DateField label="Date d'expiration du permis" value={licenseExpiry} onChange={setLicenseExpiry} minimumDate={new Date()} />
       <TextField
-        label="National ID number"
+        label="Numéro de carte d'identité nationale"
         value={nationalId}
         onChangeText={setNationalId}
         keyboardType="number-pad"
       />
 
-      <DocumentPicker label="National ID photo" file={idDocument} onPick={setIdDocument} />
-      <DocumentPicker label="Driving license photo" file={licenseDocument} onPick={setLicenseDocument} />
+      <DocumentPicker label="Photo de la carte d'identité" file={idDocument} onPick={setIdDocument} />
+      <DocumentPicker label="Photo du permis de conduire" file={licenseDocument} onPick={setLicenseDocument} />
       <DocumentPicker label="Selfie" file={selfie} onPick={setSelfie} />
 
-      <Button label="Submit for review" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+      <Button label="Soumettre pour examen" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
     </Screen>
   );
 }

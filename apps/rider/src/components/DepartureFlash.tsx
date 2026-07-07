@@ -30,7 +30,7 @@ export function DepartureFlash() {
 
   return (
     <Animated.View style={[styles.badge, { opacity: reduceMotion ? 1 : opacity }]}>
-      <Text style={styles.text}>⚡ Departing soon</Text>
+      <Text style={styles.text}>⚡ Départ imminent</Text>
     </Animated.View>
   );
 }

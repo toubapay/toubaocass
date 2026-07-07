@@ -23,7 +23,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
       <Text style={styles.label}>{label}</Text>
       <Pressable style={styles.selector} onPress={() => setVisible(true)}>
         <Text style={value ? styles.selectorText : styles.placeholder}>
-          {value ? value.name : placeholder ?? 'Select a city'}
+          {value ? value.name : placeholder ?? 'Sélectionner une ville'}
         </Text>
       </Pressable>
 
@@ -31,7 +31,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
         <View style={styles.modal}>
           <TextInput
             autoFocus
-            placeholder="Search city..."
+            placeholder="Rechercher une ville..."
             placeholderTextColor={colors.textMuted}
             value={query}
             onChangeText={setQuery}
@@ -55,7 +55,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
           <Pressable style={styles.closeButton} onPress={() => setVisible(false)}>
-            <Text style={styles.closeText}>Cancel</Text>
+            <Text style={styles.closeText}>Annuler</Text>
           </Pressable>
         </View>
       </Modal>

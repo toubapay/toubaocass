@@ -11,7 +11,7 @@ export function ProfileScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>My profile</Text>
+      <Text style={styles.title}>Mon profil</Text>
 
       <View style={styles.card}>
         <Text style={styles.name}>{user?.name}</Text>
@@ -19,7 +19,7 @@ export function ProfileScreen() {
         {user?.email ? <Text style={styles.meta}>{user.email}</Text> : null}
       </View>
 
-      <Button label="Log out" onPress={signOut} variant="outline" />
+      <Button label="Déconnexion" onPress={signOut} variant="outline" />
     </Screen>
   );
 }

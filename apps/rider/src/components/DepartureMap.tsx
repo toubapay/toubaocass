@@ -27,7 +27,7 @@ export function DepartureMap({ latitude, longitude, address }: Props) {
         rotateEnabled={false}
         pointerEvents="none"
       >
-        <Marker coordinate={{ latitude, longitude }} title={address ?? 'Departure point'} />
+        <Marker coordinate={{ latitude, longitude }} title={address ?? 'Point de départ'} />
       </MapView>
     </View>
   );

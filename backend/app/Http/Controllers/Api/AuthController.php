@@ -20,7 +20,7 @@ class AuthController extends Controller
         $this->otpService->requestOtp($request->string('phone'), $request->string('role'));
 
         return response()->json([
-            'message' => 'A verification code has been sent by SMS.',
+            'message' => 'Un code de vérification a été envoyé par SMS.',
             'expires_in_minutes' => (int) config('services.otp.ttl_minutes'),
         ]);
     }
@@ -62,13 +62,13 @@ class AuthController extends Controller
 
         $request->user()->update(['fcm_token' => $request->string('fcm_token')]);
 
-        return response()->json(['message' => 'FCM token updated.']);
+        return response()->json(['message' => 'Jeton FCM mis à jour.']);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out.']);
+        return response()->json(['message' => 'Déconnecté.']);
     }
 }

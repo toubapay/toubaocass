@@ -55,7 +55,7 @@ export function HomeScreen({ navigation }: Props) {
         radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
       })
         .then((res) => setTrips(res.data))
-        .catch(() => setError('Could not load rides. Pull to refresh.'))
+        .catch(() => setError('Impossible de charger les trajets. Tirez pour actualiser.'))
         .finally(() => {
           setLoading(false);
           setRefreshing(false);
@@ -85,7 +85,7 @@ export function HomeScreen({ navigation }: Props) {
     if (coords) {
       setNearMe(coords);
     } else if (locationError) {
-      Alert.alert('Location unavailable', locationError);
+      Alert.alert('Position indisponible', locationError);
     }
   };
 
@@ -97,26 +97,26 @@ export function HomeScreen({ navigation }: Props) {
             <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />
           ) : (
             <Text style={[styles.nearMeText, nearMe && styles.nearMeTextActive]}>
-              {nearMe ? `📍 Showing rides within ${NEARBY_RADIUS_KM} km of you` : '📍 Find rides near me'}
+              {nearMe ? `📍 Trajets affichés dans un rayon de ${NEARBY_RADIUS_KM} km` : '📍 Trouver des trajets près de moi'}
             </Text>
           )}
         </Pressable>
 
         <View style={styles.filterRow}>
           <View style={styles.filterField}>
-            <CityPicker label="From" cities={cities} value={origin} onChange={setOrigin} placeholder="Any city" />
+            <CityPicker label="Départ" cities={cities} value={origin} onChange={setOrigin} placeholder="Toutes les villes" />
           </View>
           <View style={styles.filterField}>
-            <CityPicker label="To" cities={cities} value={destination} onChange={setDestination} placeholder="Any city" />
+            <CityPicker label="Arrivée" cities={cities} value={destination} onChange={setDestination} placeholder="Toutes les villes" />
           </View>
         </View>
 
         <View style={styles.filterRow}>
           <View style={styles.filterField}>
-            <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="Any date" />
+            <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="Toutes les dates" />
           </View>
           <View style={styles.seatsField}>
-            <Text style={styles.seatsLabel}>Seats</Text>
+            <Text style={styles.seatsLabel}>Places</Text>
             <View style={styles.stepper}>
               <Pressable style={styles.stepperButton} onPress={() => setSeats((s) => Math.max(1, s - 1))}>
                 <Text style={styles.stepperButtonText}>−</Text>
@@ -131,10 +131,10 @@ export function HomeScreen({ navigation }: Props) {
 
         {hasFilters && (
           <Pressable onPress={clearFilters}>
-            <Text style={styles.clearLink}>Clear filters</Text>
+            <Text style={styles.clearLink}>Effacer les filtres</Text>
           </Pressable>
         )}
-        {invalidRoute && <Text style={styles.errorText}>Departure and destination can't be the same city.</Text>}
+        {invalidRoute && <Text style={styles.errorText}>La ville de départ et d'arrivée ne peuvent pas être identiques.</Text>}
       </View>
 
       {loading && trips.length === 0 ? (
@@ -156,10 +156,10 @@ export function HomeScreen({ navigation }: Props) {
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
                 {nearMe
-                  ? `No rides departing within ${NEARBY_RADIUS_KM} km of you right now.`
+                  ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
                   : hasFilters
-                    ? 'No rides found for these filters yet. Try widening your search.'
-                    : 'No upcoming rides posted yet — check back soon.'}
+                    ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
+                    : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
               </Text>
             </View>
           }

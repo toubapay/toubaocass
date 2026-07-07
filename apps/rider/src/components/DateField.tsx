@@ -24,7 +24,7 @@ export function DateField({ label, value, onChange, minimumDate, placeholder }: 
       <Text style={styles.label}>{label}</Text>
       <Pressable style={styles.selector} onPress={() => setVisible(true)}>
         <Text style={value ? styles.text : styles.placeholder}>
-          {value ? formatDate(value) : placeholder ?? 'Select a date'}
+          {value ? formatDate(value) : placeholder ?? 'Sélectionner une date'}
         </Text>
       </Pressable>
 

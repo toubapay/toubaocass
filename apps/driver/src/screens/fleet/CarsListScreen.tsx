@@ -27,17 +27,17 @@ export function CarsListScreen({ navigation }: Props) {
   useFocusEffect(load);
 
   const handleDelete = (car: Car) => {
-    Alert.alert('Remove car', `Remove ${car.make} ${car.model} (${car.plate_number})?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Supprimer le véhicule', `Supprimer ${car.make} ${car.model} (${car.plate_number}) ?`, [
+      { text: 'Annuler', style: 'cancel' },
       {
-        text: 'Remove',
+        text: 'Supprimer',
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteCar(car.id);
             load();
           } catch (e) {
-            Alert.alert('Could not remove car', extractErrorMessage(e));
+            Alert.alert('Suppression impossible', extractErrorMessage(e));
           }
         },
       },
@@ -54,7 +54,7 @@ export function CarsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>My vehicles</Text>
+      <Text style={styles.title}>Mes véhicules</Text>
       <FlatList
         data={cars}
         keyExtractor={(item) => String(item.id)}
@@ -64,20 +64,20 @@ export function CarsListScreen({ navigation }: Props) {
               {item.make} {item.model} ({item.year ?? 'N/A'})
             </Text>
             <Text style={styles.meta}>
-              {item.plate_number} · {item.seats} seats · {item.type.toUpperCase()}
+              {item.plate_number} · {item.seats} places · {item.type.toUpperCase()}
             </Text>
             <Pressable onPress={() => handleDelete(item)} style={styles.removeButton}>
-              <Text style={styles.removeText}>Remove</Text>
+              <Text style={styles.removeText}>Supprimer</Text>
             </Pressable>
           </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Add a vehicle to start posting trips.</Text>
+            <Text style={styles.emptyText}>Ajoutez un véhicule pour commencer à publier des trajets.</Text>
           </View>
         }
       />
-      <Button label="Add a vehicle" onPress={() => navigation.navigate('AddCar')} />
+      <Button label="Ajouter un véhicule" onPress={() => navigation.navigate('AddCar')} />
     </Screen>
   );
 }

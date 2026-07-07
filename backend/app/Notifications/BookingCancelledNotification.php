@@ -26,8 +26,8 @@ class BookingCancelledNotification extends Notification
         $trip = $this->booking->trip;
 
         return [
-            'title' => 'Booking cancelled',
-            'body' => "A rider cancelled {$this->booking->seats_booked} seat(s) on your {$trip->originCity->name} → {$trip->destinationCity->name} trip.",
+            'title' => 'Réservation annulée',
+            'body' => "Un passager a annulé {$this->booking->seats_booked} place(s) sur votre trajet {$trip->originCity->name} → {$trip->destinationCity->name}.",
             'data' => [
                 'type' => 'booking_cancelled',
                 'trip_id' => $trip->id,

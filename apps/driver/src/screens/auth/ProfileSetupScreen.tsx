@@ -31,12 +31,12 @@ export function ProfileSetupScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>Tell us about you</Text>
-      <Text style={styles.subtitle}>We'll use this on your driver profile.</Text>
+      <Text style={styles.title}>Parlez-nous de vous</Text>
+      <Text style={styles.subtitle}>Ces informations apparaîtront sur votre profil conducteur.</Text>
 
-      <TextField label="Full name" placeholder="Modou Fall" value={name} onChangeText={setName} error={error} />
+      <TextField label="Nom complet" placeholder="Modou Fall" value={name} onChangeText={setName} error={error} />
       <TextField
-        label="Email (optional)"
+        label="E-mail (facultatif)"
         placeholder="modou@example.com"
         keyboardType="email-address"
         autoCapitalize="none"
@@ -44,7 +44,7 @@ export function ProfileSetupScreen() {
         onChangeText={setEmail}
       />
 
-      <Button label="Finish" onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
+      <Button label="Terminer" onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
     </Screen>
   );
 }

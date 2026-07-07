@@ -21,11 +21,11 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  scheduled: 'Scheduled',
-  full: 'Full',
-  in_progress: 'In progress',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
+  scheduled: 'Programmé',
+  full: 'Complet',
+  in_progress: 'En cours',
+  completed: 'Terminé',
+  cancelled: 'Annulé',
 };
 
 export function TripsListScreen({ navigation }: Props) {
@@ -51,7 +51,7 @@ export function TripsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>My trips</Text>
+      <Text style={styles.title}>Mes trajets</Text>
       <FlatList
         data={trips}
         keyExtractor={(item) => String(item.id)}
@@ -66,18 +66,18 @@ export function TripsListScreen({ navigation }: Props) {
               </Text>
             </View>
             <Text style={styles.meta}>
-              {item.departure_date} at {item.departure_time} · {item.available_seats}/{item.total_seats} seats left
+              {item.departure_date} à {item.departure_time} · {item.available_seats}/{item.total_seats} places restantes
             </Text>
-            <Text style={styles.fare}>{item.fare.toLocaleString()} FCFA / seat</Text>
+            <Text style={styles.fare}>{item.fare.toLocaleString()} FCFA / place</Text>
           </Pressable>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>You haven't posted any trips yet.</Text>
+            <Text style={styles.emptyText}>Vous n'avez publié aucun trajet pour l'instant.</Text>
           </View>
         }
       />
-      <Button label="Post a new trip" onPress={() => navigation.navigate('PostTrip')} />
+      <Button label="Publier un nouveau trajet" onPress={() => navigation.navigate('PostTrip')} />
     </Screen>
   );
 }

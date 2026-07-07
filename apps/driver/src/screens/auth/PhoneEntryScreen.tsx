@@ -35,11 +35,11 @@ export function PhoneEntryScreen({ navigation }: Props) {
     <Screen>
       <View style={styles.hero}>
         <Text style={styles.title}>Intercity Driver</Text>
-        <Text style={styles.subtitle}>Post your trips and pick up riders across Senegal.</Text>
+        <Text style={styles.subtitle}>Publiez vos trajets et prenez des passagers partout au Sénégal.</Text>
       </View>
 
       <TextField
-        label="Phone number"
+        label="Numéro de téléphone"
         placeholder="+221 77 000 00 00"
         keyboardType="phone-pad"
         value={phone}
@@ -47,7 +47,7 @@ export function PhoneEntryScreen({ navigation }: Props) {
         error={error}
       />
 
-      <Button label="Continue" onPress={handleSubmit} loading={loading} />
+      <Button label="Continuer" onPress={handleSubmit} loading={loading} />
     </Screen>
   );
 }

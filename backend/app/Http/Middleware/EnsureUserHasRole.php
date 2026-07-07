@@ -14,7 +14,7 @@ class EnsureUserHasRole
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (! $request->user() || $request->user()->role !== $role) {
-            return response()->json(['message' => 'This action requires a '.$role.' account.'], 403);
+            return response()->json(['message' => 'Cette action nécessite un compte '.$role.'.'], 403);
         }
 
         return $next($request);

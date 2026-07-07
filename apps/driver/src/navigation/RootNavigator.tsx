@@ -46,9 +46,9 @@ function AuthNavigator() {
 function TripsNavigator() {
   return (
     <TripsStackNav.Navigator>
-      <TripsStackNav.Screen name="TripsList" component={TripsListScreen} options={{ title: 'My trips' }} />
-      <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Post a trip' }} />
-      <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Trip details' }} />
+      <TripsStackNav.Screen name="TripsList" component={TripsListScreen} options={{ title: 'Mes trajets' }} />
+      <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Publier un trajet' }} />
+      <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
     </TripsStackNav.Navigator>
   );
 }
@@ -56,8 +56,8 @@ function TripsNavigator() {
 function FleetNavigator() {
   return (
     <FleetStackNav.Navigator>
-      <FleetStackNav.Screen name="CarsList" component={CarsListScreen} options={{ title: 'My vehicles' }} />
-      <FleetStackNav.Screen name="AddCar" component={AddCarScreen} options={{ title: 'Add vehicle' }} />
+      <FleetStackNav.Screen name="CarsList" component={CarsListScreen} options={{ title: 'Mes véhicules' }} />
+      <FleetStackNav.Screen name="AddCar" component={AddCarScreen} options={{ title: 'Ajouter un véhicule' }} />
     </FleetStackNav.Navigator>
   );
 }
@@ -65,8 +65,8 @@ function FleetNavigator() {
 function KycNavigator() {
   return (
     <KycStackNav.Navigator>
-      <KycStackNav.Screen name="KycStatus" component={KycStatusScreen} options={{ title: 'Verification' }} />
-      <KycStackNav.Screen name="KycForm" component={KycFormScreen} options={{ title: 'Submit documents' }} />
+      <KycStackNav.Screen name="KycStatus" component={KycStatusScreen} options={{ title: 'Vérification' }} />
+      <KycStackNav.Screen name="KycForm" component={KycFormScreen} options={{ title: 'Soumettre les documents' }} />
     </KycStackNav.Navigator>
   );
 }
@@ -93,10 +93,10 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: 'Trips' }} />
-      <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: 'Fleet' }} />
-      <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: 'Verification' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: 'Trajets' }} />
+      <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: 'Flotte' }} />
+      <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: 'Vérification' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   );
 }

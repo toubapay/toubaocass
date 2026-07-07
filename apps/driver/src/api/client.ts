@@ -45,5 +45,5 @@ export function extractErrorMessage(error: unknown): string {
     }
     if (data?.message) return data.message;
   }
-  return 'Something went wrong. Please try again.';
+  return 'Une erreur est survenue. Veuillez réessayer.';
 }

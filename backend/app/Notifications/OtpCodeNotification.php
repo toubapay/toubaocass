@@ -26,6 +26,6 @@ class OtpCodeNotification extends Notification
     {
         $ttl = config('services.otp.ttl_minutes');
 
-        return "Your Intercity verification code is {$this->code}. It expires in {$ttl} minutes.";
+        return "Votre code de vérification Intercity est {$this->code}. Il expire dans {$ttl} minutes.";
     }
 }

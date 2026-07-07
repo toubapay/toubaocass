@@ -26,8 +26,8 @@ class BookingConfirmedNotification extends Notification
         $trip = $this->booking->trip;
 
         return [
-            'title' => 'Booking confirmed',
-            'body' => "You're booked for {$this->booking->seats_booked} seat(s) from {$trip->originCity->name} to {$trip->destinationCity->name} on {$trip->departure_date->format('d/m/Y')} at {$trip->departure_time}.",
+            'title' => 'Réservation confirmée',
+            'body' => "Vous avez réservé {$this->booking->seats_booked} place(s) de {$trip->originCity->name} à {$trip->destinationCity->name} le {$trip->departure_date->format('d/m/Y')} à {$trip->departure_time}.",
             'data' => [
                 'type' => 'booking_confirmed',
                 'trip_id' => $trip->id,

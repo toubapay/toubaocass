@@ -98,7 +98,7 @@ class TripController extends Controller
 
         if ($user->driverProfile?->kyc_status !== DriverProfile::STATUS_APPROVED) {
             throw ValidationException::withMessages([
-                'kyc' => ['Your driver KYC must be approved before you can post trips.'],
+                'kyc' => ['Votre vérification conducteur (KYC) doit être approuvée avant de pouvoir publier des trajets.'],
             ]);
         }
 
@@ -128,7 +128,7 @@ class TripController extends Controller
         $this->authorize('update', $trip);
 
         if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
-            return response()->json(['message' => 'Only a scheduled trip can be started.'], 422);
+            return response()->json(['message' => 'Seul un trajet programmé peut être démarré.'], 422);
         }
 
         $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
@@ -141,7 +141,7 @@ class TripController extends Controller
         $this->authorize('update', $trip);
 
         if ($trip->status !== Trip::STATUS_IN_PROGRESS) {
-            return response()->json(['message' => 'Only a trip in progress can be completed.'], 422);
+            return response()->json(['message' => 'Seul un trajet en cours peut être terminé.'], 422);
         }
 
         $trip->update(['status' => Trip::STATUS_COMPLETED]);
@@ -154,7 +154,7 @@ class TripController extends Controller
         $this->authorize('delete', $trip);
 
         if (in_array($trip->status, [Trip::STATUS_CANCELLED, Trip::STATUS_COMPLETED], true)) {
-            return response()->json(['message' => 'This trip can no longer be cancelled.'], 422);
+            return response()->json(['message' => 'Ce trajet ne peut plus être annulé.'], 422);
         }
 
         $trip->update(['status' => Trip::STATUS_CANCELLED]);
@@ -162,6 +162,6 @@ class TripController extends Controller
 
         TripCancelled::dispatch($trip);
 
-        return response()->json(['message' => 'Trip cancelled.']);
+        return response()->json(['message' => 'Trajet annulé.']);
     }
 }

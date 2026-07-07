@@ -27,8 +27,8 @@ class BookingCreatedNotification extends Notification
         $trip = $this->booking->trip;
 
         return [
-            'title' => 'New booking',
-            'body' => "{$this->booking->seats_booked} seat(s) booked on your {$trip->originCity->name} → {$trip->destinationCity->name} trip.",
+            'title' => 'Nouvelle réservation',
+            'body' => "{$this->booking->seats_booked} place(s) réservée(s) sur votre trajet {$trip->originCity->name} → {$trip->destinationCity->name}.",
             'data' => [
                 'type' => 'booking_created',
                 'trip_id' => $trip->id,
@@ -41,6 +41,6 @@ class BookingCreatedNotification extends Notification
     {
         $trip = $this->booking->trip;
 
-        return "Intercity: {$this->booking->seats_booked} seat(s) booked on your {$trip->originCity->name} → {$trip->destinationCity->name} trip ({$trip->departure_date->format('d/m/Y')} {$trip->departure_time}). {$trip->available_seats} seat(s) left.";
+        return "Intercity : {$this->booking->seats_booked} place(s) réservée(s) sur votre trajet {$trip->originCity->name} → {$trip->destinationCity->name} ({$trip->departure_date->format('d/m/Y')} {$trip->departure_time}). {$trip->available_seats} place(s) restante(s).";
     }
 }

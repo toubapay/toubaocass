@@ -8,7 +8,7 @@ import { DepartureFlash } from './DepartureFlash';
 
 const RIDE_TYPE_LABEL: Record<string, string> = {
   standard: 'Standard',
-  comfort: 'Comfort',
+  comfort: 'Confort',
   xl: 'XL',
 };
 
@@ -44,19 +44,19 @@ export function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void })
         {trip.distance_km !== undefined && (
           <>
             <Text style={styles.metaDot}>•</Text>
-            <Text style={styles.metaDistance}>{trip.distance_km < 1 ? '<1 km away' : `${trip.distance_km} km away`}</Text>
+            <Text style={styles.metaDistance}>{trip.distance_km < 1 ? 'à < 1 km' : `à ${trip.distance_km} km`}</Text>
           </>
         )}
       </View>
       {trip.departure_address && <Text style={styles.address}>📍 {trip.departure_address}</Text>}
 
       <View style={styles.footerRow}>
-        <Text style={styles.driver}>{trip.driver.name ?? 'Driver'} · {trip.car?.make} {trip.car?.model}</Text>
+        <Text style={styles.driver}>{trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}</Text>
         <Text style={styles.fare}>{trip.fare.toLocaleString()} FCFA</Text>
       </View>
 
       <Text style={styles.seats}>
-        {trip.available_seats} of {trip.total_seats} seat(s) available
+        {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
       </Text>
 
       {isDepartingSoon(trip) && <DepartureFlash />}

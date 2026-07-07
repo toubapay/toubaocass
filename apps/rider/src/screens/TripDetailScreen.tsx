@@ -37,12 +37,12 @@ export function TripDetailScreen({ route, navigation }: Props) {
     try {
       await bookTrip(tripId, seats);
       Alert.alert(
-        'Booking confirmed',
-        `You booked ${seats} seat(s). Have a safe trip! You can review it under My Bookings.`,
+        'Réservation confirmée',
+        `Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`,
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (e) {
-      Alert.alert('Could not book', extractErrorMessage(e));
+      Alert.alert('Réservation impossible', extractErrorMessage(e));
       load();
     } finally {
       setBooking(false);
@@ -74,13 +74,13 @@ export function TripDetailScreen({ route, navigation }: Props) {
           <Text style={styles.city}>{trip.destination_city?.name}</Text>
         </View>
         <Text style={styles.meta}>
-          {trip.departure_date} at {trip.departure_time}
+          {trip.departure_date} à {trip.departure_time}
         </Text>
         {isDepartingSoon(trip) && <DepartureFlash />}
 
         {hasPin && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Departure point</Text>
+            <Text style={styles.sectionTitle}>Point de départ</Text>
             <DepartureMap
               latitude={trip.departure_latitude as number}
               longitude={trip.departure_longitude as number}
@@ -88,19 +88,19 @@ export function TripDetailScreen({ route, navigation }: Props) {
             />
             {trip.departure_address && <Text style={styles.line}>{trip.departure_address}</Text>}
             <Pressable onPress={openInGoogleMaps}>
-              <Text style={styles.mapLink}>Open in Google Maps</Text>
+              <Text style={styles.mapLink}>Ouvrir dans Google Maps</Text>
             </Pressable>
           </View>
         )}
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Driver</Text>
-          <Text style={styles.line}>{trip.driver.name ?? 'Driver'}</Text>
-          <Text style={styles.lineMuted}>Rating: {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</Text>
+          <Text style={styles.sectionTitle}>Conducteur</Text>
+          <Text style={styles.line}>{trip.driver.name ?? 'Conducteur'}</Text>
+          <Text style={styles.lineMuted}>Note : {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Vehicle</Text>
+          <Text style={styles.sectionTitle}>Véhicule</Text>
           <Text style={styles.line}>
             {trip.car?.make} {trip.car?.model} · {trip.car?.color}
           </Text>
@@ -108,23 +108,23 @@ export function TripDetailScreen({ route, navigation }: Props) {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Fare</Text>
-          <Text style={styles.fare}>{trip.fare.toLocaleString()} FCFA / seat</Text>
-          <Text style={styles.lineMuted}>{trip.available_seats} of {trip.total_seats} seats left</Text>
+          <Text style={styles.sectionTitle}>Tarif</Text>
+          <Text style={styles.fare}>{trip.fare.toLocaleString()} FCFA / place</Text>
+          <Text style={styles.lineMuted}>{trip.available_seats} place(s) restante(s) sur {trip.total_seats}</Text>
         </View>
 
         {trip.notes ? (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>Remarques</Text>
             <Text style={styles.line}>{trip.notes}</Text>
           </View>
         ) : null}
 
         {isFull ? (
-          <Text style={styles.fullNotice}>This trip is no longer available.</Text>
+          <Text style={styles.fullNotice}>Ce trajet n'est plus disponible.</Text>
         ) : (
           <View style={styles.seatsRow}>
-            <Text style={styles.seatsLabel}>Seats to book</Text>
+            <Text style={styles.seatsLabel}>Places à réserver</Text>
             <View style={styles.stepper}>
               <Button
                 label="-"
@@ -144,7 +144,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         )}
 
         <Button
-          label={`Book for ${(trip.fare * seats).toLocaleString()} FCFA`}
+          label={`Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`}
           onPress={handleBook}
           loading={booking}
           disabled={isFull}

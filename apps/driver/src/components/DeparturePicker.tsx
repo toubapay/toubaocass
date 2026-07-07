@@ -54,11 +54,11 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Text style={styles.locateText}>📍 Use my current location</Text>
+          <Text style={styles.locateText}>📍 Utiliser ma position actuelle</Text>
         )}
       </Pressable>
       {error && <Text style={styles.error}>{error}</Text>}
-      {!hasPin && <Text style={styles.hint}>Tap the map to drop a pin where riders should meet you.</Text>}
+      {!hasPin && <Text style={styles.hint}>Touchez la carte pour placer un repère à l'endroit où les passagers doivent vous retrouver.</Text>}
     </View>
   );
 }

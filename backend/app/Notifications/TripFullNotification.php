@@ -24,8 +24,8 @@ class TripFullNotification extends Notification
     public function toFcm(object $notifiable): array
     {
         return [
-            'title' => 'Trip full',
-            'body' => "Your {$this->trip->originCity->name} → {$this->trip->destinationCity->name} trip on {$this->trip->departure_date->format('d/m/Y')} is now fully booked.",
+            'title' => 'Trajet complet',
+            'body' => "Votre trajet {$this->trip->originCity->name} → {$this->trip->destinationCity->name} du {$this->trip->departure_date->format('d/m/Y')} est maintenant complet.",
             'data' => [
                 'type' => 'trip_full',
                 'trip_id' => $this->trip->id,

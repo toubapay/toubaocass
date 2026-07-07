@@ -13,8 +13,8 @@ import { colors, radius, spacing } from '../theme';
 type Props = NativeStackScreenProps<BookingsStackParamList, 'MyBookings'>;
 
 const STATUS_LABEL: Record<string, string> = {
-  confirmed: 'Confirmed',
-  cancelled: 'Cancelled',
+  confirmed: 'Confirmée',
+  cancelled: 'Annulée',
 };
 
 export function MyBookingsScreen({ navigation }: Props) {
@@ -31,17 +31,17 @@ export function MyBookingsScreen({ navigation }: Props) {
   useFocusEffect(load);
 
   const handleCancel = (booking: Booking) => {
-    Alert.alert('Cancel booking', 'Are you sure you want to cancel this booking?', [
-      { text: 'No', style: 'cancel' },
+    Alert.alert('Annuler la réservation', 'Voulez-vous vraiment annuler cette réservation ?', [
+      { text: 'Non', style: 'cancel' },
       {
-        text: 'Yes, cancel',
+        text: 'Oui, annuler',
         style: 'destructive',
         onPress: async () => {
           try {
             await cancelBooking(booking.id);
             load();
           } catch (e) {
-            Alert.alert('Could not cancel', extractErrorMessage(e));
+            Alert.alert('Annulation impossible', extractErrorMessage(e));
           }
         },
       },
@@ -58,7 +58,7 @@ export function MyBookingsScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>My bookings</Text>
+      <Text style={styles.title}>Mes réservations</Text>
       <FlatList
         data={bookings}
         keyExtractor={(item) => String(item.id)}
@@ -76,20 +76,20 @@ export function MyBookingsScreen({ navigation }: Props) {
               </Text>
             </View>
             <Text style={styles.meta}>
-              {item.trip.departure_date} at {item.trip.departure_time} · {item.seats_booked} seat(s)
+              {item.trip.departure_date} à {item.trip.departure_time} · {item.seats_booked} place(s)
             </Text>
             <Text style={styles.fare}>{item.fare_total.toLocaleString()} FCFA</Text>
 
             {item.status === 'confirmed' && (
               <Pressable onPress={() => handleCancel(item)} style={styles.cancelButton}>
-                <Text style={styles.cancelText}>Cancel booking</Text>
+                <Text style={styles.cancelText}>Annuler la réservation</Text>
               </Pressable>
             )}
           </Pressable>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>You have no bookings yet. Search for a ride to get started.</Text>
+            <Text style={styles.emptyText}>Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.</Text>
           </View>
         }
       />

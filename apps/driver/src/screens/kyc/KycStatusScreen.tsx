@@ -14,23 +14,23 @@ type Props = NativeStackScreenProps<KycStackParamList, 'KycStatus'>;
 
 const STATUS_COPY: Record<string, { title: string; body: string; color: string }> = {
   pending: {
-    title: 'Verification required',
-    body: 'Submit your ID, driving license and a selfie to start posting trips.',
+    title: 'Vérification requise',
+    body: 'Soumettez votre pièce d\'identité, votre permis de conduire et un selfie pour commencer à publier des trajets.',
     color: colors.textMuted,
   },
   submitted: {
-    title: 'Under review',
-    body: 'We are reviewing your documents. This usually takes less than 24 hours.',
+    title: 'En cours d\'examen',
+    body: 'Nous examinons vos documents. Cela prend généralement moins de 24 heures.',
     color: colors.accent,
   },
   approved: {
-    title: 'Verified',
-    body: 'Your account is verified. You can post trips any time.',
+    title: 'Vérifié',
+    body: 'Votre compte est vérifié. Vous pouvez publier des trajets à tout moment.',
     color: colors.success,
   },
   rejected: {
-    title: 'Verification rejected',
-    body: 'Please review the reason below and resubmit your documents.',
+    title: 'Vérification refusée',
+    body: 'Veuillez consulter la raison ci-dessous et soumettre à nouveau vos documents.',
     color: colors.danger,
   },
 };
@@ -61,7 +61,7 @@ export function KycStatusScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Driver verification</Text>
+      <Text style={styles.title}>Vérification conducteur</Text>
 
       <View style={styles.card}>
         <Text style={[styles.status, { color: copy.color }]}>{copy.title}</Text>
@@ -72,7 +72,7 @@ export function KycStatusScreen({ navigation }: Props) {
       </View>
 
       {status !== 'submitted' && status !== 'approved' && (
-        <Button label="Submit documents" onPress={() => navigation.navigate('KycForm')} />
+        <Button label="Soumettre les documents" onPress={() => navigation.navigate('KycForm')} />
       )}
     </Screen>
   );

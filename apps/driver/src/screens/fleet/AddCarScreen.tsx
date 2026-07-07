@@ -14,9 +14,9 @@ import { colors, radius, spacing } from '../../theme';
 type Props = NativeStackScreenProps<FleetStackParamList, 'AddCar'>;
 
 const CAR_TYPES: { value: CarType; label: string }[] = [
-  { value: 'sedan', label: 'Sedan' },
+  { value: 'sedan', label: 'Berline' },
   { value: 'suv', label: 'SUV' },
-  { value: 'van', label: 'Van' },
+  { value: 'van', label: 'Fourgonnette' },
   { value: 'minibus', label: 'Minibus' },
 ];
 
@@ -57,9 +57,9 @@ export function AddCarScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Add a vehicle</Text>
+        <Text style={styles.title}>Ajouter un véhicule</Text>
 
-        <Text style={styles.label}>Vehicle type</Text>
+        <Text style={styles.label}>Type de véhicule</Text>
         <View style={styles.typeRow}>
           {CAR_TYPES.map((t) => (
             <Pressable
@@ -72,12 +72,12 @@ export function AddCarScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <TextField label="Make" placeholder="Toyota" value={make} onChangeText={setMake} />
-        <TextField label="Model" placeholder="Corolla" value={model} onChangeText={setModel} />
-        <TextField label="Year" placeholder="2020" keyboardType="number-pad" value={year} onChangeText={setYear} />
-        <TextField label="Color" placeholder="White" value={color} onChangeText={setColor} />
+        <TextField label="Marque" placeholder="Toyota" value={make} onChangeText={setMake} />
+        <TextField label="Modèle" placeholder="Corolla" value={model} onChangeText={setModel} />
+        <TextField label="Année" placeholder="2020" keyboardType="number-pad" value={year} onChangeText={setYear} />
+        <TextField label="Couleur" placeholder="Blanc" value={color} onChangeText={setColor} />
         <TextField
-          label="Plate number"
+          label="Numéro d'immatriculation"
           placeholder="DK-1234-AB"
           autoCapitalize="characters"
           value={plateNumber}
@@ -85,13 +85,13 @@ export function AddCarScreen({ navigation }: Props) {
           error={error}
         />
         <TextField
-          label="Number of seats (passengers)"
+          label="Nombre de places (passagers)"
           keyboardType="number-pad"
           value={seats}
           onChangeText={setSeats}
         />
 
-        <Button label="Save vehicle" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+        <Button label="Enregistrer le véhicule" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
       </ScrollView>
     </Screen>
   );

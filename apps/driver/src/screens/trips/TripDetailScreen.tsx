@@ -13,6 +13,14 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'TripDetail'>;
 
+const STATUS_LABEL: Record<string, string> = {
+  scheduled: 'Programmé',
+  full: 'Complet',
+  in_progress: 'En cours',
+  completed: 'Terminé',
+  cancelled: 'Annulé',
+};
+
 export function TripDetailScreen({ route, navigation }: Props) {
   const { tripId } = route.params;
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -34,17 +42,17 @@ export function TripDetailScreen({ route, navigation }: Props) {
       await action();
       load();
     } catch (e) {
-      Alert.alert('Action failed', extractErrorMessage(e));
+      Alert.alert('Échec de l\'action', extractErrorMessage(e));
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleCancel = () => {
-    Alert.alert('Cancel trip', 'All confirmed riders will be notified. Continue?', [
-      { text: 'No', style: 'cancel' },
+    Alert.alert('Annuler le trajet', 'Tous les passagers confirmés seront notifiés. Continuer ?', [
+      { text: 'Non', style: 'cancel' },
       {
-        text: 'Yes, cancel trip',
+        text: 'Oui, annuler le trajet',
         style: 'destructive',
         onPress: () =>
           runAction(async () => {
@@ -74,20 +82,20 @@ export function TripDetailScreen({ route, navigation }: Props) {
           <Text style={styles.city}>{trip.destination_city?.name}</Text>
         </View>
         <Text style={styles.meta}>
-          {trip.departure_date} at {trip.departure_time} · {trip.status.replace('_', ' ')}
+          {trip.departure_date} à {trip.departure_time} · {STATUS_LABEL[trip.status] ?? trip.status.replace('_', ' ')}
         </Text>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Trip</Text>
-          <Text style={styles.line}>{trip.fare.toLocaleString()} FCFA / seat</Text>
+          <Text style={styles.sectionTitle}>Trajet</Text>
+          <Text style={styles.line}>{trip.fare.toLocaleString()} FCFA / place</Text>
           <Text style={styles.lineMuted}>
-            {trip.available_seats} of {trip.total_seats} seats available
+            {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
           </Text>
         </View>
 
         {(trip.departure_address || trip.departure_latitude !== null) && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Meeting point</Text>
+            <Text style={styles.sectionTitle}>Point de rendez-vous</Text>
             {trip.departure_address && <Text style={styles.line}>{trip.departure_address}</Text>}
             {trip.departure_latitude !== null && (
               <Text style={styles.lineMuted}>
@@ -97,15 +105,15 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        <Text style={styles.sectionHeading}>Riders ({confirmedBookings.length})</Text>
+        <Text style={styles.sectionHeading}>Passagers ({confirmedBookings.length})</Text>
         {confirmedBookings.length === 0 ? (
-          <Text style={styles.lineMuted}>No bookings yet.</Text>
+          <Text style={styles.lineMuted}>Aucune réservation pour l'instant.</Text>
         ) : (
           confirmedBookings.map((booking) => (
             <View key={booking.id} style={styles.card}>
-              <Text style={styles.line}>{booking.rider.name ?? 'Rider'}</Text>
+              <Text style={styles.line}>{booking.rider.name ?? 'Passager'}</Text>
               <Text style={styles.lineMuted}>
-                {booking.rider.phone} · {booking.seats_booked} seat(s)
+                {booking.rider.phone} · {booking.seats_booked} place(s)
               </Text>
             </View>
           ))
@@ -114,7 +122,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <View style={styles.actions}>
           {['scheduled', 'full'].includes(trip.status) && (
             <Button
-              label="Start trip"
+              label="Démarrer le trajet"
               onPress={() => runAction(() => startTrip(tripId))}
               loading={actionLoading}
               style={styles.actionButton}
@@ -122,14 +130,14 @@ export function TripDetailScreen({ route, navigation }: Props) {
           )}
           {trip.status === 'in_progress' && (
             <Button
-              label="Complete trip"
+              label="Terminer le trajet"
               onPress={() => runAction(() => completeTrip(tripId))}
               loading={actionLoading}
               style={styles.actionButton}
             />
           )}
           {!['completed', 'cancelled'].includes(trip.status) && (
-            <Button label="Cancel trip" onPress={handleCancel} variant="danger" loading={actionLoading} />
+            <Button label="Annuler le trajet" onPress={handleCancel} variant="danger" loading={actionLoading} />
           )}
         </View>
       </ScrollView>

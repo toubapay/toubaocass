@@ -40,8 +40,8 @@ function AuthNavigator() {
 function HomeNavigator() {
   return (
     <HomeStackNav.Navigator>
-      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Available rides' }} />
-      <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Trip details' }} />
+      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Trajets disponibles' }} />
+      <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
     </HomeStackNav.Navigator>
   );
 }
@@ -49,8 +49,8 @@ function HomeNavigator() {
 function BookingsNavigator() {
   return (
     <BookingsStackNav.Navigator>
-      <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: 'My bookings' }} />
-      <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Trip details' }} />
+      <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: 'Mes réservations' }} />
+      <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
     </BookingsStackNav.Navigator>
   );
 }
@@ -71,9 +71,9 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Home' }} />
-      <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Bookings' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
+      <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Accueil' }} />
+      <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Réservations' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   );
 }
