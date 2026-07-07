@@ -29,7 +29,7 @@ apps/driver/    Expo (React Native + TypeScript) app for drivers
 
 | Concern | Choice |
 |---|---|
-| Backend | Laravel 13, Sanctum (bearer tokens), SQLite (dev) |
+| Backend | Laravel 13, Sanctum (bearer tokens), PostgreSQL |
 | Auth | Phone + OTP (no passwords). One phone number can hold a separate rider account and driver account. |
 | Mobile | Expo SDK 57, React Native, TypeScript, React Navigation |
 | Push | Firebase Cloud Messaging (HTTP v1 API), pluggable behind a `PushGateway` interface |
@@ -39,13 +39,30 @@ apps/driver/    Expo (React Native + TypeScript) app for drivers
 
 ## Backend (Laravel)
 
+### Why PostgreSQL
+
+The core business rule — a car with N seats never accepts more than N
+bookings, even under concurrent requests — is enforced with a
+`SELECT ... FOR UPDATE` row lock in `BookingController` (see
+`app/Http/Controllers/Api/BookingController.php`). That only does its job
+under a database with real row-level locking and MVCC. PostgreSQL was
+chosen over MySQL/SQLite for this reason, plus better constraint/type
+support if geolocation or fare-splitting logic is added later. The test
+suite runs against a real Postgres instance for the same reason (see
+`phpunit.xml`) rather than SQLite, which would mask locking bugs.
+
 ### Setup
 
 ```bash
+# Create the app + test databases (adjust user/password to taste)
+createdb toubaocass
+createdb toubaocass_testing
+
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
+# edit .env: DB_DATABASE=toubaocass, DB_USERNAME/DB_PASSWORD to match your Postgres role
 php artisan migrate --seed   # seeds Senegalese cities: Dakar, Touba, Thiès, ...
 php artisan serve            # http://localhost:8000
 ```
@@ -64,6 +81,9 @@ php artisan serve            # http://localhost:8000
 
 ### Tests
 
+Requires the `toubaocass_testing` database created above (see `phpunit.xml`
+for the connection env used during tests).
+
 ```bash
 php artisan test
 ```
@@ -71,7 +91,8 @@ php artisan test
 19 feature tests cover OTP auth (including that the same phone number can
 hold independent rider/driver accounts), KYC submission, car management,
 trip creation gated on approved KYC, and — the core business rule — seat
-booking/overbooking/cancellation/trip-full/trip-cancellation behavior.
+booking/overbooking/cancellation/trip-full/trip-cancellation behavior,
+exercised against real Postgres row locks rather than mocked.
 
 ### API summary
 
