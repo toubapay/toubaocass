@@ -13,7 +13,23 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | KYC Document Disk
+    |--------------------------------------------------------------------------
+    |
+    | Driver KYC documents (ID, driving license, selfie) contain personal
+    | data and must never be served from a public/world-readable disk. This
+    | is kept separate from the default disk above, which serves public
+    | assets like car photos. Defaults to the private "local" disk (no
+    | public URL) in development; set to "kyc" (Cloudflare R2, private
+    | bucket) in production.
+    |
+    */
+
+    'kyc_disk' => env('KYC_FILESYSTEM_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -56,6 +72,39 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Cloudflare R2 (S3-compatible), public bucket — car photos and any
+        // other rider/driver-facing assets. Point FILESYSTEM_DISK=r2 at this
+        // in production so uploads survive redeploys on ephemeral hosts
+        // (e.g. Railway).
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET'),
+            'url' => env('R2_URL'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Cloudflare R2, private bucket — driver KYC documents. No public
+        // "url" is configured on purpose; these should only ever be read via
+        // Storage::disk('kyc')->temporaryUrl() from an authenticated/admin
+        // context, never exposed directly to the mobile apps.
+        'kyc' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_KYC_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
             'throw' => false,
             'report' => false,
         ],

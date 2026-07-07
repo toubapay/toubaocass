@@ -21,10 +21,12 @@ class DriverController extends Controller
     {
         $user = $request->user();
 
+        $kycDisk = config('filesystems.kyc_disk');
+
         $paths = [
-            'id_document_path' => $request->file('id_document')->store("kyc/{$user->id}", 'public'),
-            'license_document_path' => $request->file('license_document')->store("kyc/{$user->id}", 'public'),
-            'selfie_path' => $request->file('selfie')->store("kyc/{$user->id}", 'public'),
+            'id_document_path' => $request->file('id_document')->store("kyc/{$user->id}", $kycDisk),
+            'license_document_path' => $request->file('license_document')->store("kyc/{$user->id}", $kycDisk),
+            'selfie_path' => $request->file('selfie')->store("kyc/{$user->id}", $kycDisk),
         ];
 
         $profile = DriverProfile::updateOrCreate(

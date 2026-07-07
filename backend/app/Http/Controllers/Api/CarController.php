@@ -23,7 +23,7 @@ class CarController extends Controller
         $data = $request->safe()->except('photo');
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('cars', 'public');
+            $data['photo_path'] = $request->file('photo')->store('cars');
         }
 
         $car = $request->user()->cars()->create($data);
@@ -38,7 +38,7 @@ class CarController extends Controller
         $data = $request->safe()->except('photo');
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('cars', 'public');
+            $data['photo_path'] = $request->file('photo')->store('cars');
         }
 
         $car->update($data);
