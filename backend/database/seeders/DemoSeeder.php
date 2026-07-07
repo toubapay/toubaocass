@@ -22,6 +22,7 @@ class DemoSeeder extends Seeder
         $touba = City::where('name', 'Touba')->firstOrFail();
         $thies = City::where('name', 'Thiès')->firstOrFail();
         $saintLouis = City::where('name', 'Saint-Louis')->firstOrFail();
+        $mbour = City::where('name', 'Mbour')->firstOrFail();
 
         $driver = User::create([
             'name' => 'Modou Fall',
@@ -92,6 +93,23 @@ class DemoSeeder extends Seeder
             'ride_type' => 'xl',
             'total_seats' => 6,
             'available_seats' => 6,
+            'status' => Trip::STATUS_SCHEDULED,
+        ]);
+
+        // Departing soon (within the "flash" window) and partially booked,
+        // so both the fill-status pill and the departure alert have
+        // something to show without waiting for a specific date.
+        Trip::create([
+            'driver_id' => $driver->id,
+            'car_id' => $car->id,
+            'origin_city_id' => $dakar->id,
+            'destination_city_id' => $mbour->id,
+            'departure_date' => now()->addHours(2)->toDateString(),
+            'departure_time' => now()->addHours(2)->format('H:i'),
+            'fare' => 2500,
+            'ride_type' => 'standard',
+            'total_seats' => 6,
+            'available_seats' => 2,
             'status' => Trip::STATUS_SCHEDULED,
         ]);
 

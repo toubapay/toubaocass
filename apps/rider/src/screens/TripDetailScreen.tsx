@@ -7,11 +7,13 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import { Trip } from '../api/types';
 import { Button } from '../components/Button';
+import { DepartureFlash } from '../components/DepartureFlash';
 import { Screen } from '../components/Screen';
-import { SearchStackParamList } from '../navigation/types';
+import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { isDepartingSoon } from '../utils/trip';
 
-type Props = NativeStackScreenProps<SearchStackParamList, 'TripDetail'>;
+type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
 export function TripDetailScreen({ route, navigation }: Props) {
   const { tripId } = route.params;
@@ -67,6 +69,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <Text style={styles.meta}>
           {trip.departure_date} at {trip.departure_time}
         </Text>
+        {isDepartingSoon(trip) && <DepartureFlash />}
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Driver</Text>

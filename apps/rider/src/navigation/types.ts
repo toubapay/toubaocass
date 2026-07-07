@@ -4,14 +4,8 @@ export type AuthStackParamList = {
   ProfileSetup: undefined;
 };
 
-export type SearchStackParamList = {
-  Search: undefined;
-  TripResults: {
-    origin_city_id?: number;
-    destination_city_id?: number;
-    date?: string;
-    seats?: number;
-  };
+export type HomeStackParamList = {
+  Home: undefined;
   TripDetail: { tripId: number };
 };
 
@@ -21,7 +15,7 @@ export type BookingsStackParamList = {
 };
 
 export type MainTabParamList = {
-  SearchTab: undefined;
+  HomeTab: undefined;
   BookingsTab: undefined;
   ProfileTab: undefined;
 };

@@ -10,21 +10,20 @@ import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
+import { HomeScreen } from '../screens/HomeScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { SearchScreen } from '../screens/SearchScreen';
 import { TripDetailScreen } from '../screens/TripDetailScreen';
-import { TripResultsScreen } from '../screens/TripResultsScreen';
 import { colors } from '../theme';
 import {
   AuthStackParamList,
   BookingsStackParamList,
+  HomeStackParamList,
   MainTabParamList,
-  SearchStackParamList,
 } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
-const SearchStackNav = createNativeStackNavigator<SearchStackParamList>();
+const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
 const BookingsStackNav = createNativeStackNavigator<BookingsStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -38,13 +37,12 @@ function AuthNavigator() {
   );
 }
 
-function SearchNavigator() {
+function HomeNavigator() {
   return (
-    <SearchStackNav.Navigator>
-      <SearchStackNav.Screen name="Search" component={SearchScreen} options={{ title: 'Find a ride' }} />
-      <SearchStackNav.Screen name="TripResults" component={TripResultsScreen} options={{ title: 'Available rides' }} />
-      <SearchStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Trip details' }} />
-    </SearchStackNav.Navigator>
+    <HomeStackNav.Navigator>
+      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Available rides' }} />
+      <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Trip details' }} />
+    </HomeStackNav.Navigator>
   );
 }
 
@@ -68,12 +66,12 @@ function MainTabs() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarIcon: ({ color, size }) => {
           const icon =
-            route.name === 'SearchTab' ? 'search' : route.name === 'BookingsTab' ? 'ticket' : 'person';
+            route.name === 'HomeTab' ? 'home' : route.name === 'BookingsTab' ? 'ticket' : 'person';
           return <Ionicons name={icon as never} color={color} size={size} />;
         },
       })}
     >
-      <Tab.Screen name="SearchTab" component={SearchNavigator} options={{ title: 'Search' }} />
+      <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Home' }} />
       <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Bookings' }} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
