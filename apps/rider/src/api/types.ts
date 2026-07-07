@@ -60,6 +60,9 @@ export interface Trip {
   car: Car | null;
   origin_city: City | null;
   destination_city: City | null;
+  departure_latitude: number | null;
+  departure_longitude: number | null;
+  departure_address: string | null;
   departure_date: string;
   departure_time: string;
   fare: number;
@@ -69,6 +72,7 @@ export interface Trip {
   status: TripStatus;
   notes: string | null;
   created_at: string;
+  distance_km?: number;
   bookings?: Booking[];
   bookings_count?: number;
 }

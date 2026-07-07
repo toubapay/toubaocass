@@ -66,6 +66,9 @@ class DemoSeeder extends Seeder
             'available_seats' => 4,
             'status' => Trip::STATUS_SCHEDULED,
             'notes' => 'Direct route via the new highway, one stop in Diourbel.',
+            'departure_latitude' => 14.6928,
+            'departure_longitude' => -17.4467,
+            'departure_address' => "Place de l'Indépendance, Dakar",
         ]);
 
         Trip::create([
@@ -111,6 +114,9 @@ class DemoSeeder extends Seeder
             'total_seats' => 6,
             'available_seats' => 2,
             'status' => Trip::STATUS_SCHEDULED,
+            'departure_latitude' => 14.7167,
+            'departure_longitude' => -17.4677,
+            'departure_address' => 'Gare routière, Pikine',
         ]);
 
         $rider = User::create([

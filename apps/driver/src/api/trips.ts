@@ -5,6 +5,9 @@ export interface CreateTripInput {
   car_id: number;
   origin_city_id: number;
   destination_city_id: number;
+  departure_latitude?: number;
+  departure_longitude?: number;
+  departure_address?: string;
   departure_date: string;
   departure_time: string;
   fare: number;

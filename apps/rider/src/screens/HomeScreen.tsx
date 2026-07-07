@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -9,10 +9,13 @@ import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
+import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
-import { colors, spacing } from '../theme';
+import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
+
+const NEARBY_RADIUS_KM = 25;
 
 export function HomeScreen({ navigation }: Props) {
   const [cities, setCities] = useState<City[]>([]);
@@ -20,6 +23,9 @@ export function HomeScreen({ navigation }: Props) {
   const [destination, setDestination] = useState<City | null>(null);
   const [date, setDate] = useState<Date | null>(null);
   const [seats, setSeats] = useState(1);
+  const [nearMe, setNearMe] = useState<Coordinates | null>(null);
+
+  const { loading: locating, error: locationError, requestLocation } = useMyLocation();
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +36,7 @@ export function HomeScreen({ navigation }: Props) {
     fetchCities().then(setCities).catch(() => setCities([]));
   }, []);
 
-  const hasFilters = origin || destination || date;
+  const hasFilters = origin || destination || date || nearMe;
   const invalidRoute = origin && destination && origin.id === destination.id;
 
   const load = useCallback(
@@ -44,6 +50,9 @@ export function HomeScreen({ navigation }: Props) {
         destination_city_id: destination?.id,
         date: date ? date.toISOString().slice(0, 10) : undefined,
         seats,
+        lat: nearMe?.latitude,
+        lng: nearMe?.longitude,
+        radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
       })
         .then((res) => setTrips(res.data))
         .catch(() => setError('Could not load rides. Pull to refresh.'))
@@ -52,23 +61,47 @@ export function HomeScreen({ navigation }: Props) {
           setRefreshing(false);
         });
     },
-    [origin, destination, date, seats, invalidRoute],
+    [origin, destination, date, seats, nearMe, invalidRoute],
   );
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [origin, destination, date, seats]);
+  }, [origin, destination, date, seats, nearMe]);
 
   const clearFilters = () => {
     setOrigin(null);
     setDestination(null);
     setDate(null);
+    setNearMe(null);
+  };
+
+  const toggleNearMe = async () => {
+    if (nearMe) {
+      setNearMe(null);
+      return;
+    }
+    const coords = await requestLocation();
+    if (coords) {
+      setNearMe(coords);
+    } else if (locationError) {
+      Alert.alert('Location unavailable', locationError);
+    }
   };
 
   return (
     <Screen>
       <View style={styles.filters}>
+        <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
+          {locating ? (
+            <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />
+          ) : (
+            <Text style={[styles.nearMeText, nearMe && styles.nearMeTextActive]}>
+              {nearMe ? `📍 Showing rides within ${NEARBY_RADIUS_KM} km of you` : '📍 Find rides near me'}
+            </Text>
+          )}
+        </Pressable>
+
         <View style={styles.filterRow}>
           <View style={styles.filterField}>
             <CityPicker label="From" cities={cities} value={origin} onChange={setOrigin} placeholder="Any city" />
@@ -122,7 +155,11 @@ export function HomeScreen({ navigation }: Props) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
-                {hasFilters ? 'No rides found for these filters yet. Try widening your search.' : 'No upcoming rides posted yet — check back soon.'}
+                {nearMe
+                  ? `No rides departing within ${NEARBY_RADIUS_KM} km of you right now.`
+                  : hasFilters
+                    ? 'No rides found for these filters yet. Try widening your search.'
+                    : 'No upcoming rides posted yet — check back soon.'}
               </Text>
             </View>
           }
@@ -135,6 +172,19 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   filters: { marginBottom: spacing.sm },
+  nearMeButton: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    minHeight: 42,
+  },
+  nearMeButtonActive: { backgroundColor: colors.primary },
+  nearMeText: { color: colors.primary, fontWeight: '700', fontSize: 13.5 },
+  nearMeTextActive: { color: '#fff' },
   filterRow: { flexDirection: 'row', gap: spacing.sm },
   filterField: { flex: 1 },
   seatsField: { width: 108 },

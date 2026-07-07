@@ -15,6 +15,9 @@ class UpdateTripRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'departure_latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:departure_longitude'],
+            'departure_longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:departure_latitude'],
+            'departure_address' => ['nullable', 'string', 'max:255'],
             'departure_date' => ['sometimes', 'date', 'after_or_equal:today'],
             'departure_time' => ['sometimes', 'date_format:H:i'],
             'fare' => ['sometimes', 'integer', 'min:100'],

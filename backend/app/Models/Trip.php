@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'driver_id', 'car_id', 'origin_city_id', 'destination_city_id',
+    'departure_latitude', 'departure_longitude', 'departure_address',
     'departure_date', 'departure_time', 'fare', 'ride_type',
     'total_seats', 'available_seats', 'status', 'notes',
 ])]
@@ -39,7 +40,14 @@ class Trip extends Model
     {
         return [
             'departure_date' => 'date',
+            'departure_latitude' => 'float',
+            'departure_longitude' => 'float',
         ];
+    }
+
+    public function hasDepartureLocation(): bool
+    {
+        return $this->departure_latitude !== null && $this->departure_longitude !== null;
     }
 
     public function driver(): BelongsTo

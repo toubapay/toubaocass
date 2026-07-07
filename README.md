@@ -24,6 +24,10 @@ apps/driver/    Expo (React Native + TypeScript) app for drivers
   on. Cancelling a booking frees the seat back up and reopens a full trip.
 - Both sides get SMS + push notifications for OTP codes, new bookings, a
   trip going full, and cancellations.
+- Drivers can drop a precise departure pin (Google Maps) and a meeting-point
+  description when posting a trip; riders can search "near me" using their
+  device location, see distance-to-departure on each result, and open the
+  pin in Google Maps from the trip detail screen.
 
 ## Repo layout & tech choices
 
@@ -34,6 +38,7 @@ apps/driver/    Expo (React Native + TypeScript) app for drivers
 | Mobile | Expo SDK 57, React Native, TypeScript, React Navigation |
 | Push | Firebase Cloud Messaging (HTTP v1 API), pluggable behind a `PushGateway` interface |
 | SMS | Twilio (or any provider), pluggable behind an `SmsGateway` interface — logs to file in dev |
+| Maps/location | `expo-location` (device GPS) + `react-native-maps` with the Google provider |
 
 ---
 
@@ -117,6 +122,16 @@ Role-scoped routes are protected by a `role:{rider|driver}` middleware, and
 ownership (a driver editing *their* car/trip, a rider cancelling *their*
 booking) is enforced via Laravel policies.
 
+`GET /trips` also accepts `lat`, `lng`, and `radius_km` (default 50) to
+search by proximity to a point instead of/alongside the city filters. When
+given, results are limited to trips with a departure pin within that radius
+and ordered by distance (nearest first); each result gets a `distance_km`
+field. Distance is computed with the Haversine formula directly in SQL
+(`app/Support/Geo.php`) rather than a PostGIS/earthdistance extension, so it
+works on any Postgres instance without extra setup. `POST`/`PUT` on
+`/driver/trips` accept optional `departure_latitude`, `departure_longitude`,
+and `departure_address` for the driver's exact meeting point.
+
 ---
 
 ## Mobile apps (Expo)
@@ -128,24 +143,52 @@ separate listings).
 ```bash
 cd apps/rider   # or apps/driver
 npm install
+cp .env.example .env   # set GOOGLE_MAPS_API_KEY, adjust API_BASE_URL if needed
 npx expo start
 ```
 
-Point the app at your backend by editing `extra.apiBaseUrl` in `app.json`
-(defaults to `http://localhost:8000/api`, which only works from a simulator
-on the same machine — use your LAN IP for a physical device).
+Config is dynamic (`app.config.js`, not a static `app.json`) specifically so
+`API_BASE_URL` and `GOOGLE_MAPS_API_KEY` can come from `.env` instead of
+being hardcoded — `API_BASE_URL` defaults to `http://localhost:8000/api`,
+which only works from a simulator on the same machine; use your LAN IP for a
+physical device.
 
 ### Rider app (`apps/rider`)
 
-Phone/OTP sign-up → profile → search by city/date/seats → trip results →
-trip detail (driver, car, fare, seats left) → book → **My Bookings** (view /
-cancel) → **Profile**.
+Phone/OTP sign-up → profile → home feed (browsable listing, filterable by
+city/date/seats, or "Find rides near me" using device location) → trip
+detail (driver, car, fare, seats left, departure map) → book → **My
+Bookings** (view/cancel) → **Profile**.
 
 ### Driver app (`apps/driver`)
 
 Phone/OTP sign-up → profile → **Verification** (submit ID/license/selfie,
-track approval status) → **Fleet** (add vehicles) → **Trips** (post a trip,
-see riders booked on it, start/complete/cancel it) → **Profile**.
+track approval status) → **Fleet** (add vehicles) → **Trips** (post a trip —
+optionally drop a departure pin on the map or use current location, see
+riders booked on it, start/complete/cancel it) → **Profile**.
+
+### Google Maps & location
+
+Both apps use `expo-location` (device GPS) and `react-native-maps` (Google
+provider) for the departure-point features above. A few things worth
+knowing:
+
+- **Get a key** at the [Google Cloud Console](https://console.cloud.google.com/google/maps-apis)
+  with "Maps SDK for Android" and "Maps SDK for iOS" enabled, then put it in
+  each app's `.env` as `GOOGLE_MAPS_API_KEY`. Without a key the map simply
+  won't render tiles on a real build — everything else in the app still
+  works.
+- **`expo start --web` never touches react-native-maps at all.** It has no
+  web renderer, so `DepartureMap`/`DeparturePicker` are split into a native
+  file (`Component.tsx`, real Google map) and a web file
+  (`Component.web.tsx`, address text + an "Open in Google Maps" link /
+  "use current location" button). Metro picks whichever matches the build
+  target automatically. `expo-location` itself works fine on web via the
+  browser's geolocation API, so "find rides near me" is fully usable there.
+- The map pieces themselves need a real device/simulator (or `eas build` /
+  `expo prebuild`) to see rendered — Expo Go's shared debug Maps key covers
+  Android for quick testing, but iOS's `PROVIDER_GOOGLE` needs your own key
+  either way.
 
 ### Push notifications
 

@@ -20,6 +20,9 @@ class TripResource extends JsonResource
             'car' => new CarResource($this->whenLoaded('car')),
             'origin_city' => new CityResource($this->whenLoaded('originCity')),
             'destination_city' => new CityResource($this->whenLoaded('destinationCity')),
+            'departure_latitude' => $this->departure_latitude,
+            'departure_longitude' => $this->departure_longitude,
+            'departure_address' => $this->departure_address,
             'departure_date' => $this->departure_date->format('Y-m-d'),
             'departure_time' => $this->departure_time,
             'fare' => $this->fare,
@@ -29,6 +32,7 @@ class TripResource extends JsonResource
             'status' => $this->status,
             'notes' => $this->notes,
             'created_at' => $this->created_at,
+            'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 1)),
             'bookings' => BookingResource::collection($this->whenLoaded('bookings')),
             'bookings_count' => $this->whenCounted('bookings'),
         ];

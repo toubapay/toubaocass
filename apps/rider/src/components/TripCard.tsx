@@ -41,7 +41,14 @@ export function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void })
         <Text style={styles.meta}>{trip.departure_time}</Text>
         <Text style={styles.metaDot}>•</Text>
         <Text style={styles.meta}>{RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}</Text>
+        {trip.distance_km !== undefined && (
+          <>
+            <Text style={styles.metaDot}>•</Text>
+            <Text style={styles.metaDistance}>{trip.distance_km < 1 ? '<1 km away' : `${trip.distance_km} km away`}</Text>
+          </>
+        )}
       </View>
+      {trip.departure_address && <Text style={styles.address}>📍 {trip.departure_address}</Text>}
 
       <View style={styles.footerRow}>
         <Text style={styles.driver}>{trip.driver.name ?? 'Driver'} · {trip.car?.make} {trip.car?.model}</Text>
@@ -74,7 +81,9 @@ const styles = StyleSheet.create({
   pillText: { fontSize: 11, fontWeight: '700' },
   metaRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   meta: { fontSize: 13, color: colors.textMuted },
+  metaDistance: { fontSize: 13, color: colors.accent, fontWeight: '700' },
   metaDot: { marginHorizontal: spacing.xs, color: colors.textMuted },
+  address: { fontSize: 12, color: colors.textMuted, marginTop: 2, marginBottom: spacing.xs },
   footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   driver: { fontSize: 14, color: colors.text, flexShrink: 1, marginRight: spacing.sm },
   fare: { fontSize: 16, fontWeight: '700', color: colors.primary },

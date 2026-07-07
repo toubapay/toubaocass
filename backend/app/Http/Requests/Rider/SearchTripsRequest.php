@@ -20,6 +20,9 @@ class SearchTripsRequest extends FormRequest
             'date' => ['nullable', 'date'],
             'ride_type' => ['nullable', Rule::in(['standard', 'comfort', 'xl'])],
             'seats' => ['nullable', 'integer', 'min:1', 'max:29'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90', 'required_with:lng'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180', 'required_with:lat'],
+            'radius_km' => ['nullable', 'numeric', 'min:1', 'max:500'],
         ];
     }
 }

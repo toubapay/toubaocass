@@ -12,6 +12,7 @@ use App\Models\Booking;
 use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
+use App\Support\Geo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +24,7 @@ class TripController extends Controller
     public function search(SearchTripsRequest $request)
     {
         $seats = (int) $request->input('seats', 1);
+        $hasGeo = $request->filled('lat') && $request->filled('lng');
 
         $trips = Trip::query()
             ->with(['driver.driverProfile', 'car', 'originCity', 'destinationCity'])
@@ -39,8 +41,23 @@ class TripController extends Controller
                             ->where('departure_time', '>=', now()->format('H:i'));
                     });
             })
-            ->orderBy('departure_date')
-            ->orderBy('departure_time')
+            ->when(
+                $hasGeo,
+                function ($q) use ($request) {
+                    $lat = (float) $request->input('lat');
+                    $lng = (float) $request->input('lng');
+                    $radius = (float) $request->input('radius_km', 50);
+                    $expr = Geo::distanceExpression();
+
+                    $q->whereNotNull('departure_latitude')
+                        ->whereNotNull('departure_longitude')
+                        ->selectRaw('trips.*')
+                        ->selectRaw("{$expr} as distance_km", [$lat, $lng, $lat])
+                        ->whereRaw("{$expr} <= ?", [$lat, $lng, $lat, $radius])
+                        ->orderByRaw($expr, [$lat, $lng, $lat]);
+                },
+                fn ($q) => $q->orderBy('departure_date')->orderBy('departure_time'),
+            )
             ->paginate(20);
 
         return TripResource::collection($trips);

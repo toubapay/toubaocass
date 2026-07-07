@@ -7,6 +7,9 @@ export interface SearchTripsParams {
   date?: string;
   ride_type?: RideType;
   seats?: number;
+  lat?: number;
+  lng?: number;
+  radius_km?: number;
 }
 
 export async function searchTrips(params: SearchTripsParams): Promise<Paginated<Trip>> {

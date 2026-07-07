@@ -85,6 +85,18 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </Text>
         </View>
 
+        {(trip.departure_address || trip.departure_latitude !== null) && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Meeting point</Text>
+            {trip.departure_address && <Text style={styles.line}>{trip.departure_address}</Text>}
+            {trip.departure_latitude !== null && (
+              <Text style={styles.lineMuted}>
+                {trip.departure_latitude?.toFixed(5)}, {trip.departure_longitude?.toFixed(5)}
+              </Text>
+            )}
+          </View>
+        )}
+
         <Text style={styles.sectionHeading}>Riders ({confirmedBookings.length})</Text>
         {confirmedBookings.length === 0 ? (
           <Text style={styles.lineMuted}>No bookings yet.</Text>

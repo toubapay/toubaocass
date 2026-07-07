@@ -11,8 +11,10 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/Button';
 import { CityPicker } from '../../components/CityPicker';
 import { DateField } from '../../components/DateField';
+import { DeparturePicker } from '../../components/DeparturePicker';
 import { Screen } from '../../components/Screen';
 import { TextField } from '../../components/TextField';
+import { reverseGeocode } from '../../hooks/useMyLocation';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
@@ -35,6 +37,9 @@ export function PostTripScreen({ navigation }: Props) {
   const [destination, setDestination] = useState<City | null>(null);
   const [date, setDate] = useState<Date | null>(null);
   const [time, setTime] = useState<Date | null>(null);
+  const [departureLat, setDepartureLat] = useState<number | null>(null);
+  const [departureLng, setDepartureLng] = useState<number | null>(null);
+  const [departureAddress, setDepartureAddress] = useState('');
   const [fare, setFare] = useState('');
   const [rideType, setRideType] = useState<RideType>('standard');
   const [notes, setNotes] = useState('');
@@ -54,6 +59,14 @@ export function PostTripScreen({ navigation }: Props) {
   const kycApproved = user?.driver_profile?.kyc_status === 'approved';
   const canSubmit = kycApproved && car && origin && destination && origin.id !== destination.id && date && time && Number(fare) > 0;
 
+  const handleDepartureChange = (coords: { latitude: number; longitude: number }) => {
+    setDepartureLat(coords.latitude);
+    setDepartureLng(coords.longitude);
+    reverseGeocode(coords).then((address) => {
+      if (address) setDepartureAddress(address);
+    });
+  };
+
   const handleSubmit = async () => {
     if (!canSubmit || !car || !origin || !destination || !date || !time) return;
 
@@ -64,6 +77,9 @@ export function PostTripScreen({ navigation }: Props) {
         car_id: car.id,
         origin_city_id: origin.id,
         destination_city_id: destination.id,
+        departure_latitude: departureLat ?? undefined,
+        departure_longitude: departureLng ?? undefined,
+        departure_address: departureAddress.trim() || undefined,
         departure_date: date.toISOString().slice(0, 10),
         departure_time: time.toTimeString().slice(0, 5),
         fare: Number(fare),
@@ -128,6 +144,16 @@ export function PostTripScreen({ navigation }: Props) {
           onChange={setDestination}
           placeholder="Destination city"
         />
+
+        <Text style={styles.label}>Exact meeting point (optional)</Text>
+        <DeparturePicker latitude={departureLat} longitude={departureLng} onChange={handleDepartureChange} />
+        <TextField
+          label="Meeting point description"
+          placeholder="e.g. Total station, Route de l'Aéroport"
+          value={departureAddress}
+          onChangeText={setDepartureAddress}
+        />
+
         <DateField label="Departure date" value={date} onChange={setDate} minimumDate={new Date()} />
         <DateField label="Departure time" mode="time" value={time} onChange={setTime} />
 

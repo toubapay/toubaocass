@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { bookTrip } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -8,6 +8,7 @@ import { fetchTrip } from '../api/trips';
 import { Trip } from '../api/types';
 import { Button } from '../components/Button';
 import { DepartureFlash } from '../components/DepartureFlash';
+import { DepartureMap } from '../components/DepartureMap';
 import { Screen } from '../components/Screen';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -57,6 +58,12 @@ export function TripDetailScreen({ route, navigation }: Props) {
   }
 
   const isFull = trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
+
+  const openInGoogleMaps = () => {
+    if (!hasPin) return;
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${trip.departure_latitude},${trip.departure_longitude}`);
+  };
 
   return (
     <Screen>
@@ -70,6 +77,21 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {trip.departure_date} at {trip.departure_time}
         </Text>
         {isDepartingSoon(trip) && <DepartureFlash />}
+
+        {hasPin && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Departure point</Text>
+            <DepartureMap
+              latitude={trip.departure_latitude as number}
+              longitude={trip.departure_longitude as number}
+              address={trip.departure_address}
+            />
+            {trip.departure_address && <Text style={styles.line}>{trip.departure_address}</Text>}
+            <Pressable onPress={openInGoogleMaps}>
+              <Text style={styles.mapLink}>Open in Google Maps</Text>
+            </Pressable>
+          </View>
+        )}
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Driver</Text>
@@ -150,6 +172,7 @@ const styles = StyleSheet.create({
   line: { fontSize: 16, color: colors.text },
   lineMuted: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
+  mapLink: { color: colors.primary, fontWeight: '700', fontSize: 13, marginTop: spacing.sm },
   fullNotice: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md },
   seatsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
   seatsLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
