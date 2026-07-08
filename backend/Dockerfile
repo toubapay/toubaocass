@@ -23,21 +23,14 @@ FROM base AS vendor
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
-# --- Frontend assets (only the default Vite/Tailwind welcome-page build) ---
-FROM node:22-slim AS frontend
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY resources ./resources
-COPY vite.config.* ./
-RUN npm run build
+# This is a JSON API backend for the rider/driver mobile apps only — no
+# blade views are served, so there's no Vite/Node asset build here.
 
 # --- Final runtime image ---
 FROM base AS app
 
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
-COPY --from=frontend /app/public/build ./public/build
 
 RUN cp vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php public/frankenphp-worker.php \
     && composer dump-autoload --optimize --no-dev \
