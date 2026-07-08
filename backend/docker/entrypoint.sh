@@ -9,6 +9,7 @@ php artisan config:cache
 php artisan route:cache
 php artisan event:cache
 php artisan migrate --force
+php artisan db:seed --class=DatabaseSeeder --force
 
 if [ "$#" -gt 0 ]; then
     exec "$@"
