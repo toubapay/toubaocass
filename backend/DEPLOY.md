@@ -24,24 +24,34 @@ set to `backend`.
    `QUEUE_CONNECTION`/`CACHE_STORE`/`SESSION_DRIVER` off the database once
    traffic grows — the app works fine on the `database` driver at MVP scale.
 
-## 2. Object storage (Cloudflare R2)
+## 2. Object storage (AWS S3, or any S3-compatible provider)
 
 Railway's container filesystem is ephemeral — anything written to disk is
 lost on redeploy. Car photos and driver KYC documents must go to external
-object storage instead:
+object storage instead. The `s3`/`kyc` disks (`config/filesystems.php`) work
+with real AWS S3 out of the box, or any S3-compatible provider (Cloudflare
+R2, Backblaze B2, DigitalOcean Spaces, MinIO, etc.) by pointing `AWS_ENDPOINT`
+at it.
 
-1. Create a Cloudflare R2 account, then two buckets:
-   - one **public** bucket for car photos (enable the bucket's public
-     development URL, or attach a custom domain),
+**Using AWS S3:**
+1. Create two buckets in the same AWS account/region:
+   - one **public-read** bucket for car photos (bucket policy allowing
+     `s3:GetObject` publicly, or serve via CloudFront),
    - one **private** bucket for KYC documents (ID, driving license, selfie)
-     — do **not** make this one public; it holds personal data.
-2. Create an R2 API token (Account → R2 → Manage API Tokens) with read/write
-   access to both buckets.
-3. Set these variables on the web service (see full list below):
-   `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`
-   (`https://<account_id>.r2.cloudflarestorage.com`), `R2_BUCKET` (public),
-   `R2_URL` (the public bucket's URL/custom domain), `R2_KYC_BUCKET` (private).
-4. Set `FILESYSTEM_DISK=r2` and `KYC_FILESYSTEM_DISK=kyc`.
+     — leave this one fully private; it holds personal data.
+2. Create an IAM user (or role) with read/write access scoped to both
+   buckets, and generate an access key pair for it.
+3. Set on the web service: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+   `AWS_DEFAULT_REGION` (e.g. `us-east-1`), `AWS_BUCKET` (public bucket name),
+   `AWS_URL` (the public bucket's URL, e.g.
+   `https://<bucket>.s3.<region>.amazonaws.com`), `AWS_KYC_BUCKET` (private
+   bucket name). Leave `AWS_ENDPOINT` blank and `AWS_USE_PATH_STYLE_ENDPOINT=false`
+   — both are only needed for non-AWS S3-compatible providers.
+4. Set `FILESYSTEM_DISK=s3` and `KYC_FILESYSTEM_DISK=kyc`.
+
+**Using an S3-compatible provider instead (e.g. Cloudflare R2):** same steps,
+but also set `AWS_ENDPOINT` to the provider's endpoint URL,
+`AWS_DEFAULT_REGION=auto`, and `AWS_USE_PATH_STYLE_ENDPOINT=true`.
 
 Locally these default to `FILESYSTEM_DISK=public` (symlinked, world-readable
 — fine for dev) and `KYC_FILESYSTEM_DISK=local` (private, no public URL), so
@@ -61,9 +71,9 @@ listed here keeps its `.env.example` default.
 | `APP_URL` | your Railway public domain, e.g. `https://api.intercity.example` |
 | `DB_CONNECTION` | `pgsql` |
 | `DB_URL` | `${{Postgres.DATABASE_URL}}` (Railway variable reference) |
-| `FILESYSTEM_DISK` | `r2` |
+| `FILESYSTEM_DISK` | `s3` |
 | `KYC_FILESYSTEM_DISK` | `kyc` |
-| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET`, `R2_URL`, `R2_KYC_BUCKET` | from step 2 |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_KYC_BUCKET` | from step 2 (plus `AWS_ENDPOINT`/`AWS_USE_PATH_STYLE_ENDPOINT` if using R2 or another S3-compatible provider) |
 | `SMS_DRIVER` | `twilio` (once you have real Twilio credentials; otherwise leave `log`) |
 | `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM` | your Twilio credentials |
 | `PUSH_DRIVER` | `fcm` (once configured; otherwise leave `log`) |
@@ -96,14 +106,18 @@ in the `jobs` table.
 
 ## 5. Health check
 
-`backend/railway.json` points Railway's health check at `/up`, which Laravel
-serves out of the box. No extra route needed.
+`backend/railway.json` doesn't set a `healthcheckPath` — both the web and
+queue-worker services share this config file (same repo/root directory), and
+a queue worker never serves HTTP, so a shared health check would always fail
+for it. Railway falls back to considering a deployment healthy once the
+container stays up. Laravel does still serve `/up` if you want to wire up an
+external uptime monitor against the web service specifically.
 
 ## 6. First deploy checklist
 
 - [ ] `APP_KEY` generated and set (once — don't regenerate after real data exists)
 - [ ] Postgres plugin attached, `DB_URL` set, migrations run automatically on boot
-- [ ] R2 buckets created, `FILESYSTEM_DISK=r2` / `KYC_FILESYSTEM_DISK=kyc` set
+- [ ] S3/R2 buckets created, `FILESYSTEM_DISK=s3` / `KYC_FILESYSTEM_DISK=kyc` set
 - [ ] Queue worker service added with the overridden start command
 - [ ] `APP_DEBUG=false`, `APP_ENV=production`
 - [ ] Mobile apps' `API_BASE_URL` (`apps/rider/.env`, `apps/driver/.env`) point at the Railway domain

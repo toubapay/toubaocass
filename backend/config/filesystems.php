@@ -24,8 +24,8 @@ return [
     | data and must never be served from a public/world-readable disk. This
     | is kept separate from the default disk above, which serves public
     | assets like car photos. Defaults to the private "local" disk (no
-    | public URL) in development; set to "kyc" (Cloudflare R2, private
-    | bucket) in production.
+    | public URL) in development; set to "kyc" (private S3/R2 bucket) in
+    | production.
     |
     */
 
@@ -63,6 +63,13 @@ return [
             'report' => false,
         ],
 
+        // Public bucket — car photos and any other rider/driver-facing
+        // assets. Point FILESYSTEM_DISK=s3 at this in production so uploads
+        // survive redeploys on ephemeral hosts (e.g. Railway). Works with
+        // real AWS S3 as-is (leave AWS_ENDPOINT blank); for an S3-compatible
+        // provider like Cloudflare R2 instead, set AWS_ENDPOINT to its
+        // endpoint URL, AWS_DEFAULT_REGION=auto, and
+        // AWS_USE_PATH_STYLE_ENDPOINT=true.
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -76,35 +83,20 @@ return [
             'report' => false,
         ],
 
-        // Cloudflare R2 (S3-compatible), public bucket — car photos and any
-        // other rider/driver-facing assets. Point FILESYSTEM_DISK=r2 at this
-        // in production so uploads survive redeploys on ephemeral hosts
-        // (e.g. Railway).
-        'r2' => [
-            'driver' => 's3',
-            'key' => env('R2_ACCESS_KEY_ID'),
-            'secret' => env('R2_SECRET_ACCESS_KEY'),
-            'region' => 'auto',
-            'bucket' => env('R2_BUCKET'),
-            'url' => env('R2_URL'),
-            'endpoint' => env('R2_ENDPOINT'),
-            'use_path_style_endpoint' => true,
-            'throw' => false,
-            'report' => false,
-        ],
-
-        // Cloudflare R2, private bucket — driver KYC documents. No public
-        // "url" is configured on purpose; these should only ever be read via
+        // Private bucket — driver KYC documents (ID, driving license,
+        // selfie). Uses the same credentials/provider as the 's3' disk
+        // above but a separate, non-public bucket. No "url" is configured
+        // on purpose; these should only ever be read via
         // Storage::disk('kyc')->temporaryUrl() from an authenticated/admin
         // context, never exposed directly to the mobile apps.
         'kyc' => [
             'driver' => 's3',
-            'key' => env('R2_ACCESS_KEY_ID'),
-            'secret' => env('R2_SECRET_ACCESS_KEY'),
-            'region' => 'auto',
-            'bucket' => env('R2_KYC_BUCKET'),
-            'endpoint' => env('R2_ENDPOINT'),
-            'use_path_style_endpoint' => true,
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_KYC_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
         ],
