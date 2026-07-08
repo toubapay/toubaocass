@@ -3,7 +3,7 @@
 # Builds the Laravel API as a single container running Octane on FrankenPHP,
 # suitable for Railway (binds to $PORT) or any other Docker host.
 
-FROM dunglas/frankenphp:1-php8.3 AS base
+FROM dunglas/frankenphp:1-php8.4 AS base
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/install-php-extensions
 RUN install-php-extensions \
