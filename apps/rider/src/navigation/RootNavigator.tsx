@@ -11,6 +11,7 @@ import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { HomeScreen } from '../screens/HomeScreen';
+import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { TripDetailScreen } from '../screens/TripDetailScreen';
@@ -20,11 +21,13 @@ import {
   BookingsStackParamList,
   HomeStackParamList,
   MainTabParamList,
+  MapStackParamList,
 } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
 const BookingsStackNav = createNativeStackNavigator<BookingsStackParamList>();
+const MapStackNav = createNativeStackNavigator<MapStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function AuthNavigator() {
@@ -52,6 +55,15 @@ function BookingsNavigator() {
       <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: 'Mes réservations' }} />
       <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
     </BookingsStackNav.Navigator>
+  );
+}
+
+function MapNavigator() {
+  return (
+    <MapStackNav.Navigator>
+      <MapStackNav.Screen name="Map" component={MapScreen} options={{ title: 'Carte des trajets' }} />
+      <MapStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
+    </MapStackNav.Navigator>
   );
 }
 

@@ -14,8 +14,14 @@ export type BookingsStackParamList = {
   TripDetail: { tripId: number };
 };
 
+export type MapStackParamList = {
+  Map: undefined;
+  TripDetail: { tripId: number };
+};
+
 export type MainTabParamList = {
   HomeTab: undefined;
+  MapTab: undefined;
   BookingsTab: undefined;
   ProfileTab: undefined;
 };

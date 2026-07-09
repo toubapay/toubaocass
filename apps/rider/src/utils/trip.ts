@@ -25,3 +25,9 @@ export const FILL_STATE_LABEL: Record<BookingFillState, string> = {
   filling: 'Se remplit',
   full: 'Complet',
 };
+
+export const RIDE_TYPE_LABEL: Record<string, string> = {
+  standard: 'Standard',
+  comfort: 'Confort',
+  xl: 'XL',
+};

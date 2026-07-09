@@ -3,14 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, isDepartingSoon } from '../utils/trip';
+import { bookingFillState, FILL_STATE_LABEL, isDepartingSoon, RIDE_TYPE_LABEL } from '../utils/trip';
 import { DepartureFlash } from './DepartureFlash';
-
-const RIDE_TYPE_LABEL: Record<string, string> = {
-  standard: 'Standard',
-  comfort: 'Confort',
-  xl: 'XL',
-};
 
 const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   open: { bg: colors.successSoft, fg: colors.success },
