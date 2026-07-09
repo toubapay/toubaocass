@@ -2,12 +2,13 @@
 
 An Uber-style platform for **intercity** ride-sharing: taxi owners (drivers) post
 seat availability for a scheduled trip between two cities, and riders search,
-book, and pay for a seat. Built as three projects in one repo:
+book, and pay for a seat. Built as four projects in one repo:
 
 ```
 backend/        Laravel 13 API (Sanctum auth, OTP, KYC, trips, bookings, notifications)
 apps/rider/     Expo (React Native + TypeScript) app for riders
 apps/driver/    Expo (React Native + TypeScript) app for drivers
+apps/web/       React + Vite web app for riders (same backend API as the mobile apps)
 ```
 
 ## How it works
