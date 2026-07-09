@@ -52,6 +52,15 @@ export function TripsListScreen({ navigation }: Props) {
   return (
     <Screen>
       <Text style={styles.title}>Mes trajets</Text>
+
+      <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
+        <Text style={styles.mapCardIcon}>🗺️</Text>
+        <View style={styles.mapCardText}>
+          <Text style={styles.mapCardTitle}>Définir un point de départ sur la carte</Text>
+          <Text style={styles.mapCardSubtitle}>Recherchez une adresse ou utilisez votre position actuelle</Text>
+        </View>
+      </Pressable>
+
       <FlatList
         data={trips}
         keyExtractor={(item) => String(item.id)}
@@ -85,6 +94,21 @@ export function TripsListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  mapCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  mapCardIcon: { fontSize: 22 },
+  mapCardText: { flex: 1 },
+  mapCardTitle: { fontSize: 14.5, fontWeight: '700', color: colors.text },
+  mapCardSubtitle: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

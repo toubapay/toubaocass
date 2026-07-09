@@ -9,6 +9,7 @@ export const colors = {
   border: '#E2E6E4',
   danger: '#C0392B',
   success: '#1E8E5A',
+  accentSoft: '#E4EFF3',
 };
 
 export const spacing = {

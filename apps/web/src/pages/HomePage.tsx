@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -13,6 +14,7 @@ import { colors, radius, spacing } from '../theme';
 const NEARBY_RADIUS_KM = 25;
 
 export function HomePage() {
+  const navigate = useNavigate();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -80,6 +82,31 @@ export function HomePage() {
   return (
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Trajets disponibles</h1>
+
+      <button
+        onClick={() => navigate('/map')}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.sm,
+          border: `1px solid ${colors.border}`,
+          borderRadius: radius.md,
+          padding: '14px 16px',
+          marginBottom: spacing.sm,
+          backgroundColor: colors.accentSoft,
+          textAlign: 'left',
+          cursor: 'pointer',
+        }}
+      >
+        <span style={{ fontSize: 22 }}>🗺️</span>
+        <span>
+          <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: colors.text }}>Voir la carte des trajets</span>
+          <span style={{ display: 'block', fontSize: 12.5, color: colors.textMuted }}>
+            Rechercher une adresse ou utiliser votre position actuelle
+          </span>
+        </span>
+      </button>
 
       <button
         onClick={toggleNearMe}

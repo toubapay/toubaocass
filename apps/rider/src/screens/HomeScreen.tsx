@@ -92,6 +92,14 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
+        <Pressable style={styles.mapCard} onPress={() => navigation.getParent()?.navigate('MapTab')}>
+          <Text style={styles.mapCardIcon}>🗺️</Text>
+          <View style={styles.mapCardText}>
+            <Text style={styles.mapCardTitle}>Voir la carte des trajets</Text>
+            <Text style={styles.mapCardSubtitle}>Rechercher une adresse ou utiliser votre position actuelle</Text>
+          </View>
+        </Pressable>
+
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
           {locating ? (
             <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />
@@ -172,6 +180,21 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   filters: { marginBottom: spacing.sm },
+  mapCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  mapCardIcon: { fontSize: 22 },
+  mapCardText: { flex: 1 },
+  mapCardTitle: { fontSize: 14.5, fontWeight: '700', color: colors.text },
+  mapCardSubtitle: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
   nearMeButton: {
     borderWidth: 1,
     borderColor: colors.primary,
