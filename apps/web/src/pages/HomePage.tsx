@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -7,6 +6,7 @@ import type { City, Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { TripCard } from '../components/TripCard';
+import { TripsMap } from '../components/TripsMap';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -14,7 +14,6 @@ import { colors, radius, spacing } from '../theme';
 const NEARBY_RADIUS_KM = 25;
 
 export function HomePage() {
-  const navigate = useNavigate();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -27,6 +26,7 @@ export function HomePage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
+  const [citySearch, setCitySearch] = useState('');
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
@@ -66,6 +66,11 @@ export function HomePage() {
     setNearMe(null);
   };
 
+  const query = citySearch.trim().toLowerCase();
+  const visibleTrips = query
+    ? trips.filter((trip) => `${trip.origin_city?.name ?? ''} ${trip.destination_city?.name ?? ''}`.toLowerCase().includes(query))
+    : trips;
+
   const toggleNearMe = async () => {
     if (nearMe) {
       setNearMe(null);
@@ -83,30 +88,42 @@ export function HomePage() {
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Trajets disponibles</h1>
 
-      <button
-        onClick={() => navigate('/map')}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: spacing.sm,
-          border: `1px solid ${colors.border}`,
-          borderRadius: radius.md,
-          padding: '14px 16px',
-          marginBottom: spacing.sm,
-          backgroundColor: colors.accentSoft,
-          textAlign: 'left',
-          cursor: 'pointer',
-        }}
-      >
-        <span style={{ fontSize: 22 }}>🗺️</span>
-        <span>
-          <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: colors.text }}>Voir la carte des trajets</span>
-          <span style={{ display: 'block', fontSize: 12.5, color: colors.textMuted }}>
-            Rechercher une adresse ou utiliser votre position actuelle
-          </span>
-        </span>
-      </button>
+      <div style={{ position: 'relative', marginBottom: spacing.sm }}>
+        <span style={{ position: 'absolute', left: 14, top: 13, fontSize: 15, pointerEvents: 'none' }}>🔍</span>
+        <input
+          value={citySearch}
+          onChange={(e) => setCitySearch(e.target.value)}
+          placeholder="Rechercher une ville de départ ou d'arrivée..."
+          style={{
+            width: '100%',
+            border: `1px solid ${colors.border}`,
+            borderRadius: radius.sm,
+            padding: '12px 14px 12px 38px',
+            fontSize: 15,
+            color: colors.text,
+            backgroundColor: colors.surface,
+          }}
+        />
+        {citySearch && (
+          <button
+            onClick={() => setCitySearch('')}
+            aria-label="Effacer la recherche"
+            style={{
+              position: 'absolute',
+              right: 10,
+              top: 8,
+              border: 'none',
+              background: 'none',
+              color: colors.textMuted,
+              fontSize: 16,
+              cursor: 'pointer',
+              padding: 6,
+            }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
       <button
         onClick={toggleNearMe}
@@ -213,22 +230,30 @@ export function HomePage() {
         ) : (
           <>
             {error && <p style={{ color: colors.danger, fontSize: 13, marginBottom: spacing.sm }}>{error}</p>}
-            {trips.length === 0 ? (
+            {visibleTrips.length === 0 ? (
               <div style={{ marginTop: spacing.xl, textAlign: 'center', padding: `0 ${spacing.lg}px` }}>
                 <p style={{ color: colors.textMuted, fontSize: 15 }}>
-                  {nearMe
-                    ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
-                    : hasFilters
-                      ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
-                      : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                  {query
+                    ? `Aucun trajet ne correspond à "${citySearch.trim()}".`
+                    : nearMe
+                      ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                      : hasFilters
+                        ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
+                        : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
                 </p>
               </div>
             ) : (
-              trips.map((trip) => <TripCard key={trip.id} trip={trip} />)
+              visibleTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)
             )}
           </>
         )}
       </div>
+
+      {!loading && (
+        <div style={{ marginTop: spacing.lg }}>
+          <TripsMap trips={visibleTrips} />
+        </div>
+      )}
     </div>
   );
 }

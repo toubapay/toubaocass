@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -9,6 +9,7 @@ import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
+import { TripsMapView } from '../components/TripsMapView';
 import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -31,6 +32,7 @@ export function HomeScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [citySearch, setCitySearch] = useState('');
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
@@ -76,6 +78,11 @@ export function HomeScreen({ navigation }: Props) {
     setNearMe(null);
   };
 
+  const query = citySearch.trim().toLowerCase();
+  const visibleTrips = query
+    ? trips.filter((trip) => `${trip.origin_city?.name ?? ''} ${trip.destination_city?.name ?? ''}`.toLowerCase().includes(query))
+    : trips;
+
   const toggleNearMe = async () => {
     if (nearMe) {
       setNearMe(null);
@@ -92,13 +99,21 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
-        <Pressable style={styles.mapCard} onPress={() => navigation.getParent()?.navigate('MapTab')}>
-          <Text style={styles.mapCardIcon}>🗺️</Text>
-          <View style={styles.mapCardText}>
-            <Text style={styles.mapCardTitle}>Voir la carte des trajets</Text>
-            <Text style={styles.mapCardSubtitle}>Rechercher une adresse ou utiliser votre position actuelle</Text>
-          </View>
-        </Pressable>
+        <View style={styles.searchWrapper}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher une ville de départ ou d'arrivée..."
+            placeholderTextColor={colors.textMuted}
+            value={citySearch}
+            onChangeText={setCitySearch}
+          />
+          {citySearch.length > 0 && (
+            <Pressable onPress={() => setCitySearch('')} style={styles.searchClear}>
+              <Text style={styles.searchClearText}>✕</Text>
+            </Pressable>
+          )}
+        </View>
 
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
           {locating ? (
@@ -151,7 +166,7 @@ export function HomeScreen({ navigation }: Props) {
         </View>
       ) : (
         <FlatList
-          data={trips}
+          data={visibleTrips}
           keyExtractor={(item) => String(item.id)}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={colors.primary} />
@@ -163,13 +178,18 @@ export function HomeScreen({ navigation }: Props) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
-                {nearMe
-                  ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
-                  : hasFilters
-                    ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
-                    : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                {query
+                  ? `Aucun trajet ne correspond à "${citySearch.trim()}".`
+                  : nearMe
+                    ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                    : hasFilters
+                      ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
+                      : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
               </Text>
             </View>
+          }
+          ListFooterComponent={
+            <TripsMapView trips={visibleTrips} onSelectTrip={(tripId) => navigation.navigate('TripDetail', { tripId })} />
           }
         />
       )}
@@ -180,21 +200,21 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   filters: { marginBottom: spacing.sm },
-  mapCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  searchWrapper: { position: 'relative', justifyContent: 'center', marginBottom: spacing.sm },
+  searchIcon: { position: 'absolute', left: 14, fontSize: 15, zIndex: 1 },
+  searchInput: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.accentSoft,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    borderRadius: radius.sm,
+    paddingVertical: 12,
+    paddingLeft: 38,
+    paddingRight: 36,
+    fontSize: 15,
+    color: colors.text,
+    backgroundColor: colors.surface,
   },
-  mapCardIcon: { fontSize: 22 },
-  mapCardText: { flex: 1 },
-  mapCardTitle: { fontSize: 14.5, fontWeight: '700', color: colors.text },
-  mapCardSubtitle: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
+  searchClear: { position: 'absolute', right: 8, padding: 6 },
+  searchClearText: { color: colors.textMuted, fontSize: 15 },
   nearMeButton: {
     borderWidth: 1,
     borderColor: colors.primary,
