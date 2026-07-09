@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HomePage } from './pages/HomePage';
+import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
@@ -42,6 +43,7 @@ function AppRoutes() {
     <Layout>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />

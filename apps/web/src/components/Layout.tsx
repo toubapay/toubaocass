@@ -5,6 +5,7 @@ import { colors, spacing } from '../theme';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
+  { to: '/map', label: 'Carte', icon: '🗺️', end: false },
   { to: '/bookings', label: 'Réservations', icon: '🎫', end: false },
   { to: '/profile', label: 'Profil', icon: '👤', end: false },
 ];
