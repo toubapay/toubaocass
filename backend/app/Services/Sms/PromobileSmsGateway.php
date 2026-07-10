@@ -12,10 +12,13 @@ use Illuminate\Support\Facades\Log;
  * SMS_DRIVER=promobile to activate.
  *
  * API docs: POST https://bulksms.promobile.sn/api/service/enterprise-service/external/sms
- * with header "Token: <api key>" and JSON body {from, to, content}. A
- * successful response is {"msgid": "...", "errorcode": "200"} — note
- * errorcode is a string mirroring an HTTP status, not an actual HTTP status
- * code, so it has to be checked separately from $response->failed().
+ * with header "Token: <api key>" and JSON body {from, to, content}. The
+ * documented success response is {"msgid": "...", "errorcode": "200"}, but
+ * the live API actually responds with an array of per-part results instead,
+ * e.g. [{"errorCode":"200","id":"..."}, {"errorCode":"200","id":"..."}] for
+ * a message split into multiple parts — note the capital C in "errorCode"
+ * here, vs. lowercase in the docs. allSucceeded() below normalizes both
+ * shapes and checks every part.
  */
 class PromobileSmsGateway implements SmsGateway
 {
@@ -35,12 +38,31 @@ class PromobileSmsGateway implements SmsGateway
                 'content' => $message,
             ]);
 
-        if ($response->failed() || $response->json('errorcode') !== '200') {
+        if ($response->failed() || ! $this->allSucceeded($response->json())) {
             Log::warning('Promobile SMS delivery failed', [
                 'phone' => $phone,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
         }
+    }
+
+    private function allSucceeded(mixed $payload): bool
+    {
+        $parts = is_array($payload) && array_is_list($payload) ? $payload : [$payload];
+
+        if (empty($parts)) {
+            return false;
+        }
+
+        foreach ($parts as $part) {
+            $code = is_array($part) ? ($part['errorCode'] ?? $part['errorcode'] ?? null) : null;
+
+            if ($code !== '200') {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
