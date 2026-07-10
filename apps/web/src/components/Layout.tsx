@@ -16,11 +16,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header
         style={{
           padding: `${spacing.md}px ${spacing.lg}px`,
-          borderBottom: `1px solid ${colors.border}`,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.primary,
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.sm,
         }}
       >
-        <span style={{ fontSize: 22, fontWeight: 800, color: colors.primary }}>Intercity</span>
+        <img src="/favicon.svg" alt="" width={28} height={28} />
+        <span style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Intercity</span>
       </header>
 
       <main
