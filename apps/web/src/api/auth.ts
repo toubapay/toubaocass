@@ -24,6 +24,10 @@ export async function updateProfile(input: { name: string; email?: string }): Pr
   return data;
 }
 
+export async function registerPushToken(fcm_token: string): Promise<void> {
+  await apiClient.post('/fcm-token', { fcm_token });
+}
+
 export async function logout(): Promise<void> {
   await apiClient.post('/logout');
 }
