@@ -5,10 +5,12 @@ seat availability for a scheduled trip between two cities, and riders search,
 book, and pay for a seat. Built as four projects in one repo:
 
 ```
-backend/        Laravel 13 API (Sanctum auth, OTP, KYC, trips, bookings, notifications)
-apps/rider/     Expo (React Native + TypeScript) app for riders
-apps/driver/    Expo (React Native + TypeScript) app for drivers
-apps/web/       React + Vite web app for riders (same backend API as the mobile apps)
+backend/            Laravel 13 API (Sanctum auth, OTP, KYC, trips, bookings, notifications)
+apps/rider/         Expo (React Native + TypeScript) app for riders
+apps/driver/        Expo (React Native + TypeScript) app for drivers
+apps/web/           React + Vite web app for riders (same backend API as the mobile apps)
+apps/rider_flutter/ Flutter app for riders — alternative client, same backend API
+apps/driver_flutter/ Flutter app for drivers — alternative client, same backend API
 ```
 
 ## How it works
@@ -201,6 +203,44 @@ iOS via `expo prebuild` or EAS Build) and setting `PUSH_DRIVER=fcm` on the
 backend — in Expo Go / dev-client without that config, pushes are logged
 server-side instead of delivered, which is enough to develop and test the
 booking flow end-to-end.
+
+---
+
+## Flutter apps (alternative clients)
+
+`apps/rider_flutter/` and `apps/driver_flutter/` are Flutter/Dart clients
+covering the same functionality as the Expo apps above — auth/OTP, profile
+setup, trip search/booking/history/maps (rider), KYC/fleet/trip-posting/
+management/maps (driver), and FCM push — against the exact same backend API.
+They run alongside the Expo apps rather than replacing them; nothing else in
+this repo changes because of their presence.
+
+```bash
+cd apps/rider_flutter   # or apps/driver_flutter
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://localhost:8000/api
+```
+
+- **Firebase**: same pattern as the Expo apps — download `google-services.json`
+  / `GoogleService-Info.plist` from the Firebase console for these apps'
+  package IDs (`com.intercity.rider_flutter` / `com.intercity.driver_flutter`)
+  and place them at `android/app/google-services.json` and
+  `ios/Runner/GoogleService-Info.plist` (gitignored). The Android Gradle
+  plugin only activates once that file exists, so `flutter build`/`analyze`/
+  `test` work fine without it.
+- **Google Maps key**: pass `-PmapsApiKey=...` to Gradle (or set
+  `mapsApiKey=...` in `android/local.properties`, gitignored) before building
+  for Android; wire the iOS key manually in Xcode per `google_maps_flutter`'s
+  setup docs.
+- **Departure-point picker**: the driver app's map-based pickup-point picker
+  (tap/drag a pin, or snap to current GPS) matches the Expo app's, minus its
+  address-autocomplete search-as-you-type — a deliberate scope trim, not a
+  missing feature.
+- Verified in this repo via `flutter analyze` (zero errors in both apps),
+  `flutter test` (unit tests for the ported urgency/fill-state trip logic),
+  and `flutter build web`. Native Android/iOS builds need a real Android SDK
+  / Xcode toolchain and a physical device or emulator to verify further —
+  same constraint the Expo apps' EAS builds already have outside this repo.
 
 ---
 
