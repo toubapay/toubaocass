@@ -75,8 +75,10 @@ listed here keeps its `.env.example` default.
 | `FILESYSTEM_DISK` | `s3` |
 | `KYC_FILESYSTEM_DISK` | `kyc` |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_KYC_BUCKET` | from step 2 (plus `AWS_ENDPOINT`/`AWS_USE_PATH_STYLE_ENDPOINT` if using R2 or another S3-compatible provider) |
-| `SMS_DRIVER` | `twilio` (once you have real Twilio credentials; otherwise leave `log`) |
-| `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM` | your Twilio credentials |
+| `SMS_DRIVER` | `promobile` (Promobile BULKSMS, the "Facili" account) or `twilio`; otherwise leave `log` |
+| `PROMOBILE_TOKEN` | your Promobile API key (Manage API Keys in their dashboard) |
+| `PROMOBILE_FROM` | `Ocass` (the sender ID recipients see) |
+| `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM` | your Twilio credentials (only needed if using `SMS_DRIVER=twilio` instead) |
 | `PUSH_DRIVER` | `fcm` (once configured; otherwise leave `log`) |
 | `FCM_PROJECT_ID` | your Firebase project ID |
 | `FCM_CREDENTIALS_JSON` | the *entire contents* of the Firebase service-account JSON (Console → Project settings → Service accounts → Generate new private key), pasted as one Railway variable value — it's already single-line JSON, no reformatting needed. `docker/entrypoint.sh` writes it to `storage/app/fcm-credentials.json` at container boot; leave `FCM_CREDENTIALS_PATH` unset unless you're mounting the file another way |

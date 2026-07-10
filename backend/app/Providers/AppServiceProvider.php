@@ -7,6 +7,7 @@ use App\Contracts\SmsGateway;
 use App\Services\Push\FcmPushGateway;
 use App\Services\Push\LogPushGateway;
 use App\Services\Sms\LogSmsGateway;
+use App\Services\Sms\PromobileSmsGateway;
 use App\Services\Sms\TwilioSmsGateway;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +22,13 @@ class AppServiceProvider extends ServiceProvider
                     (string) config('services.sms.twilio.sid'),
                     (string) config('services.sms.twilio.token'),
                     (string) config('services.sms.twilio.from'),
+                );
+            }
+
+            if (config('services.sms.driver') === 'promobile') {
+                return new PromobileSmsGateway(
+                    (string) config('services.sms.promobile.token'),
+                    (string) config('services.sms.promobile.from'),
                 );
             }
 

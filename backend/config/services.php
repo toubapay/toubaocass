@@ -42,6 +42,10 @@ return [
             'token' => env('TWILIO_TOKEN'),
             'from' => env('TWILIO_FROM'),
         ],
+        'promobile' => [
+            'token' => env('PROMOBILE_TOKEN'),
+            'from' => env('PROMOBILE_FROM', 'Ocass'),
+        ],
     ],
 
     'push' => [
