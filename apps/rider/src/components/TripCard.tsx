@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, isDepartingSoon, RIDE_TYPE_LABEL } from '../utils/trip';
-import { DepartureFlash } from './DepartureFlash';
+import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { TripUrgencyBadge } from './TripUrgencyBadge';
 
 const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   open: { bg: colors.successSoft, fg: colors.success },
@@ -53,7 +53,7 @@ export function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void })
         {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
       </Text>
 
-      {isDepartingSoon(trip) && <DepartureFlash />}
+      <TripUrgencyBadge trip={trip} />
     </Pressable>
   );
 }

@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, isDepartingSoon, RIDE_TYPE_LABEL } from '../utils/trip';
-import { DepartureFlash } from './DepartureFlash';
+import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { TripUrgencyBadge } from './TripUrgencyBadge';
 
 const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   open: { bg: colors.successSoft, fg: colors.success },
@@ -83,7 +83,7 @@ export function TripCard({ trip }: { trip: Trip }) {
         {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
       </p>
 
-      {isDepartingSoon(trip) && <DepartureFlash />}
+      <TripUrgencyBadge trip={trip} />
     </button>
   );
 }
