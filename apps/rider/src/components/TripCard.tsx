@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
 import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
 const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
@@ -12,9 +13,19 @@ const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   full: { bg: colors.dangerSoft, fg: colors.danger },
 };
 
-export function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
+export function TripCard({
+  trip,
+  onPress,
+  onTripUpdated,
+}: {
+  trip: Trip;
+  onPress: () => void;
+  onTripUpdated?: (trip: Trip) => void;
+}) {
   const fillState = bookingFillState(trip);
   const fillStyle = FILL_STATE_STYLE[fillState];
+  const [showQuickAction, setShowQuickAction] = useState(false);
+  const booked = trip.my_booking != null;
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -54,6 +65,32 @@ export function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void })
       </Text>
 
       <TripUrgencyBadge trip={trip} />
+
+      <View style={styles.quickActionRow}>
+        {booked ? (
+          <Text style={styles.bookedLabel}>✓ Réservé · {trip.my_booking!.seats_booked} place(s)</Text>
+        ) : (
+          <View />
+        )}
+        <Pressable
+          style={[styles.quickActionButton, booked && styles.quickActionButtonOutline]}
+          onPress={(e) => {
+            e.stopPropagation();
+            setShowQuickAction(true);
+          }}
+        >
+          <Text style={[styles.quickActionText, booked && styles.quickActionTextOutline]}>
+            {booked ? 'Modifier' : 'Réserver'}
+          </Text>
+        </Pressable>
+      </View>
+
+      <BookingQuickActionModal
+        trip={trip}
+        visible={showQuickAction}
+        onClose={() => setShowQuickAction(false)}
+        onSuccess={(updatedTrip) => onTripUpdated?.(updatedTrip)}
+      />
     </Pressable>
   );
 }
@@ -82,4 +119,24 @@ const styles = StyleSheet.create({
   driver: { fontSize: 14, color: colors.text, flexShrink: 1, marginRight: spacing.sm },
   fare: { fontSize: 16, fontWeight: '700', color: colors.primary },
   seats: { fontSize: 12, color: colors.textMuted, marginTop: spacing.xs, fontWeight: '600' },
+  quickActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  bookedLabel: { fontSize: 12, fontWeight: '700', color: colors.success },
+  quickActionButton: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  quickActionButtonOutline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  quickActionText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  quickActionTextOutline: { color: colors.primary },
 });

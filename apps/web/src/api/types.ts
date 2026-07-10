@@ -75,6 +75,7 @@ export interface Trip {
   distance_km?: number;
   bookings?: Booking[];
   bookings_count?: number;
+  my_booking?: { id: number; seats_booked: number; fare_total: number; status: BookingStatus } | null;
 }
 
 export interface Booking {

@@ -4,13 +4,15 @@ import 'package:intl/intl.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../utils/trip.dart' as trip_utils;
+import 'booking_quick_action_sheet.dart';
 import 'trip_urgency_badge.dart';
 
 class TripCard extends StatelessWidget {
-  const TripCard({super.key, required this.trip, required this.onTap});
+  const TripCard({super.key, required this.trip, required this.onTap, this.onTripUpdated});
 
   final Trip trip;
   final VoidCallback onTap;
+  final void Function(Trip updatedTrip)? onTripUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ class TripCard extends StatelessWidget {
       trip_utils.BookingFillState.full => AppColors.danger,
     };
     final currency = NumberFormat.decimalPattern('fr');
+    final booked = trip.myBooking != null;
 
     return InkWell(
       onTap: onTap,
@@ -87,6 +90,34 @@ class TripCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (booked)
+                  Text(
+                    '✓ Réservé · ${trip.myBooking!.seatsBooked} place(s)',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.success),
+                  )
+                else
+                  const SizedBox.shrink(),
+                booked
+                    ? OutlinedButton(
+                        onPressed: () async {
+                          final updated = await showBookingQuickActionSheet(context, trip);
+                          if (updated != null) onTripUpdated?.call(updated);
+                        },
+                        child: const Text('Modifier'),
+                      )
+                    : ElevatedButton(
+                        onPressed: () async {
+                          final updated = await showBookingQuickActionSheet(context, trip);
+                          if (updated != null) onTripUpdated?.call(updated);
+                        },
+                        child: const Text('Réserver'),
+                      ),
               ],
             ),
           ],

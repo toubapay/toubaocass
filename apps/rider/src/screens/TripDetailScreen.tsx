@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { bookTrip } from '../api/bookings';
+import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import { Trip } from '../api/types';
@@ -25,23 +25,39 @@ export function TripDetailScreen({ route, navigation }: Props) {
   const load = () => {
     setLoading(true);
     fetchTrip(tripId)
-      .then(setTrip)
+      .then((fetched) => {
+        setTrip(fetched);
+        setSeats(fetched.my_booking?.seats_booked ?? 1);
+      })
       .finally(() => setLoading(false));
   };
 
   useEffect(load, [tripId]);
 
+  const editing = trip?.my_booking != null;
+
   const handleBook = async () => {
+    if (!trip) return;
     setBooking(true);
     try {
-      await bookTrip(tripId, seats);
-      Alert.alert(
-        'Réservation confirmée',
-        `Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`,
-        [{ text: 'OK', onPress: () => navigation.goBack() }],
-      );
+      if (editing) {
+        await updateBooking(trip.my_booking!.id, seats);
+        if (seats === 0) {
+          Alert.alert('Réservation annulée', undefined, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+          return;
+        }
+        Alert.alert('Réservation mise à jour', undefined, [{ text: 'OK' }]);
+        load();
+      } else {
+        await bookTrip(tripId, seats);
+        Alert.alert(
+          'Réservation confirmée',
+          `Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`,
+          [{ text: 'OK', onPress: () => navigation.goBack() }],
+        );
+      }
     } catch (e) {
-      Alert.alert('Réservation impossible', extractErrorMessage(e));
+      Alert.alert(editing ? 'Modification impossible' : 'Réservation impossible', extractErrorMessage(e));
       load();
     } finally {
       setBooking(false);
@@ -56,7 +72,10 @@ export function TripDetailScreen({ route, navigation }: Props) {
     );
   }
 
-  const isFull = trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const isUnavailable = editing
+    ? !['scheduled', 'full'].includes(trip.status)
+    : trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
 
   const openInGoogleMaps = () => {
@@ -76,6 +95,9 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {trip.departure_date} à {trip.departure_time}
         </Text>
         <TripUrgencyBadge trip={trip} />
+        {editing && (
+          <Text style={styles.bookedNotice}>✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet</Text>
+        )}
 
         {hasPin && (
           <View style={styles.card}>
@@ -127,22 +149,22 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </View>
         ) : null}
 
-        {isFull ? (
+        {isUnavailable ? (
           <Text style={styles.fullNotice}>Ce trajet n'est plus disponible.</Text>
         ) : (
           <View style={styles.seatsRow}>
-            <Text style={styles.seatsLabel}>Places à réserver</Text>
+            <Text style={styles.seatsLabel}>{editing ? 'Nombre de places' : 'Places à réserver'}</Text>
             <View style={styles.stepper}>
               <Button
                 label="-"
-                onPress={() => setSeats((s) => Math.max(1, s - 1))}
+                onPress={() => setSeats((s) => Math.max(editing ? 0 : 1, s - 1))}
                 variant="outline"
                 style={styles.stepperButton}
               />
               <Text style={styles.seatsValue}>{seats}</Text>
               <Button
                 label="+"
-                onPress={() => setSeats((s) => Math.min(trip.available_seats, s + 1))}
+                onPress={() => setSeats((s) => Math.min(maxSeats, s + 1))}
                 variant="outline"
                 style={styles.stepperButton}
               />
@@ -150,11 +172,22 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </View>
         )}
 
+        {editing && seats === 0 && !isUnavailable && (
+          <Text style={styles.warningNotice}>Réduire à 0 place annulera votre réservation.</Text>
+        )}
+
         <Button
-          label={`Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`}
+          label={
+            editing
+              ? seats === 0
+                ? 'Annuler la réservation'
+                : `Enregistrer pour ${(trip.fare * seats).toLocaleString()} FCFA`
+              : `Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`
+          }
           onPress={handleBook}
           loading={booking}
-          disabled={isFull}
+          disabled={isUnavailable}
+          variant={editing && seats === 0 ? 'danger' : 'primary'}
         />
       </ScrollView>
     </Screen>
@@ -191,6 +224,8 @@ const styles = StyleSheet.create({
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
   mapLink: { color: colors.primary, fontWeight: '700', fontSize: 13, marginTop: spacing.sm },
   fullNotice: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md },
+  bookedNotice: { color: colors.success, fontWeight: '700', fontSize: 13, marginTop: spacing.sm, marginBottom: -spacing.sm },
+  warningNotice: { color: colors.danger, fontSize: 12, marginTop: -spacing.md, marginBottom: spacing.md },
   seatsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
   seatsLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

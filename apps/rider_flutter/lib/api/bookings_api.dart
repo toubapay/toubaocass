@@ -15,3 +15,8 @@ Future<Paginated<Booking>> fetchMyBookings() async {
 Future<void> cancelBooking(int bookingId) async {
   await ApiClient.instance.dio.delete('/bookings/$bookingId');
 }
+
+Future<Booking> updateBooking(int bookingId, int seats) async {
+  final response = await ApiClient.instance.dio.put('/bookings/$bookingId', data: {'seats': seats});
+  return Booking.fromJson(response.data as Map<String, dynamic>);
+}

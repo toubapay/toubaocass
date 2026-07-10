@@ -135,6 +135,22 @@ class TripDriver {
       );
 }
 
+class RiderBookingSummary {
+  final int id;
+  final int seatsBooked;
+  final int fareTotal;
+  final String status;
+
+  RiderBookingSummary({required this.id, required this.seatsBooked, required this.fareTotal, required this.status});
+
+  factory RiderBookingSummary.fromJson(Map<String, dynamic> json) => RiderBookingSummary(
+        id: json['id'] as int,
+        seatsBooked: json['seats_booked'] as int,
+        fareTotal: json['fare_total'] as int,
+        status: json['status'] as String,
+      );
+}
+
 class Trip {
   final int id;
   final TripDriver driver;
@@ -156,6 +172,7 @@ class Trip {
   final double? distanceKm;
   final List<Booking>? bookings;
   final int? bookingsCount;
+  final RiderBookingSummary? myBooking;
 
   Trip({
     required this.id,
@@ -178,6 +195,7 @@ class Trip {
     this.distanceKm,
     this.bookings,
     this.bookingsCount,
+    this.myBooking,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) => Trip(
@@ -204,6 +222,9 @@ class Trip {
             ? null
             : (json['bookings'] as List).map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList(),
         bookingsCount: json['bookings_count'] as int?,
+        myBooking: json['my_booking'] == null
+            ? null
+            : RiderBookingSummary.fromJson(json['my_booking'] as Map<String, dynamic>),
       );
 }
 

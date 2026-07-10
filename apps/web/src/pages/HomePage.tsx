@@ -243,7 +243,13 @@ export function HomePage() {
                 </p>
               </div>
             ) : (
-              visibleTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)
+              visibleTrips.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  trip={trip}
+                  onTripUpdated={(updated) => setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
+                />
+              ))
             )}
           </>
         )}

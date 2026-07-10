@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'driver_id', 'car_id', 'origin_city_id', 'destination_city_id',
@@ -73,6 +74,16 @@ class Trip extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Unconstrained by rider on its own — callers eager-load this with a
+     * `where('rider_id', ...)` constraint to surface "does the current rider
+     * already have a booking on this trip" in rider-facing trip listings.
+     */
+    public function riderBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class);
     }
 
     public function isBookable(): bool

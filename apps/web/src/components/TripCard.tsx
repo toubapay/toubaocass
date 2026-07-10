@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
 import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
 const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
@@ -11,14 +13,21 @@ const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   full: { bg: colors.dangerSoft, fg: colors.danger },
 };
 
-export function TripCard({ trip }: { trip: Trip }) {
+export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: (trip: Trip) => void }) {
   const navigate = useNavigate();
   const fillState = bookingFillState(trip);
   const fillStyle = FILL_STATE_STYLE[fillState];
+  const [showQuickAction, setShowQuickAction] = useState(false);
+  const booked = trip.my_booking != null;
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => navigate(`/trips/${trip.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') navigate(`/trips/${trip.id}`);
+      }}
       style={{
         display: 'block',
         width: '100%',
@@ -84,6 +93,42 @@ export function TripCard({ trip }: { trip: Trip }) {
       </p>
 
       <TripUrgencyBadge trip={trip} />
-    </button>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm }}>
+        {booked ? (
+          <span style={{ fontSize: 12, fontWeight: 700, color: colors.success }}>
+            ✓ Réservé · {trip.my_booking!.seats_booked} place(s)
+          </span>
+        ) : (
+          <span />
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowQuickAction(true);
+          }}
+          style={{
+            border: `1.5px solid ${colors.primary}`,
+            borderRadius: radius.sm,
+            padding: '8px 16px',
+            backgroundColor: booked ? 'transparent' : colors.primary,
+            color: booked ? colors.primary : '#fff',
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+          }}
+        >
+          {booked ? 'Modifier' : 'Réserver'}
+        </button>
+      </div>
+
+      {showQuickAction && (
+        <BookingQuickActionModal
+          trip={trip}
+          onClose={() => setShowQuickAction(false)}
+          onSuccess={(updatedTrip) => onTripUpdated?.(updatedTrip)}
+        />
+      )}
+    </div>
   );
 }

@@ -25,9 +25,13 @@ class TripController extends Controller
     {
         $seats = (int) $request->input('seats', 1);
         $hasGeo = $request->filled('lat') && $request->filled('lng');
+        $rider = $request->user();
 
         $trips = Trip::query()
-            ->with(['driver.driverProfile', 'car', 'originCity', 'destinationCity'])
+            ->with([
+                'driver.driverProfile', 'car', 'originCity', 'destinationCity',
+                'riderBooking' => fn ($q) => $q->where('rider_id', $rider->id)->where('status', Booking::STATUS_CONFIRMED),
+            ])
             ->where('status', Trip::STATUS_SCHEDULED)
             ->where('available_seats', '>=', $seats)
             ->when($request->filled('origin_city_id'), fn ($q) => $q->where('origin_city_id', $request->input('origin_city_id')))
@@ -63,9 +67,12 @@ class TripController extends Controller
         return TripResource::collection($trips);
     }
 
-    public function show(Trip $trip)
+    public function show(Request $request, Trip $trip)
     {
-        return new TripResource($trip->load(['driver.driverProfile', 'car', 'originCity', 'destinationCity']));
+        return new TripResource($trip->load([
+            'driver.driverProfile', 'car', 'originCity', 'destinationCity',
+            'riderBooking' => fn ($q) => $q->where('rider_id', $request->user()->id)->where('status', Booking::STATUS_CONFIRMED),
+        ]));
     }
 
     /**

@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('trips/{trip}', [TripController::class, 'show']);
         Route::post('trips/{trip}/bookings', [BookingController::class, 'store']);
         Route::get('bookings', [BookingController::class, 'index']);
+        Route::put('bookings/{booking}', [BookingController::class, 'update']);
         Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
     });
 

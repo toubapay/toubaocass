@@ -6,6 +6,7 @@ use App\Events\BookingCancelled;
 use App\Events\BookingCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rider\StoreBookingRequest;
+use App\Http\Requests\Rider\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Trip;
@@ -76,6 +77,66 @@ class BookingController extends Controller
         BookingCreated::dispatch($booking);
 
         return new BookingResource($booking->load(['trip.car', 'trip.originCity', 'trip.destinationCity', 'trip.driver']));
+    }
+
+    /**
+     * Change the seat count on an existing confirmed booking — lets a rider
+     * add more seats (if available) or release some, without cancelling and
+     * re-booking. Reducing to 0 seats is treated as a cancellation.
+     */
+    public function update(UpdateBookingRequest $request, Booking $booking)
+    {
+        $this->authorize('update', $booking);
+
+        $newSeats = (int) $request->validated('seats');
+
+        if ($newSeats === 0) {
+            return $this->destroy($request, $booking);
+        }
+
+        if ($booking->status !== Booking::STATUS_CONFIRMED) {
+            return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
+        }
+
+        $updated = DB::transaction(function () use ($booking, $newSeats) {
+            /** @var Trip $trip */
+            $trip = Trip::where('id', $booking->trip_id)->lockForUpdate()->firstOrFail();
+
+            if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
+                throw ValidationException::withMessages([
+                    'trip' => ['Ce trajet n\'accepte plus de modifications.'],
+                ]);
+            }
+
+            $delta = $newSeats - $booking->seats_booked;
+
+            if ($delta > 0 && $trip->available_seats < $delta) {
+                throw ValidationException::withMessages([
+                    'seats' => ["Il ne reste que {$trip->available_seats} place(s) supplémentaire(s) disponible(s) sur ce trajet."],
+                ]);
+            }
+
+            $booking->update([
+                'seats_booked' => $newSeats,
+                'fare_total' => $trip->fare * $newSeats,
+            ]);
+
+            if ($delta !== 0) {
+                $trip->decrement('available_seats', $delta);
+            }
+
+            $trip->refresh();
+
+            if ($trip->available_seats <= 0 && $trip->status !== Trip::STATUS_FULL) {
+                $trip->update(['status' => Trip::STATUS_FULL]);
+            } elseif ($trip->available_seats > 0 && $trip->status === Trip::STATUS_FULL) {
+                $trip->update(['status' => Trip::STATUS_SCHEDULED]);
+            }
+
+            return $booking;
+        });
+
+        return new BookingResource($updated->load(['trip.car', 'trip.originCity', 'trip.destinationCity', 'trip.driver']));
     }
 
     public function destroy(Request $request, Booking $booking)

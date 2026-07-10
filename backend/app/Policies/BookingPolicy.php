@@ -11,4 +11,9 @@ class BookingPolicy
     {
         return $user->id === $booking->rider_id;
     }
+
+    public function update(User $user, Booking $booking): bool
+    {
+        return $user->id === $booking->rider_id;
+    }
 }

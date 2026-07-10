@@ -172,7 +172,11 @@ export function HomeScreen({ navigation }: Props) {
             <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={colors.primary} />
           }
           renderItem={({ item }) => (
-            <TripCard trip={item} onPress={() => navigation.navigate('TripDetail', { tripId: item.id })} />
+            <TripCard
+              trip={item}
+              onPress={() => navigation.navigate('TripDetail', { tripId: item.id })}
+              onTripUpdated={(updated) => setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
+            />
           )}
           ListHeaderComponent={error ? <Text style={styles.errorText}>{error}</Text> : null}
           ListEmptyComponent={

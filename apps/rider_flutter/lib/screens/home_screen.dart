@@ -263,7 +263,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 )
               else
-                ...visibleTrips.map((trip) => TripCard(trip: trip, onTap: () => widget.onOpenTrip(trip.id))),
+                ...visibleTrips.map((trip) => TripCard(
+                      trip: trip,
+                      onTap: () => widget.onOpenTrip(trip.id),
+                      onTripUpdated: (updated) => setState(
+                        () => trips = trips.map((t) => t.id == updated.id ? updated : t).toList(),
+                      ),
+                    )),
               const SizedBox(height: AppSpacing.md),
               TripsMap(trips: visibleTrips, onSelectTrip: widget.onOpenTrip),
             ],

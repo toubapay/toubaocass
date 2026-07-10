@@ -35,6 +35,12 @@ class TripResource extends JsonResource
             'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 1)),
             'bookings' => BookingResource::collection($this->whenLoaded('bookings')),
             'bookings_count' => $this->whenCounted('bookings'),
+            'my_booking' => $this->when($this->relationLoaded('riderBooking'), fn () => $this->riderBooking ? [
+                'id' => $this->riderBooking->id,
+                'seats_booked' => $this->riderBooking->seats_booked,
+                'fare_total' => $this->riderBooking->fare_total,
+                'status' => $this->riderBooking->status,
+            ] : null),
         ];
     }
 }

@@ -11,6 +11,11 @@ export async function fetchMyBookings(): Promise<Paginated<Booking>> {
   return data;
 }
 
+export async function updateBooking(bookingId: number, seats: number): Promise<Booking> {
+  const { data } = await apiClient.put(`/bookings/${bookingId}`, { seats });
+  return data;
+}
+
 export async function cancelBooking(bookingId: number): Promise<void> {
   await apiClient.delete(`/bookings/${bookingId}`);
 }

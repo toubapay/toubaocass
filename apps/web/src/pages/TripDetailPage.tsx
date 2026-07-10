@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { bookTrip } from '../api/bookings';
+import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import type { Trip } from '../api/types';
@@ -22,19 +22,35 @@ export function TripDetailPage() {
     if (!id) return;
     setLoading(true);
     fetchTrip(Number(id))
-      .then(setTrip)
+      .then((fetched) => {
+        setTrip(fetched);
+        setSeats(fetched.my_booking?.seats_booked ?? 1);
+      })
       .finally(() => setLoading(false));
   };
 
   useEffect(load, [id]);
 
+  const editing = trip?.my_booking != null;
+
   const handleBook = async () => {
     if (!trip) return;
     setBooking(true);
     try {
-      await bookTrip(trip.id, seats);
-      alert(`Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`);
-      navigate('/bookings');
+      if (editing) {
+        await updateBooking(trip.my_booking!.id, seats);
+        if (seats === 0) {
+          alert('Réservation annulée.');
+          navigate('/bookings');
+          return;
+        }
+        alert('Réservation mise à jour.');
+        load();
+      } else {
+        await bookTrip(trip.id, seats);
+        alert(`Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`);
+        navigate('/bookings');
+      }
     } catch (err) {
       alert(extractErrorMessage(err));
       load();
@@ -47,7 +63,10 @@ export function TripDetailPage() {
     return <CenteredSpinner />;
   }
 
-  const isFull = trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const isUnavailable = editing
+    ? !['scheduled', 'full'].includes(trip.status)
+    : trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
 
   const cardStyle: React.CSSProperties = {
@@ -84,6 +103,11 @@ export function TripDetailPage() {
         {trip.departure_date} à {trip.departure_time}
       </p>
       <TripUrgencyBadge trip={trip} />
+      {editing && (
+        <p style={{ fontSize: 13, fontWeight: 700, color: colors.success, marginTop: spacing.sm, marginBottom: 0 }}>
+          ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
+        </p>
+      )}
 
       {hasPin && (
         <div style={cardStyle}>
@@ -163,21 +187,23 @@ export function TripDetailPage() {
         </div>
       )}
 
-      {isFull ? (
+      {isUnavailable ? (
         <p style={{ color: colors.danger, textAlign: 'center', marginBottom: spacing.md }}>Ce trajet n'est plus disponible.</p>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>Places à réserver</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
+            {editing ? 'Nombre de places' : 'Places à réserver'}
+          </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
             <button
-              onClick={() => setSeats((s) => Math.max(1, s - 1))}
+              onClick={() => setSeats((s) => Math.max(editing ? 0 : 1, s - 1))}
               style={{ width: 44, minHeight: 44, border: `1.5px solid ${colors.primary}`, borderRadius: radius.md, background: 'none', color: colors.primary, fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
             >
               -
             </button>
             <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, minWidth: 24, textAlign: 'center' }}>{seats}</span>
             <button
-              onClick={() => setSeats((s) => Math.min(trip.available_seats, s + 1))}
+              onClick={() => setSeats((s) => Math.min(maxSeats, s + 1))}
               style={{ width: 44, minHeight: 44, border: `1.5px solid ${colors.primary}`, borderRadius: radius.md, background: 'none', color: colors.primary, fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
             >
               +
@@ -186,11 +212,24 @@ export function TripDetailPage() {
         </div>
       )}
 
+      {editing && seats === 0 && !isUnavailable && (
+        <p style={{ fontSize: 12, color: colors.danger, marginTop: -spacing.md, marginBottom: spacing.md }}>
+          Réduire à 0 place annulera votre réservation.
+        </p>
+      )}
+
       <Button
-        label={`Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`}
+        label={
+          editing
+            ? seats === 0
+              ? 'Annuler la réservation'
+              : `Enregistrer pour ${(trip.fare * seats).toLocaleString()} FCFA`
+            : `Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`
+        }
         onClick={handleBook}
         loading={booking}
-        disabled={isFull}
+        disabled={isUnavailable}
+        variant={editing && seats === 0 ? 'danger' : 'primary'}
       />
     </div>
   );

@@ -34,30 +34,47 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setState(() => loading = true);
     try {
       final result = await fetchTrip(widget.tripId);
-      setState(() => trip = result);
+      setState(() {
+        trip = result;
+        seats = result.myBooking?.seatsBooked ?? 1;
+      });
     } finally {
       setState(() => loading = false);
     }
   }
 
+  bool get editing => trip?.myBooking != null;
+
   Future<void> _handleBook() async {
     setState(() => booking = true);
     try {
-      await bookTrip(widget.tripId, seats);
-      if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Réservation confirmée'),
-          content: Text(
-            'Vous avez réservé $seats place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.',
+      if (editing) {
+        await updateBooking(trip!.myBooking!.id, seats);
+        if (seats == 0) {
+          if (mounted) Navigator.of(context).pop();
+          return;
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Réservation mise à jour.')));
+        }
+        _load();
+      } else {
+        await bookTrip(widget.tripId, seats);
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Réservation confirmée'),
+            content: Text(
+              'Vous avez réservé $seats place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.',
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
-          ],
-        ),
-      );
-      if (mounted) Navigator.of(context).pop();
+        );
+        if (mounted) Navigator.of(context).pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
@@ -78,7 +95,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
 
     final t = trip!;
-    final isFull = t.availableSeats <= 0 || t.status != 'scheduled';
+    final isUnavailable = editing
+        ? !['scheduled', 'full'].contains(t.status)
+        : t.availableSeats <= 0 || t.status != 'scheduled';
+    final maxSeats = editing ? t.availableSeats + (t.myBooking?.seatsBooked ?? 0) : t.availableSeats;
     final hasPin = t.departureLatitude != null && t.departureLongitude != null;
     final currency = NumberFormat.decimalPattern('fr');
 
@@ -101,6 +121,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           Text('${t.departureDate} à ${t.departureTime}', style: const TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: AppSpacing.sm),
           TripUrgencyBadge(trip: t),
+          if (editing)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Text('✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success)),
+            ),
           const SizedBox(height: AppSpacing.lg),
           if (hasPin) ...[
             _Card(
@@ -160,7 +186,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           ),
           if (t.notes != null && t.notes!.isNotEmpty)
             _Card(title: 'Remarques', children: [Text(t.notes!, style: const TextStyle(fontSize: 16))]),
-          if (isFull)
+          if (isUnavailable)
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
               child: Text("Ce trajet n'est plus disponible.",
@@ -172,11 +198,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Places à réserver', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(editing ? 'Nombre de places' : 'Places à réserver',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   Row(
                     children: [
                       OutlinedButton(
-                        onPressed: () => setState(() => seats = (seats - 1).clamp(1, t.availableSeats)),
+                        onPressed: () => setState(() => seats = (seats - 1).clamp(editing ? 0 : 1, maxSeats)),
                         child: const Text('-'),
                       ),
                       Padding(
@@ -184,7 +211,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         child: Text('$seats', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                       ),
                       OutlinedButton(
-                        onPressed: () => setState(() => seats = (seats + 1).clamp(1, t.availableSeats)),
+                        onPressed: () => setState(() => seats = (seats + 1).clamp(editing ? 0 : 1, maxSeats)),
                         child: const Text('+'),
                       ),
                     ],
@@ -192,11 +219,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 ],
               ),
             ),
+          if (editing && seats == 0 && !isUnavailable)
+            const Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.md),
+              child: Text('Réduire à 0 place annulera votre réservation.',
+                  style: TextStyle(color: AppColors.danger, fontSize: 12)),
+            ),
           ElevatedButton(
-            onPressed: isFull || booking ? null : _handleBook,
+            onPressed: isUnavailable || booking ? null : _handleBook,
+            style: editing && seats == 0 ? ElevatedButton.styleFrom(backgroundColor: AppColors.danger) : null,
             child: booking
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text('Réserver pour ${currency.format(t.fare * seats)} FCFA'),
+                : Text(editing
+                    ? (seats == 0 ? 'Annuler la réservation' : 'Enregistrer pour ${currency.format(t.fare * seats)} FCFA')
+                    : 'Réserver pour ${currency.format(t.fare * seats)} FCFA'),
           ),
         ],
       ),
