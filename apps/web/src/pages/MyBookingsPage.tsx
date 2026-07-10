@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { cancelBooking, fetchMyBookings } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
-import type { Booking } from '../api/types';
+import type { Booking, Trip } from '../api/types';
+import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
 
@@ -16,6 +17,7 @@ export function MyBookingsPage() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modifyingBookingId, setModifyingBookingId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -36,7 +38,27 @@ export function MyBookingsPage() {
     }
   };
 
+  const handleTripUpdated = (bookingId: number, updatedTrip: Trip) => {
+    setBookings((prev) =>
+      prev.map((b) => {
+        if (b.id !== bookingId) return b;
+        if (updatedTrip.my_booking) {
+          return {
+            ...b,
+            trip: updatedTrip,
+            seats_booked: updatedTrip.my_booking.seats_booked,
+            fare_total: updatedTrip.my_booking.fare_total,
+            status: updatedTrip.my_booking.status,
+          };
+        }
+        return { ...b, status: 'cancelled' };
+      }),
+    );
+  };
+
   if (loading) return <CenteredSpinner />;
+
+  const modifyingBooking = bookings.find((b) => b.id === modifyingBookingId);
 
   return (
     <div>
@@ -76,18 +98,48 @@ export function MyBookingsPage() {
             </p>
 
             {item.status === 'confirmed' && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCancel(item);
-                }}
-                style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, marginTop: spacing.sm, fontSize: 14 }}
-              >
-                Annuler la réservation
-              </button>
+              <div style={{ display: 'flex', gap: spacing.md, marginTop: spacing.sm }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModifyingBookingId(item.id);
+                  }}
+                  style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 14 }}
+                >
+                  Modifier
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCancel(item);
+                  }}
+                  style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 14 }}
+                >
+                  Annuler la réservation
+                </button>
+              </div>
             )}
           </div>
         ))
+      )}
+
+      {modifyingBooking && (
+        <BookingQuickActionModal
+          trip={{
+            ...modifyingBooking.trip,
+            my_booking: {
+              id: modifyingBooking.id,
+              seats_booked: modifyingBooking.seats_booked,
+              fare_total: modifyingBooking.fare_total,
+              status: modifyingBooking.status,
+            },
+          }}
+          onClose={() => setModifyingBookingId(null)}
+          onSuccess={(updatedTrip) => {
+            handleTripUpdated(modifyingBooking.id, updatedTrip);
+            setModifyingBookingId(null);
+          }}
+        />
       )}
     </div>
   );

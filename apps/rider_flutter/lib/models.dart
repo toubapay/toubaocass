@@ -198,6 +198,30 @@ class Trip {
     this.myBooking,
   });
 
+  Trip copyWithMyBooking(RiderBookingSummary? myBooking) => Trip(
+        id: id,
+        driver: driver,
+        car: car,
+        originCity: originCity,
+        destinationCity: destinationCity,
+        departureLatitude: departureLatitude,
+        departureLongitude: departureLongitude,
+        departureAddress: departureAddress,
+        departureDate: departureDate,
+        departureTime: departureTime,
+        fare: fare,
+        rideType: rideType,
+        totalSeats: totalSeats,
+        availableSeats: availableSeats,
+        status: status,
+        notes: notes,
+        createdAt: createdAt,
+        distanceKm: distanceKm,
+        bookings: bookings,
+        bookingsCount: bookingsCount,
+        myBooking: myBooking,
+      );
+
   factory Trip.fromJson(Map<String, dynamic> json) => Trip(
         id: json['id'] as int,
         driver: TripDriver.fromJson(json['driver'] as Map<String, dynamic>),

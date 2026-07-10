@@ -5,7 +5,8 @@ import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View }
 
 import { cancelBooking, fetchMyBookings } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
-import { Booking } from '../api/types';
+import { Booking, Trip } from '../api/types';
+import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { Screen } from '../components/Screen';
 import { BookingsStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -20,6 +21,7 @@ const STATUS_LABEL: Record<string, string> = {
 export function MyBookingsScreen({ navigation }: Props) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modifyingBookingId, setModifyingBookingId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -48,6 +50,24 @@ export function MyBookingsScreen({ navigation }: Props) {
     ]);
   };
 
+  const handleTripUpdated = (bookingId: number, updatedTrip: Trip) => {
+    setBookings((prev) =>
+      prev.map((b) => {
+        if (b.id !== bookingId) return b;
+        if (updatedTrip.my_booking) {
+          return {
+            ...b,
+            trip: updatedTrip,
+            seats_booked: updatedTrip.my_booking.seats_booked,
+            fare_total: updatedTrip.my_booking.fare_total,
+            status: updatedTrip.my_booking.status,
+          };
+        }
+        return { ...b, status: 'cancelled' };
+      }),
+    );
+  };
+
   if (loading) {
     return (
       <Screen style={styles.center}>
@@ -55,6 +75,8 @@ export function MyBookingsScreen({ navigation }: Props) {
       </Screen>
     );
   }
+
+  const modifyingBooking = bookings.find((b) => b.id === modifyingBookingId);
 
   return (
     <Screen>
@@ -81,9 +103,14 @@ export function MyBookingsScreen({ navigation }: Props) {
             <Text style={styles.fare}>{item.fare_total.toLocaleString()} FCFA</Text>
 
             {item.status === 'confirmed' && (
-              <Pressable onPress={() => handleCancel(item)} style={styles.cancelButton}>
-                <Text style={styles.cancelText}>Annuler la réservation</Text>
-              </Pressable>
+              <View style={styles.actionsRow}>
+                <Pressable onPress={() => setModifyingBookingId(item.id)}>
+                  <Text style={styles.modifyText}>Modifier</Text>
+                </Pressable>
+                <Pressable onPress={() => handleCancel(item)}>
+                  <Text style={styles.cancelText}>Annuler la réservation</Text>
+                </Pressable>
+              </View>
             )}
           </Pressable>
         )}
@@ -93,6 +120,26 @@ export function MyBookingsScreen({ navigation }: Props) {
           </View>
         }
       />
+
+      {modifyingBooking && (
+        <BookingQuickActionModal
+          trip={{
+            ...modifyingBooking.trip,
+            my_booking: {
+              id: modifyingBooking.id,
+              seats_booked: modifyingBooking.seats_booked,
+              fare_total: modifyingBooking.fare_total,
+              status: modifyingBooking.status,
+            },
+          }}
+          visible
+          onClose={() => setModifyingBookingId(null)}
+          onSuccess={(updatedTrip) => {
+            handleTripUpdated(modifyingBooking.id, updatedTrip);
+            setModifyingBookingId(null);
+          }}
+        />
+      )}
     </Screen>
   );
 }
@@ -114,7 +161,8 @@ const styles = StyleSheet.create({
   statusCancelled: { color: colors.danger },
   meta: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs },
   fare: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
-  cancelButton: { marginTop: spacing.sm },
+  actionsRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },
+  modifyText: { color: colors.primary, fontWeight: '600' },
   cancelText: { color: colors.danger, fontWeight: '600' },
   empty: { marginTop: spacing.xl, alignItems: 'center' },
   emptyText: { color: colors.textMuted, fontSize: 15, textAlign: 'center' },

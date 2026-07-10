@@ -5,6 +5,7 @@ import '../api/bookings_api.dart';
 import '../api/client.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../widgets/booking_quick_action_sheet.dart';
 
 const _statusLabel = {'confirmed': 'Confirmée', 'cancelled': 'Annulée'};
 
@@ -58,6 +59,42 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
       }
     }
+  }
+
+  Future<void> _handleModify(Booking booking) async {
+    final tripWithMyBooking = booking.trip.copyWithMyBooking(RiderBookingSummary(
+      id: booking.id,
+      seatsBooked: booking.seatsBooked,
+      fareTotal: booking.fareTotal,
+      status: booking.status,
+    ));
+    final updatedTrip = await showBookingQuickActionSheet(context, tripWithMyBooking);
+    if (updatedTrip == null) return;
+    setState(() {
+      bookings = bookings.map((b) {
+        if (b.id != booking.id) return b;
+        if (updatedTrip.myBooking != null) {
+          return Booking(
+            id: b.id,
+            trip: updatedTrip,
+            rider: b.rider,
+            seatsBooked: updatedTrip.myBooking!.seatsBooked,
+            fareTotal: updatedTrip.myBooking!.fareTotal,
+            status: updatedTrip.myBooking!.status,
+            createdAt: b.createdAt,
+          );
+        }
+        return Booking(
+          id: b.id,
+          trip: b.trip,
+          rider: b.rider,
+          seatsBooked: b.seatsBooked,
+          fareTotal: b.fareTotal,
+          status: 'cancelled',
+          createdAt: b.createdAt,
+        );
+      }).toList();
+    });
   }
 
   @override
@@ -132,10 +169,20 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                                 if (booking.status == 'confirmed')
                                   Padding(
                                     padding: const EdgeInsets.only(top: AppSpacing.sm),
-                                    child: TextButton(
-                                      onPressed: () => _handleCancel(booking),
-                                      style: TextButton.styleFrom(foregroundColor: AppColors.danger, padding: EdgeInsets.zero),
-                                      child: const Text('Annuler la réservation'),
+                                    child: Row(
+                                      children: [
+                                        TextButton(
+                                          onPressed: () => _handleModify(booking),
+                                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                                          child: const Text('Modifier'),
+                                        ),
+                                        const SizedBox(width: AppSpacing.md),
+                                        TextButton(
+                                          onPressed: () => _handleCancel(booking),
+                                          style: TextButton.styleFrom(foregroundColor: AppColors.danger, padding: EdgeInsets.zero),
+                                          child: const Text('Annuler la réservation'),
+                                        ),
+                                      ],
                                     ),
                                   ),
                               ],
