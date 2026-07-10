@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Booking;
 use App\Notifications\Channels\FcmChannel;
+use App\Notifications\Channels\SmsChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -18,7 +19,7 @@ class BookingCancelledNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return [FcmChannel::class];
+        return [FcmChannel::class, SmsChannel::class];
     }
 
     public function toFcm(object $notifiable): array
@@ -34,5 +35,12 @@ class BookingCancelledNotification extends Notification
                 'booking_id' => $this->booking->id,
             ],
         ];
+    }
+
+    public function toSms(object $notifiable): string
+    {
+        $trip = $this->booking->trip;
+
+        return "Intercity : Un passager a annulé {$this->booking->seats_booked} place(s) sur votre trajet {$trip->originCity->name} → {$trip->destinationCity->name} ({$trip->departure_date->format('d/m/Y')} {$trip->departure_time}). {$trip->available_seats} place(s) restante(s).";
     }
 }
