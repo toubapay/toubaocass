@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { extractErrorMessage } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -49,6 +50,10 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
 
   return (
     <Screen>
+      <Pressable onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={8}>
+        <Ionicons name="chevron-back" size={24} color={colors.text} />
+      </Pressable>
+
       <Text style={styles.title}>Saisissez le code</Text>
       <Text style={styles.subtitle}>Nous avons envoyé un code de vérification par SMS au {phone}.</Text>
 
@@ -75,6 +80,7 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  backButton: { alignSelf: 'flex-start', marginBottom: spacing.xs },
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   subtitle: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
   resendButton: { marginTop: spacing.sm },
