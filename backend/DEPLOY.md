@@ -69,6 +69,7 @@ listed here keeps its `.env.example` default.
 | `APP_KEY` | generate once with `php artisan key:generate --show`, paste the output |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | your Railway public domain, e.g. `https://api.intercity.example` |
+| `LOG_CHANNEL` | `stderr` — Railway's log tabs only capture stdout/stderr, not files inside the container, so the default `stack`/`single` channel (which writes to `storage/logs/laravel.log`) is invisible in the dashboard |
 | `DB_CONNECTION` | `pgsql` |
 | `DB_URL` | `${{Postgres.DATABASE_URL}}` (Railway variable reference) |
 | `FILESYSTEM_DISK` | `s3` |
