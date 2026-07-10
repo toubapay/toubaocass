@@ -7,12 +7,11 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import { Trip } from '../api/types';
 import { Button } from '../components/Button';
-import { DepartureFlash } from '../components/DepartureFlash';
 import { DepartureMap } from '../components/DepartureMap';
 import { Screen } from '../components/Screen';
+import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
-import { isDepartingSoon } from '../utils/trip';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
@@ -76,7 +75,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <Text style={styles.meta}>
           {trip.departure_date} à {trip.departure_time}
         </Text>
-        {isDepartingSoon(trip) && <DepartureFlash />}
+        <TripUrgencyBadge trip={trip} />
 
         {hasPin && (
           <View style={styles.card}>
@@ -97,6 +96,14 @@ export function TripDetailScreen({ route, navigation }: Props) {
           <Text style={styles.sectionTitle}>Conducteur</Text>
           <Text style={styles.line}>{trip.driver.name ?? 'Conducteur'}</Text>
           <Text style={styles.lineMuted}>Note : {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</Text>
+          <View style={styles.contactRow}>
+            <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${trip.driver.phone}`)}>
+              <Text style={styles.contactButtonText}>📞 Appeler</Text>
+            </Pressable>
+            <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`sms:${trip.driver.phone}`)}>
+              <Text style={styles.contactButtonText}>💬 SMS</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.card}>
@@ -171,6 +178,16 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 12, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
   line: { fontSize: 16, color: colors.text },
   lineMuted: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  contactRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  contactButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
   mapLink: { color: colors.primary, fontWeight: '700', fontSize: 13, marginTop: spacing.sm },
   fullNotice: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md },

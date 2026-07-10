@@ -31,3 +31,18 @@ export const RIDE_TYPE_LABEL: Record<string, string> = {
   comfort: 'Confort',
   xl: 'XL',
 };
+
+const URGENT_HOURS = 2;
+
+/**
+ * Drives the always-visible trip-detail urgency badge: departure within the
+ * next 2 hours, or down to the last seat (0 seats already gets its own
+ * distinct "no longer available" notice, so it's excluded here).
+ */
+export function isUrgent(trip: Trip): boolean {
+  if (trip.status !== 'scheduled') return false;
+  const hours = hoursUntilDeparture(trip);
+  const departingUrgently = hours >= 0 && hours <= URGENT_HOURS;
+  const almostFull = trip.available_seats > 0 && trip.available_seats < 2;
+  return departingUrgently || almostFull;
+}

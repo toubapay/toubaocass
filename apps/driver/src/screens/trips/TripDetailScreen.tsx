@@ -1,13 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { extractErrorMessage } from '../../api/client';
 import { cancelTrip, completeTrip, fetchMyTrip, startTrip } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { TripUrgencyBadge } from '../../components/TripUrgencyBadge';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
@@ -84,6 +85,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <Text style={styles.meta}>
           {trip.departure_date} à {trip.departure_time} · {STATUS_LABEL[trip.status] ?? trip.status.replace('_', ' ')}
         </Text>
+        <TripUrgencyBadge trip={trip} />
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Trajet</Text>
@@ -115,6 +117,14 @@ export function TripDetailScreen({ route, navigation }: Props) {
               <Text style={styles.lineMuted}>
                 {booking.rider.phone} · {booking.seats_booked} place(s)
               </Text>
+              <View style={styles.contactRow}>
+                <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${booking.rider.phone}`)}>
+                  <Text style={styles.contactButtonText}>📞 Appeler</Text>
+                </Pressable>
+                <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`sms:${booking.rider.phone}`)}>
+                  <Text style={styles.contactButtonText}>💬 SMS</Text>
+                </Pressable>
+              </View>
             </View>
           ))
         )}
@@ -163,6 +173,16 @@ const styles = StyleSheet.create({
   sectionHeading: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
   line: { fontSize: 16, color: colors.text },
   lineMuted: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  contactRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  contactButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   actions: { marginTop: spacing.lg, gap: spacing.sm },
   actionButton: { marginBottom: spacing.sm },
 });

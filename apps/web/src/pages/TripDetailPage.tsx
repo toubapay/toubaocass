@@ -6,10 +6,9 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import type { Trip } from '../api/types';
 import { Button } from '../components/Button';
-import { DepartureFlash } from '../components/DepartureFlash';
 import { CenteredSpinner } from '../components/Spinner';
+import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { colors, radius, spacing } from '../theme';
-import { isDepartingSoon } from '../utils/trip';
 
 export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -84,7 +83,7 @@ export function TripDetailPage() {
       <p style={{ color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg }}>
         {trip.departure_date} à {trip.departure_time}
       </p>
-      {isDepartingSoon(trip) && <DepartureFlash />}
+      <TripUrgencyBadge trip={trip} />
 
       {hasPin && (
         <div style={cardStyle}>
@@ -105,6 +104,40 @@ export function TripDetailPage() {
         <p style={sectionTitleStyle}>Conducteur</p>
         <p style={{ fontSize: 16, color: colors.text, margin: 0 }}>{trip.driver.name ?? 'Conducteur'}</p>
         <p style={{ fontSize: 13, color: colors.textMuted, margin: '2px 0 0' }}>Note : {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</p>
+        <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.sm }}>
+          <a
+            href={`tel:${trip.driver.phone}`}
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              border: `1px solid ${colors.primary}`,
+              borderRadius: radius.sm,
+              padding: `${spacing.sm}px 0`,
+              color: colors.primary,
+              fontWeight: 700,
+              fontSize: 13,
+              textDecoration: 'none',
+            }}
+          >
+            📞 Appeler
+          </a>
+          <a
+            href={`sms:${trip.driver.phone}`}
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              border: `1px solid ${colors.primary}`,
+              borderRadius: radius.sm,
+              padding: `${spacing.sm}px 0`,
+              color: colors.primary,
+              fontWeight: 700,
+              fontSize: 13,
+              textDecoration: 'none',
+            }}
+          >
+            💬 SMS
+          </a>
+        </div>
       </div>
 
       <div style={cardStyle}>

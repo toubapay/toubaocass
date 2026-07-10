@@ -8,7 +8,9 @@ export const colors = {
   textMuted: '#6B7570',
   border: '#E2E6E4',
   danger: '#C0392B',
+  dangerSoft: '#FBEAE8',
   success: '#1E8E5A',
+  successSoft: '#E4F3EC',
   accentSoft: '#E4EFF3',
 };
 
