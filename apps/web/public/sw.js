@@ -28,12 +28,12 @@ try {
   importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
   firebase.initializeApp({
-    apiKey: 'REPLACE_WITH_VITE_FIREBASE_API_KEY',
-    authDomain: 'REPLACE_WITH_VITE_FIREBASE_AUTH_DOMAIN',
-    projectId: 'REPLACE_WITH_VITE_FIREBASE_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_VITE_FIREBASE_STORAGE_BUCKET',
-    messagingSenderId: 'REPLACE_WITH_VITE_FIREBASE_MESSAGING_SENDER_ID',
-    appId: 'REPLACE_WITH_VITE_FIREBASE_APP_ID',
+    apiKey: 'AIzaSyApu6NvW2RWVS9-oEKkmXFZMr5wKgGRjJQ',
+    authDomain: 'ocass-a1f8f.firebaseapp.com',
+    projectId: 'ocass-a1f8f',
+    storageBucket: 'ocass-a1f8f.firebasestorage.app',
+    messagingSenderId: '1070944386226',
+    appId: '1:1070944386226:web:ee1bfa949f57e999f69dab',
   });
 
   const messaging = firebase.messaging();
