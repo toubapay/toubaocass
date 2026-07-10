@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\Log;
  */
 class LogPushGateway implements PushGateway
 {
-    public function send(string $token, string $title, string $body, array $data = []): void
+    public function send(string $token, string $title, string $body, array $data = []): bool
     {
         Log::info("[PUSH] to {$token}: {$title} - {$body}", $data);
+
+        return true;
     }
 }

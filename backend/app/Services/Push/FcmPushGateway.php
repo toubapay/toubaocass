@@ -26,14 +26,14 @@ class FcmPushGateway implements PushGateway
         private readonly array $credentials,
     ) {}
 
-    public function send(string $token, string $title, string $body, array $data = []): void
+    public function send(string $token, string $title, string $body, array $data = []): bool
     {
         $accessToken = $this->getAccessToken();
 
         if (! $accessToken) {
             Log::warning('FCM push skipped: unable to obtain access token');
 
-            return;
+            return false;
         }
 
         $response = Http::withToken($accessToken)
@@ -53,31 +53,52 @@ class FcmPushGateway implements PushGateway
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
+            return false;
         }
+
+        return true;
     }
 
     private function getAccessToken(): ?string
     {
-        return Cache::remember(self::TOKEN_CACHE_KEY, 3000, function () {
-            $jwt = $this->buildSignedJwt();
+        // Only cache a token we actually got — CACHE_STORE=database persists
+        // across redeploys, so caching a failure here via Cache::remember()
+        // (which stores whatever the closure returns, null included) would
+        // silently block every send for the full TTL even after the
+        // underlying problem (bad credentials, network blip) was fixed.
+        $cached = Cache::get(self::TOKEN_CACHE_KEY);
 
-            if (! $jwt) {
-                return null;
-            }
+        if ($cached) {
+            return $cached;
+        }
 
-            $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion' => $jwt,
-            ]);
+        $jwt = $this->buildSignedJwt();
 
-            if ($response->failed()) {
-                Log::warning('FCM OAuth token exchange failed', ['body' => $response->body()]);
+        if (! $jwt) {
+            Log::warning('FCM push skipped: could not build a signed JWT from the configured credentials');
 
-                return null;
-            }
+            return null;
+        }
 
-            return $response->json('access_token');
-        });
+        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwt,
+        ]);
+
+        if ($response->failed()) {
+            Log::warning('FCM OAuth token exchange failed', ['status' => $response->status(), 'body' => $response->body()]);
+
+            return null;
+        }
+
+        $accessToken = $response->json('access_token');
+
+        if ($accessToken) {
+            Cache::put(self::TOKEN_CACHE_KEY, $accessToken, 3000);
+        }
+
+        return $accessToken;
     }
 
     private function buildSignedJwt(): ?string
