@@ -23,6 +23,11 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.intercity.rider',
+      // Download from Firebase Console > Project settings > Your apps > iOS
+      // app with bundle ID com.intercity.rider, place at the project root.
+      // Not committed (see .gitignore) — required for real FCM push
+      // delivery on iOS builds, optional for local Expo Go testing.
+      googleServicesFile: './GoogleService-Info.plist',
       config: {
         googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
       },
@@ -36,6 +41,11 @@ module.exports = {
         monochromeImage: './assets/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
+      // Download from Firebase Console > Project settings > Your apps >
+      // Android app with package com.intercity.rider, place at the project
+      // root. Not committed (see .gitignore) — required for real FCM push
+      // delivery on Android builds, optional for local Expo Go testing.
+      googleServicesFile: './google-services.json',
       config: {
         googleMaps: {
           apiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',

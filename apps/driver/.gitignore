@@ -34,6 +34,11 @@ yarn-error.*
 .env
 .env*.local
 
+# Firebase — per-app config, not secret but keeps churn/project-specific
+# values out of the repo; see app.config.js for where to place them
+google-services.json
+GoogleService-Info.plist
+
 # typescript
 *.tsbuildinfo
 
