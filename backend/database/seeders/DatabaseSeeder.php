@@ -23,5 +23,7 @@ class DatabaseSeeder extends Seeder
         foreach ($cities as $city) {
             City::firstOrCreate(['name' => $city, 'country' => 'Senegal']);
         }
+
+        $this->call(TestRoutesSeeder::class);
     }
 }
