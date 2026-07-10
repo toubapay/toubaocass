@@ -5,6 +5,14 @@ set -e
 # queue-worker service — Railway just overrides the start command for the
 # latter, so this stays a shared entrypoint rather than two images.
 
+# Firebase service-account key: never committed to git, so it arrives as a
+# raw-JSON env var and gets written to disk here, before config:cache reads
+# FCM_CREDENTIALS_PATH (see config/services.php for the matching default).
+if [ -n "$FCM_CREDENTIALS_JSON" ]; then
+    mkdir -p storage/app
+    printf '%s' "$FCM_CREDENTIALS_JSON" > storage/app/fcm-credentials.json
+fi
+
 php artisan config:cache
 php artisan route:cache
 php artisan event:cache

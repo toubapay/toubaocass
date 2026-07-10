@@ -77,7 +77,8 @@ listed here keeps its `.env.example` default.
 | `SMS_DRIVER` | `twilio` (once you have real Twilio credentials; otherwise leave `log`) |
 | `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM` | your Twilio credentials |
 | `PUSH_DRIVER` | `fcm` (once configured; otherwise leave `log`) |
-| `FCM_PROJECT_ID`, `FCM_CREDENTIALS_PATH` | your Firebase credentials |
+| `FCM_PROJECT_ID` | your Firebase project ID |
+| `FCM_CREDENTIALS_JSON` | the *entire contents* of the Firebase service-account JSON (Console → Project settings → Service accounts → Generate new private key), pasted as one Railway variable value — it's already single-line JSON, no reformatting needed. `docker/entrypoint.sh` writes it to `storage/app/fcm-credentials.json` at container boot; leave `FCM_CREDENTIALS_PATH` unset unless you're mounting the file another way |
 | `OTP_BYPASS_CODE` | leave unset in production (only useful for demos) |
 
 Railway sets `PORT` automatically — the entrypoint script already binds

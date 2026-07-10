@@ -48,7 +48,11 @@ return [
         'driver' => env('PUSH_DRIVER', 'log'),
         'fcm' => [
             'project_id' => env('FCM_PROJECT_ID'),
-            'credentials_path' => env('FCM_CREDENTIALS_PATH'),
+            // Defaults to where docker/entrypoint.sh writes FCM_CREDENTIALS_JSON
+            // at container boot (a service-account key can't be committed to
+            // git, so it's never a real file in the repo) — override with
+            // FCM_CREDENTIALS_PATH only if you're mounting the file yourself.
+            'credentials_path' => env('FCM_CREDENTIALS_PATH', storage_path('app/fcm-credentials.json')),
         ],
     ],
 
