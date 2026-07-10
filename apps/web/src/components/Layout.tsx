@@ -23,7 +23,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         }}
       >
         <img src="/favicon.svg" alt="" width={28} height={28} />
-        <span style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Intercity</span>
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+          <span style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Intercity</span>
+          <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+            Voyagez à partir de chez vous. Recherchez et réservez.
+          </span>
+        </div>
       </header>
 
       <main
