@@ -1,11 +1,19 @@
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
-import { usePushNotifications } from '../hooks/usePushNotifications';
+import type { UsePushNotifications } from '../hooks/usePushNotifications';
 import { colors, radius, spacing } from '../theme';
 
-export function ProfilePage() {
+/**
+ * Receives the push-notifications hook result as a prop instead of calling
+ * the hook itself — it needs to be a single instance mounted for the whole
+ * authenticated session (see AppRoutes in App.tsx), not just while this
+ * page happens to be open, otherwise the foreground onMessage() listener
+ * that displays incoming pushes gets torn down the moment you navigate away
+ * from Profile, silently dropping any push that arrives on another page.
+ */
+export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushNotifications }) {
   const { user, signOut } = useAuth();
-  const { permission, loading, error, enable } = usePushNotifications();
+  const { permission, loading, error, enable } = pushNotifications;
 
   return (
     <div>

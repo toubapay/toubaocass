@@ -75,3 +75,5 @@ export function usePushNotifications() {
 
   return { permission, loading, error, enable };
 }
+
+export type UsePushNotifications = ReturnType<typeof usePushNotifications>;

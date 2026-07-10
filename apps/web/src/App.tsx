@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { usePushNotifications } from './hooks/usePushNotifications';
 import { HomePage } from './pages/HomePage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
@@ -14,6 +15,10 @@ import { TripDetailPage } from './pages/TripDetailPage';
 
 function AppRoutes() {
   const { isLoading, isAuthenticated, user } = useAuth();
+  // Mounted once for the whole authenticated session (not inside ProfilePage
+  // itself) so the foreground onMessage() listener that displays incoming
+  // pushes stays active no matter which page is open when one arrives.
+  const pushNotifications = usePushNotifications();
 
   if (isLoading) {
     return <CenteredSpinner />;
@@ -46,7 +51,7 @@ function AppRoutes() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
