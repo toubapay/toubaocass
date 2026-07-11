@@ -21,6 +21,20 @@ export function usePushNotifications() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const fetchAndRegisterToken = useCallback(async () => {
+    const messaging = await getFirebaseMessaging();
+    if (!messaging) {
+      throw new Error('Les notifications ne sont pas prises en charge par ce navigateur.');
+    }
+
+    const swRegistration = await navigator.serviceWorker.ready;
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: swRegistration,
+    });
+    if (token) await registerPushToken(token);
+  }, []);
+
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
@@ -38,8 +52,23 @@ export function usePushNotifications() {
         // foreground messages just won't show; nothing else breaks.
       });
 
+    // Permission may already be granted from an earlier session, but the
+    // FCM token on file with the backend can go stale (token rotation, the
+    // Home Screen PWA being removed and re-added, etc.) with nothing else to
+    // trigger a refresh — the "Activer" button only reappears if permission
+    // itself is revoked. getToken() is cheap and idempotent (returns the
+    // current valid token, minting a new one only if the old one rotated),
+    // so re-registering on every load keeps the backend's token current
+    // instead of silently going stale forever after the first grant.
+    if ('Notification' in window && Notification.permission === 'granted') {
+      fetchAndRegisterToken().catch(() => {
+        // Best-effort background refresh — the explicit "Activer" flow below
+        // is what surfaces a real error to the rider.
+      });
+    }
+
     return () => unsubscribe?.();
-  }, []);
+  }, [fetchAndRegisterToken]);
 
   const enable = useCallback(async () => {
     if (!('Notification' in window)) {
@@ -54,24 +83,13 @@ export function usePushNotifications() {
       setPermission(result as PushPermissionState);
       if (result !== 'granted') return;
 
-      const messaging = await getFirebaseMessaging();
-      if (!messaging) {
-        setError("Les notifications ne sont pas prises en charge par ce navigateur.");
-        return;
-      }
-
-      const swRegistration = await navigator.serviceWorker.ready;
-      const token = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-        serviceWorkerRegistration: swRegistration,
-      });
-      if (token) await registerPushToken(token);
+      await fetchAndRegisterToken();
     } catch {
       setError('Impossible d\'activer les notifications. Réessayez.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchAndRegisterToken]);
 
   return { permission, loading, error, enable };
 }
