@@ -116,7 +116,7 @@ export function HomePage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Trajets disponibles</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Choisissez votre Destination</h1>
 
       <div style={{ position: 'relative', marginBottom: spacing.sm }}>
         <span style={{ position: 'absolute', left: 14, top: 13, fontSize: 15, pointerEvents: 'none' }}>🔍</span>
