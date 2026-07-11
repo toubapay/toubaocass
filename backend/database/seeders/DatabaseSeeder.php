@@ -28,6 +28,13 @@ class DatabaseSeeder extends Seeder
             'Diourbel' => [14.6559, -16.2333],
             'Louga' => [15.6173, -16.2240],
             'Tambacounda' => [13.7671, -13.6681],
+            'Fatick' => [14.3390, -16.4110],
+            'Linguère' => [15.3900, -15.1200],
+            'Tivaouane' => [14.9500, -16.8167],
+            'Matam' => [15.6559, -13.2548],
+            'Sédhiou' => [12.7081, -15.5569],
+            'Koungheul' => [13.9833, -14.8000],
+            'Kédougou' => [12.5500, -12.1833],
         ];
 
         foreach ($cities as $name => [$latitude, $longitude]) {
@@ -38,6 +45,14 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Nouakchott (Mauritania) — the one cross-border route (Dakar <->
+        // Nouakchott) among the additional routes below.
+        $nouakchott = City::firstOrCreate(['name' => 'Nouakchott', 'country' => 'Mauritanie']);
+        if ($nouakchott->latitude === null || $nouakchott->longitude === null) {
+            $nouakchott->update(['latitude' => 18.0858, 'longitude' => -15.9785]);
+        }
+
         $this->call(TestRoutesSeeder::class);
+        $this->call(AdditionalRoutesSeeder::class);
     }
 }
