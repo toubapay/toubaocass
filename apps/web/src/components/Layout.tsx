@@ -28,8 +28,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       >
         <img src="/favicon.svg" alt="" width={28} height={28} />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Intercity</span>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>Intercity</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
             Voyagez à partir de chez vous. Recherchez et réservez.
           </span>
         </div>
@@ -83,11 +83,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 padding: `${spacing.sm}px 0`,
                 textDecoration: 'none',
                 color: isActive ? '#fff' : 'rgba(255,255,255,0.65)',
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: 600,
               })}
             >
-              <span style={{ fontSize: 20 }}>{item.icon}</span>
+              <span style={{ fontSize: 22 }}>{item.icon}</span>
               <span>{item.label}</span>
             </NavLink>
           ))}

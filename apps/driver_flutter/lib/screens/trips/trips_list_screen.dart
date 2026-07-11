@@ -79,16 +79,16 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       ),
                       child: const Row(
                         children: [
-                          Text('🗺️', style: TextStyle(fontSize: 22)),
+                          Text('🗺️', style: TextStyle(fontSize: 24)),
                           SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Définir un point de départ sur la carte',
-                                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
+                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700)),
                                 Text('Recherchez une adresse ou utilisez votre position actuelle',
-                                    style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+                                    style: TextStyle(fontSize: 14.0, color: AppColors.textMuted)),
                               ],
                             ),
                           ),
@@ -101,7 +101,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Center(
                         child: Text("Vous n'avez publié aucun trajet pour l'instant.",
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
                       ),
                     )
                   else
@@ -124,21 +124,21 @@ class _TripsListScreenState extends State<TripsListScreen> {
                                     Expanded(
                                       child: Text(
                                         '${trip.originCity?.name ?? '?'} → ${trip.destinationCity?.name ?? '?'}',
-                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Text(_statusLabel[trip.status] ?? trip.status,
                                         style: TextStyle(
-                                            fontSize: 12, fontWeight: FontWeight.w700, color: _statusColor[trip.status])),
+                                            fontSize: 13, fontWeight: FontWeight.w700, color: _statusColor[trip.status])),
                                   ],
                                 ),
                                 Text(
                                   '${trip.departureDate} à ${trip.departureTime} · ${trip.availableSeats}/${trip.totalSeats} places restantes',
-                                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
                                 ),
                                 Text('${currency.format(trip.fare)} FCFA / place',
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
                               ],
                             ),
                           ),

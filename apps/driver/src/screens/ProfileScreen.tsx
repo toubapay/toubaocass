@@ -36,7 +36,7 @@ export function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  name: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
-  meta: { fontSize: 14, color: colors.textMuted },
-  kyc: { fontSize: 14, color: colors.text, fontWeight: '600', marginTop: spacing.sm },
+  name: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  meta: { fontSize: 15, color: colors.textMuted },
+  kyc: { fontSize: 15, color: colors.text, fontWeight: '600', marginTop: spacing.sm },
 });

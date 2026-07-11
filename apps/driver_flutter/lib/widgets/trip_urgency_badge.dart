@@ -21,7 +21,7 @@ class TripUrgencyBadge extends StatelessWidget {
       decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(AppRadius.sm)),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700),
+        style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700),
       ),
     );
   }

@@ -72,12 +72,12 @@ export function TripsMapView({ trips, onSelectTrip, height = 260 }: Props) {
 
 const styles = StyleSheet.create({
   wrapper: { marginTop: spacing.lg },
-  title: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 2 },
-  subtitle: { fontSize: 12.5, color: colors.textMuted, marginBottom: spacing.sm },
+  title: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 2 },
+  subtitle: { fontSize: 14.0, color: colors.textMuted, marginBottom: spacing.sm },
   mapContainer: { borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
   map: { flex: 1 },
   callout: { minWidth: 180, padding: 2 },
-  calloutTitle: { fontWeight: '700', fontSize: 14, color: colors.text, marginBottom: 4 },
-  calloutLine: { fontSize: 12, color: colors.textMuted, marginBottom: 2 },
-  calloutLink: { fontSize: 12, color: colors.primary, fontWeight: '700', marginTop: 6 },
+  calloutTitle: { fontWeight: '700', fontSize: 15, color: colors.text, marginBottom: 4 },
+  calloutLine: { fontSize: 13, color: colors.textMuted, marginBottom: 2 },
+  calloutLink: { fontSize: 13, color: colors.primary, fontWeight: '700', marginTop: 6 },
 });

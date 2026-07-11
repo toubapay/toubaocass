@@ -159,8 +159,8 @@ export function MapPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.sm }}>Trajets sur la carte</h1>
-      <p style={{ fontSize: 13, color: colors.textMuted, marginBottom: spacing.md }}>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.sm }}>Trajets sur la carte</h1>
+      <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: spacing.md }}>
         {trips.length === 0
           ? "Aucun trajet actif n'a de point de départ précis pour l'instant."
           : `${trips.length} trajet(s) avec un point de départ affiché.`}
@@ -179,13 +179,13 @@ export function MapPage() {
             border: `1px solid ${colors.border}`,
             borderRadius: radius.sm,
             padding: '12px 14px',
-            fontSize: 15,
+            fontSize: 16,
             color: colors.text,
             backgroundColor: colors.surface,
           }}
         />
         {searching && (
-          <span style={{ position: 'absolute', right: 14, top: 12, fontSize: 12, color: colors.textMuted }}>Recherche…</span>
+          <span style={{ position: 'absolute', right: 14, top: 12, fontSize: 13, color: colors.textMuted }}>Recherche…</span>
         )}
         {suggestions.length > 0 && (
           <div
@@ -216,7 +216,7 @@ export function MapPage() {
                   border: 'none',
                   borderBottom: i < suggestions.length - 1 ? `1px solid ${colors.border}` : 'none',
                   backgroundColor: 'transparent',
-                  fontSize: 13,
+                  fontSize: 14,
                   color: colors.text,
                   cursor: 'pointer',
                 }}
@@ -239,7 +239,7 @@ export function MapPage() {
             borderRadius: radius.sm,
             padding: '8px 14px',
             fontWeight: 700,
-            fontSize: 13,
+            fontSize: 14,
             cursor: locating ? 'default' : 'pointer',
           }}
         >
@@ -248,13 +248,13 @@ export function MapPage() {
         {selectedPoint && (
           <button
             onClick={clearSelectedPoint}
-            style={{ border: 'none', background: 'transparent', color: colors.textMuted, fontSize: 13, cursor: 'pointer' }}
+            style={{ border: 'none', background: 'transparent', color: colors.textMuted, fontSize: 14, cursor: 'pointer' }}
           >
             Effacer
           </button>
         )}
       </div>
-      {locationError && <p style={{ color: colors.danger, fontSize: 12, marginBottom: spacing.md }}>{locationError}</p>}
+      {locationError && <p style={{ color: colors.danger, fontSize: 13, marginBottom: spacing.md }}>{locationError}</p>}
 
       <div
         style={{
@@ -313,7 +313,7 @@ export function MapPage() {
                       borderRadius: 6,
                       padding: '6px 10px',
                       fontWeight: 700,
-                      fontSize: 12,
+                      fontSize: 13,
                       cursor: 'pointer',
                     }}
                   >

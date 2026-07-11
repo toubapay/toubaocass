@@ -19,7 +19,7 @@ export function TripUrgencyBadge({ trip }: { trip: Trip }) {
         color: urgent ? colors.danger : colors.success,
         borderRadius: radius.sm,
         padding: `3px ${spacing.sm}px`,
-        fontSize: 11.5,
+        fontSize: 12.5,
         fontWeight: 700,
         marginTop: spacing.xs,
         marginBottom: spacing.sm,

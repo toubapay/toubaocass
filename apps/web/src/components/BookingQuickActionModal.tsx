@@ -66,15 +66,15 @@ export function BookingQuickActionModal({
           padding: spacing.lg,
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>
           {editing ? 'Modifier la réservation' : 'Réserver ce trajet'}
         </h2>
-        <p style={{ fontSize: 13, color: colors.textMuted, margin: `0 0 ${spacing.md}px` }}>
+        <p style={{ fontSize: 14, color: colors.textMuted, margin: `0 0 ${spacing.md}px` }}>
           {trip.origin_city?.name} → {trip.destination_city?.name} · {trip.departure_date} à {trip.departure_time}
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
+          <span style={{ fontSize: 15, fontWeight: 600, color: colors.text }}>
             {editing ? 'Nombre de places' : 'Places à réserver'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
@@ -86,7 +86,7 @@ export function BookingQuickActionModal({
                 borderRadius: radius.sm,
                 border: `1px solid ${colors.border}`,
                 background: colors.background,
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: 700,
                 color: colors.primary,
                 cursor: 'pointer',
@@ -94,7 +94,7 @@ export function BookingQuickActionModal({
             >
               −
             </button>
-            <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, minWidth: 24, textAlign: 'center' }}>
+            <span style={{ fontSize: 20, fontWeight: 700, color: colors.text, minWidth: 24, textAlign: 'center' }}>
               {seats}
             </span>
             <button
@@ -105,7 +105,7 @@ export function BookingQuickActionModal({
                 borderRadius: radius.sm,
                 border: `1px solid ${colors.border}`,
                 background: colors.background,
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: 700,
                 color: colors.primary,
                 cursor: 'pointer',
@@ -117,13 +117,13 @@ export function BookingQuickActionModal({
         </div>
 
         {editing && seats === 0 && (
-          <p style={{ fontSize: 12, color: colors.danger, marginTop: -spacing.sm, marginBottom: spacing.md }}>
+          <p style={{ fontSize: 13, color: colors.danger, marginTop: -spacing.sm, marginBottom: spacing.md }}>
             Réduire à 0 place annulera votre réservation.
           </p>
         )}
-        {error && <p style={{ fontSize: 12, color: colors.danger, marginBottom: spacing.sm }}>{error}</p>}
+        {error && <p style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.sm }}>{error}</p>}
 
-        <p style={{ fontSize: 15, fontWeight: 700, color: colors.primary, marginBottom: spacing.md }}>
+        <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, marginBottom: spacing.md }}>
           {(trip.fare * seats).toLocaleString()} FCFA
         </p>
 

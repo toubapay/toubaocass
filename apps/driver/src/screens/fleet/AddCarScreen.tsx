@@ -98,8 +98,8 @@ export function AddCarScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   typeChip: {
     paddingVertical: spacing.sm,

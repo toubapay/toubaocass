@@ -52,7 +52,7 @@ export function DateField({ label, value, onChange, mode = 'date', minimumDate, 
 
 const styles = StyleSheet.create({
   wrapper: { marginBottom: spacing.md },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   selector: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     backgroundColor: colors.surface,
   },
-  text: { fontSize: 16, color: colors.text },
-  placeholder: { fontSize: 16, color: colors.textMuted },
+  text: { fontSize: 18, color: colors.text },
+  placeholder: { fontSize: 18, color: colors.textMuted },
 });

@@ -59,7 +59,7 @@ const webInputStyle: React.CSSProperties = {
   borderRadius: radius.sm,
   padding: `${spacing.sm + 4}px ${spacing.md}px`,
   backgroundColor: colors.surface,
-  fontSize: 16,
+  fontSize: 18,
   color: colors.text,
   fontFamily: 'inherit',
   width: '100%',
@@ -68,5 +68,5 @@ const webInputStyle: React.CSSProperties = {
 
 const styles = StyleSheet.create({
   wrapper: { marginBottom: spacing.md },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
 });

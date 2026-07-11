@@ -82,7 +82,7 @@ class _KycStatusScreenState extends State<KycStatusScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
-            const Text('Vérification conducteur', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+            const Text('Vérification conducteur', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.md),
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -95,13 +95,13 @@ class _KycStatusScreenState extends State<KycStatusScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(copy.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: copy.color)),
+                  Text(copy.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: copy.color)),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(copy.body, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                  Text(copy.body, style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
                   if (status == 'rejected' && profile?.kycRejectionReason != null)
                     Padding(
                       padding: const EdgeInsets.only(top: AppSpacing.sm),
-                      child: Text(profile!.kycRejectionReason!, style: const TextStyle(fontSize: 13, color: AppColors.danger)),
+                      child: Text(profile!.kycRejectionReason!, style: const TextStyle(fontSize: 14, color: AppColors.danger)),
                     ),
                 ],
               ),

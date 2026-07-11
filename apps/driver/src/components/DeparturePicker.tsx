@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.text,
     backgroundColor: colors.surface,
   },
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   suggestionItem: { paddingHorizontal: 14, paddingVertical: 10 },
   suggestionBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  suggestionText: { fontSize: 13, color: colors.text },
+  suggestionText: { fontSize: 14, color: colors.text },
   mapContainer: { height: 200, borderRadius: radius.md, overflow: 'hidden', marginBottom: spacing.sm },
   map: { flex: 1 },
   locateButton: {
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     alignItems: 'center',
   },
-  locateText: { color: colors.primary, fontWeight: '700', fontSize: 13.5 },
-  error: { color: colors.danger, fontSize: 12, marginTop: spacing.xs },
-  hint: { color: colors.textMuted, fontSize: 12, marginTop: spacing.xs },
+  locateText: { color: colors.primary, fontWeight: '700', fontSize: 15.0 },
+  error: { color: colors.danger, fontSize: 13, marginTop: spacing.xs },
+  hint: { color: colors.textMuted, fontSize: 13, marginTop: spacing.xs },
 });

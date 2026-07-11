@@ -158,8 +158,8 @@ export function TripDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   routeRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
-  city: { fontSize: 22, fontWeight: '800', color: colors.text },
-  arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 18 },
+  city: { fontSize: 24, fontWeight: '800', color: colors.text },
+  arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 20 },
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg, textTransform: 'capitalize' },
   card: {
     backgroundColor: colors.surface,
@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
-  sectionHeading: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
-  line: { fontSize: 16, color: colors.text },
-  lineMuted: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
+  sectionHeading: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
+  line: { fontSize: 18, color: colors.text },
+  lineMuted: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   contactRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   contactButton: {
     flex: 1,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     alignItems: 'center',
   },
-  contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
   actions: { marginTop: spacing.lg, gap: spacing.sm },
   actionButton: { marginBottom: spacing.sm },
 });

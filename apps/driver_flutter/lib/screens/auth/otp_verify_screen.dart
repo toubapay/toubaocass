@@ -55,10 +55,10 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Saisissez le code', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+            const Text('Saisissez le code', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.sm),
             Text('Nous avons envoyé un code de vérification par SMS au ${widget.phone}.',
-                style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
             const SizedBox(height: AppSpacing.lg),
             TextField(
               controller: codeController,

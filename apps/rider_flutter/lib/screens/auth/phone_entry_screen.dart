@@ -45,10 +45,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.xl),
-              const Text('Intercity', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              const Text('Intercity', style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800, color: AppColors.primary)),
               const SizedBox(height: AppSpacing.sm),
               const Text('Réservez une place pour un trajet entre villes.',
-                  style: TextStyle(fontSize: 16, color: AppColors.textMuted)),
+                  style: TextStyle(fontSize: 18, color: AppColors.textMuted)),
               const SizedBox(height: AppSpacing.xl),
               TextField(
                 controller: phoneController,

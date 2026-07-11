@@ -47,9 +47,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.xl),
-              const Text('Parlez-nous de vous', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+              const Text('Parlez-nous de vous', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
               const SizedBox(height: AppSpacing.sm),
-              const Text('Votre nom suffit pour commencer.', style: TextStyle(fontSize: 15, color: AppColors.textMuted)),
+              const Text('Votre nom suffit pour commencer.', style: TextStyle(fontSize: 16, color: AppColors.textMuted)),
               const SizedBox(height: AppSpacing.lg),
               TextField(
                 controller: nameController,

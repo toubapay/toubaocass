@@ -93,7 +93,7 @@ export function TripsListScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   mapCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -105,10 +105,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
   },
-  mapCardIcon: { fontSize: 22 },
+  mapCardIcon: { fontSize: 24 },
   mapCardText: { flex: 1 },
-  mapCardTitle: { fontSize: 14.5, fontWeight: '700', color: colors.text },
-  mapCardSubtitle: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
+  mapCardTitle: { fontSize: 16.0, fontWeight: '700', color: colors.text },
+  mapCardSubtitle: { fontSize: 14.0, color: colors.textMuted, marginTop: 2 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -118,10 +118,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  route: { fontSize: 16, fontWeight: '700', color: colors.text, flexShrink: 1, marginRight: spacing.sm },
-  status: { fontSize: 12, fontWeight: '700' },
-  meta: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs },
-  fare: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
+  route: { fontSize: 18, fontWeight: '700', color: colors.text, flexShrink: 1, marginRight: spacing.sm },
+  status: { fontSize: 13, fontWeight: '700' },
+  meta: { fontSize: 14, color: colors.textMuted, marginTop: spacing.xs },
+  fare: { fontSize: 16, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   empty: { marginTop: spacing.lg, marginBottom: spacing.lg, alignItems: 'center' },
-  emptyText: { color: colors.textMuted, fontSize: 15, textAlign: 'center' },
+  emptyText: { color: colors.textMuted, fontSize: 16, textAlign: 'center' },
 });

@@ -23,7 +23,7 @@ export function Button({ label, onClick, type = 'button', disabled, loading, var
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 600,
     cursor: isDisabled ? 'default' : 'pointer',
     opacity: isDisabled ? 0.5 : 1,

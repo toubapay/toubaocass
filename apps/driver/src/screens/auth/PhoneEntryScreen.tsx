@@ -54,6 +54,6 @@ export function PhoneEntryScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   hero: { marginTop: spacing.xl, marginBottom: spacing.xl * 1.5 },
-  title: { fontSize: 30, fontWeight: '800', color: colors.primary, marginBottom: spacing.sm },
-  subtitle: { fontSize: 16, color: colors.textMuted },
+  title: { fontSize: 33, fontWeight: '800', color: colors.primary, marginBottom: spacing.sm },
+  subtitle: { fontSize: 18, color: colors.textMuted },
 });

@@ -146,7 +146,7 @@ export function MyBookingsScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  route: { fontSize: 16, fontWeight: '700', color: colors.text, flexShrink: 1 },
-  status: { fontSize: 12, fontWeight: '700', color: colors.success },
+  route: { fontSize: 18, fontWeight: '700', color: colors.text, flexShrink: 1 },
+  status: { fontSize: 13, fontWeight: '700', color: colors.success },
   statusCancelled: { color: colors.danger },
-  meta: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs },
-  fare: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
+  meta: { fontSize: 14, color: colors.textMuted, marginTop: spacing.xs },
+  fare: { fontSize: 16, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   actionsRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },
   modifyText: { color: colors.primary, fontWeight: '600' },
   cancelText: { color: colors.danger, fontWeight: '600' },
   empty: { marginTop: spacing.xl, alignItems: 'center' },
-  emptyText: { color: colors.textMuted, fontSize: 15, textAlign: 'center' },
+  emptyText: { color: colors.textMuted, fontSize: 16, textAlign: 'center' },
 });

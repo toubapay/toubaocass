@@ -79,7 +79,7 @@ class _KycFormScreenState extends State<KycFormScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.xs),
           InkWell(
             onTap: () => _pick(onPicked),

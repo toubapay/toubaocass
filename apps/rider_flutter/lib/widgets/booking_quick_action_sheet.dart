@@ -71,18 +71,18 @@ class _BookingQuickActionSheetState extends State<_BookingQuickActionSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(editing ? 'Modifier la réservation' : 'Réserver ce trajet',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.xs),
             Text(
               '${trip.originCity?.name ?? '?'} → ${trip.destinationCity?.name ?? '?'} · ${trip.departureDate} à ${trip.departureTime}',
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.md),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(editing ? 'Nombre de places' : 'Places à réserver',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 Row(
                   children: [
                     OutlinedButton(
@@ -91,7 +91,7 @@ class _BookingQuickActionSheetState extends State<_BookingQuickActionSheet> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                      child: Text('$seats', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                      child: Text('$seats', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                     ),
                     OutlinedButton(
                       onPressed: () => setState(() => seats = (seats + 1).clamp(editing ? 0 : 1, maxSeats)),
@@ -105,16 +105,16 @@ class _BookingQuickActionSheetState extends State<_BookingQuickActionSheet> {
               const Padding(
                 padding: EdgeInsets.only(top: AppSpacing.xs),
                 child: Text('Réduire à 0 place annulera votre réservation.',
-                    style: TextStyle(color: AppColors.danger, fontSize: 12)),
+                    style: TextStyle(color: AppColors.danger, fontSize: 13)),
               ),
             if (error != null)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
-                child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 12)),
+                child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 13)),
               ),
             const SizedBox(height: AppSpacing.md),
             Text('${trip.fare * seats} FCFA',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
             const SizedBox(height: AppSpacing.md),
             ElevatedButton(
               onPressed: loading ? null : _confirm,

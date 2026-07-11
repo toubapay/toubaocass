@@ -42,8 +42,8 @@ export function TripsMap({ trips, height = 300 }: Props) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.text, marginBottom: spacing.xs }}>Carte des trajets</h2>
-      <p style={{ fontSize: 12.5, color: colors.textMuted, marginBottom: spacing.sm }}>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginBottom: spacing.xs }}>Carte des trajets</h2>
+      <p style={{ fontSize: 14.0, color: colors.textMuted, marginBottom: spacing.sm }}>
         {withCoords.length === 0
           ? "Aucun trajet affiché n'a de point de départ précis pour l'instant."
           : `${withCoords.length} trajet(s) avec un point de départ affiché.`}
@@ -91,7 +91,7 @@ export function TripsMap({ trips, height = 300 }: Props) {
                       borderRadius: 6,
                       padding: '6px 10px',
                       fontWeight: 700,
-                      fontSize: 12,
+                      fontSize: 13,
                       cursor: 'pointer',
                     }}
                   >

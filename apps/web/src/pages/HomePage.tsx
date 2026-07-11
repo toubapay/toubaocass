@@ -116,10 +116,10 @@ export function HomePage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Choisissez votre Destination</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Choisissez votre Destination</h1>
 
       <div style={{ position: 'relative', marginBottom: spacing.sm }}>
-        <span style={{ position: 'absolute', left: 14, top: 13, fontSize: 15, pointerEvents: 'none' }}>🔍</span>
+        <span style={{ position: 'absolute', left: 14, top: 13, fontSize: 16, pointerEvents: 'none' }}>🔍</span>
         <input
           value={citySearch}
           onChange={(e) => setCitySearch(e.target.value)}
@@ -131,7 +131,7 @@ export function HomePage() {
             border: `1px solid ${colors.border}`,
             borderRadius: radius.sm,
             padding: '12px 14px 12px 38px',
-            fontSize: 15,
+            fontSize: 16,
             color: colors.text,
             backgroundColor: colors.surface,
           }}
@@ -147,7 +147,7 @@ export function HomePage() {
               border: 'none',
               background: 'none',
               color: colors.textMuted,
-              fontSize: 16,
+              fontSize: 18,
               cursor: 'pointer',
               padding: 6,
             }}
@@ -184,7 +184,7 @@ export function HomePage() {
                   border: 'none',
                   borderBottom: i < citySuggestions.length - 1 ? `1px solid ${colors.border}` : 'none',
                   backgroundColor: 'transparent',
-                  fontSize: 13.5,
+                  fontSize: 15.0,
                   color: colors.text,
                   cursor: 'pointer',
                 }}
@@ -207,7 +207,7 @@ export function HomePage() {
           backgroundColor: nearMe ? colors.primary : 'transparent',
           color: nearMe ? '#fff' : colors.primary,
           fontWeight: 700,
-          fontSize: 13.5,
+          fontSize: 15.0,
           cursor: 'pointer',
         }}
       >
@@ -229,7 +229,7 @@ export function HomePage() {
 
       <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
             Date
           </label>
           <input
@@ -242,14 +242,14 @@ export function HomePage() {
               border: `1px solid ${colors.border}`,
               borderRadius: radius.sm,
               padding: '13px 16px',
-              fontSize: 15,
+              fontSize: 16,
               color: colors.text,
               backgroundColor: colors.surface,
             }}
           />
         </div>
         <div style={{ width: 108 }}>
-          <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
             Places
           </label>
           <div
@@ -266,14 +266,14 @@ export function HomePage() {
           >
             <button
               onClick={() => setSeats((s) => Math.max(1, s - 1))}
-              style={{ border: 'none', background: 'none', fontSize: 18, fontWeight: 700, color: colors.primary, cursor: 'pointer', width: 28 }}
+              style={{ border: 'none', background: 'none', fontSize: 20, fontWeight: 700, color: colors.primary, cursor: 'pointer', width: 28 }}
             >
               −
             </button>
-            <span style={{ fontSize: 15, fontWeight: 700, color: colors.text }}>{seats}</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: colors.text }}>{seats}</span>
             <button
               onClick={() => setSeats((s) => Math.min(9, s + 1))}
-              style={{ border: 'none', background: 'none', fontSize: 18, fontWeight: 700, color: colors.primary, cursor: 'pointer', width: 28 }}
+              style={{ border: 'none', background: 'none', fontSize: 20, fontWeight: 700, color: colors.primary, cursor: 'pointer', width: 28 }}
             >
               +
             </button>
@@ -284,13 +284,13 @@ export function HomePage() {
       {hasFilters && (
         <button
           onClick={clearFilters}
-          style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, fontSize: 13, cursor: 'pointer', padding: 0, marginTop: spacing.sm, marginBottom: spacing.sm }}
+          style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, fontSize: 14, cursor: 'pointer', padding: 0, marginTop: spacing.sm, marginBottom: spacing.sm }}
         >
           Effacer les filtres
         </button>
       )}
       {invalidRoute && (
-        <p style={{ color: colors.danger, fontSize: 13, marginBottom: spacing.sm }}>
+        <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.sm }}>
           La ville de départ et d'arrivée ne peuvent pas être identiques.
         </p>
       )}
@@ -300,10 +300,10 @@ export function HomePage() {
           <CenteredSpinner />
         ) : (
           <>
-            {error && <p style={{ color: colors.danger, fontSize: 13, marginBottom: spacing.sm }}>{error}</p>}
+            {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.sm }}>{error}</p>}
             {visibleTrips.length === 0 ? (
               <div style={{ marginTop: spacing.xl, textAlign: 'center', padding: `0 ${spacing.lg}px` }}>
-                <p style={{ color: colors.textMuted, fontSize: 15 }}>
+                <p style={{ color: colors.textMuted, fontSize: 16 }}>
                   {query
                     ? `Aucun trajet ne correspond à "${citySearch.trim()}".`
                     : nearMe
@@ -343,14 +343,14 @@ export function HomePage() {
                     backgroundColor: 'transparent',
                     color: colors.primary,
                     fontWeight: 700,
-                    fontSize: 13,
+                    fontSize: 14,
                     cursor: page <= 1 ? 'default' : 'pointer',
                     opacity: page <= 1 ? 0.4 : 1,
                   }}
                 >
                   ← Précédent
                 </button>
-                <span style={{ fontSize: 13, color: colors.textMuted, textAlign: 'center' }}>
+                <span style={{ fontSize: 14, color: colors.textMuted, textAlign: 'center' }}>
                   Page {page} sur {lastPage}
                   <br />
                   {total} trajet(s) au total
@@ -365,7 +365,7 @@ export function HomePage() {
                     backgroundColor: 'transparent',
                     color: colors.primary,
                     fontWeight: 700,
-                    fontSize: 13,
+                    fontSize: 14,
                     cursor: page >= lastPage ? 'default' : 'pointer',
                     opacity: page >= lastPage ? 0.4 : 1,
                   }}

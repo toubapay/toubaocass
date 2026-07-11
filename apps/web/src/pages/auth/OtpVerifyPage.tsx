@@ -57,15 +57,15 @@ export function OtpVerifyPage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 20, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
+        style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
       >
         ←
       </button>
 
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
+      <h1 style={{ fontSize: 26, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
         Saisissez le code
       </h1>
-      <p style={{ fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg }}>
+      <p style={{ fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg }}>
         Nous avons envoyé un code de vérification par SMS au {phone}.
       </p>
 

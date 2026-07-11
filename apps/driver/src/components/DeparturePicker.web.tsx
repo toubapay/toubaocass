@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     alignItems: 'center',
   },
-  locateText: { color: colors.primary, fontWeight: '700', fontSize: 13.5 },
-  error: { color: colors.danger, fontSize: 12, marginTop: spacing.xs },
-  hint: { color: colors.textMuted, fontSize: 12, marginTop: spacing.xs },
-  coords: { color: colors.textMuted, fontSize: 12, marginTop: spacing.xs },
+  locateText: { color: colors.primary, fontWeight: '700', fontSize: 15.0 },
+  error: { color: colors.danger, fontSize: 13, marginTop: spacing.xs },
+  hint: { color: colors.textMuted, fontSize: 13, marginTop: spacing.xs },
+  coords: { color: colors.textMuted, fontSize: 13, marginTop: spacing.xs },
 });

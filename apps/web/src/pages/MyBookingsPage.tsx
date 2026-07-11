@@ -62,11 +62,11 @@ export function MyBookingsPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Mes réservations</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Mes réservations</h1>
 
       {bookings.length === 0 ? (
         <div style={{ marginTop: spacing.xl, textAlign: 'center' }}>
-          <p style={{ color: colors.textMuted, fontSize: 15 }}>Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.</p>
+          <p style={{ color: colors.textMuted, fontSize: 16 }}>Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.</p>
         </div>
       ) : (
         bookings.map((item) => (
@@ -83,17 +83,17 @@ export function MyBookingsPage() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: colors.text }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: colors.text }}>
                 {item.trip.origin_city?.name} → {item.trip.destination_city?.name}
               </span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: item.status === 'cancelled' ? colors.danger : colors.success }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: item.status === 'cancelled' ? colors.danger : colors.success }}>
                 {STATUS_LABEL[item.status]}
               </span>
             </div>
-            <p style={{ fontSize: 13, color: colors.textMuted, marginTop: spacing.xs, marginBottom: 0 }}>
+            <p style={{ fontSize: 14, color: colors.textMuted, marginTop: spacing.xs, marginBottom: 0 }}>
               {item.trip.departure_date} à {item.trip.departure_time} · {item.seats_booked} place(s)
             </p>
-            <p style={{ fontSize: 15, fontWeight: 700, color: colors.primary, marginTop: spacing.xs, marginBottom: 0 }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, marginTop: spacing.xs, marginBottom: 0 }}>
               {item.fare_total.toLocaleString()} FCFA
             </p>
 
@@ -104,7 +104,7 @@ export function MyBookingsPage() {
                     e.stopPropagation();
                     setModifyingBookingId(item.id);
                   }}
-                  style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 14 }}
+                  style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
                 >
                   Modifier
                 </button>
@@ -113,7 +113,7 @@ export function MyBookingsPage() {
                     e.stopPropagation();
                     handleCancel(item);
                   }}
-                  style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 14 }}
+                  style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
                 >
                   Annuler la réservation
                 </button>

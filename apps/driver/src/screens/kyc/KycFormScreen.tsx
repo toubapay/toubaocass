@@ -110,9 +110,9 @@ export function KycFormScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   pickerWrapper: { marginBottom: spacing.md },
-  pickerLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  pickerLabel: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   pickerBox: {
     height: 120,
     borderRadius: radius.md,

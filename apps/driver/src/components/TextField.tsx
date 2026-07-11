@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   label: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: colors.text,
     marginBottom: spacing.xs,
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text,
     backgroundColor: colors.surface,
   },
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.danger,
-    fontSize: 12,
+    fontSize: 13,
     marginTop: spacing.xs,
   },
 });

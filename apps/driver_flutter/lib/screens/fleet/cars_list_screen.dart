@@ -73,7 +73,7 @@ class _CarsListScreenState extends State<CarsListScreen> {
                       padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Center(
                         child: Text('Ajoutez un véhicule pour commencer à publier des trajets.',
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 15), textAlign: TextAlign.center),
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 16), textAlign: TextAlign.center),
                       ),
                     )
                   else
@@ -89,9 +89,9 @@ class _CarsListScreenState extends State<CarsListScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('${car.make} ${car.model} (${car.year ?? 'N/A'})',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                               Text('${car.plateNumber} · ${car.seats} places · ${car.type.toUpperCase()}',
-                                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
                               TextButton(
                                 onPressed: () => _handleDelete(car),
                                 style: TextButton.styleFrom(foregroundColor: AppColors.danger, padding: EdgeInsets.zero),

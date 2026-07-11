@@ -230,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Text(
                   "La ville de départ et d'arrivée ne peuvent pas être identiques.",
-                  style: TextStyle(color: AppColors.danger, fontSize: 13),
+                  style: TextStyle(color: AppColors.danger, fontSize: 14),
                 ),
               ),
             const SizedBox(height: AppSpacing.sm),
@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 13)),
+                  child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 14)),
                 ),
               if (visibleTrips.isEmpty)
                 Padding(
@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
                                   : 'Aucun trajet à venir pour le moment — revenez bientôt.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                      style: const TextStyle(color: AppColors.textMuted, fontSize: 16),
                     ),
                   ),
                 )

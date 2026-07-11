@@ -33,10 +33,10 @@ export function ProfileSetupPage() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
+      <h1 style={{ fontSize: 26, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
         Parlez-nous de vous
       </h1>
-      <p style={{ fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg }}>Votre nom suffit pour commencer.</p>
+      <p style={{ fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg }}>Votre nom suffit pour commencer.</p>
 
       <TextField label="Nom complet" placeholder="Awa Ndiaye" value={name} onChange={(e) => setName(e.target.value)} error={error} />
       <TextField

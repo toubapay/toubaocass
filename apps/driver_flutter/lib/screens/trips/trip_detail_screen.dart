@@ -100,12 +100,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         children: [
           Row(
             children: [
-              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 18)),
+                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 20)),
               ),
-              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -117,36 +117,36 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _Card(
             title: 'Trajet',
             children: [
-              Text('${currency.format(t.fare)} FCFA / place', style: const TextStyle(fontSize: 16)),
+              Text('${currency.format(t.fare)} FCFA / place', style: const TextStyle(fontSize: 18)),
               Text('${t.availableSeats} place(s) disponible(s) sur ${t.totalSeats}',
-                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
             ],
           ),
           if (t.departureAddress != null || t.departureLatitude != null)
             _Card(
               title: 'Point de rendez-vous',
               children: [
-                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 16)),
+                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 18)),
                 if (t.departureLatitude != null)
                   Text('${t.departureLatitude!.toStringAsFixed(5)}, ${t.departureLongitude!.toStringAsFixed(5)}',
-                      style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
               ],
             ),
           Text('Passagers (${confirmedBookings.length})',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: AppSpacing.sm),
           if (confirmedBookings.isEmpty)
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text("Aucune réservation pour l'instant.", style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+              child: Text("Aucune réservation pour l'instant.", style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
             )
           else
             ...confirmedBookings.map((booking) => _Card(
                   title: '',
                   children: [
-                    Text(booking.rider.name ?? 'Passager', style: const TextStyle(fontSize: 16)),
+                    Text(booking.rider.name ?? 'Passager', style: const TextStyle(fontSize: 18)),
                     Text('${booking.rider.phone} · ${booking.seatsBooked} place(s)',
-                        style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                        style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
@@ -217,7 +217,7 @@ class _Card extends StatelessWidget {
         children: [
           if (title.isNotEmpty) ...[
             Text(title.toUpperCase(),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
             const SizedBox(height: AppSpacing.xs),
           ],
           ...children,

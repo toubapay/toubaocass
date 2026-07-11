@@ -187,9 +187,9 @@ export function PostTripScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
-  notice: { color: colors.textMuted, fontSize: 15 },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  notice: { color: colors.textMuted, fontSize: 16 },
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   chip: {
     paddingVertical: spacing.sm,

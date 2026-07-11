@@ -111,12 +111,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         children: [
           Row(
             children: [
-              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 18)),
+                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 20)),
               ),
-              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
@@ -127,7 +127,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: Text('✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success)),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.success)),
             ),
           const SizedBox(height: AppSpacing.lg),
           if (t.routeDistanceKm != null)
@@ -137,7 +137,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 Text(
                   '🛣️ ${t.routeDistanceKm} km'
                   '${t.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(t.routeDurationMinutes!)} de route' : ''}',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 RouteMap(trip: t),
@@ -147,7 +147,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             _Card(
               title: 'Point de départ',
               children: [
-                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 16)),
+                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 18)),
                 TextButton(
                   onPressed: () => launchUrl(Uri.parse(
                       'https://www.google.com/maps/search/?api=1&query=${t.departureLatitude},${t.departureLongitude}')),
@@ -159,9 +159,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           _Card(
             title: 'Conducteur',
             children: [
-              Text(t.driver.name ?? 'Conducteur', style: const TextStyle(fontSize: 16)),
+              Text(t.driver.name ?? 'Conducteur', style: const TextStyle(fontSize: 18)),
               Text('Note : ${t.driver.rating.toStringAsFixed(1)} ★',
-                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
@@ -186,21 +186,21 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             title: 'Véhicule',
             children: [
               Text('${t.car?.make ?? ''} ${t.car?.model ?? ''} · ${t.car?.color ?? ''}',
-                  style: const TextStyle(fontSize: 16)),
-              Text(t.rideType.toUpperCase(), style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                  style: const TextStyle(fontSize: 18)),
+              Text(t.rideType.toUpperCase(), style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
             ],
           ),
           _Card(
             title: 'Tarif',
             children: [
               Text('${currency.format(t.fare)} FCFA / place',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.primary)),
               Text('${t.availableSeats} place(s) restante(s) sur ${t.totalSeats}',
-                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
             ],
           ),
           if (t.notes != null && t.notes!.isNotEmpty)
-            _Card(title: 'Remarques', children: [Text(t.notes!, style: const TextStyle(fontSize: 16))]),
+            _Card(title: 'Remarques', children: [Text(t.notes!, style: const TextStyle(fontSize: 18))]),
           if (isUnavailable)
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
@@ -214,7 +214,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(editing ? 'Nombre de places' : 'Places à réserver',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   Row(
                     children: [
                       OutlinedButton(
@@ -223,7 +223,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                        child: Text('$seats', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                        child: Text('$seats', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                       ),
                       OutlinedButton(
                         onPressed: () => setState(() => seats = (seats + 1).clamp(editing ? 0 : 1, maxSeats)),
@@ -238,7 +238,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
               child: Text('Réduire à 0 place annulera votre réservation.',
-                  style: TextStyle(color: AppColors.danger, fontSize: 12)),
+                  style: TextStyle(color: AppColors.danger, fontSize: 13)),
             ),
           ElevatedButton(
             onPressed: isUnavailable || booking ? null : _handleBook,
@@ -275,7 +275,7 @@ class _Card extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title.toUpperCase(),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
           const SizedBox(height: AppSpacing.xs),
           ...children,
         ],

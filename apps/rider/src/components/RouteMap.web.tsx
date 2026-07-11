@@ -32,6 +32,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  icon: { fontSize: 22 },
-  text: { fontSize: 12, color: colors.textMuted, textAlign: 'center', paddingHorizontal: 16 },
+  icon: { fontSize: 24 },
+  text: { fontSize: 13, color: colors.textMuted, textAlign: 'center', paddingHorizontal: 16 },
 });

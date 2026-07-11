@@ -31,8 +31,8 @@ export function PhoneEntryPage() {
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ marginTop: spacing.xl, marginBottom: spacing.xl * 1.5 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>Intercity</h1>
-        <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>Réservez une place pour un trajet entre villes.</p>
+        <h1 style={{ fontSize: 35, fontWeight: 800, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>Intercity</h1>
+        <p style={{ fontSize: 18, color: colors.textMuted, margin: 0 }}>Réservez une place pour un trajet entre villes.</p>
       </div>
 
       <TextField

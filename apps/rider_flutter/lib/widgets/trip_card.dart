@@ -45,7 +45,7 @@ class TripCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '${trip.originCity?.name ?? '?'} → ${trip.destinationCity?.name ?? '?'}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -57,16 +57,16 @@ class TripCard extends StatelessWidget {
               Text(
                 '🛣️ ${trip.routeDistanceKm} km'
                 '${trip.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(trip.routeDurationMinutes!)}' : ''}',
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),
             Text(
               '${trip.departureDate} à ${trip.departureTime}',
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
             ),
             if (trip.distanceKm != null)
               Text(
                 '${trip.distanceKm!.toStringAsFixed(1)} km de vous',
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),
             const SizedBox(height: AppSpacing.sm),
             Row(
@@ -74,7 +74,7 @@ class TripCard extends StatelessWidget {
               children: [
                 Text(
                   '${currency.format(trip.fare)} FCFA',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
                 Row(
                   children: [
@@ -86,13 +86,13 @@ class TripCard extends StatelessWidget {
                       ),
                       child: Text(
                         trip_utils.rideTypeLabel[trip.rideType] ?? trip.rideType,
-                        style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 12, color: AppColors.accent, fontWeight: FontWeight.w600),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       trip_utils.fillStateLabel[fillState]!,
-                      style: TextStyle(fontSize: 12, color: fillColor, fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 13, color: fillColor, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -105,7 +105,7 @@ class TripCard extends StatelessWidget {
                 if (booked)
                   Text(
                     '✓ Réservé · ${trip.myBooking!.seatsBooked} place(s)',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.success),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success),
                   )
                 else
                   const SizedBox.shrink(),

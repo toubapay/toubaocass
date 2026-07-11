@@ -12,7 +12,7 @@ interface Props {
 export function CityPicker({ label, cities, value, onChange, placeholder }: Props) {
   return (
     <div style={{ marginBottom: spacing.md }}>
-      <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+      <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
         {label}
       </label>
       <select
@@ -26,7 +26,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
           border: `1px solid ${colors.border}`,
           borderRadius: radius.sm,
           padding: '14px 16px',
-          fontSize: 16,
+          fontSize: 18,
           color: value ? colors.text : colors.textMuted,
           backgroundColor: colors.surface,
           appearance: 'none',

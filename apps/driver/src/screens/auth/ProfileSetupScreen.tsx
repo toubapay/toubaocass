@@ -50,6 +50,6 @@ export function ProfileSetupScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
-  subtitle: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
+  title: { fontSize: 26, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
+  subtitle: { fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg },
 });

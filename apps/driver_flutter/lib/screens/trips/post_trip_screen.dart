@@ -112,7 +112,7 @@ class _PostTripScreenState extends State<PostTripScreen> {
           padding: EdgeInsets.all(AppSpacing.md),
           child: Text(
             "Votre vérification conducteur doit être approuvée avant de pouvoir publier des trajets. Consultez l'onglet Vérification.",
-            style: TextStyle(color: AppColors.textMuted, fontSize: 15),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 16),
           ),
         ),
       );
@@ -124,7 +124,7 @@ class _PostTripScreenState extends State<PostTripScreen> {
         body: const Padding(
           padding: EdgeInsets.all(AppSpacing.md),
           child: Text("Ajoutez d'abord un véhicule depuis l'onglet Flotte.",
-              style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
         ),
       );
     }
@@ -134,7 +134,7 @@ class _PostTripScreenState extends State<PostTripScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
-          const Text('Véhicule', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text('Véhicule', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.xs),
           Wrap(
             spacing: AppSpacing.sm,
@@ -174,7 +174,7 @@ class _PostTripScreenState extends State<PostTripScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text('Point de rendez-vous exact (facultatif)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text('Point de rendez-vous exact (facultatif)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.xs),
           DeparturePicker(
             latitude: departureLat,
@@ -223,7 +223,7 @@ class _PostTripScreenState extends State<PostTripScreen> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text('Type de trajet', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text('Type de trajet', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.xs),
           Wrap(
             spacing: AppSpacing.sm,

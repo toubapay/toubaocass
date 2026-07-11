@@ -84,7 +84,7 @@ export function CarsListScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -93,10 +93,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  name: { fontSize: 16, fontWeight: '700', color: colors.text },
-  meta: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs },
+  name: { fontSize: 18, fontWeight: '700', color: colors.text },
+  meta: { fontSize: 14, color: colors.textMuted, marginTop: spacing.xs },
   removeButton: { marginTop: spacing.sm },
   removeText: { color: colors.danger, fontWeight: '600' },
   empty: { marginTop: spacing.lg, marginBottom: spacing.lg, alignItems: 'center' },
-  emptyText: { color: colors.textMuted, fontSize: 15, textAlign: 'center' },
+  emptyText: { color: colors.textMuted, fontSize: 16, textAlign: 'center' },
 });

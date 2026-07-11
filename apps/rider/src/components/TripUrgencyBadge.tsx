@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   urgent: { backgroundColor: colors.dangerSoft },
   calm: { backgroundColor: colors.successSoft },
-  text: { fontSize: 11.5, fontWeight: '700' },
+  text: { fontSize: 12.5, fontWeight: '700' },
   urgentText: { color: colors.danger },
   calmText: { color: colors.success },
 });

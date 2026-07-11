@@ -80,14 +80,14 @@ class _DeparturePickerState extends State<DeparturePicker> {
         if (error != null)
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 12)),
+            child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 13)),
           ),
         if (!hasPin)
           const Padding(
             padding: EdgeInsets.only(top: AppSpacing.xs),
             child: Text(
               'Touchez la carte pour placer un repère à l\'endroit où les passagers doivent vous retrouver.',
-              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
           ),
       ],

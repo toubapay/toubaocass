@@ -115,7 +115,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                         Text(
                           "Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.",
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 15),
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 16),
                         ),
                       ],
                     )
@@ -143,14 +143,14 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                                     Expanded(
                                       child: Text(
                                         '${booking.trip.originCity?.name ?? '?'} → ${booking.trip.destinationCity?.name ?? '?'}',
-                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Text(
                                       _statusLabel[booking.status] ?? booking.status,
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w700,
                                         color: booking.status == 'cancelled' ? AppColors.danger : AppColors.success,
                                       ),
@@ -160,11 +160,11 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
                                   '${booking.trip.departureDate} à ${booking.trip.departureTime} · ${booking.seatsBooked} place(s)',
-                                  style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
                                 ),
                                 Text(
                                   '${currency.format(booking.fareTotal)} FCFA',
-                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
                                 ),
                                 if (booking.status == 'confirmed')
                                   Padding(

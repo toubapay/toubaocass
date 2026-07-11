@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   text: {
-    fontSize: 11.5,
+    fontSize: 12.5,
     fontWeight: '700',
     color: colors.danger,
   },

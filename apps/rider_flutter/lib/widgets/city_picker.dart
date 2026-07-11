@@ -36,7 +36,7 @@ class _CityPickerSheetState extends State<_CityPickerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(widget.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               autofocus: true,

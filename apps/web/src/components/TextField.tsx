@@ -11,7 +11,7 @@ export function TextField({ label, error, style, ...rest }: Props) {
   return (
     <div style={{ marginBottom: spacing.md }}>
       {label && (
-        <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+        <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
           {label}
         </label>
       )}
@@ -22,13 +22,13 @@ export function TextField({ label, error, style, ...rest }: Props) {
           border: `1px solid ${error ? colors.danger : colors.border}`,
           borderRadius: radius.sm,
           padding: '14px 16px',
-          fontSize: 16,
+          fontSize: 18,
           color: colors.text,
           backgroundColor: colors.surface,
           ...style,
         }}
       />
-      {error && <p style={{ color: colors.danger, fontSize: 12, marginTop: spacing.xs }}>{error}</p>}
+      {error && <p style={{ color: colors.danger, fontSize: 13, marginTop: spacing.xs }}>{error}</p>}
     </div>
   );
 }

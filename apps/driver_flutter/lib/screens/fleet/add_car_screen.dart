@@ -67,7 +67,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
-          const Text('Type de véhicule', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text('Type de véhicule', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSpacing.xs),
           Wrap(
             spacing: AppSpacing.sm,
