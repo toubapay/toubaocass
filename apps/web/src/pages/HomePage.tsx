@@ -27,6 +27,7 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [citySearch, setCitySearch] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -91,6 +92,15 @@ export function HomePage() {
     ? trips.filter((trip) => `${trip.origin_city?.name ?? ''} ${trip.destination_city?.name ?? ''}`.toLowerCase().includes(query))
     : trips;
 
+  const citySuggestions = query
+    ? cities.filter((city) => city.name.toLowerCase().includes(query) && city.name.toLowerCase() !== query).slice(0, 6)
+    : [];
+
+  function selectCitySuggestion(name: string) {
+    setCitySearch(name);
+    setSearchFocused(false);
+  }
+
   const toggleNearMe = async () => {
     if (nearMe) {
       setNearMe(null);
@@ -113,6 +123,8 @@ export function HomePage() {
         <input
           value={citySearch}
           onChange={(e) => setCitySearch(e.target.value)}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
           placeholder="Rechercher une ville de départ ou d'arrivée..."
           style={{
             width: '100%',
@@ -142,6 +154,45 @@ export function HomePage() {
           >
             ✕
           </button>
+        )}
+        {searchFocused && citySuggestions.length > 0 && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              zIndex: 50,
+              backgroundColor: colors.surface,
+              border: `1px solid ${colors.border}`,
+              borderRadius: radius.sm,
+              marginTop: 4,
+              maxHeight: 220,
+              overflowY: 'auto',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            }}
+          >
+            {citySuggestions.map((city, i) => (
+              <button
+                key={city.id}
+                onClick={() => selectCitySuggestion(city.name)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '10px 14px',
+                  border: 'none',
+                  borderBottom: i < citySuggestions.length - 1 ? `1px solid ${colors.border}` : 'none',
+                  backgroundColor: 'transparent',
+                  fontSize: 13.5,
+                  color: colors.text,
+                  cursor: 'pointer',
+                }}
+              >
+                📍 {city.name}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
