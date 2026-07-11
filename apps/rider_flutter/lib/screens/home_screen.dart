@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
             .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Trajets disponibles')),
+      appBar: AppBar(title: const Text('Choisissez votre Destination')),
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(

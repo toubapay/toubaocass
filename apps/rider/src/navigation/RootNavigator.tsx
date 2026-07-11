@@ -43,7 +43,7 @@ function AuthNavigator() {
 function HomeNavigator() {
   return (
     <HomeStackNav.Navigator>
-      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Trajets disponibles' }} />
+      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Choisissez votre Destination' }} />
       <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
     </HomeStackNav.Navigator>
   );
