@@ -38,7 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           maxWidth: 480,
           margin: '0 auto',
           padding: spacing.lg,
-          paddingBottom: 90,
+          paddingBottom: 'calc(90px + env(safe-area-inset-bottom))',
         }}
       >
         {children}
@@ -52,8 +52,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
           right: 0,
           backgroundColor: colors.surface,
           borderTop: `1px solid ${colors.border}`,
+          boxShadow: '0 -2px 10px rgba(19, 26, 23, 0.08)',
           display: 'flex',
           justifyContent: 'center',
+          // Forces its own compositing layer so iOS Safari doesn't let the
+          // fixed nav flicker/lag behind scrolled content while the address
+          // bar is showing/hiding.
+          transform: 'translateZ(0)',
+          WebkitTransform: 'translateZ(0)',
+          willChange: 'transform',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          zIndex: 100,
         }}
       >
         <div style={{ display: 'flex', width: '100%', maxWidth: 480 }}>

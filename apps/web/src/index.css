@@ -23,6 +23,10 @@
 
 html, body, #root {
   height: 100%;
+  /* iOS Safari resizes the visual viewport as its address bar shows/hides,
+     which can make height:100% content jump under a position:fixed bottom
+     nav mid-scroll. dvh tracks the actual visible viewport instead. */
+  height: 100dvh;
 }
 
 body {
