@@ -19,7 +19,20 @@ export function RouteMap({ trip }: { trip: Trip }) {
   const center: [number, number] = [(originPos[0] + destPos[0]) / 2, (originPos[1] + destPos[1]) / 2];
 
   return (
-    <div style={{ height: 220, borderRadius: radius.md, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
+    <div
+      style={{
+        height: 220,
+        borderRadius: radius.md,
+        overflow: 'hidden',
+        border: `1px solid ${colors.border}`,
+        // Leaflet's internal panes/controls/popups use z-indices up to
+        // 1000, which — without a stacking context of their own — leak
+        // into the page's root stacking context and can render above
+        // page chrome like the fixed bottom nav.
+        position: 'relative',
+        zIndex: 0,
+      }}
+    >
       <MapContainer center={center} zoom={7} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

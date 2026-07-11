@@ -48,7 +48,20 @@ export function TripsMap({ trips, height = 300 }: Props) {
           ? "Aucun trajet affiché n'a de point de départ précis pour l'instant."
           : `${withCoords.length} trajet(s) avec un point de départ affiché.`}
       </p>
-      <div style={{ height, borderRadius: 12, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
+      <div
+        style={{
+          height,
+          borderRadius: 12,
+          overflow: 'hidden',
+          border: `1px solid ${colors.border}`,
+          // Leaflet's internal panes/controls/popups use z-indices up to
+          // 1000, which — without a stacking context of their own — leak
+          // into the page's root stacking context and can render above
+          // page chrome like the fixed bottom nav.
+          position: 'relative',
+          zIndex: 0,
+        }}
+      >
         <MapContainer center={center} zoom={withCoords.length > 0 ? 11 : 7} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
