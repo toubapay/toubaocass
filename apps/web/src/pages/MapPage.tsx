@@ -256,7 +256,22 @@ export function MapPage() {
       </div>
       {locationError && <p style={{ color: colors.danger, fontSize: 12, marginBottom: spacing.md }}>{locationError}</p>}
 
-      <div style={{ height: '55vh', minHeight: 320, borderRadius: 12, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
+      <div
+        style={{
+          height: '55vh',
+          minHeight: 320,
+          borderRadius: 12,
+          overflow: 'hidden',
+          border: `1px solid ${colors.border}`,
+          // Leaflet's internal panes/controls/popups use z-indices up to
+          // 1000, which — without a stacking context of their own — leak
+          // into the page's root stacking context and can render above
+          // page chrome like the fixed bottom nav. Scoping them here keeps
+          // everything Leaflet-related clipped to this box.
+          position: 'relative',
+          zIndex: 0,
+        }}
+      >
         <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
           <RecenterMap center={mapCenter} zoom={mapZoom} />
           <TileLayer
