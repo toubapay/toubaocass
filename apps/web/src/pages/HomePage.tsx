@@ -27,6 +27,9 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [citySearch, setCitySearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
@@ -35,29 +38,46 @@ export function HomePage() {
   const hasFilters = origin || destination || date || nearMe;
   const invalidRoute = origin && destination && origin.id === destination.id;
 
-  const load = useCallback(() => {
-    if (invalidRoute) return;
-    setLoading(true);
-    setError(undefined);
-    searchTrips({
-      origin_city_id: origin?.id,
-      destination_city_id: destination?.id,
-      date: date || undefined,
-      seats,
-      lat: nearMe?.latitude,
-      lng: nearMe?.longitude,
-      radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
-    })
-      .then((res) => setTrips(res.data))
-      .catch(() => setError('Impossible de charger les trajets. Réessayez.'))
-      .finally(() => setLoading(false));
+  const load = useCallback(
+    (pageToLoad: number) => {
+      if (invalidRoute) return;
+      setLoading(true);
+      setError(undefined);
+      searchTrips({
+        origin_city_id: origin?.id,
+        destination_city_id: destination?.id,
+        date: date || undefined,
+        seats,
+        lat: nearMe?.latitude,
+        lng: nearMe?.longitude,
+        radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
+        page: pageToLoad,
+      })
+        .then((res) => {
+          setTrips(res.data);
+          setLastPage(res.meta?.last_page ?? 1);
+          setTotal(res.meta?.total ?? res.data.length);
+        })
+        .catch(() => setError('Impossible de charger les trajets. Réessayez.'))
+        .finally(() => setLoading(false));
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [origin, destination, date, seats, nearMe, invalidRoute]);
+    [origin, destination, date, seats, nearMe, invalidRoute],
+  );
 
+  // Any filter change starts back over at page 1 — a page number from a
+  // previous filter combination has no guaranteed meaning under a new one.
   useEffect(() => {
-    load();
+    setPage(1);
+    load(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origin, destination, date, seats, nearMe]);
+
+  const goToPage = (nextPage: number) => {
+    setPage(nextPage);
+    load(nextPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const clearFilters = () => {
     setOrigin(null);
@@ -250,6 +270,58 @@ export function HomePage() {
                   onTripUpdated={(updated) => setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
                 />
               ))
+            )}
+
+            {!query && lastPage > 1 && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginTop: spacing.md,
+                  marginBottom: spacing.md,
+                }}
+              >
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page <= 1}
+                  style={{
+                    border: `1.5px solid ${colors.primary}`,
+                    borderRadius: radius.sm,
+                    padding: '10px 16px',
+                    backgroundColor: 'transparent',
+                    color: colors.primary,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: page <= 1 ? 'default' : 'pointer',
+                    opacity: page <= 1 ? 0.4 : 1,
+                  }}
+                >
+                  ← Précédent
+                </button>
+                <span style={{ fontSize: 13, color: colors.textMuted, textAlign: 'center' }}>
+                  Page {page} sur {lastPage}
+                  <br />
+                  {total} trajet(s) au total
+                </span>
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page >= lastPage}
+                  style={{
+                    border: `1.5px solid ${colors.primary}`,
+                    borderRadius: radius.sm,
+                    padding: '10px 16px',
+                    backgroundColor: 'transparent',
+                    color: colors.primary,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: page >= lastPage ? 'default' : 'pointer',
+                    opacity: page >= lastPage ? 0.4 : 1,
+                  }}
+                >
+                  Suivant →
+                </button>
+              </div>
             )}
           </>
         )}

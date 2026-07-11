@@ -15,11 +15,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <header
         style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
           padding: `${spacing.md}px ${spacing.lg}px`,
           backgroundColor: colors.primary,
           display: 'flex',
           alignItems: 'center',
           gap: spacing.sm,
+          boxShadow: '0 2px 10px rgba(19, 26, 23, 0.12)',
         }}
       >
         <img src="/favicon.svg" alt="" width={28} height={28} />
@@ -50,9 +54,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: colors.surface,
-          borderTop: `1px solid ${colors.border}`,
-          boxShadow: '0 -2px 10px rgba(19, 26, 23, 0.08)',
+          backgroundColor: colors.primary,
+          boxShadow: '0 -2px 10px rgba(19, 26, 23, 0.2)',
           display: 'flex',
           justifyContent: 'center',
           // Forces its own compositing layer so iOS Safari doesn't let the
@@ -79,7 +82,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 gap: 2,
                 padding: `${spacing.sm}px 0`,
                 textDecoration: 'none',
-                color: isActive ? colors.primary : colors.textMuted,
+                color: isActive ? '#fff' : 'rgba(255,255,255,0.65)',
                 fontSize: 12,
                 fontWeight: 600,
               })}

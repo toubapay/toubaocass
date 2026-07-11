@@ -10,6 +10,7 @@ export interface SearchTripsParams {
   lat?: number;
   lng?: number;
   radius_km?: number;
+  page?: number;
 }
 
 export async function searchTrips(params: SearchTripsParams): Promise<Paginated<Trip>> {
