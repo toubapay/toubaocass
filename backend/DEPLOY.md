@@ -83,6 +83,7 @@ listed here keeps its `.env.example` default.
 | `FCM_PROJECT_ID` | your Firebase project ID |
 | `FCM_CREDENTIALS_JSON` | the *entire contents* of the Firebase service-account JSON (Console → Project settings → Service accounts → Generate new private key), pasted as one Railway variable value — it's already single-line JSON, no reformatting needed. `docker/entrypoint.sh` writes it to `storage/app/fcm-credentials.json` at container boot; leave `FCM_CREDENTIALS_PATH` unset unless you're mounting the file another way |
 | `OTP_BYPASS_CODE` | leave unset in production (only useful for demos) |
+| `GOOGLE_MAPS_SERVER_KEY` | optional — a *server-side* Google Maps key (restrict to this server's IP + the Distance Matrix API only; distinct from the client apps' `GOOGLE_MAPS_API_KEY`) for real driving-distance/duration between cities. Without it, route distance falls back to a straight-line estimate — the feature still works, just less precise |
 
 Railway sets `PORT` automatically — the entrypoint script already binds
 Octane to it, don't set it yourself.

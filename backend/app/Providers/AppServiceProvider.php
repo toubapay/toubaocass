@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PushGateway;
 use App\Contracts\SmsGateway;
+use App\Services\Geo\CityDistanceService;
 use App\Services\Push\FcmPushGateway;
 use App\Services\Push\LogPushGateway;
 use App\Services\Sms\LogSmsGateway;
@@ -50,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
 
             return new LogPushGateway;
         });
+
+        // Singleton so its per-request memo cache actually avoids duplicate
+        // city_distances lookups across the trips in one paginated listing.
+        $this->app->singleton(CityDistanceService::class);
     }
 
     public function boot(): void

@@ -34,6 +34,8 @@ export interface City {
   id: number;
   name: string;
   country: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface Car {
@@ -73,6 +75,8 @@ export interface Trip {
   notes: string | null;
   created_at: string;
   distance_km?: number;
+  route_distance_km: number | null;
+  route_duration_minutes: number | null;
   bookings?: Booking[];
   bookings_count?: number;
   my_booking?: { id: number; seats_booked: number; fare_total: number; status: BookingStatus } | null;

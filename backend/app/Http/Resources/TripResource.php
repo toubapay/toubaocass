@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\Geo\CityDistanceService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,6 +10,9 @@ class TripResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $hasRoute = $this->relationLoaded('originCity') && $this->relationLoaded('destinationCity')
+            && $this->originCity && $this->destinationCity;
+
         return [
             'id' => $this->id,
             'driver' => [
@@ -33,6 +37,14 @@ class TripResource extends JsonResource
             'notes' => $this->notes,
             'created_at' => $this->created_at,
             'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 1)),
+            'route_distance_km' => $this->when(
+                $hasRoute,
+                fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->distance_km,
+            ),
+            'route_duration_minutes' => $this->when(
+                $hasRoute,
+                fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->duration_minutes,
+            ),
             'bookings' => BookingResource::collection($this->whenLoaded('bookings')),
             'bookings_count' => $this->whenCounted('bookings'),
             'my_booking' => $this->when($this->relationLoaded('riderBooking'), fn () => $this->riderBooking ? [

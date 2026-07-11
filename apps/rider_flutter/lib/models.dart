@@ -70,13 +70,17 @@ class City {
   final int id;
   final String name;
   final String country;
+  final double? latitude;
+  final double? longitude;
 
-  City({required this.id, required this.name, required this.country});
+  City({required this.id, required this.name, required this.country, this.latitude, this.longitude});
 
   factory City.fromJson(Map<String, dynamic> json) => City(
         id: json['id'] as int,
         name: json['name'] as String,
         country: json['country'] as String? ?? '',
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
       );
 }
 
@@ -170,6 +174,8 @@ class Trip {
   final String? notes;
   final String createdAt;
   final double? distanceKm;
+  final double? routeDistanceKm;
+  final int? routeDurationMinutes;
   final List<Booking>? bookings;
   final int? bookingsCount;
   final RiderBookingSummary? myBooking;
@@ -193,6 +199,8 @@ class Trip {
     required this.notes,
     required this.createdAt,
     this.distanceKm,
+    this.routeDistanceKm,
+    this.routeDurationMinutes,
     this.bookings,
     this.bookingsCount,
     this.myBooking,
@@ -217,6 +225,8 @@ class Trip {
         notes: notes,
         createdAt: createdAt,
         distanceKm: distanceKm,
+        routeDistanceKm: routeDistanceKm,
+        routeDurationMinutes: routeDurationMinutes,
         bookings: bookings,
         bookingsCount: bookingsCount,
         myBooking: myBooking,
@@ -242,6 +252,8 @@ class Trip {
         notes: json['notes'] as String?,
         createdAt: json['created_at'] as String? ?? '',
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        routeDistanceKm: (json['route_distance_km'] as num?)?.toDouble(),
+        routeDurationMinutes: json['route_duration_minutes'] as int?,
         bookings: json['bookings'] == null
             ? null
             : (json['bookings'] as List).map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList(),

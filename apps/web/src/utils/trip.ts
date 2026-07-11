@@ -32,6 +32,14 @@ export const RIDE_TYPE_LABEL: Record<string, string> = {
   xl: 'XL',
 };
 
+/** Formats a minute count as "1h30" (over an hour) or "45 min". */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  return remaining === 0 ? `${hours}h` : `${hours}h${String(remaining).padStart(2, '0')}`;
+}
+
 const URGENT_HOURS = 2;
 
 /**

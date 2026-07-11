@@ -53,6 +53,12 @@ class TripCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
+            if (trip.routeDistanceKm != null)
+              Text(
+                '🛣️ ${trip.routeDistanceKm} km'
+                '${trip.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(trip.routeDurationMinutes!)}' : ''}',
+                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
             Text(
               '${trip.departureDate} à ${trip.departureTime}',
               style: const TextStyle(fontSize: 13, color: AppColors.textMuted),

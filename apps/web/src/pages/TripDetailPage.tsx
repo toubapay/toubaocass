@@ -6,9 +6,11 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import type { Trip } from '../api/types';
 import { Button } from '../components/Button';
+import { RouteMap } from '../components/RouteMap';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { colors, radius, spacing } from '../theme';
+import { formatDuration } from '../utils/trip';
 
 export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -107,6 +109,19 @@ export function TripDetailPage() {
         <p style={{ fontSize: 13, fontWeight: 700, color: colors.success, marginTop: spacing.sm, marginBottom: 0 }}>
           ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
         </p>
+      )}
+
+      {trip.route_distance_km !== null && (
+        <div style={cardStyle}>
+          <p style={sectionTitleStyle}>Itinéraire</p>
+          <p style={{ fontSize: 16, color: colors.text, margin: 0 }}>
+            🛣️ {trip.route_distance_km} km
+            {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)} de route`}
+          </p>
+          <div style={{ marginTop: spacing.sm }}>
+            <RouteMap trip={trip} />
+          </div>
+        </div>
       )}
 
       {hasPin && (

@@ -60,6 +60,16 @@ return [
         ],
     ],
 
+    'google_maps' => [
+        // Server-side key for the Distance Matrix API — deliberately separate
+        // from the client apps' GOOGLE_MAPS_API_KEY (that one is restricted
+        // to Android/iOS app bundles for map tile rendering; this one should
+        // be restricted to this server's IP and the Distance Matrix API
+        // only). Route distances fall back to a straight-line estimate when
+        // this isn't set.
+        'server_key' => env('GOOGLE_MAPS_SERVER_KEY'),
+    ],
+
     'otp' => [
         'ttl_minutes' => env('OTP_TTL_MINUTES', 5),
         'length' => env('OTP_LENGTH', 6),

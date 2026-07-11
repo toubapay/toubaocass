@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { bookingFillState, FILL_STATE_LABEL, formatDuration, RIDE_TYPE_LABEL } from '../utils/trip';
 import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
@@ -39,6 +39,13 @@ export function TripCard({
           <Text style={[styles.pillText, { color: fillStyle.fg }]}>{FILL_STATE_LABEL[fillState]}</Text>
         </View>
       </View>
+
+      {trip.route_distance_km !== null && (
+        <Text style={styles.routeDistance}>
+          🛣️ {trip.route_distance_km} km
+          {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)}`}
+        </Text>
+      )}
 
       <View style={styles.metaRow}>
         <Text style={styles.meta}>{trip.departure_date}</Text>
@@ -108,6 +115,7 @@ const styles = StyleSheet.create({
   routeRow: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, flexWrap: 'wrap' },
   city: { fontSize: 17, fontWeight: '700', color: colors.text },
   arrow: { marginHorizontal: spacing.sm, color: colors.textMuted },
+  routeDistance: { fontSize: 12, color: colors.textMuted, marginBottom: spacing.xs },
   pill: { borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 3, marginLeft: spacing.sm },
   pillText: { fontSize: 11, fontWeight: '700' },
   metaRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },

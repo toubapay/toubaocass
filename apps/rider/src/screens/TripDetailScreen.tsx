@@ -8,10 +8,12 @@ import { fetchTrip } from '../api/trips';
 import { Trip } from '../api/types';
 import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
+import { RouteMap } from '../components/RouteMap';
 import { Screen } from '../components/Screen';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { formatDuration } from '../utils/trip';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
@@ -97,6 +99,19 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <TripUrgencyBadge trip={trip} />
         {editing && (
           <Text style={styles.bookedNotice}>✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet</Text>
+        )}
+
+        {trip.route_distance_km !== null && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Itinéraire</Text>
+            <Text style={styles.line}>
+              🛣️ {trip.route_distance_km} km
+              {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)} de route`}
+            </Text>
+            <View style={{ marginTop: spacing.sm }}>
+              <RouteMap trip={trip} />
+            </View>
+          </View>
         )}
 
         {hasPin && (

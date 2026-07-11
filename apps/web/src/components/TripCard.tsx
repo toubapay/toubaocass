@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, RIDE_TYPE_LABEL } from '../utils/trip';
+import { bookingFillState, FILL_STATE_LABEL, formatDuration, RIDE_TYPE_LABEL } from '../utils/trip';
 import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
@@ -61,6 +61,13 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
           {FILL_STATE_LABEL[fillState]}
         </span>
       </div>
+
+      {trip.route_distance_km !== null && (
+        <p style={{ fontSize: 12, color: colors.textMuted, margin: `0 0 ${spacing.xs}px` }}>
+          🛣️ {trip.route_distance_km} km
+          {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)}`}
+        </p>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', marginBottom: spacing.sm, fontSize: 13, color: colors.textMuted }}>
         <span>{trip.departure_date}</span>

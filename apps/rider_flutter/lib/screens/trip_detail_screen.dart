@@ -7,6 +7,8 @@ import '../api/client.dart';
 import '../api/trips_api.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../utils/trip.dart' as trip_utils;
+import '../widgets/route_map.dart';
 import '../widgets/trip_urgency_badge.dart';
 
 class TripDetailScreen extends StatefulWidget {
@@ -128,6 +130,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success)),
             ),
           const SizedBox(height: AppSpacing.lg),
+          if (t.routeDistanceKm != null)
+            _Card(
+              title: 'Itinéraire',
+              children: [
+                Text(
+                  '🛣️ ${t.routeDistanceKm} km'
+                  '${t.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(t.routeDurationMinutes!)} de route' : ''}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                RouteMap(trip: t),
+              ],
+            ),
           if (hasPin) ...[
             _Card(
               title: 'Point de départ',

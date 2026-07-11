@@ -33,6 +33,14 @@ const rideTypeLabel = {
   'xl': 'XL',
 };
 
+/// Formats a minute count as "1h30" (over an hour) or "45 min".
+String formatDuration(int minutes) {
+  if (minutes < 60) return '$minutes min';
+  final hours = minutes ~/ 60;
+  final remaining = minutes % 60;
+  return remaining == 0 ? '${hours}h' : '${hours}h${remaining.toString().padLeft(2, '0')}';
+}
+
 /// Drives the always-visible trip urgency badge: departure within the next
 /// 2 hours, or down to the last seat (0 seats already gets its own distinct
 /// "no longer available" notice, so it's excluded here).

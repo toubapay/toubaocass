@@ -74,4 +74,19 @@ void main() {
           BookingFillState.full);
     });
   });
+
+  group('formatDuration', () {
+    test('under an hour shows minutes', () {
+      expect(formatDuration(45), '45 min');
+    });
+
+    test('exact hour shows no minutes', () {
+      expect(formatDuration(120), '2h');
+    });
+
+    test('hour with remainder pads minutes', () {
+      expect(formatDuration(150), '2h30');
+      expect(formatDuration(125), '2h05');
+    });
+  });
 }
