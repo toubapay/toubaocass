@@ -49,6 +49,27 @@ class CityDistanceService
     }
 
     /**
+     * Re-attempts a Google lookup for a distance that was previously cached
+     * via the Haversine fallback (e.g. computed before a server key was
+     * configured) and upgrades it in place if Google now returns a result.
+     * No-op for distances already sourced from Google.
+     */
+    public function refresh(CityDistance $distance): CityDistance
+    {
+        if ($distance->source === 'google') {
+            return $distance;
+        }
+
+        $computed = $this->computeViaGoogle($distance->originCity, $distance->destinationCity);
+
+        if ($computed) {
+            $distance->update($computed);
+        }
+
+        return $distance;
+    }
+
+    /**
      * @return array{distance_km: float, duration_minutes: int|null, source: string}|null
      */
     private function computeViaGoogle(City $origin, City $destination): ?array
