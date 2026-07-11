@@ -104,7 +104,29 @@ export function TripDetailPage() {
       <p style={{ color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg }}>
         {trip.departure_date} à {trip.departure_time}
       </p>
-      <TripUrgencyBadge trip={trip} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
+        <TripUrgencyBadge trip={trip} />
+        {!editing && !isUnavailable && (
+          <button
+            onClick={handleBook}
+            disabled={booking}
+            style={{
+              border: 'none',
+              borderRadius: radius.sm,
+              padding: `${spacing.xs}px ${spacing.md}px`,
+              backgroundColor: colors.primary,
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: booking ? 'default' : 'pointer',
+              opacity: booking ? 0.6 : 1,
+              marginBottom: spacing.sm,
+            }}
+          >
+            {booking ? '…' : `⚡ Réserver — ${(trip.fare * seats).toLocaleString()} FCFA`}
+          </button>
+        )}
+      </div>
       {editing && (
         <p style={{ fontSize: 14, fontWeight: 700, color: colors.success, marginTop: spacing.sm, marginBottom: 0 }}>
           ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
