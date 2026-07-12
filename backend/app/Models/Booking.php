@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['trip_id', 'rider_id', 'seats_booked', 'fare_total', 'status'])]
+#[Fillable(['trip_id', 'rider_id', 'seats_booked', 'fare_total', 'status', 'payment_method'])]
 class Booking extends Model
 {
     /** @use HasFactory<BookingFactory> */
@@ -18,6 +18,10 @@ class Booking extends Model
     const STATUS_CONFIRMED = 'confirmed';
 
     const STATUS_CANCELLED = 'cancelled';
+
+    const PAYMENT_METHOD_CASH = 'cash';
+
+    const PAYMENT_METHOD_WALLET = 'wallet';
 
     public function trip(): BelongsTo
     {

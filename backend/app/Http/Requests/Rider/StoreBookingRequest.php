@@ -15,6 +15,7 @@ class StoreBookingRequest extends FormRequest
     {
         return [
             'seats' => ['required', 'integer', 'min:1', 'max:29'],
+            'payment_method' => ['sometimes', 'in:cash,wallet'],
         ];
     }
 }

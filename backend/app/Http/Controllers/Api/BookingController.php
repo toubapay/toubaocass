@@ -10,6 +10,8 @@ use App\Http\Requests\Rider\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Trip;
+use App\Models\WalletTransaction;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -26,12 +28,13 @@ class BookingController extends Controller
         return BookingResource::collection($bookings);
     }
 
-    public function store(StoreBookingRequest $request, Trip $trip)
+    public function store(StoreBookingRequest $request, Trip $trip, WalletService $walletService)
     {
         $rider = $request->user();
         $seatsRequested = (int) $request->validated('seats');
+        $paymentMethod = $request->validated('payment_method') ?? Booking::PAYMENT_METHOD_CASH;
 
-        $booking = DB::transaction(function () use ($trip, $rider, $seatsRequested) {
+        $booking = DB::transaction(function () use ($trip, $rider, $seatsRequested, $paymentMethod, $walletService) {
             /** @var Trip $locked */
             $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
@@ -58,12 +61,20 @@ class BookingController extends Controller
                 ]);
             }
 
+            $fareTotal = $locked->fare * $seatsRequested;
+
             $booking = $locked->bookings()->create([
                 'rider_id' => $rider->id,
                 'seats_booked' => $seatsRequested,
-                'fare_total' => $locked->fare * $seatsRequested,
+                'fare_total' => $fareTotal,
+                'payment_method' => $paymentMethod,
                 'status' => Booking::STATUS_CONFIRMED,
             ]);
+
+            if ($paymentMethod === Booking::PAYMENT_METHOD_WALLET) {
+                $walletService->charge($rider, $fareTotal, $booking, 'Paiement de réservation');
+                $walletService->credit($locked->driver, $fareTotal, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation');
+            }
 
             $locked->decrement('available_seats', $seatsRequested);
 
@@ -84,21 +95,21 @@ class BookingController extends Controller
      * add more seats (if available) or release some, without cancelling and
      * re-booking. Reducing to 0 seats is treated as a cancellation.
      */
-    public function update(UpdateBookingRequest $request, Booking $booking)
+    public function update(UpdateBookingRequest $request, Booking $booking, WalletService $walletService)
     {
         $this->authorize('update', $booking);
 
         $newSeats = (int) $request->validated('seats');
 
         if ($newSeats === 0) {
-            return $this->destroy($request, $booking);
+            return $this->destroy($request, $booking, $walletService);
         }
 
         if ($booking->status !== Booking::STATUS_CONFIRMED) {
             return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
         }
 
-        $updated = DB::transaction(function () use ($booking, $newSeats) {
+        $updated = DB::transaction(function () use ($booking, $newSeats, $walletService) {
             /** @var Trip $trip */
             $trip = Trip::where('id', $booking->trip_id)->lockForUpdate()->firstOrFail();
 
@@ -108,21 +119,35 @@ class BookingController extends Controller
                 ]);
             }
 
-            $delta = $newSeats - $booking->seats_booked;
+            $seatDelta = $newSeats - $booking->seats_booked;
 
-            if ($delta > 0 && $trip->available_seats < $delta) {
+            if ($seatDelta > 0 && $trip->available_seats < $seatDelta) {
                 throw ValidationException::withMessages([
                     'seats' => ["Il ne reste que {$trip->available_seats} place(s) supplémentaire(s) disponible(s) sur ce trajet."],
                 ]);
             }
 
+            $newFareTotal = $trip->fare * $newSeats;
+            $fareDelta = $newFareTotal - $booking->fare_total;
+
+            if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET && $fareDelta !== 0) {
+                if ($fareDelta > 0) {
+                    $walletService->charge($booking->rider, $fareDelta, $booking, 'Ajustement de réservation');
+                    $walletService->credit($trip->driver, $fareDelta, $booking, WalletTransaction::TYPE_EARNING, 'Ajustement de revenu');
+                } else {
+                    $refundAmount = abs($fareDelta);
+                    $walletService->credit($booking->rider, $refundAmount, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement partiel de réservation');
+                    $walletService->debit($trip->driver, $refundAmount, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Ajustement de revenu');
+                }
+            }
+
             $booking->update([
                 'seats_booked' => $newSeats,
-                'fare_total' => $trip->fare * $newSeats,
+                'fare_total' => $newFareTotal,
             ]);
 
-            if ($delta !== 0) {
-                $trip->decrement('available_seats', $delta);
+            if ($seatDelta !== 0) {
+                $trip->decrement('available_seats', $seatDelta);
             }
 
             $trip->refresh();
@@ -139,7 +164,7 @@ class BookingController extends Controller
         return new BookingResource($updated->load(['trip.car', 'trip.originCity', 'trip.destinationCity', 'trip.driver']));
     }
 
-    public function destroy(Request $request, Booking $booking)
+    public function destroy(Request $request, Booking $booking, WalletService $walletService)
     {
         $this->authorize('delete', $booking);
 
@@ -147,7 +172,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
         }
 
-        DB::transaction(function () use ($booking) {
+        DB::transaction(function () use ($booking, $walletService) {
             $booking->update(['status' => Booking::STATUS_CANCELLED]);
 
             /** @var Trip $trip */
@@ -158,6 +183,11 @@ class BookingController extends Controller
 
             if ($wasFull) {
                 $trip->update(['status' => Trip::STATUS_SCHEDULED]);
+            }
+
+            if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
+                $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation annulée');
+                $walletService->debit($trip->driver, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Reprise de revenu (réservation annulée)');
             }
         });
 

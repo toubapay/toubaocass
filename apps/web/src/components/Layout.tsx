@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-import { colors, spacing } from '../theme';
+import { colors, radius, spacing } from '../theme';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
@@ -42,7 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           maxWidth: 480,
           margin: '0 auto',
           padding: spacing.lg,
-          paddingBottom: 'calc(90px + env(safe-area-inset-bottom))',
+          paddingBottom: 'calc(100px + env(safe-area-inset-bottom))',
         }}
       >
         {children}
@@ -51,11 +51,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <nav
         style={{
           position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: colors.primary,
-          boxShadow: '0 -2px 10px rgba(19, 26, 23, 0.2)',
+          bottom: 'calc(14px + env(safe-area-inset-bottom))',
+          left: 14,
+          right: 14,
           display: 'flex',
           justifyContent: 'center',
           // Forces its own compositing layer so iOS Safari doesn't let the
@@ -64,11 +62,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
           transform: 'translateZ(0)',
           WebkitTransform: 'translateZ(0)',
           willChange: 'transform',
-          paddingBottom: 'env(safe-area-inset-bottom)',
           zIndex: 100,
         }}
       >
-        <div style={{ display: 'flex', width: '100%', maxWidth: 480 }}>
+        <div
+          style={{
+            display: 'flex',
+            width: '100%',
+            maxWidth: 480,
+            backgroundColor: colors.surface,
+            borderRadius: radius.lg,
+            boxShadow: '0 6px 20px rgba(19, 26, 23, 0.18)',
+            padding: 6,
+            gap: 2,
+          }}
+        >
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
@@ -81,13 +89,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 alignItems: 'center',
                 gap: 2,
                 padding: `${spacing.sm}px 0`,
+                borderRadius: radius.md,
                 textDecoration: 'none',
-                color: isActive ? '#fff' : 'rgba(255,255,255,0.65)',
-                fontSize: 13,
-                fontWeight: 600,
+                backgroundColor: isActive ? colors.accentSoft : 'transparent',
+                color: isActive ? colors.primary : colors.textMuted,
+                fontSize: 12.5,
+                fontWeight: isActive ? 700 : 600,
               })}
             >
-              <span style={{ fontSize: 22 }}>{item.icon}</span>
+              <span style={{ fontSize: 20 }}>{item.icon}</span>
               <span>{item.label}</span>
             </NavLink>
           ))}

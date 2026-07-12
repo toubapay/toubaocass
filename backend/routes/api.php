@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\TripController;
+use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -26,6 +27,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // driver of that trip (authorized per-booking, not per-role).
     Route::get('bookings/{booking}/messages', [MessageController::class, 'index']);
     Route::post('bookings/{booking}/messages', [MessageController::class, 'store']);
+
+    // Wallet — available to both riders and drivers. Top-ups aren't
+    // self-service; they're credited by an admin (see the wallet:top-up
+    // Artisan command), so there's no top-up endpoint here.
+    Route::get('wallet', [WalletController::class, 'show']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {

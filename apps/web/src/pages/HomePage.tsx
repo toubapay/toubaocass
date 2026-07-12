@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
+import { fetchWallet } from '../api/wallet';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
+import { WalletIcon } from '../components/WalletIcon';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -14,6 +17,8 @@ import { colors, radius, spacing } from '../theme';
 const NEARBY_RADIUS_KM = 25;
 
 export function HomePage() {
+  const navigate = useNavigate();
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -34,6 +39,10 @@ export function HomePage() {
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
+  }, []);
+
+  useEffect(() => {
+    fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
   }, []);
 
   const hasFilters = origin || destination || date || nearMe;
@@ -116,24 +125,51 @@ export function HomePage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Choisissez votre Destination</h1>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm, marginBottom: spacing.md }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, margin: 0 }}>Choisissez votre Destination</h1>
+        <button
+          onClick={() => navigate('/wallet')}
+          aria-label="Mon portefeuille"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            border: 'none',
+            borderRadius: radius.lg,
+            padding: '8px 12px',
+            backgroundColor: colors.accentSoft,
+            color: colors.accent,
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          <WalletIcon size={16} color={colors.accent} />
+          {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
+        </button>
+      </div>
 
       <div style={{ position: 'relative', marginBottom: spacing.sm }}>
-        <span style={{ position: 'absolute', left: 14, top: 13, fontSize: 16, pointerEvents: 'none' }}>🔍</span>
+        <span style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', fontSize: 17, pointerEvents: 'none' }}>
+          🔍
+        </span>
         <input
           value={citySearch}
           onChange={(e) => setCitySearch(e.target.value)}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-          placeholder="Rechercher une ville de départ ou d'arrivée..."
+          placeholder="Où allez-vous ?"
           style={{
             width: '100%',
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.sm,
-            padding: '12px 14px 12px 38px',
+            border: 'none',
+            borderRadius: 28,
+            padding: '16px 44px 16px 48px',
             fontSize: 16,
             color: colors.text,
             backgroundColor: colors.surface,
+            boxShadow: '0 4px 16px rgba(19, 26, 23, 0.1)',
           }}
         />
         {citySearch && (
@@ -142,8 +178,9 @@ export function HomePage() {
             aria-label="Effacer la recherche"
             style={{
               position: 'absolute',
-              right: 10,
-              top: 8,
+              right: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
               border: 'none',
               background: 'none',
               color: colors.textMuted,

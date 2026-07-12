@@ -19,6 +19,7 @@ class BookingResource extends JsonResource
             ],
             'seats_booked' => $this->seats_booked,
             'fare_total' => $this->fare_total,
+            'payment_method' => $this->payment_method,
             'status' => $this->status,
             'created_at' => $this->created_at,
         ];

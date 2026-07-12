@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
+import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
 import type { UsePushNotifications } from '../hooks/usePushNotifications';
 import { colors, radius, spacing } from '../theme';
@@ -12,8 +17,14 @@ import { colors, radius, spacing } from '../theme';
  * from Profile, silently dropping any push that arrives on another page.
  */
 export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushNotifications }) {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { permission, loading, error, enable } = pushNotifications;
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
+  }, []);
 
   return (
     <div>
@@ -24,7 +35,7 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
           backgroundColor: colors.surface,
           borderRadius: radius.md,
           padding: spacing.lg,
-          marginBottom: spacing.xl,
+          marginBottom: spacing.md,
           border: `1px solid ${colors.border}`,
         }}
       >
@@ -32,6 +43,35 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         <p style={{ fontSize: 15, color: colors.textMuted, margin: 0 }}>{user?.phone}</p>
         {user?.email && <p style={{ fontSize: 15, color: colors.textMuted, margin: 0 }}>{user.email}</p>}
       </div>
+
+      <button
+        onClick={() => navigate('/wallet')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          border: 'none',
+          borderRadius: radius.md,
+          padding: spacing.lg,
+          marginBottom: spacing.xl,
+          backgroundColor: colors.primary,
+          color: '#fff',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+          <WalletIcon size={26} color="#fff" detailColor={colors.primary} />
+          <span>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 600, opacity: 0.85 }}>Mon portefeuille</span>
+            <span style={{ display: 'block', fontSize: 20, fontWeight: 800 }}>
+              {walletBalance !== null ? `${walletBalance.toLocaleString()} FCFA` : '…'}
+            </span>
+          </span>
+        </span>
+        <span style={{ fontSize: 20 }}>→</span>
+      </button>
 
       {permission !== 'unsupported' && (
         <div style={{ marginBottom: spacing.lg }}>

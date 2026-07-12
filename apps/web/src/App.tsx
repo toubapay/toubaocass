@@ -13,6 +13,7 @@ import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TripDetailPage } from './pages/TripDetailPage';
+import { WalletPage } from './pages/WalletPage';
 
 function AppRoutes() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />
+        <Route path="/wallet" element={<WalletPage />} />
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

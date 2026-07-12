@@ -4,11 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
-import type { Trip } from '../api/types';
+import type { PaymentMethod, Trip } from '../api/types';
+import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
 import { RouteMap } from '../components/RouteMap';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
+import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
 import { formatDuration } from '../utils/trip';
 
@@ -19,6 +21,12 @@ export function TripDetailPage() {
   const [loading, setLoading] = useState(true);
   const [seats, setSeats] = useState(1);
   const [booking, setBooking] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
+  }, []);
 
   const load = () => {
     if (!id) return;
@@ -49,7 +57,7 @@ export function TripDetailPage() {
         alert('Réservation mise à jour.');
         load();
       } else {
-        await bookTrip(trip.id, seats);
+        await bookTrip(trip.id, seats, paymentMethod);
         alert(`Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`);
         navigate('/bookings');
       }
@@ -69,6 +77,8 @@ export function TripDetailPage() {
     ? !['scheduled', 'full'].includes(trip.status)
     : trip.available_seats <= 0 || trip.status !== 'scheduled';
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
+  const insufficientWalletFunds =
+    !editing && paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
 
   const cardStyle: React.CSSProperties = {
@@ -109,7 +119,7 @@ export function TripDetailPage() {
         {!editing && !isUnavailable && (
           <button
             onClick={handleBook}
-            disabled={booking}
+            disabled={booking || insufficientWalletFunds}
             style={{
               border: 'none',
               borderRadius: radius.sm,
@@ -118,8 +128,8 @@ export function TripDetailPage() {
               color: '#fff',
               fontWeight: 700,
               fontSize: 13,
-              cursor: booking ? 'default' : 'pointer',
-              opacity: booking ? 0.6 : 1,
+              cursor: booking || insufficientWalletFunds ? 'default' : 'pointer',
+              opacity: booking || insufficientWalletFunds ? 0.6 : 1,
               marginBottom: spacing.sm,
             }}
           >
@@ -248,6 +258,68 @@ export function TripDetailPage() {
         </div>
       )}
 
+      {!editing && !isUnavailable && (
+        <div style={{ marginBottom: spacing.lg }}>
+          <span style={{ fontSize: 15, fontWeight: 600, color: colors.text, display: 'block', marginBottom: spacing.sm }}>
+            Mode de paiement
+          </span>
+          <div style={{ display: 'flex', gap: spacing.sm }}>
+            <button
+              onClick={() => setPaymentMethod('cash')}
+              style={{
+                flex: 1,
+                border: `1.5px solid ${paymentMethod === 'cash' ? colors.primary : colors.border}`,
+                borderRadius: radius.md,
+                padding: spacing.sm,
+                backgroundColor: paymentMethod === 'cash' ? colors.accentSoft : colors.surface,
+                color: paymentMethod === 'cash' ? colors.primary : colors.textMuted,
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+            >
+              💵 Espèces
+            </button>
+            <button
+              onClick={() => setPaymentMethod('wallet')}
+              style={{
+                flex: 1,
+                border: `1.5px solid ${paymentMethod === 'wallet' ? colors.primary : colors.border}`,
+                borderRadius: radius.md,
+                padding: spacing.sm,
+                backgroundColor: paymentMethod === 'wallet' ? colors.accentSoft : colors.surface,
+                color: paymentMethod === 'wallet' ? colors.primary : colors.textMuted,
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <WalletIcon
+                  size={15}
+                  color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted}
+                  detailColor={paymentMethod === 'wallet' ? colors.accentSoft : colors.surface}
+                />
+                Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+              </span>
+            </button>
+          </div>
+          {paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats && (
+            <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
+              Solde insuffisant pour ce paiement.{' '}
+              <button
+                onClick={() => navigate('/wallet')}
+                style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
+              >
+                Recharger
+              </button>
+            </p>
+          )}
+        </div>
+      )}
+
       {isUnavailable ? (
         <p style={{ color: colors.danger, textAlign: 'center', marginBottom: spacing.md }}>Ce trajet n'est plus disponible.</p>
       ) : (
@@ -289,7 +361,7 @@ export function TripDetailPage() {
         }
         onClick={handleBook}
         loading={booking}
-        disabled={isUnavailable}
+        disabled={isUnavailable || insufficientWalletFunds}
         variant={editing && seats === 0 ? 'danger' : 'primary'}
       />
     </div>

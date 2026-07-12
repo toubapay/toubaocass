@@ -52,6 +52,11 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class, 'rider_id');
     }
 
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
     public function isDriver(): bool
     {
         return $this->role === self::ROLE_DRIVER;
