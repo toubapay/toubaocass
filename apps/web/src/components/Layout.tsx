@@ -1,7 +1,9 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 
+import { fetchWallet } from '../api/wallet';
 import { colors, radius, spacing } from '../theme';
+import { WalletIcon } from './WalletIcon';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
@@ -11,6 +13,13 @@ const NAV_ITEMS = [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
+  }, []);
+
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <header
@@ -22,17 +31,42 @@ export function Layout({ children }: { children: React.ReactNode }) {
           backgroundColor: colors.primary,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           gap: spacing.sm,
           boxShadow: '0 2px 10px rgba(19, 26, 23, 0.12)',
         }}
       >
-        <img src="/favicon.svg" alt="" width={28} height={28} />
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-          <span style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>Intercity</span>
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
-            Voyagez à partir de chez vous. Recherchez et réservez.
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+          <img src="/favicon.svg" alt="" width={28} height={28} />
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+            <span style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>Intercity</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+              Voyagez à partir de chez vous. Recherchez et réservez.
+            </span>
+          </div>
         </div>
+        <button
+          onClick={() => navigate('/wallet')}
+          aria-label="Mon portefeuille"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            border: 'none',
+            borderRadius: radius.lg,
+            padding: '8px 12px',
+            backgroundColor: 'rgba(255,255,255,0.18)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
+          {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
+        </button>
       </header>
 
       <main
