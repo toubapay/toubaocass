@@ -65,6 +65,10 @@ module.exports = {
     },
     extra: {
       apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000/api',
+      // Same key as ios/android.config above, additionally exposed to JS so
+      // the address picker's Places Autocomplete/Details REST calls can use
+      // it (those are plain fetch() calls, not part of the native Maps SDK).
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
     },
   },
 };

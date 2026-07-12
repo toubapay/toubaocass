@@ -45,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Mon profil', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+            const Text('Mon profil', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSpacing.md),
             Container(
               width: double.infinity,
@@ -59,15 +59,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user?.name ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(user?.name ?? '', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700)),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(user?.phone ?? '', style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                  Text(user?.phone ?? '', style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
                   if (user?.email != null)
-                    Text(user!.email!, style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                    Text(user!.email!, style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
                   const SizedBox(height: AppSpacing.sm),
                   Text('Vérification : ${_kycLabel[kycStatus] ?? kycStatus}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                  Text('Note : ${rating.toStringAsFixed(1)} ★', style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text('Note : ${rating.toStringAsFixed(1)} ★', style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -93,9 +93,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('Mon portefeuille',
-                                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                                style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600)),
                             Text(walletBalance != null ? '$walletBalance FCFA' : '…',
-                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                                style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w800)),
                           ],
                         ),
                       ],
@@ -120,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    Text('⚙️ Paramètres', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text('⚙️ Paramètres', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
                     Icon(Icons.arrow_forward, color: AppColors.textMuted),
                   ],
                 ),

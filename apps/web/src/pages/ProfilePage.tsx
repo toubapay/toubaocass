@@ -28,7 +28,7 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Mon profil</h1>
+      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Mon profil</h1>
 
       <div
         style={{
@@ -39,9 +39,9 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
           border: `1px solid ${colors.border}`,
         }}
       >
-        <p style={{ fontSize: 20, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>{user?.name}</p>
-        <p style={{ fontSize: 15, color: colors.textMuted, margin: 0 }}>{user?.phone}</p>
-        {user?.email && <p style={{ fontSize: 15, color: colors.textMuted, margin: 0 }}>{user.email}</p>}
+        <p style={{ fontSize: 21, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>{user?.name}</p>
+        <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{user?.phone}</p>
+        {user?.email && <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{user.email}</p>}
       </div>
 
       <button
@@ -64,13 +64,13 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         <span style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
           <WalletIcon size={26} color="#fff" detailColor={colors.primary} />
           <span>
-            <span style={{ display: 'block', fontSize: 13, fontWeight: 600, opacity: 0.85 }}>Mon portefeuille</span>
-            <span style={{ display: 'block', fontSize: 20, fontWeight: 800 }}>
+            <span style={{ display: 'block', fontSize: 14, fontWeight: 600, opacity: 0.85 }}>Mon portefeuille</span>
+            <span style={{ display: 'block', fontSize: 21, fontWeight: 800 }}>
               {walletBalance !== null ? `${walletBalance.toLocaleString()} FCFA` : '…'}
             </span>
           </span>
         </span>
-        <span style={{ fontSize: 20 }}>→</span>
+        <span style={{ fontSize: 21 }}>→</span>
       </button>
 
       <button
@@ -91,22 +91,22 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         }}
       >
         <span style={{ fontWeight: 600 }}>⚙️ Paramètres</span>
-        <span style={{ fontSize: 20, color: colors.textMuted }}>→</span>
+        <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
       </button>
 
       {permission !== 'unsupported' && (
         <div style={{ marginBottom: spacing.lg }}>
           {permission === 'granted' ? (
-            <p style={{ fontSize: 14, color: colors.success, fontWeight: 600 }}>🔔 Notifications activées</p>
+            <p style={{ fontSize: 15, color: colors.success, fontWeight: 600 }}>🔔 Notifications activées</p>
           ) : permission === 'denied' ? (
-            <p style={{ fontSize: 14, color: colors.textMuted }}>
+            <p style={{ fontSize: 15, color: colors.textMuted }}>
               Notifications bloquées. Autorisez-les dans les réglages de votre navigateur pour être prévenu(e) de vos
               réservations.
             </p>
           ) : (
             <Button label="🔔 Activer les notifications" onClick={enable} loading={loading} variant="outline" />
           )}
-          {error && <p style={{ fontSize: 13, color: colors.danger, marginTop: spacing.xs }}>{error}</p>}
+          {error && <p style={{ fontSize: 14, color: colors.danger, marginTop: spacing.xs }}>{error}</p>}
         </div>
       )}
 

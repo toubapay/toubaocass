@@ -54,7 +54,7 @@ export function ProfileScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 25, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  name: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
-  meta: { fontSize: 15, color: colors.textMuted },
+  name: { fontSize: 21, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  meta: { fontSize: 16, color: colors.textMuted },
   walletCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -75,9 +75,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   walletLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  walletLabel: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.85)' },
-  walletValue: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  walletArrow: { fontSize: 20, color: '#fff' },
+  walletLabel: { fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.85)' },
+  walletValue: { fontSize: 21, fontWeight: '800', color: '#fff' },
+  walletArrow: { fontSize: 21, color: '#fff' },
   settingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginBottom: spacing.lg,
   },
-  settingsLabel: { fontSize: 16, fontWeight: '600', color: colors.text },
-  settingsArrow: { fontSize: 20, color: colors.textMuted },
+  settingsLabel: { fontSize: 17, fontWeight: '600', color: colors.text },
+  settingsArrow: { fontSize: 21, color: colors.textMuted },
 });

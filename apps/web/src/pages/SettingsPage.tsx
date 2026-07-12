@@ -5,11 +5,11 @@ import { updateProfile } from '../api/auth';
 import { createAddress, deleteAddress, fetchAddresses, updateAddress } from '../api/addresses';
 import { extractErrorMessage } from '../api/client';
 import type { Address } from '../api/types';
+import { AddressMapPicker } from '../components/AddressMapPicker';
 import { Button } from '../components/Button';
 import { CenteredSpinner } from '../components/Spinner';
 import { TextField } from '../components/TextField';
 import { useAuth } from '../context/AuthContext';
-import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
 
 function AddressForm({
@@ -31,12 +31,6 @@ function AddressForm({
   const [isDefault, setIsDefault] = useState(initial?.is_default ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const { loading: locating, error: locationError, requestLocation } = useMyLocation();
-
-  const handleUseLocation = async () => {
-    const result = await requestLocation();
-    if (result) setCoords(result);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,33 +70,18 @@ function AddressForm({
         value={label}
         onChange={(e) => setLabel(e.target.value)}
       />
-      <TextField
-        label="Adresse"
-        placeholder="Sacré-Cœur 3, Dakar"
-        value={addressLine}
-        onChange={(e) => setAddressLine(e.target.value)}
-      />
-
-      <button
-        type="button"
-        onClick={handleUseLocation}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          border: 'none',
-          background: 'none',
-          color: colors.accent,
-          fontWeight: 600,
-          fontSize: 14,
-          cursor: 'pointer',
-          padding: 0,
-          marginBottom: spacing.sm,
-        }}
-      >
-        📍 {locating ? 'Localisation…' : coords ? 'Position enregistrée ✓' : 'Utiliser ma position actuelle'}
-      </button>
-      {locationError && <p style={{ fontSize: 13, color: colors.danger, marginTop: -8, marginBottom: spacing.sm }}>{locationError}</p>}
+      <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+        Adresse
+      </label>
+      <div style={{ marginBottom: spacing.md }}>
+        <AddressMapPicker
+          addressLine={addressLine}
+          onAddressLineChange={setAddressLine}
+          latitude={coords?.latitude ?? null}
+          longitude={coords?.longitude ?? null}
+          onLocationChange={(latitude, longitude) => setCoords({ latitude, longitude })}
+        />
+      </div>
 
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: colors.text, marginBottom: spacing.md }}>
         <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />

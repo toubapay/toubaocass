@@ -5,6 +5,13 @@ const _tokenKey = 'intercity_rider_flutter_token';
 
 const apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8000/api');
 
+// Same key used by the native Maps SDK (see android/app/build.gradle.kts and
+// ios/Flutter/Secrets.xcconfig) — additionally passed here via
+// `--dart-define=GOOGLE_MAPS_API_KEY=...` so the address picker's Places
+// Autocomplete/Details REST calls (plain http requests, not part of the
+// native SDK) can use it too.
+const googleMapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+
 class ApiClient {
   ApiClient._internal() {
     _dio = Dio(BaseOptions(baseUrl: apiBaseUrl, headers: {'Accept': 'application/json'}));

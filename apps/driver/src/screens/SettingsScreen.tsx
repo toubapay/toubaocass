@@ -5,11 +5,11 @@ import { createAddress, deleteAddress, fetchAddresses, updateAddress } from '../
 import { updateProfile } from '../api/auth';
 import { extractErrorMessage } from '../api/client';
 import { Address } from '../api/types';
+import { AddressMapPicker } from '../components/AddressMapPicker';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
 import { useAuth } from '../context/AuthContext';
-import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
 
 function AddressForm({
@@ -31,12 +31,6 @@ function AddressForm({
   const [isDefault, setIsDefault] = useState(initial?.is_default ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const { loading: locating, error: locationError, requestLocation } = useMyLocation();
-
-  const handleUseLocation = async () => {
-    const result = await requestLocation();
-    if (result) setCoords(result);
-  };
 
   const handleSubmit = async () => {
     setError(undefined);
@@ -61,23 +55,14 @@ function AddressForm({
   return (
     <View style={styles.formCard}>
       <TextField label="Libellé" placeholder="Domicile, Travail…" value={label} onChangeText={setLabel} />
-      <TextField
-        label="Adresse"
-        placeholder="Sacré-Cœur 3, Dakar"
-        value={addressLine}
-        onChangeText={setAddressLine}
+      <Text style={styles.fieldLabel}>Adresse</Text>
+      <AddressMapPicker
+        addressLine={addressLine}
+        onAddressLineChange={setAddressLine}
+        latitude={coords?.latitude ?? null}
+        longitude={coords?.longitude ?? null}
+        onLocationChange={setCoords}
       />
-
-      <Pressable onPress={handleUseLocation} style={styles.locationButton}>
-        {locating ? (
-          <ActivityIndicator size="small" color={colors.accent} />
-        ) : (
-          <Text style={styles.locationText}>
-            📍 {coords ? 'Position enregistrée ✓' : 'Utiliser ma position actuelle'}
-          </Text>
-        )}
-      </Pressable>
-      {locationError && <Text style={styles.errorText}>{locationError}</Text>}
 
       <Pressable onPress={() => setIsDefault((v) => !v)} style={styles.checkboxRow}>
         <View style={[styles.checkbox, isDefault && styles.checkboxChecked]}>
@@ -243,8 +228,7 @@ const styles = StyleSheet.create({
   phoneText: { fontSize: 13, color: colors.textMuted, marginBottom: spacing.sm },
   errorText: { fontSize: 13, color: colors.danger, marginBottom: spacing.sm },
   successText: { fontSize: 13, color: colors.success, marginBottom: spacing.sm },
-  locationButton: { marginBottom: spacing.sm },
-  locationText: { color: colors.accent, fontWeight: '600', fontSize: 14 },
+  fieldLabel: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
   checkbox: {
     width: 20,

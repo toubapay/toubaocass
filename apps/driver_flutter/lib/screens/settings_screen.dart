@@ -7,7 +7,7 @@ import '../api/client.dart';
 import '../models.dart';
 import '../state/auth_provider.dart';
 import '../theme.dart';
-import '../utils/my_location.dart';
+import '../widgets/address_map_picker.dart';
 
 class _AddressForm extends StatefulWidget {
   const _AddressForm({this.initial, required this.onCancel, required this.onSaved});
@@ -22,14 +22,12 @@ class _AddressForm extends StatefulWidget {
 
 class _AddressFormState extends State<_AddressForm> {
   late final labelController = TextEditingController(text: widget.initial?.label ?? '');
-  late final addressController = TextEditingController(text: widget.initial?.addressLine ?? '');
+  late String addressLine = widget.initial?.addressLine ?? '';
   double? latitude;
   double? longitude;
   bool isDefault = false;
   bool saving = false;
-  bool locating = false;
   String? error;
-  String? locationError;
 
   @override
   void initState() {
@@ -37,24 +35,6 @@ class _AddressFormState extends State<_AddressForm> {
     latitude = widget.initial?.latitude;
     longitude = widget.initial?.longitude;
     isDefault = widget.initial?.isDefault ?? false;
-  }
-
-  Future<void> _useLocation() async {
-    setState(() {
-      locating = true;
-      locationError = null;
-    });
-    try {
-      final coords = await requestMyLocation();
-      setState(() {
-        latitude = coords.latitude;
-        longitude = coords.longitude;
-      });
-    } on LocationRequestException catch (e) {
-      setState(() => locationError = e.message);
-    } finally {
-      setState(() => locating = false);
-    }
   }
 
   Future<void> _submit() async {
@@ -67,14 +47,14 @@ class _AddressFormState extends State<_AddressForm> {
           ? await updateAddress(
               widget.initial!.id,
               label: labelController.text.trim(),
-              addressLine: addressController.text.trim(),
+              addressLine: addressLine.trim(),
               latitude: latitude,
               longitude: longitude,
               isDefault: isDefault,
             )
           : await createAddress(
               label: labelController.text.trim(),
-              addressLine: addressController.text.trim(),
+              addressLine: addressLine.trim(),
               latitude: latitude,
               longitude: longitude,
               isDefault: isDefault,
@@ -89,7 +69,7 @@ class _AddressFormState extends State<_AddressForm> {
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit = labelController.text.trim().isNotEmpty && addressController.text.trim().isNotEmpty;
+    final canSubmit = labelController.text.trim().isNotEmpty && addressLine.trim().isNotEmpty;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -108,22 +88,18 @@ class _AddressFormState extends State<_AddressForm> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextField(
-            controller: addressController,
-            decoration: const InputDecoration(labelText: 'Adresse', hintText: 'Sacré-Cœur 3, Dakar'),
-            onChanged: (_) => setState(() {}),
+          const Text('Adresse', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          const SizedBox(height: AppSpacing.xs),
+          AddressMapPicker(
+            addressLine: addressLine,
+            onAddressLineChanged: (value) => setState(() => addressLine = value),
+            latitude: latitude,
+            longitude: longitude,
+            onLocationChanged: (lat, lng) => setState(() {
+              latitude = lat;
+              longitude = lng;
+            }),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          TextButton(
-            onPressed: locating ? null : _useLocation,
-            child: Text(locating
-                ? 'Localisation…'
-                : latitude != null
-                    ? '📍 Position enregistrée ✓'
-                    : '📍 Utiliser ma position actuelle'),
-          ),
-          if (locationError != null)
-            Text(locationError!, style: const TextStyle(color: AppColors.danger, fontSize: 13)),
           CheckboxListTile(
             value: isDefault,
             onChanged: (v) => setState(() => isDefault = v ?? false),

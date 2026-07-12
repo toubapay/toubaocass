@@ -47,3 +47,7 @@ app.*.map.json
 # Firebase config — download from Firebase Console per-app, never commit.
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
+
+# Google Maps API key for iOS — local-only, like android/local.properties's
+# mapsApiKey. See ios/Flutter/Secrets.xcconfig.example.
+/ios/Flutter/Secrets.xcconfig
