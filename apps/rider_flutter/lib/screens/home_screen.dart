@@ -10,6 +10,7 @@ import '../utils/my_location.dart';
 import '../widgets/city_picker.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trips_map.dart';
+import '../widgets/voice_search_button.dart';
 
 const _nearbyRadiusKm = 25.0;
 
@@ -146,9 +147,29 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             TextField(
               controller: searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "Rechercher une ville de départ ou d'arrivée...",
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
+                suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (searchController.text.isNotEmpty) ...[
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: () => setState(() => searchController.clear()),
+                      ),
+                      Container(width: 1, height: 18, color: AppColors.border),
+                    ],
+                    VoiceSearchButton(
+                      onResult: (text) {
+                        searchController.text = text;
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                ),
               ),
               onChanged: (_) => setState(() {}),
             ),

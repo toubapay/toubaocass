@@ -10,6 +10,7 @@ import { DateField } from '../components/DateField';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
 import { TripsMapView } from '../components/TripsMapView';
+import { VoiceSearchButton } from '../components/VoiceSearchButton';
 import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -108,11 +109,17 @@ export function HomeScreen({ navigation }: Props) {
             value={citySearch}
             onChangeText={setCitySearch}
           />
-          {citySearch.length > 0 && (
-            <Pressable onPress={() => setCitySearch('')} style={styles.searchClear}>
-              <Text style={styles.searchClearText}>✕</Text>
-            </Pressable>
-          )}
+          <View style={styles.searchActions}>
+            {citySearch.length > 0 && (
+              <>
+                <Pressable onPress={() => setCitySearch('')} hitSlop={8}>
+                  <Text style={styles.searchClearText}>✕</Text>
+                </Pressable>
+                <View style={styles.searchDivider} />
+              </>
+            )}
+            <VoiceSearchButton onResult={setCitySearch} />
+          </View>
         </View>
 
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
@@ -212,13 +219,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingVertical: 12,
     paddingLeft: 38,
-    paddingRight: 36,
+    paddingRight: 68,
     fontSize: 16,
     color: colors.text,
     backgroundColor: colors.surface,
   },
-  searchClear: { position: 'absolute', right: 8, padding: 6 },
+  searchActions: {
+    position: 'absolute',
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   searchClearText: { color: colors.textMuted, fontSize: 16 },
+  searchDivider: { width: 1, height: 18, backgroundColor: colors.border },
   nearMeButton: {
     borderWidth: 1,
     borderColor: colors.primary,

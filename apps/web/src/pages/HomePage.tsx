@@ -5,10 +5,12 @@ import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
+import { MicIcon } from '../components/MicIcon';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
+import { useVoiceSearch } from '../hooks/useVoiceSearch';
 import { colors, radius, spacing } from '../theme';
 
 const NEARBY_RADIUS_KM = 25;
@@ -33,6 +35,12 @@ export function HomePage() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const { listening: voiceListening, supported: voiceSupported, error: voiceError, start: startVoiceSearch } =
+    useVoiceSearch((text) => setCitySearch(text));
+
+  useEffect(() => {
+    if (voiceError) alert(voiceError);
+  }, [voiceError]);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -146,33 +154,62 @@ export function HomePage() {
               width: '100%',
               border: 'none',
               borderRadius: 28,
-              padding: '16px 44px 16px 48px',
+              padding: citySearch ? '16px 84px 16px 48px' : '16px 48px 16px 48px',
               fontSize: 16,
               color: colors.text,
               backgroundColor: colors.surface,
               boxShadow: '0 4px 16px rgba(19, 26, 23, 0.1)',
             }}
           />
-          {citySearch && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            {citySearch && (
+              <>
+                <button
+                  onClick={() => setCitySearch('')}
+                  aria-label="Effacer la recherche"
+                  style={{
+                    display: 'flex',
+                    border: 'none',
+                    background: 'none',
+                    color: colors.textMuted,
+                    fontSize: 18,
+                    cursor: 'pointer',
+                    padding: 4,
+                  }}
+                >
+                  ✕
+                </button>
+                <div style={{ width: 1, height: 20, backgroundColor: colors.border }} />
+              </>
+            )}
             <button
-              onClick={() => setCitySearch('')}
-              aria-label="Effacer la recherche"
+              onClick={() => {
+                startVoiceSearch();
+                if (!voiceSupported) alert("La recherche vocale n'est pas prise en charge par ce navigateur.");
+              }}
+              aria-label={voiceListening ? "Arrêter l'écoute" : 'Recherche vocale'}
               style={{
-                position: 'absolute',
-                right: 12,
-                top: '50%',
-                transform: 'translateY(-50%)',
+                display: 'flex',
                 border: 'none',
                 background: 'none',
-                color: colors.textMuted,
-                fontSize: 18,
                 cursor: 'pointer',
-                padding: 6,
+                padding: 4,
+                animation: voiceListening ? 'pulse 1s ease-in-out infinite' : undefined,
               }}
             >
-              ✕
+              <MicIcon size={18} color={voiceListening ? colors.danger : colors.textMuted} />
             </button>
-          )}
+          </div>
           {searchFocused && citySuggestions.length > 0 && (
             <div
               style={{

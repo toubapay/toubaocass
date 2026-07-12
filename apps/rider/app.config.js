@@ -19,6 +19,14 @@ module.exports = {
           locationWhenInUsePermission: 'Allow Intercity to use your location to find rides departing near you.',
         },
       ],
+      [
+        'expo-speech-recognition',
+        {
+          microphonePermission: 'Allow Intercity to use the microphone for voice search.',
+          speechRecognitionPermission: 'Allow Intercity to use speech recognition for voice search.',
+          androidSpeechServicePackages: ['com.google.android.googlequicksearchbox'],
+        },
+      ],
     ],
     ios: {
       supportsTablet: true,
