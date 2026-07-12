@@ -90,7 +90,7 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
           textAlign: 'left',
         }}
       >
-        <span style={{ fontWeight: 600 }}>⚙️ Paramètres</span>
+        <span style={{ fontSize: 18, fontWeight: 600 }}>⚙️ Paramètres</span>
         <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
       </button>
 

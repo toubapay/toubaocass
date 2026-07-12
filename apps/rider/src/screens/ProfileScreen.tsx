@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginBottom: spacing.lg,
   },
-  settingsLabel: { fontSize: 17, fontWeight: '600', color: colors.text },
+  settingsLabel: { fontSize: 19, fontWeight: '600', color: colors.text },
   settingsArrow: { fontSize: 21, color: colors.textMuted },
 });

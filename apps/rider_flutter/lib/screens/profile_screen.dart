@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    Text('⚙️ Paramètres', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    Text('⚙️ Paramètres', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
                     Icon(Icons.arrow_forward, color: AppColors.textMuted),
                   ],
                 ),
