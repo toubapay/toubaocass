@@ -128,9 +128,33 @@ export function TripDetailPage() {
         )}
       </div>
       {editing && (
-        <p style={{ fontSize: 14, fontWeight: 700, color: colors.success, marginTop: spacing.sm, marginBottom: 0 }}>
-          ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: colors.success, margin: 0 }}>
+            ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
+          </p>
+          <button
+            onClick={() =>
+              navigate(`/chat/${trip.my_booking!.id}`, {
+                state: {
+                  title: trip.driver.name ?? 'Conducteur',
+                  subtitle: `${trip.origin_city?.name} → ${trip.destination_city?.name}`,
+                },
+              })
+            }
+            style={{
+              border: `1px solid ${colors.primary}`,
+              borderRadius: radius.sm,
+              padding: `${spacing.xs}px ${spacing.md}px`,
+              backgroundColor: 'transparent',
+              color: colors.primary,
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            💬 Discuter avec le conducteur
+          </button>
+        </div>
       )}
 
       {trip.route_distance_km !== null && (

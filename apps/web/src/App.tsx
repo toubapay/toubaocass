@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
+import { ChatPage } from './pages/ChatPage';
 import { HomePage } from './pages/HomePage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
+        <Route path="/chat/:bookingId" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

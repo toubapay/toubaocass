@@ -98,7 +98,21 @@ export function MyBookingsPage() {
             </p>
 
             {item.status === 'confirmed' && (
-              <div style={{ display: 'flex', gap: spacing.md, marginTop: spacing.sm }}>
+              <div style={{ display: 'flex', gap: spacing.md, marginTop: spacing.sm, flexWrap: 'wrap' }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/chat/${item.id}`, {
+                      state: {
+                        title: item.trip.driver.name ?? 'Conducteur',
+                        subtitle: `${item.trip.origin_city?.name} → ${item.trip.destination_city?.name}`,
+                      },
+                    });
+                  }}
+                  style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
+                >
+                  💬 Discuter
+                </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
