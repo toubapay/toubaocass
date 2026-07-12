@@ -10,6 +10,7 @@ import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
+import { ChatScreen } from '../screens/ChatScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
@@ -45,6 +46,7 @@ function HomeNavigator() {
     <HomeStackNav.Navigator>
       <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Choisissez votre Destination' }} />
       <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
+      <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
     </HomeStackNav.Navigator>
   );
 }
@@ -54,6 +56,7 @@ function BookingsNavigator() {
     <BookingsStackNav.Navigator>
       <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: 'Mes réservations' }} />
       <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
+      <BookingsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
     </BookingsStackNav.Navigator>
   );
 }

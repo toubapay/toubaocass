@@ -4,19 +4,24 @@ export type AuthStackParamList = {
   ProfileSetup: undefined;
 };
 
+export type ChatParams = { bookingId: number; title?: string; subtitle?: string };
+
 export type HomeStackParamList = {
   Home: undefined;
   TripDetail: { tripId: number };
+  Chat: ChatParams;
 };
 
 export type BookingsStackParamList = {
   MyBookings: undefined;
   TripDetail: { tripId: number };
+  Chat: ChatParams;
 };
 
 export type MapStackParamList = {
   Map: undefined;
   TripDetail: { tripId: number };
+  Chat: ChatParams;
 };
 
 export type MainTabParamList = {

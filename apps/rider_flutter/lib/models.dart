@@ -304,3 +304,36 @@ class Booking {
         createdAt: json['created_at'] as String? ?? '',
       );
 }
+
+class Message {
+  final int id;
+  final int bookingId;
+  final String body;
+  final int senderId;
+  final String? senderName;
+  final bool isMine;
+  final String? readAt;
+  final String createdAt;
+
+  Message({
+    required this.id,
+    required this.bookingId,
+    required this.body,
+    required this.senderId,
+    required this.senderName,
+    required this.isMine,
+    required this.readAt,
+    required this.createdAt,
+  });
+
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+        id: json['id'] as int,
+        bookingId: json['booking_id'] as int,
+        body: json['body'] as String,
+        senderId: json['sender_id'] as int,
+        senderName: json['sender_name'] as String?,
+        isMine: json['is_mine'] as bool,
+        readAt: json['read_at'] as String?,
+        createdAt: json['created_at'] as String? ?? '',
+      );
+}

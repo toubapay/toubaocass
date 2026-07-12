@@ -124,6 +124,18 @@ export function TripDetailScreen({ route, navigation }: Props) {
                 <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`sms:${booking.rider.phone}`)}>
                   <Text style={styles.contactButtonText}>💬 SMS</Text>
                 </Pressable>
+                <Pressable
+                  style={styles.contactButton}
+                  onPress={() =>
+                    navigation.navigate('Chat', {
+                      bookingId: booking.id,
+                      title: booking.rider.name ?? 'Passager',
+                      subtitle: `${trip.origin_city?.name} → ${trip.destination_city?.name}`,
+                    })
+                  }
+                >
+                  <Text style={styles.contactButtonText}>💬 Discuter</Text>
+                </Pressable>
               </View>
             </View>
           ))

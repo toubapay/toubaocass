@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/auth/otp_verify_screen.dart';
 import 'screens/auth/phone_entry_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
+import 'screens/chat_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/my_bookings_screen.dart';
 import 'screens/profile_screen.dart';
@@ -63,7 +64,22 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
       GoRoute(
         path: '/trips/:id',
-        builder: (context, state) => TripDetailScreen(tripId: int.parse(state.pathParameters['id']!)),
+        builder: (context, state) => TripDetailScreen(
+          tripId: int.parse(state.pathParameters['id']!),
+          onOpenChat: (bookingId, title, subtitle) =>
+              context.push('/chat/$bookingId', extra: {'title': title, 'subtitle': subtitle}),
+        ),
+      ),
+      GoRoute(
+        path: '/chat/:bookingId',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen(
+            bookingId: int.parse(state.pathParameters['bookingId']!),
+            title: extra?['title'] as String?,
+            subtitle: extra?['subtitle'] as String?,
+          );
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => _MainShell(navigationShell: navigationShell),
@@ -74,7 +90,11 @@ GoRouter buildRouter(AuthProvider auth) {
           StatefulShellBranch(routes: [
             GoRoute(
                 path: '/bookings',
-                builder: (context, state) => MyBookingsScreen(onOpenTrip: (id) => context.push('/trips/$id'))),
+                builder: (context, state) => MyBookingsScreen(
+                      onOpenTrip: (id) => context.push('/trips/$id'),
+                      onOpenChat: (bookingId, title, subtitle) =>
+                          context.push('/chat/$bookingId', extra: {'title': title, 'subtitle': subtitle}),
+                    )),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),

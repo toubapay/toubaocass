@@ -17,10 +17,11 @@ const _statusLabel = {
 };
 
 class TripDetailScreen extends StatefulWidget {
-  const TripDetailScreen({super.key, required this.tripId, required this.onCancelled});
+  const TripDetailScreen({super.key, required this.tripId, required this.onCancelled, required this.onOpenChat});
 
   final int tripId;
   final VoidCallback onCancelled;
+  final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
 
   @override
   State<TripDetailScreen> createState() => _TripDetailScreenState();
@@ -161,6 +162,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           child: OutlinedButton(
                             onPressed: () => launchUrl(Uri.parse('sms:${booking.rider.phone}')),
                             child: const Text('💬 SMS'),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => widget.onOpenChat(
+                              booking.id,
+                              booking.rider.name ?? 'Passager',
+                              '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
+                            ),
+                            child: const Text('💬 Discuter'),
                           ),
                         ),
                       ],

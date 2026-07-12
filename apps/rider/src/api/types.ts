@@ -96,6 +96,17 @@ export interface Booking {
   created_at: string;
 }
 
+export interface Message {
+  id: number;
+  booking_id: number;
+  body: string;
+  sender_id: number;
+  sender_name: string | null;
+  is_mine: boolean;
+  read_at: string | null;
+  created_at: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

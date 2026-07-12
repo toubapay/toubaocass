@@ -10,6 +10,7 @@ import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
+import { ChatScreen } from '../screens/ChatScreen';
 import { AddCarScreen } from '../screens/fleet/AddCarScreen';
 import { CarsListScreen } from '../screens/fleet/CarsListScreen';
 import { KycFormScreen } from '../screens/kyc/KycFormScreen';
@@ -49,6 +50,7 @@ function TripsNavigator() {
       <TripsStackNav.Screen name="TripsList" component={TripsListScreen} options={{ title: 'Mes trajets' }} />
       <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Publier un trajet' }} />
       <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
+      <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
     </TripsStackNav.Navigator>
   );
 }

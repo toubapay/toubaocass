@@ -4,10 +4,13 @@ export type AuthStackParamList = {
   ProfileSetup: undefined;
 };
 
+export type ChatParams = { bookingId: number; title?: string; subtitle?: string };
+
 export type TripsStackParamList = {
   TripsList: undefined;
   PostTrip: undefined;
   TripDetail: { tripId: number };
+  Chat: ChatParams;
 };
 
 export type FleetStackParamList = {

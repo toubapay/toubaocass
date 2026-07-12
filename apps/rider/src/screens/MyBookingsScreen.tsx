@@ -104,6 +104,17 @@ export function MyBookingsScreen({ navigation }: Props) {
 
             {item.status === 'confirmed' && (
               <View style={styles.actionsRow}>
+                <Pressable
+                  onPress={() =>
+                    navigation.navigate('Chat', {
+                      bookingId: item.id,
+                      title: item.trip.driver.name ?? 'Conducteur',
+                      subtitle: `${item.trip.origin_city?.name} → ${item.trip.destination_city?.name}`,
+                    })
+                  }
+                >
+                  <Text style={styles.modifyText}>💬 Discuter</Text>
+                </Pressable>
                 <Pressable onPress={() => setModifyingBookingId(item.id)}>
                   <Text style={styles.modifyText}>Modifier</Text>
                 </Pressable>

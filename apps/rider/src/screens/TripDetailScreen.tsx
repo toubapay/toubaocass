@@ -98,7 +98,21 @@ export function TripDetailScreen({ route, navigation }: Props) {
         </Text>
         <TripUrgencyBadge trip={trip} />
         {editing && (
-          <Text style={styles.bookedNotice}>✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet</Text>
+          <View style={styles.bookedRow}>
+            <Text style={styles.bookedNotice}>✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet</Text>
+            <Pressable
+              onPress={() =>
+                navigation.navigate('Chat', {
+                  bookingId: trip.my_booking!.id,
+                  title: trip.driver.name ?? 'Conducteur',
+                  subtitle: `${trip.origin_city?.name} → ${trip.destination_city?.name}`,
+                })
+              }
+              style={styles.chatButton}
+            >
+              <Text style={styles.chatButtonText}>💬 Discuter</Text>
+            </Pressable>
+          </View>
         )}
 
         {trip.route_distance_km !== null && (
@@ -239,7 +253,23 @@ const styles = StyleSheet.create({
   fare: { fontSize: 22, fontWeight: '800', color: colors.primary },
   mapLink: { color: colors.primary, fontWeight: '700', fontSize: 14, marginTop: spacing.sm },
   fullNotice: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md },
-  bookedNotice: { color: colors.success, fontWeight: '700', fontSize: 14, marginTop: spacing.sm, marginBottom: -spacing.sm },
+  bookedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  bookedNotice: { color: colors.success, fontWeight: '700', fontSize: 14 },
+  chatButton: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+  },
+  chatButtonText: { color: colors.primary, fontWeight: '700', fontSize: 13 },
   warningNotice: { color: colors.danger, fontSize: 13, marginTop: -spacing.md, marginBottom: spacing.md },
   seatsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
   seatsLabel: { fontSize: 15, fontWeight: '600', color: colors.text },

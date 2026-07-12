@@ -12,9 +12,10 @@ import '../widgets/route_map.dart';
 import '../widgets/trip_urgency_badge.dart';
 
 class TripDetailScreen extends StatefulWidget {
-  const TripDetailScreen({super.key, required this.tripId});
+  const TripDetailScreen({super.key, required this.tripId, required this.onOpenChat});
 
   final int tripId;
+  final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
 
   @override
   State<TripDetailScreen> createState() => _TripDetailScreenState();
@@ -126,8 +127,23 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           if (editing)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Text('✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.success)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text('✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.success)),
+                  ),
+                  TextButton(
+                    onPressed: () => widget.onOpenChat(
+                      t.myBooking!.id,
+                      t.driver.name ?? 'Conducteur',
+                      '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
+                    ),
+                    child: const Text('💬 Discuter'),
+                  ),
+                ],
+              ),
             ),
           const SizedBox(height: AppSpacing.lg),
           if (t.routeDistanceKm != null)

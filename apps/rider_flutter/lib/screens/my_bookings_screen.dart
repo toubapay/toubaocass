@@ -10,9 +10,10 @@ import '../widgets/booking_quick_action_sheet.dart';
 const _statusLabel = {'confirmed': 'Confirmée', 'cancelled': 'Annulée'};
 
 class MyBookingsScreen extends StatefulWidget {
-  const MyBookingsScreen({super.key, required this.onOpenTrip});
+  const MyBookingsScreen({super.key, required this.onOpenTrip, required this.onOpenChat});
 
   final void Function(int tripId) onOpenTrip;
+  final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
 
   @override
   State<MyBookingsScreen> createState() => _MyBookingsScreenState();
@@ -169,14 +170,23 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                                 if (booking.status == 'confirmed')
                                   Padding(
                                     padding: const EdgeInsets.only(top: AppSpacing.sm),
-                                    child: Row(
+                                    child: Wrap(
+                                      spacing: AppSpacing.md,
                                       children: [
+                                        TextButton(
+                                          onPressed: () => widget.onOpenChat(
+                                            booking.id,
+                                            booking.trip.driver.name ?? 'Conducteur',
+                                            '${booking.trip.originCity?.name ?? '?'} → ${booking.trip.destinationCity?.name ?? '?'}',
+                                          ),
+                                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                                          child: const Text('💬 Discuter'),
+                                        ),
                                         TextButton(
                                           onPressed: () => _handleModify(booking),
                                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                                           child: const Text('Modifier'),
                                         ),
-                                        const SizedBox(width: AppSpacing.md),
                                         TextButton(
                                           onPressed: () => _handleCancel(booking),
                                           style: TextButton.styleFrom(foregroundColor: AppColors.danger, padding: EdgeInsets.zero),

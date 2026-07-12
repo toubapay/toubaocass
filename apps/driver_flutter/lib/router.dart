@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/auth/otp_verify_screen.dart';
 import 'screens/auth/phone_entry_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
+import 'screens/chat_screen.dart';
 import 'screens/fleet/add_car_screen.dart';
 import 'screens/fleet/cars_list_screen.dart';
 import 'screens/kyc/kyc_form_screen.dart';
@@ -65,7 +66,20 @@ GoRouter buildRouter(AuthProvider auth) {
         builder: (context, state) => TripDetailScreen(
           tripId: int.parse(state.pathParameters['id']!),
           onCancelled: () => context.pop(),
+          onOpenChat: (bookingId, title, subtitle) =>
+              context.push('/chat/$bookingId', extra: {'title': title, 'subtitle': subtitle}),
         ),
+      ),
+      GoRoute(
+        path: '/chat/:bookingId',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen(
+            bookingId: int.parse(state.pathParameters['bookingId']!),
+            title: extra?['title'] as String?,
+            subtitle: extra?['subtitle'] as String?,
+          );
+        },
       ),
       GoRoute(path: '/post-trip', builder: (context, state) => PostTripScreen(onCreated: () => context.pop())),
       GoRoute(path: '/add-car', builder: (context, state) => AddCarScreen(onSaved: () => context.pop())),
