@@ -48,6 +48,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
+      {/* The floating nav below has margin on every side, unlike the old
+          edge-to-edge bar — without this, scrolled page content is visible
+          peeking through the gaps around it (left/right/below) as the page
+          scrolls. This opaque, page-colored backdrop covers that whole
+          footprint so nothing ever shows through. */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 'calc(92px + env(safe-area-inset-bottom))',
+          backgroundColor: colors.background,
+          zIndex: 99,
+        }}
+      />
+
       <nav
         style={{
           position: 'fixed',
