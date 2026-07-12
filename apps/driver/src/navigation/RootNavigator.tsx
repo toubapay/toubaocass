@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { WalletHeaderButton } from '../components/WalletHeaderButton';
 import { useAuth } from '../context/AuthContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
@@ -19,12 +20,14 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { PostTripScreen } from '../screens/trips/PostTripScreen';
 import { TripDetailScreen } from '../screens/trips/TripDetailScreen';
 import { TripsListScreen } from '../screens/trips/TripsListScreen';
+import { WalletScreen } from '../screens/WalletScreen';
 import { colors } from '../theme';
 import {
   AuthStackParamList,
   FleetStackParamList,
   KycStackParamList,
   MainTabParamList,
+  ProfileStackParamList,
   TripsStackParamList,
 } from './types';
 
@@ -32,6 +35,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const TripsStackNav = createNativeStackNavigator<TripsStackParamList>();
 const FleetStackNav = createNativeStackNavigator<FleetStackParamList>();
 const KycStackNav = createNativeStackNavigator<KycStackParamList>();
+const ProfileStackNav = createNativeStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function AuthNavigator() {
@@ -47,10 +51,18 @@ function AuthNavigator() {
 function TripsNavigator() {
   return (
     <TripsStackNav.Navigator>
-      <TripsStackNav.Screen name="TripsList" component={TripsListScreen} options={{ title: 'Mes trajets' }} />
+      <TripsStackNav.Screen
+        name="TripsList"
+        component={TripsListScreen}
+        options={({ navigation }) => ({
+          title: 'Mes trajets',
+          headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
+        })}
+      />
       <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Publier un trajet' }} />
       <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
       <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
+      <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
     </TripsStackNav.Navigator>
   );
 }
@@ -70,6 +82,15 @@ function KycNavigator() {
       <KycStackNav.Screen name="KycStatus" component={KycStatusScreen} options={{ title: 'Vérification' }} />
       <KycStackNav.Screen name="KycForm" component={KycFormScreen} options={{ title: 'Soumettre les documents' }} />
     </KycStackNav.Navigator>
+  );
+}
+
+function ProfileNavigator() {
+  return (
+    <ProfileStackNav.Navigator>
+      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
+      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+    </ProfileStackNav.Navigator>
   );
 }
 
@@ -98,7 +119,7 @@ function MainTabs() {
       <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: 'Trajets' }} />
       <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: 'Flotte' }} />
       <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: 'Vérification' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   );
 }

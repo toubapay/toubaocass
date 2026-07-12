@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -5,7 +6,8 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, T
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
-import { Trip } from '../api/types';
+import { PaymentMethod, Trip } from '../api/types';
+import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
 import { RouteMap } from '../components/RouteMap';
@@ -23,6 +25,14 @@ export function TripDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [seats, setSeats] = useState(1);
   const [booking, setBooking] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchWallet()
+      .then((w) => setWalletBalance(w.balance))
+      .catch(() => setWalletBalance(null));
+  }, []);
 
   const load = () => {
     setLoading(true);
@@ -51,7 +61,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
         Alert.alert('Réservation mise à jour', undefined, [{ text: 'OK' }]);
         load();
       } else {
-        await bookTrip(tripId, seats);
+        await bookTrip(tripId, seats, paymentMethod);
         Alert.alert(
           'Réservation confirmée',
           `Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`,
@@ -79,6 +89,8 @@ export function TripDetailScreen({ route, navigation }: Props) {
     : trip.available_seats <= 0 || trip.status !== 'scheduled';
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
+  const insufficientWalletFunds =
+    !editing && paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats;
 
   const openInGoogleMaps = () => {
     if (!hasPin) return;
@@ -178,6 +190,38 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </View>
         ) : null}
 
+        {!editing && !isUnavailable && (
+          <View style={styles.paymentSection}>
+            <Text style={styles.seatsLabel}>Mode de paiement</Text>
+            <View style={styles.paymentRow}>
+              <Pressable
+                onPress={() => setPaymentMethod('cash')}
+                style={[styles.paymentOption, paymentMethod === 'cash' && styles.paymentOptionActive]}
+              >
+                <Text style={[styles.paymentOptionText, paymentMethod === 'cash' && styles.paymentOptionTextActive]}>
+                  💵 Espèces
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setPaymentMethod('wallet')}
+                style={[styles.paymentOption, paymentMethod === 'wallet' && styles.paymentOptionActive]}
+              >
+                <View style={styles.paymentOptionInner}>
+                  <Ionicons
+                    name="wallet"
+                    size={15}
+                    color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted}
+                  />
+                  <Text style={[styles.paymentOptionText, paymentMethod === 'wallet' && styles.paymentOptionTextActive]}>
+                    Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+            {insufficientWalletFunds && <Text style={styles.paymentWarning}>Solde insuffisant pour ce paiement.</Text>}
+          </View>
+        )}
+
         {isUnavailable ? (
           <Text style={styles.fullNotice}>Ce trajet n'est plus disponible.</Text>
         ) : (
@@ -215,7 +259,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
           }
           onPress={handleBook}
           loading={booking}
-          disabled={isUnavailable}
+          disabled={isUnavailable || insufficientWalletFunds}
           variant={editing && seats === 0 ? 'danger' : 'primary'}
         />
       </ScrollView>
@@ -276,4 +320,20 @@ const styles = StyleSheet.create({
   stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   stepperButton: { width: 44, minHeight: 44, paddingVertical: 0 },
   seatsValue: { fontSize: 20, fontWeight: '700', color: colors.text, minWidth: 24, textAlign: 'center' },
+  paymentSection: { marginBottom: spacing.lg },
+  paymentRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  paymentOption: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paymentOptionActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  paymentOptionInner: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  paymentOptionText: { fontWeight: '700', fontSize: 14, color: colors.textMuted },
+  paymentOptionTextActive: { color: colors.primary },
+  paymentWarning: { color: colors.danger, fontSize: 12.5, marginTop: spacing.xs },
 });

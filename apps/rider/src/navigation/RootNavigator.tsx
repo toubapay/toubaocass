@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { WalletHeaderButton } from '../components/WalletHeaderButton';
 import { useAuth } from '../context/AuthContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
@@ -16,6 +17,7 @@ import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { TripDetailScreen } from '../screens/TripDetailScreen';
+import { WalletScreen } from '../screens/WalletScreen';
 import { colors } from '../theme';
 import {
   AuthStackParamList,
@@ -23,12 +25,14 @@ import {
   HomeStackParamList,
   MainTabParamList,
   MapStackParamList,
+  ProfileStackParamList,
 } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
 const BookingsStackNav = createNativeStackNavigator<BookingsStackParamList>();
 const MapStackNav = createNativeStackNavigator<MapStackParamList>();
+const ProfileStackNav = createNativeStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function AuthNavigator() {
@@ -44,9 +48,17 @@ function AuthNavigator() {
 function HomeNavigator() {
   return (
     <HomeStackNav.Navigator>
-      <HomeStackNav.Screen name="Home" component={HomeScreen} options={{ title: 'Choisissez votre Destination' }} />
+      <HomeStackNav.Screen
+        name="Home"
+        component={HomeScreen}
+        options={({ navigation }) => ({
+          title: 'Choisissez votre Destination',
+          headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
+        })}
+      />
       <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
       <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
+      <HomeStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
     </HomeStackNav.Navigator>
   );
 }
@@ -70,6 +82,15 @@ function MapNavigator() {
   );
 }
 
+function ProfileNavigator() {
+  return (
+    <ProfileStackNav.Navigator>
+      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
+      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+    </ProfileStackNav.Navigator>
+  );
+}
+
 function MainTabs() {
   useRegisterPushToken(true);
 
@@ -88,7 +109,7 @@ function MainTabs() {
     >
       <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Accueil' }} />
       <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Réservations' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   );
 }

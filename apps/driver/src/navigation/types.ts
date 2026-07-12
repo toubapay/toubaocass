@@ -11,6 +11,7 @@ export type TripsStackParamList = {
   PostTrip: undefined;
   TripDetail: { tripId: number };
   Chat: ChatParams;
+  Wallet: undefined;
 };
 
 export type FleetStackParamList = {
@@ -21,6 +22,11 @@ export type FleetStackParamList = {
 export type KycStackParamList = {
   KycStatus: undefined;
   KycForm: undefined;
+};
+
+export type ProfileStackParamList = {
+  Profile: undefined;
+  Wallet: undefined;
 };
 
 export type MainTabParamList = {

@@ -1,8 +1,8 @@
 import { apiClient } from './client';
-import { Booking, Paginated } from './types';
+import { Booking, Paginated, PaymentMethod } from './types';
 
-export async function bookTrip(tripId: number, seats: number): Promise<Booking> {
-  const { data } = await apiClient.post(`/trips/${tripId}/bookings`, { seats });
+export async function bookTrip(tripId: number, seats: number, paymentMethod: PaymentMethod = 'cash'): Promise<Booking> {
+  const { data } = await apiClient.post(`/trips/${tripId}/bookings`, { seats, payment_method: paymentMethod });
   return data;
 }
 

@@ -10,6 +10,7 @@ export type HomeStackParamList = {
   Home: undefined;
   TripDetail: { tripId: number };
   Chat: ChatParams;
+  Wallet: undefined;
 };
 
 export type BookingsStackParamList = {
@@ -22,6 +23,11 @@ export type MapStackParamList = {
   Map: undefined;
   TripDetail: { tripId: number };
   Chat: ChatParams;
+};
+
+export type ProfileStackParamList = {
+  Profile: undefined;
+  Wallet: undefined;
 };
 
 export type MainTabParamList = {

@@ -8,6 +8,8 @@ export type TripStatus = 'scheduled' | 'full' | 'in_progress' | 'completed' | 'c
 
 export type BookingStatus = 'confirmed' | 'cancelled';
 
+export type PaymentMethod = 'cash' | 'wallet';
+
 export interface DriverProfile {
   id: number;
   license_number: string | null;
@@ -92,8 +94,24 @@ export interface Booking {
   };
   seats_booked: number;
   fare_total: number;
+  payment_method: PaymentMethod;
   status: BookingStatus;
   created_at: string;
+}
+
+export interface WalletTransaction {
+  id: number;
+  type: 'top_up' | 'payment' | 'earning' | 'refund' | 'refund_reversal';
+  amount: number;
+  booking_id: number | null;
+  description: string | null;
+  created_at: string;
+}
+
+export interface Wallet {
+  id: number;
+  balance: number;
+  transactions: WalletTransaction[];
 }
 
 export interface Message {
