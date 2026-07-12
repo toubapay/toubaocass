@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
@@ -32,6 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // self-service; they're credited by an admin (see the wallet:top-up
     // Artisan command), so there's no top-up endpoint here.
     Route::get('wallet', [WalletController::class, 'show']);
+
+    // Saved addresses — available to both riders and drivers.
+    Route::get('addresses', [AddressController::class, 'index']);
+    Route::post('addresses', [AddressController::class, 'store']);
+    Route::put('addresses/{address}', [AddressController::class, 'update']);
+    Route::delete('addresses/{address}', [AddressController::class, 'destroy']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {

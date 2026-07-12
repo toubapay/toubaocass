@@ -73,6 +73,27 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         <span style={{ fontSize: 20 }}>→</span>
       </button>
 
+      <button
+        onClick={() => navigate('/settings')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          border: `1px solid ${colors.border}`,
+          borderRadius: radius.md,
+          padding: spacing.lg,
+          marginBottom: spacing.lg,
+          backgroundColor: colors.surface,
+          color: colors.text,
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ fontWeight: 600 }}>⚙️ Paramètres</span>
+        <span style={{ fontSize: 20, color: colors.textMuted }}>→</span>
+      </button>
+
       {permission !== 'unsupported' && (
         <div style={{ marginBottom: spacing.lg }}>
           {permission === 'granted' ? (

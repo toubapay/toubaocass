@@ -12,6 +12,7 @@ import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
 import { TripDetailPage } from './pages/TripDetailPage';
 import { WalletPage } from './pages/WalletPage';
 
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />
         <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

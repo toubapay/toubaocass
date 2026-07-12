@@ -57,6 +57,11 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class);
     }
 
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
     public function isDriver(): bool
     {
         return $this->role === self::ROLE_DRIVER;
