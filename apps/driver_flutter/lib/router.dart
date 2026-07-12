@@ -10,6 +10,7 @@ import 'screens/fleet/cars_list_screen.dart';
 import 'screens/kyc/kyc_form_screen.dart';
 import 'screens/kyc/kyc_status_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/trips/post_trip_screen.dart';
 import 'screens/trips/trip_detail_screen.dart';
 import 'screens/trips/trips_list_screen.dart';
@@ -63,6 +64,7 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/verify', builder: (context, state) => OtpVerifyScreen(phone: state.extra as String? ?? '')),
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
       GoRoute(path: '/wallet', builder: (context, state) => const WalletScreen()),
+      GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(
         path: '/trips/:id',
         builder: (context, state) => TripDetailScreen(
@@ -111,7 +113,10 @@ GoRouter buildRouter(AuthProvider auth) {
           StatefulShellBranch(routes: [
             GoRoute(
                 path: '/profile',
-                builder: (context, state) => ProfileScreen(onOpenWallet: () => context.push('/wallet'))),
+                builder: (context, state) => ProfileScreen(
+                      onOpenWallet: () => context.push('/wallet'),
+                      onOpenSettings: () => context.push('/settings'),
+                    )),
           ]),
         ],
       ),

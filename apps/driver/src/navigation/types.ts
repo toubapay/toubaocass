@@ -27,6 +27,7 @@ export type KycStackParamList = {
 export type ProfileStackParamList = {
   Profile: undefined;
   Wallet: undefined;
+  Settings: undefined;
 };
 
 export type MainTabParamList = {

@@ -16,6 +16,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 import { TripDetailScreen } from '../screens/TripDetailScreen';
 import { WalletScreen } from '../screens/WalletScreen';
 import { colors } from '../theme';
@@ -87,6 +88,7 @@ function ProfileNavigator() {
     <ProfileStackNav.Navigator>
       <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
       <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: 'Paramètres' }} />
     </ProfileStackNav.Navigator>
   );
 }

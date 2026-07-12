@@ -6,9 +6,10 @@ import '../state/auth_provider.dart';
 import '../theme.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.onOpenWallet});
+  const ProfileScreen({super.key, required this.onOpenWallet, required this.onOpenSettings});
 
   final VoidCallback onOpenWallet;
+  final VoidCallback onOpenSettings;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -87,6 +88,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     const Icon(Icons.arrow_forward, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: widget.onOpenSettings,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text('⚙️ Paramètres', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Icon(Icons.arrow_forward, color: AppColors.textMuted),
                   ],
                 ),
               ),

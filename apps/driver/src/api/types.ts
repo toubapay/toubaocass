@@ -110,6 +110,16 @@ export interface Wallet {
   transactions: WalletTransaction[];
 }
 
+export interface Address {
+  id: number;
+  label: string;
+  address_line: string;
+  latitude: number | null;
+  longitude: number | null;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface Message {
   id: number;
   booking_id: number;

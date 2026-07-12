@@ -17,6 +17,7 @@ import { CarsListScreen } from '../screens/fleet/CarsListScreen';
 import { KycFormScreen } from '../screens/kyc/KycFormScreen';
 import { KycStatusScreen } from '../screens/kyc/KycStatusScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 import { PostTripScreen } from '../screens/trips/PostTripScreen';
 import { TripDetailScreen } from '../screens/trips/TripDetailScreen';
 import { TripsListScreen } from '../screens/trips/TripsListScreen';
@@ -90,6 +91,7 @@ function ProfileNavigator() {
     <ProfileStackNav.Navigator>
       <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
       <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: 'Paramètres' }} />
     </ProfileStackNav.Navigator>
   );
 }

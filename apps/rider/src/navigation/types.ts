@@ -28,6 +28,7 @@ export type MapStackParamList = {
 export type ProfileStackParamList = {
   Profile: undefined;
   Wallet: undefined;
+  Settings: undefined;
 };
 
 export type MainTabParamList = {

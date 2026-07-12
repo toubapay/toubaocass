@@ -351,6 +351,33 @@ class Wallet {
       );
 }
 
+class Address {
+  final int id;
+  final String label;
+  final String addressLine;
+  final double? latitude;
+  final double? longitude;
+  final bool isDefault;
+
+  Address({
+    required this.id,
+    required this.label,
+    required this.addressLine,
+    required this.latitude,
+    required this.longitude,
+    required this.isDefault,
+  });
+
+  factory Address.fromJson(Map<String, dynamic> json) => Address(
+        id: json['id'] as int,
+        label: json['label'] as String,
+        addressLine: json['address_line'] as String,
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
+        isDefault: json['is_default'] as bool? ?? false,
+      );
+}
+
 class Message {
   final int id;
   final int bookingId;

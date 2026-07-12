@@ -43,6 +43,11 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.walletArrow}>→</Text>
       </Pressable>
 
+      <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Settings')}>
+        <Text style={styles.settingsLabel}>⚙️ Paramètres</Text>
+        <Text style={styles.settingsArrow}>→</Text>
+      </Pressable>
+
       <Button label="Déconnexion" onPress={signOut} variant="outline" />
     </Screen>
   );
@@ -73,4 +78,17 @@ const styles = StyleSheet.create({
   walletLabel: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.85)' },
   walletValue: { fontSize: 20, fontWeight: '800', color: '#fff' },
   walletArrow: { fontSize: 20, color: '#fff' },
+  settingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  settingsLabel: { fontSize: 16, fontWeight: '600', color: colors.text },
+  settingsArrow: { fontSize: 20, color: colors.textMuted },
 });

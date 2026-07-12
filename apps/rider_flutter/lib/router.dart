@@ -8,6 +8,7 @@ import 'screens/chat_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/my_bookings_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/trip_detail_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'state/auth_provider.dart';
@@ -64,6 +65,7 @@ GoRouter buildRouter(AuthProvider auth) {
       ),
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
       GoRoute(path: '/wallet', builder: (context, state) => const WalletScreen()),
+      GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(
         path: '/trips/:id',
         builder: (context, state) => TripDetailScreen(
@@ -106,7 +108,10 @@ GoRouter buildRouter(AuthProvider auth) {
           StatefulShellBranch(routes: [
             GoRoute(
                 path: '/profile',
-                builder: (context, state) => ProfileScreen(onOpenWallet: () => context.push('/wallet'))),
+                builder: (context, state) => ProfileScreen(
+                      onOpenWallet: () => context.push('/wallet'),
+                      onOpenSettings: () => context.push('/settings'),
+                    )),
           ]),
         ],
       ),
