@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\TripController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('profile', [AuthController::class, 'updateProfile']);
     Route::post('fcm-token', [AuthController::class, 'updateFcmToken']);
     Route::post('logout', [AuthController::class, 'logout']);
+
+    // Chat on a booking — shared between the rider who booked and the
+    // driver of that trip (authorized per-booking, not per-role).
+    Route::get('bookings/{booking}/messages', [MessageController::class, 'index']);
+    Route::post('bookings/{booking}/messages', [MessageController::class, 'store']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {

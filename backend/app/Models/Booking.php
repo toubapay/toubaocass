@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['trip_id', 'rider_id', 'seats_booked', 'fare_total', 'status'])]
 class Booking extends Model
@@ -26,5 +27,10 @@ class Booking extends Model
     public function rider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rider_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
     }
 }

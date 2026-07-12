@@ -49,6 +49,11 @@ class TripSearchTest extends TestCase
 
     public function test_search_excludes_a_trip_departing_earlier_today(): void
     {
+        // Frozen at a safe mid-day instant so +/-1 hour never crosses a
+        // calendar day boundary (which would otherwise make this test flaky
+        // depending on what time it actually runs).
+        $this->travelTo(now()->setTime(12, 0));
+
         [$driver, $car] = $this->makeApprovedDriverWithCar();
 
         $alreadyDeparted = Trip::factory()->create([
