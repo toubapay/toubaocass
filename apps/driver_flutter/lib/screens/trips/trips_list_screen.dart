@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../api/trips_api.dart';
+import '../../api/wallet_api.dart';
 import '../../models.dart';
 import '../../push/push_service.dart';
 import '../../theme.dart';
@@ -23,10 +24,11 @@ const _statusLabel = {
 };
 
 class TripsListScreen extends StatefulWidget {
-  const TripsListScreen({super.key, required this.onOpenTrip, required this.onPostTrip});
+  const TripsListScreen({super.key, required this.onOpenTrip, required this.onPostTrip, required this.onOpenWallet});
 
   final void Function(int tripId) onOpenTrip;
   final VoidCallback onPostTrip;
+  final VoidCallback onOpenWallet;
 
   @override
   State<TripsListScreen> createState() => _TripsListScreenState();
@@ -35,12 +37,14 @@ class TripsListScreen extends StatefulWidget {
 class _TripsListScreenState extends State<TripsListScreen> {
   List<Trip> trips = [];
   bool loading = true;
+  int? walletBalance;
 
   @override
   void initState() {
     super.initState();
     _load();
     registerPushToken();
+    fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
   }
 
   Future<void> _load() async {
@@ -58,7 +62,30 @@ class _TripsListScreenState extends State<TripsListScreen> {
     final currency = NumberFormat.decimalPattern('fr');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes trajets')),
+      appBar: AppBar(
+        title: const Text('Mes trajets'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: Center(
+              child: OutlinedButton.icon(
+                onPressed: widget.onOpenWallet,
+                icon: const Icon(Icons.account_balance_wallet, size: 16, color: AppColors.accent),
+                label: Text(
+                  walletBalance != null ? '${walletBalance!} F' : '…',
+                  style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.accentSoft,
+                  side: BorderSide.none,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(

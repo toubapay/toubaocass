@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../api/bookings_api.dart';
 import '../api/client.dart';
 import '../api/trips_api.dart';
+import '../api/wallet_api.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../utils/trip.dart' as trip_utils;
@@ -26,11 +27,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool loading = true;
   int seats = 1;
   bool booking = false;
+  String paymentMethod = 'cash';
+  int? walletBalance;
 
   @override
   void initState() {
     super.initState();
     _load();
+    fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
   }
 
   Future<void> _load() async {
@@ -62,7 +66,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         }
         _load();
       } else {
-        await bookTrip(widget.tripId, seats);
+        await bookTrip(widget.tripId, seats, paymentMethod: paymentMethod);
         if (!mounted) return;
         await showDialog(
           context: context,
@@ -104,6 +108,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final maxSeats = editing ? t.availableSeats + (t.myBooking?.seatsBooked ?? 0) : t.availableSeats;
     final hasPin = t.departureLatitude != null && t.departureLongitude != null;
     final currency = NumberFormat.decimalPattern('fr');
+    final insufficientWalletFunds =
+        paymentMethod == 'wallet' && walletBalance != null && walletBalance! < t.fare * seats;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Détails du trajet')),
@@ -223,7 +229,36 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               child: Text("Ce trajet n'est plus disponible.",
                   textAlign: TextAlign.center, style: TextStyle(color: AppColors.danger)),
             )
-          else
+          else ...[
+            const Text('Mode de paiement', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: ChoiceChip(
+                    label: const Text('💵 Espèces'),
+                    selected: paymentMethod == 'cash',
+                    onSelected: (_) => setState(() => paymentMethod = 'cash'),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: ChoiceChip(
+                    avatar: const Icon(Icons.account_balance_wallet, size: 16),
+                    label: Text('Portefeuille${walletBalance != null ? ' ($walletBalance F)' : ''}'),
+                    selected: paymentMethod == 'wallet',
+                    onSelected: (_) => setState(() => paymentMethod = 'wallet'),
+                  ),
+                ),
+              ],
+            ),
+            if (insufficientWalletFunds)
+              const Padding(
+                padding: EdgeInsets.only(top: AppSpacing.xs),
+                child: Text('Solde du portefeuille insuffisant pour ce trajet.',
+                    style: TextStyle(color: AppColors.danger, fontSize: 13)),
+              ),
+            const SizedBox(height: AppSpacing.md),
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.lg),
               child: Row(
@@ -250,6 +285,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 ],
               ),
             ),
+          ],
           if (editing && seats == 0 && !isUnavailable)
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
@@ -257,7 +293,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   style: TextStyle(color: AppColors.danger, fontSize: 13)),
             ),
           ElevatedButton(
-            onPressed: isUnavailable || booking ? null : _handleBook,
+            onPressed: isUnavailable || booking || insufficientWalletFunds ? null : _handleBook,
             style: editing && seats == 0 ? ElevatedButton.styleFrom(backgroundColor: AppColors.danger) : null,
             child: booking
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

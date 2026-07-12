@@ -224,6 +224,7 @@ class Booking {
   final BookingRider rider;
   final int seatsBooked;
   final int fareTotal;
+  final String paymentMethod;
   final String status;
   final String createdAt;
 
@@ -233,6 +234,7 @@ class Booking {
     required this.rider,
     required this.seatsBooked,
     required this.fareTotal,
+    required this.paymentMethod,
     required this.status,
     required this.createdAt,
   });
@@ -243,8 +245,52 @@ class Booking {
         rider: BookingRider.fromJson(json['rider'] as Map<String, dynamic>),
         seatsBooked: json['seats_booked'] as int,
         fareTotal: json['fare_total'] as int,
+        paymentMethod: json['payment_method'] as String? ?? 'cash',
         status: json['status'] as String,
         createdAt: json['created_at'] as String? ?? '',
+      );
+}
+
+class WalletTransaction {
+  final int id;
+  final String type;
+  final int amount;
+  final int? bookingId;
+  final String? description;
+  final String createdAt;
+
+  WalletTransaction({
+    required this.id,
+    required this.type,
+    required this.amount,
+    required this.bookingId,
+    required this.description,
+    required this.createdAt,
+  });
+
+  factory WalletTransaction.fromJson(Map<String, dynamic> json) => WalletTransaction(
+        id: json['id'] as int,
+        type: json['type'] as String,
+        amount: json['amount'] as int,
+        bookingId: json['booking_id'] as int?,
+        description: json['description'] as String?,
+        createdAt: json['created_at'] as String? ?? '',
+      );
+}
+
+class Wallet {
+  final int id;
+  final int balance;
+  final List<WalletTransaction> transactions;
+
+  Wallet({required this.id, required this.balance, required this.transactions});
+
+  factory Wallet.fromJson(Map<String, dynamic> json) => Wallet(
+        id: json['id'] as int,
+        balance: json['balance'] as int,
+        transactions: (json['transactions'] as List? ?? [])
+            .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 }
 

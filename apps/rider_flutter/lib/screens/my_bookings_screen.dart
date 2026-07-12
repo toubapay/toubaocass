@@ -81,6 +81,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
             rider: b.rider,
             seatsBooked: updatedTrip.myBooking!.seatsBooked,
             fareTotal: updatedTrip.myBooking!.fareTotal,
+            paymentMethod: b.paymentMethod,
             status: updatedTrip.myBooking!.status,
             createdAt: b.createdAt,
           );
@@ -91,6 +92,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
           rider: b.rider,
           seatsBooked: b.seatsBooked,
           fareTotal: b.fareTotal,
+          paymentMethod: b.paymentMethod,
           status: 'cancelled',
           createdAt: b.createdAt,
         );

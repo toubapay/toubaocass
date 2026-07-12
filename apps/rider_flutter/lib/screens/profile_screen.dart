@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
 import '../theme.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key, required this.onOpenWallet});
+
+  final VoidCallback onOpenWallet;
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int? walletBalance;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.lg),
-              margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -39,6 +55,40 @@ class ProfileScreen extends StatelessWidget {
                   if (user?.email != null)
                     Text(user!.email!, style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
                 ],
+              ),
+            ),
+            InkWell(
+              onTap: widget.onOpenWallet,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.account_balance_wallet, color: Colors.white, size: 26),
+                        const SizedBox(width: AppSpacing.sm),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Mon portefeuille',
+                                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                            Text(walletBalance != null ? '$walletBalance FCFA' : '…',
+                                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.arrow_forward, color: Colors.white),
+                  ],
+                ),
               ),
             ),
             OutlinedButton(

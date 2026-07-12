@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/cities_api.dart';
 import '../api/trips_api.dart';
+import '../api/wallet_api.dart';
 import '../models.dart';
 import '../push/push_service.dart';
 import '../theme.dart';
@@ -13,9 +14,10 @@ import '../widgets/trips_map.dart';
 const _nearbyRadiusKm = 25.0;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onOpenTrip});
+  const HomeScreen({super.key, required this.onOpenTrip, required this.onOpenWallet});
 
   final void Function(int tripId) onOpenTrip;
+  final VoidCallback onOpenWallet;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -29,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int seats = 1;
   Coordinates? nearMe;
   bool locating = false;
+  int? walletBalance;
 
   List<Trip> trips = [];
   bool loading = true;
@@ -39,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     fetchCities().then((value) => setState(() => cities = value)).catchError((_) {});
+    fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
     _load();
     registerPushToken();
   }
@@ -111,7 +115,30 @@ class _HomeScreenState extends State<HomeScreen> {
             .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Choisissez votre Destination')),
+      appBar: AppBar(
+        title: const Text('Choisissez votre Destination'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: Center(
+              child: OutlinedButton.icon(
+                onPressed: widget.onOpenWallet,
+                icon: const Icon(Icons.account_balance_wallet, size: 16, color: AppColors.accent),
+                label: Text(
+                  walletBalance != null ? '${walletBalance!} F' : '…',
+                  style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.accentSoft,
+                  side: BorderSide.none,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(

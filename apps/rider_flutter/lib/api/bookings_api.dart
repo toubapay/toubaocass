@@ -2,8 +2,9 @@ import '../models.dart';
 import 'client.dart';
 import 'trips_api.dart';
 
-Future<Booking> bookTrip(int tripId, int seats) async {
-  final response = await ApiClient.instance.dio.post('/trips/$tripId/bookings', data: {'seats': seats});
+Future<Booking> bookTrip(int tripId, int seats, {String paymentMethod = 'cash'}) async {
+  final response = await ApiClient.instance.dio
+      .post('/trips/$tripId/bookings', data: {'seats': seats, 'payment_method': paymentMethod});
   return Booking.fromJson(response.data as Map<String, dynamic>);
 }
 

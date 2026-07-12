@@ -9,6 +9,7 @@ import 'screens/home_screen.dart';
 import 'screens/my_bookings_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/trip_detail_screen.dart';
+import 'screens/wallet_screen.dart';
 import 'state/auth_provider.dart';
 
 class _MainShell extends StatelessWidget {
@@ -62,6 +63,7 @@ GoRouter buildRouter(AuthProvider auth) {
         builder: (context, state) => OtpVerifyScreen(phone: state.extra as String? ?? ''),
       ),
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
+      GoRoute(path: '/wallet', builder: (context, state) => const WalletScreen()),
       GoRoute(
         path: '/trips/:id',
         builder: (context, state) => TripDetailScreen(
@@ -85,7 +87,12 @@ GoRouter buildRouter(AuthProvider auth) {
         builder: (context, state, navigationShell) => _MainShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: '/', builder: (context, state) => HomeScreen(onOpenTrip: (id) => context.push('/trips/$id'))),
+            GoRoute(
+                path: '/',
+                builder: (context, state) => HomeScreen(
+                      onOpenTrip: (id) => context.push('/trips/$id'),
+                      onOpenWallet: () => context.push('/wallet'),
+                    )),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
@@ -97,7 +104,9 @@ GoRouter buildRouter(AuthProvider auth) {
                     )),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
+            GoRoute(
+                path: '/profile',
+                builder: (context, state) => ProfileScreen(onOpenWallet: () => context.push('/wallet'))),
           ]),
         ],
       ),
