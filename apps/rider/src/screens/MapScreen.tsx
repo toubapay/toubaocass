@@ -16,11 +16,11 @@ import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { searchTrips } from '../api/trips';
 import { Trip } from '../api/types';
 import { useMyLocation } from '../hooks/useMyLocation';
-import { MapStackParamList } from '../navigation/types';
+import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 import { RIDE_TYPE_LABEL } from '../utils/trip';
 
-type Props = NativeStackScreenProps<MapStackParamList, 'Map'>;
+type Props = NativeStackScreenProps<HomeStackParamList, 'Map'>;
 
 // Dakar city center — fallback map region when no trip has a pin yet and the
 // rider hasn't picked a location.

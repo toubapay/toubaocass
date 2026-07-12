@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { WalletHeaderButton } from '../components/WalletHeaderButton';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { ServicesScreen } from '../screens/ServicesScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { TripDetailScreen } from '../screens/TripDetailScreen';
 import { WalletScreen } from '../screens/WalletScreen';
@@ -25,16 +26,23 @@ import {
   BookingsStackParamList,
   HomeStackParamList,
   MainTabParamList,
-  MapStackParamList,
   ProfileStackParamList,
+  ServicesStackParamList,
 } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
 const BookingsStackNav = createNativeStackNavigator<BookingsStackParamList>();
-const MapStackNav = createNativeStackNavigator<MapStackParamList>();
+const ServicesStackNav = createNativeStackNavigator<ServicesStackParamList>();
 const ProfileStackNav = createNativeStackNavigator<ProfileStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+const TAB_ICONS: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
+  HomeTab: 'home',
+  ServicesTab: 'apps',
+  BookingsTab: 'ticket',
+  ProfileTab: 'person',
+};
 
 function AuthNavigator() {
   return (
@@ -54,12 +62,20 @@ function HomeNavigator() {
         component={HomeScreen}
         options={({ navigation }) => ({
           title: 'Choisissez votre Destination',
-          headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Pressable onPress={() => navigation.navigate('Map')} style={{ marginRight: 8 }}>
+                <Ionicons name="map" size={20} color={colors.accent} />
+              </Pressable>
+              <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />
+            </View>
+          ),
         })}
       />
       <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
       <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
       <HomeStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+      <HomeStackNav.Screen name="Map" component={MapScreen} options={{ title: 'Carte des trajets' }} />
     </HomeStackNav.Navigator>
   );
 }
@@ -74,12 +90,11 @@ function BookingsNavigator() {
   );
 }
 
-function MapNavigator() {
+function ServicesNavigator() {
   return (
-    <MapStackNav.Navigator>
-      <MapStackNav.Screen name="Map" component={MapScreen} options={{ title: 'Carte des trajets' }} />
-      <MapStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
-    </MapStackNav.Navigator>
+    <ServicesStackNav.Navigator>
+      <ServicesStackNav.Screen name="Services" component={ServicesScreen} options={{ title: 'Services' }} />
+    </ServicesStackNav.Navigator>
   );
 }
 
@@ -104,12 +119,13 @@ function MainTabs() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarIcon: ({ color, size }) => {
           const icon =
-            route.name === 'HomeTab' ? 'home' : route.name === 'BookingsTab' ? 'ticket' : 'person';
-          return <Ionicons name={icon as never} color={color} size={size} />;
+            TAB_ICONS[route.name as keyof MainTabParamList] ?? 'ellipse';
+          return <Ionicons name={icon} color={color} size={size} />;
         },
       })}
     >
       <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Accueil' }} />
+      <Tab.Screen name="ServicesTab" component={ServicesNavigator} options={{ title: 'Services' }} />
       <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Réservations' }} />
       <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />
     </Tab.Navigator>

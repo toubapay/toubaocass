@@ -3,11 +3,12 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { fetchWallet } from '../api/wallet';
 import { colors, radius, spacing } from '../theme';
+import { ServicesIcon } from './ServicesIcon';
 import { WalletIcon } from './WalletIcon';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
-  { to: '/map', label: 'Carte', icon: '🗺️', end: false },
+  { to: '/services', label: 'Services', icon: 'services' as const, end: false },
   { to: '/bookings', label: 'Réservations', icon: '🎫', end: false },
   { to: '/profile', label: 'Profil', icon: '👤', end: false },
 ];
@@ -45,28 +46,49 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/wallet')}
-          aria-label="Mon portefeuille"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            border: 'none',
-            borderRadius: radius.lg,
-            padding: '8px 12px',
-            backgroundColor: 'rgba(255,255,255,0.18)',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: 13,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
-          {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
+          <button
+            onClick={() => navigate('/map')}
+            aria-label="Carte des trajets"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              borderRadius: radius.lg,
+              width: 34,
+              height: 34,
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              cursor: 'pointer',
+              flexShrink: 0,
+              fontSize: 16,
+            }}
+          >
+            🗺️
+          </button>
+          <button
+            onClick={() => navigate('/wallet')}
+            aria-label="Mon portefeuille"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              border: 'none',
+              borderRadius: radius.lg,
+              padding: '8px 12px',
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
+            {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
+          </button>
+        </div>
       </header>
 
       <main
@@ -148,8 +170,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 fontWeight: isActive ? 700 : 600,
               })}
             >
-              <span style={{ fontSize: 20 }}>{item.icon}</span>
-              <span>{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  {item.icon === 'services' ? (
+                    <ServicesIcon size={20} color={isActive ? colors.primary : colors.textMuted} />
+                  ) : (
+                    <span style={{ fontSize: 20 }}>{item.icon}</span>
+                  )}
+                  <span>{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </div>
