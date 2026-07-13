@@ -79,4 +79,11 @@ return [
         'bypass_code' => env('OTP_BYPASS_CODE'),
     ],
 
+    'delivery' => [
+        // FCFA, integer (matches trips.fare's no-decimals convention). Fee is
+        // computed as base_fee + fee_per_km * straight-line distance.
+        'fee_per_km' => env('DELIVERY_FEE_PER_KM', 150),
+        'base_fee' => env('DELIVERY_BASE_FEE', 500),
+    ],
+
 ];

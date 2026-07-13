@@ -12,6 +12,8 @@ import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { ChatScreen } from '../screens/ChatScreen';
+import { DeliveryDetailScreen } from '../screens/deliveries/DeliveryDetailScreen';
+import { DeliveriesListScreen } from '../screens/deliveries/DeliveriesListScreen';
 import { AddCarScreen } from '../screens/fleet/AddCarScreen';
 import { CarsListScreen } from '../screens/fleet/CarsListScreen';
 import { KycFormScreen } from '../screens/kyc/KycFormScreen';
@@ -25,6 +27,7 @@ import { WalletScreen } from '../screens/WalletScreen';
 import { colors } from '../theme';
 import {
   AuthStackParamList,
+  DeliveriesStackParamList,
   FleetStackParamList,
   KycStackParamList,
   MainTabParamList,
@@ -34,6 +37,7 @@ import {
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const TripsStackNav = createNativeStackNavigator<TripsStackParamList>();
+const DeliveriesStackNav = createNativeStackNavigator<DeliveriesStackParamList>();
 const FleetStackNav = createNativeStackNavigator<FleetStackParamList>();
 const KycStackNav = createNativeStackNavigator<KycStackParamList>();
 const ProfileStackNav = createNativeStackNavigator<ProfileStackParamList>();
@@ -65,6 +69,15 @@ function TripsNavigator() {
       <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
       <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
     </TripsStackNav.Navigator>
+  );
+}
+
+function DeliveriesNavigator() {
+  return (
+    <DeliveriesStackNav.Navigator>
+      <DeliveriesStackNav.Screen name="DeliveriesList" component={DeliveriesListScreen} options={{ title: 'Livraisons' }} />
+      <DeliveriesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: 'Détails de la livraison' }} />
+    </DeliveriesStackNav.Navigator>
   );
 }
 
@@ -109,16 +122,19 @@ function MainTabs() {
           const icon =
             route.name === 'TripsTab'
               ? 'car'
-              : route.name === 'FleetTab'
-                ? 'car-sport'
-                : route.name === 'KycTab'
-                  ? 'shield-checkmark'
-                  : 'person';
+              : route.name === 'DeliveriesTab'
+                ? 'cube'
+                : route.name === 'FleetTab'
+                  ? 'car-sport'
+                  : route.name === 'KycTab'
+                    ? 'shield-checkmark'
+                    : 'person';
           return <Ionicons name={icon as never} color={color} size={size} />;
         },
       })}
     >
       <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: 'Trajets' }} />
+      <Tab.Screen name="DeliveriesTab" component={DeliveriesNavigator} options={{ title: 'Livraisons' }} />
       <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: 'Flotte' }} />
       <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: 'Vérification' }} />
       <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />

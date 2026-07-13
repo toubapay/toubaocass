@@ -135,6 +135,35 @@ export interface Message {
   created_at: string;
 }
 
+export type PackageType = 'document' | 'colis_leger' | 'colis_moyen' | 'colis_volumineux';
+
+export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'cancelled';
+
+export interface Delivery {
+  id: number;
+  sender: { id: number; name: string | null; phone: string };
+  driver: { id: number; name: string | null; phone: string; rating: number | null } | null;
+  receiver_name: string;
+  receiver_phone: string;
+  receiver_address_line: string;
+  receiver_latitude: number;
+  receiver_longitude: number;
+  pickup_address_line: string;
+  pickup_latitude: number;
+  pickup_longitude: number;
+  package_type: PackageType;
+  notes: string | null;
+  distance_km: number;
+  fee: number;
+  payment_method: PaymentMethod;
+  status: DeliveryStatus;
+  accepted_at: string | null;
+  picked_up_at: string | null;
+  delivered_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

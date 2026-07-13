@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
+use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\TripController;
@@ -48,6 +49,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('bookings', [BookingController::class, 'index']);
         Route::put('bookings/{booking}', [BookingController::class, 'update']);
         Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
+
+        // Livraison (package delivery) requests.
+        Route::post('deliveries/quote', [DeliveryController::class, 'quote']);
+        Route::get('deliveries', [DeliveryController::class, 'index']);
+        Route::post('deliveries', [DeliveryController::class, 'store']);
+        Route::get('deliveries/{delivery}', [DeliveryController::class, 'show']);
+        Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy']);
     });
 
     // Driver-facing KYC, fleet, and trip management.
@@ -67,5 +75,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('trips/{trip}/start', [TripController::class, 'start']);
         Route::post('trips/{trip}/complete', [TripController::class, 'complete']);
         Route::delete('trips/{trip}', [TripController::class, 'cancel']);
+
+        // Livraison (package delivery) browsing & fulfillment.
+        Route::get('deliveries/available', [DeliveryController::class, 'availableIndex']);
+        Route::get('deliveries', [DeliveryController::class, 'driverIndex']);
+        Route::get('deliveries/{delivery}', [DeliveryController::class, 'driverShow']);
+        Route::post('deliveries/{delivery}/accept', [DeliveryController::class, 'accept']);
+        Route::post('deliveries/{delivery}/pickup', [DeliveryController::class, 'pickup']);
+        Route::post('deliveries/{delivery}/deliver', [DeliveryController::class, 'deliver']);
     });
 });

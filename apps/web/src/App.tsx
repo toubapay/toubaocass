@@ -5,9 +5,12 @@ import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
 import { ChatPage } from './pages/ChatPage';
+import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
+import { MyDeliveriesPage } from './pages/MyDeliveriesPage';
+import { NewDeliveryPage } from './pages/NewDeliveryPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
@@ -54,6 +57,9 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/livraison" element={<NewDeliveryPage />} />
+        <Route path="/deliveries" element={<MyDeliveriesPage />} />
+        <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />

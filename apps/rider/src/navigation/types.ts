@@ -22,6 +22,9 @@ export type BookingsStackParamList = {
 
 export type ServicesStackParamList = {
   Services: undefined;
+  NewDelivery: undefined;
+  MyDeliveries: undefined;
+  DeliveryDetail: { deliveryId: number };
 };
 
 export type ProfileStackParamList = {

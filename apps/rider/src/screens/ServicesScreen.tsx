@@ -1,9 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '../components/Screen';
+import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+
+type Props = NativeStackScreenProps<ServicesStackParamList, 'Services'>;
 
 const SERVICES: { key: string; label: string; description: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'livraison', label: 'Livraison', description: 'Envoi de colis en ville et entre villes', icon: 'cube-outline' },
@@ -12,7 +16,7 @@ const SERVICES: { key: string; label: string; description: string; icon: keyof t
   { key: 'location', label: 'Location', description: 'Location de véhicules avec ou sans chauffeur', icon: 'key-outline' },
 ];
 
-export function ServicesScreen() {
+export function ServicesScreen({ navigation }: Props) {
   return (
     <Screen>
       <Text style={styles.title}>Services</Text>
@@ -20,7 +24,11 @@ export function ServicesScreen() {
         <Pressable
           key={service.key}
           style={styles.card}
-          onPress={() => Alert.alert('Bientôt disponible', `${service.label} arrive prochainement.`)}
+          onPress={() =>
+            service.key === 'livraison'
+              ? navigation.navigate('NewDelivery')
+              : Alert.alert('Bientôt disponible', `${service.label} arrive prochainement.`)
+          }
         >
           <View style={styles.iconWrap}>
             <Ionicons name={service.icon} size={24} color={colors.primary} />

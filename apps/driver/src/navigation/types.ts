@@ -19,6 +19,11 @@ export type FleetStackParamList = {
   AddCar: undefined;
 };
 
+export type DeliveriesStackParamList = {
+  DeliveriesList: undefined;
+  DeliveryDetail: { deliveryId: number };
+};
+
 export type KycStackParamList = {
   KycStatus: undefined;
   KycForm: undefined;
@@ -32,6 +37,7 @@ export type ProfileStackParamList = {
 
 export type MainTabParamList = {
   TripsTab: undefined;
+  DeliveriesTab: undefined;
   FleetTab: undefined;
   KycTab: undefined;
   ProfileTab: undefined;

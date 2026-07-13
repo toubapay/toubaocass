@@ -12,9 +12,12 @@ import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { ChatScreen } from '../screens/ChatScreen';
+import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
+import { MyDeliveriesScreen } from '../screens/MyDeliveriesScreen';
+import { NewDeliveryScreen } from '../screens/NewDeliveryScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ServicesScreen } from '../screens/ServicesScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -93,7 +96,21 @@ function BookingsNavigator() {
 function ServicesNavigator() {
   return (
     <ServicesStackNav.Navigator>
-      <ServicesStackNav.Screen name="Services" component={ServicesScreen} options={{ title: 'Services' }} />
+      <ServicesStackNav.Screen
+        name="Services"
+        component={ServicesScreen}
+        options={({ navigation }) => ({
+          title: 'Services',
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate('MyDeliveries')}>
+              <Ionicons name="receipt-outline" size={22} color={colors.accent} />
+            </Pressable>
+          ),
+        })}
+      />
+      <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: 'Nouvelle livraison' }} />
+      <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: 'Mes livraisons' }} />
+      <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: 'Détails de la livraison' }} />
     </ServicesStackNav.Navigator>
   );
 }

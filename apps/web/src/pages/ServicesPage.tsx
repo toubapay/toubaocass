@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { colors, radius, spacing } from '../theme';
 
@@ -10,6 +11,7 @@ const SERVICES = [
 ];
 
 export function ServicesPage() {
+  const navigate = useNavigate();
   const [comingSoonKey, setComingSoonKey] = useState<string | null>(null);
 
   return (
@@ -19,7 +21,11 @@ export function ServicesPage() {
       {SERVICES.map((service) => (
         <div key={service.key} style={{ marginBottom: spacing.md }}>
           <button
-            onClick={() => setComingSoonKey(comingSoonKey === service.key ? null : service.key)}
+            onClick={() =>
+              service.key === 'livraison'
+                ? navigate('/services/livraison')
+                : setComingSoonKey(comingSoonKey === service.key ? null : service.key)
+            }
             style={{
               display: 'flex',
               alignItems: 'center',

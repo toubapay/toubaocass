@@ -62,6 +62,16 @@ class User extends Authenticatable
         return $this->hasMany(Address::class);
     }
 
+    public function deliveriesAsSender(): HasMany
+    {
+        return $this->hasMany(Delivery::class, 'sender_id');
+    }
+
+    public function deliveriesAsDriver(): HasMany
+    {
+        return $this->hasMany(Delivery::class, 'driver_id');
+    }
+
     public function isDriver(): bool
     {
         return $this->role === self::ROLE_DRIVER;
