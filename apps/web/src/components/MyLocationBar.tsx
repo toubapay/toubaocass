@@ -81,29 +81,30 @@ export function MyLocationBar() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 4,
-          maxWidth: 140,
-          border: 'none',
+          gap: 6,
+          maxWidth: '58%',
+          border: `1px solid ${colors.border}`,
           borderRadius: radius.lg,
-          backgroundColor: 'rgba(255,255,255,0.18)',
-          padding: '8px 10px',
+          backgroundColor: colors.surface,
+          padding: '7px 12px',
           cursor: 'pointer',
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 12, flexShrink: 0 }}>📍</span>
+        <span style={{ fontSize: 14, flexShrink: 0 }}>📍</span>
         <span
           style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: '#fff',
+            fontSize: 13,
+            fontWeight: 600,
+            color: colors.text,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}
         >
-          {!current && locating ? '…' : (current?.addressLine ?? 'Ma position')}
+          {!current && locating ? 'Localisation…' : (current?.addressLine ?? 'Définir ma position')}
         </span>
+        <span style={{ fontSize: 11, color: colors.textMuted, flexShrink: 0 }}>⌄</span>
       </button>
 
       {modalOpen &&

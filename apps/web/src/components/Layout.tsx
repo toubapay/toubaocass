@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { fetchWallet } from '../api/wallet';
 import { colors, radius, spacing } from '../theme';
-import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
 import { WalletIcon } from './WalletIcon';
 
@@ -55,9 +54,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               Voyagez à partir de chez vous. Recherchez et réservez.
             </span>
           </div>
-        </div>
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <MyLocationBar />
         </div>
         <button
           onClick={() => navigate('/wallet')}

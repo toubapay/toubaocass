@@ -5,7 +5,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
-import { MyLocationBar } from '../components/MyLocationBar';
 import { WalletHeaderButton } from '../components/WalletHeaderButton';
 import { useAuth } from '../context/AuthContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
@@ -65,8 +64,7 @@ function HomeNavigator() {
         name="Home"
         component={HomeScreen}
         options={({ navigation }) => ({
-          headerTitle: () => <MyLocationBar />,
-          headerTitleAlign: 'center',
+          title: 'Choisissez votre Destination',
           headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
         })}
       />

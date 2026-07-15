@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from '
 import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
+import { MyLocationBar } from '../../components/MyLocationBar';
 import { Screen } from '../../components/Screen';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
@@ -51,7 +52,10 @@ export function TripsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Mes trajets</Text>
+      <View style={styles.addressRow}>
+        <Text style={styles.title}>Mes trajets</Text>
+        <MyLocationBar />
+      </View>
 
       <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
         <Text style={styles.mapCardIcon}>🗺️</Text>
@@ -93,7 +97,14 @@ export function TripsListScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 24, fontWeight: '700', color: colors.text },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
   mapCard: {
     flexDirection: 'row',
     alignItems: 'center',

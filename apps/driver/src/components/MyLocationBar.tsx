@@ -66,8 +66,9 @@ export function MyLocationBar() {
       <Pressable style={styles.pill} onPress={openModal}>
         <Text style={styles.pillIcon}>📍</Text>
         <Text style={styles.pillText} numberOfLines={1}>
-          {!current && locating ? '…' : (current?.addressLine ?? 'Ma position')}
+          {!current && locating ? 'Localisation…' : (current?.addressLine ?? 'Définir ma position')}
         </Text>
+        <Text style={styles.pillChevron}>⌄</Text>
       </Pressable>
 
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
@@ -102,15 +103,18 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    maxWidth: 170,
-    backgroundColor: colors.accentSoft,
+    maxWidth: '60%',
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radius.lg,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    gap: 4,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm + 2,
+    gap: 6,
   },
-  pillIcon: { fontSize: 12 },
-  pillText: { fontSize: 12, fontWeight: '700', color: colors.accent, flexShrink: 1 },
+  pillIcon: { fontSize: 13 },
+  pillText: { fontSize: 13, fontWeight: '600', color: colors.text, flexShrink: 1 },
+  pillChevron: { fontSize: 12, color: colors.textMuted },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.surface,
