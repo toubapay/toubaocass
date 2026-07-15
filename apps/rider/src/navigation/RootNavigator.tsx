@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
-import { WalletHeaderButton } from '../components/WalletHeaderButton';
+import { MyLocationBar } from '../components/MyLocationBar';
 import { useAuth } from '../context/AuthContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
@@ -63,10 +63,10 @@ function HomeNavigator() {
       <HomeStackNav.Screen
         name="Home"
         component={HomeScreen}
-        options={({ navigation }) => ({
+        options={{
           title: 'Choisissez votre Destination',
-          headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
-        })}
+          headerRight: () => <MyLocationBar />,
+        }}
       />
       <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
       <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />

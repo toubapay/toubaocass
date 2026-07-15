@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-import { fetchWallet } from '../api/wallet';
 import { colors, radius, spacing } from '../theme';
+import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
-import { WalletIcon } from './WalletIcon';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
@@ -14,13 +13,6 @@ const NAV_ITEMS = [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
-  }, []);
-
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <header
@@ -55,28 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/wallet')}
-          aria-label="Mon portefeuille"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            border: 'none',
-            borderRadius: radius.lg,
-            padding: '8px 12px',
-            backgroundColor: 'rgba(255,255,255,0.18)',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: 13,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
-          {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
-        </button>
+        <MyLocationBar />
       </header>
 
       <main
