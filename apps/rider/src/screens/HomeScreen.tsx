@@ -7,6 +7,7 @@ import { searchTrips } from '../api/trips';
 import { City, Trip } from '../api/types';
 import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
+import { MyLocationBar } from '../components/MyLocationBar';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
 import { TripsMapView } from '../components/TripsMapView';
@@ -95,6 +96,7 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
+        <MyLocationBar />
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
           {locating ? (
             <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />

@@ -44,3 +44,19 @@ export function useMyLocation() {
 
   return { location, loading, error, requestLocation, clearLocation };
 }
+
+/**
+ * Turns coordinates into a human-readable address for the "my location" bar,
+ * falling back to null (caller keeps the field blank/editable) if the
+ * device can't resolve one.
+ */
+export async function reverseGeocode(coords: Coordinates): Promise<string | null> {
+  try {
+    const [place] = await Location.reverseGeocodeAsync(coords);
+    if (!place) return null;
+
+    return [place.name, place.street, place.city, place.region].filter(Boolean).join(', ');
+  } catch {
+    return null;
+  }
+}

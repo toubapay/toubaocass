@@ -130,7 +130,15 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
 
   const handleUseLocation = async () => {
     const result = await requestLocation();
-    if (result) onLocationChange(result.latitude, result.longitude);
+    if (!result) return;
+    onLocationChange(result.latitude, result.longitude);
+
+    if (window.google?.maps) {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: { lat: result.latitude, lng: result.longitude } }, (results, status) => {
+        if (status === 'OK' && results?.[0]) onAddressLineChange(results[0].formatted_address);
+      });
+    }
   };
 
   if (!GOOGLE_MAPS_API_KEY) {
