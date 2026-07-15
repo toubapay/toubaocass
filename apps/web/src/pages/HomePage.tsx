@@ -5,18 +5,13 @@ import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
-import { MicIcon } from '../components/MicIcon';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
-import { useVoiceSearch } from '../hooks/useVoiceSearch';
 import { colors, radius, spacing } from '../theme';
 
 const NEARBY_RADIUS_KM = 25;
-// Sticky offset for the search box — must clear the app's sticky header
-// (logo/wallet row) so the two don't overlap while scrolling.
-const HEADER_HEIGHT = 89;
 
 export function HomePage() {
   const [cities, setCities] = useState<City[]>([]);
@@ -31,16 +26,8 @@ export function HomePage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
-  const [citySearch, setCitySearch] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const { listening: voiceListening, supported: voiceSupported, error: voiceError, start: startVoiceSearch } =
-    useVoiceSearch((text) => setCitySearch(text));
-
-  useEffect(() => {
-    if (voiceError) alert(voiceError);
-  }, [voiceError]);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -98,19 +85,7 @@ export function HomePage() {
     setNearMe(null);
   };
 
-  const query = citySearch.trim().toLowerCase();
-  const visibleTrips = query
-    ? trips.filter((trip) => `${trip.origin_city?.name ?? ''} ${trip.destination_city?.name ?? ''}`.toLowerCase().includes(query))
-    : trips;
-
-  const citySuggestions = query
-    ? cities.filter((city) => city.name.toLowerCase().includes(query) && city.name.toLowerCase() !== query).slice(0, 6)
-    : [];
-
-  function selectCitySuggestion(name: string) {
-    setCitySearch(name);
-    setSearchFocused(false);
-  }
+  const visibleTrips = trips;
 
   const toggleNearMe = async () => {
     if (nearMe) {
@@ -130,127 +105,6 @@ export function HomePage() {
       <h1 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.sm }}>
         Choisissez destination
       </h1>
-
-      <div
-        style={{
-          position: 'sticky',
-          top: HEADER_HEIGHT,
-          zIndex: 60,
-          backgroundColor: colors.background,
-          paddingBottom: spacing.sm,
-        }}
-      >
-        <div style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', fontSize: 17, pointerEvents: 'none' }}>
-            🔍
-          </span>
-          <input
-            value={citySearch}
-            onChange={(e) => setCitySearch(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-            placeholder="Où allez-vous ?"
-            style={{
-              width: '100%',
-              border: 'none',
-              borderRadius: 28,
-              padding: citySearch ? '16px 84px 16px 48px' : '16px 48px 16px 48px',
-              fontSize: 16,
-              color: colors.text,
-              backgroundColor: colors.surface,
-              boxShadow: '0 4px 16px rgba(19, 26, 23, 0.1)',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              right: 12,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            {citySearch && (
-              <>
-                <button
-                  onClick={() => setCitySearch('')}
-                  aria-label="Effacer la recherche"
-                  style={{
-                    display: 'flex',
-                    border: 'none',
-                    background: 'none',
-                    color: colors.textMuted,
-                    fontSize: 18,
-                    cursor: 'pointer',
-                    padding: 4,
-                  }}
-                >
-                  ✕
-                </button>
-                <div style={{ width: 1, height: 20, backgroundColor: colors.border }} />
-              </>
-            )}
-            <button
-              onClick={() => {
-                startVoiceSearch();
-                if (!voiceSupported) alert("La recherche vocale n'est pas prise en charge par ce navigateur.");
-              }}
-              aria-label={voiceListening ? "Arrêter l'écoute" : 'Recherche vocale'}
-              style={{
-                display: 'flex',
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                padding: 4,
-                animation: voiceListening ? 'pulse 1s ease-in-out infinite' : undefined,
-              }}
-            >
-              <MicIcon size={18} color={voiceListening ? colors.danger : colors.textMuted} />
-            </button>
-          </div>
-          {searchFocused && citySuggestions.length > 0 && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                zIndex: 50,
-                backgroundColor: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: radius.sm,
-                marginTop: 4,
-                maxHeight: 220,
-                overflowY: 'auto',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              }}
-            >
-              {citySuggestions.map((city, i) => (
-                <button
-                  key={city.id}
-                  onClick={() => selectCitySuggestion(city.name)}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 14px',
-                    border: 'none',
-                    borderBottom: i < citySuggestions.length - 1 ? `1px solid ${colors.border}` : 'none',
-                    backgroundColor: 'transparent',
-                    fontSize: 15.0,
-                    color: colors.text,
-                    cursor: 'pointer',
-                  }}
-                >
-                  📍 {city.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
       <button
         onClick={toggleNearMe}
@@ -360,13 +214,11 @@ export function HomePage() {
             {visibleTrips.length === 0 ? (
               <div style={{ marginTop: spacing.xl, textAlign: 'center', padding: `0 ${spacing.lg}px` }}>
                 <p style={{ color: colors.textMuted, fontSize: 16 }}>
-                  {query
-                    ? `Aucun trajet ne correspond à "${citySearch.trim()}".`
-                    : nearMe
-                      ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
-                      : hasFilters
-                        ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
-                        : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                  {nearMe
+                    ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                    : hasFilters
+                      ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
+                      : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
                 </p>
               </div>
             ) : (
@@ -379,7 +231,7 @@ export function HomePage() {
               ))
             )}
 
-            {!query && lastPage > 1 && (
+            {lastPage > 1 && (
               <div
                 style={{
                   display: 'flex',

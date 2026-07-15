@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -10,7 +10,6 @@ import { DateField } from '../components/DateField';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
 import { TripsMapView } from '../components/TripsMapView';
-import { VoiceSearchButton } from '../components/VoiceSearchButton';
 import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -33,7 +32,6 @@ export function HomeScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const [citySearch, setCitySearch] = useState('');
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
@@ -79,10 +77,7 @@ export function HomeScreen({ navigation }: Props) {
     setNearMe(null);
   };
 
-  const query = citySearch.trim().toLowerCase();
-  const visibleTrips = query
-    ? trips.filter((trip) => `${trip.origin_city?.name ?? ''} ${trip.destination_city?.name ?? ''}`.toLowerCase().includes(query))
-    : trips;
+  const visibleTrips = trips;
 
   const toggleNearMe = async () => {
     if (nearMe) {
@@ -100,28 +95,6 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
-        <View style={styles.searchWrapper}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Rechercher une ville de départ ou d'arrivée..."
-            placeholderTextColor={colors.textMuted}
-            value={citySearch}
-            onChangeText={setCitySearch}
-          />
-          <View style={styles.searchActions}>
-            {citySearch.length > 0 && (
-              <>
-                <Pressable onPress={() => setCitySearch('')} hitSlop={8}>
-                  <Text style={styles.searchClearText}>✕</Text>
-                </Pressable>
-                <View style={styles.searchDivider} />
-              </>
-            )}
-            <VoiceSearchButton onResult={setCitySearch} />
-          </View>
-        </View>
-
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
           {locating ? (
             <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />
@@ -189,13 +162,11 @@ export function HomeScreen({ navigation }: Props) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
-                {query
-                  ? `Aucun trajet ne correspond à "${citySearch.trim()}".`
-                  : nearMe
-                    ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
-                    : hasFilters
-                      ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
-                      : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                {nearMe
+                  ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                  : hasFilters
+                    ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
+                    : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
               </Text>
             </View>
           }
@@ -211,28 +182,6 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   filters: { marginBottom: spacing.sm },
-  searchWrapper: { position: 'relative', justifyContent: 'center', marginBottom: spacing.sm },
-  searchIcon: { position: 'absolute', left: 14, fontSize: 16, zIndex: 1 },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingVertical: 12,
-    paddingLeft: 38,
-    paddingRight: 68,
-    fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.surface,
-  },
-  searchActions: {
-    position: 'absolute',
-    right: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  searchClearText: { color: colors.textMuted, fontSize: 16 },
-  searchDivider: { width: 1, height: 18, backgroundColor: colors.border },
   nearMeButton: {
     borderWidth: 1,
     borderColor: colors.primary,
