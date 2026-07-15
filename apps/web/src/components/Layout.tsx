@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { fetchWallet } from '../api/wallet';
 import { colors, radius, spacing } from '../theme';
+import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
 import { WalletIcon } from './WalletIcon';
 
@@ -37,58 +38,49 @@ export function Layout({ children }: { children: React.ReactNode }) {
           boxShadow: '0 2px 10px rgba(19, 26, 23, 0.12)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-          <img src="/favicon.svg" alt="" width={28} height={28} />
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0, flexShrink: 1 }}>
+          <img src="/favicon.svg" alt="" width={28} height={28} style={{ flexShrink: 0 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15, minWidth: 0 }}>
             <span style={{ fontSize: 24, fontWeight: 800, color: '#fff' }}>Intercity</span>
-            <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+            <span
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.85)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               Voyagez à partir de chez vous. Recherchez et réservez.
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
-          <button
-            onClick={() => navigate('/map')}
-            aria-label="Carte des trajets"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: 'none',
-              borderRadius: radius.lg,
-              width: 34,
-              height: 34,
-              backgroundColor: 'rgba(255,255,255,0.18)',
-              cursor: 'pointer',
-              flexShrink: 0,
-              fontSize: 16,
-            }}
-          >
-            🗺️
-          </button>
-          <button
-            onClick={() => navigate('/wallet')}
-            aria-label="Mon portefeuille"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              border: 'none',
-              borderRadius: radius.lg,
-              padding: '8px 12px',
-              backgroundColor: 'rgba(255,255,255,0.18)',
-              color: '#fff',
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
-            {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
-          </button>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+          <MyLocationBar />
         </div>
+        <button
+          onClick={() => navigate('/wallet')}
+          aria-label="Mon portefeuille"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            border: 'none',
+            borderRadius: radius.lg,
+            padding: '8px 12px',
+            backgroundColor: 'rgba(255,255,255,0.18)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
+        >
+          <WalletIcon size={16} color="#fff" detailColor={colors.primary} />
+          {walletBalance !== null ? `${walletBalance.toLocaleString()} F` : '…'}
+        </button>
       </header>
 
       <main

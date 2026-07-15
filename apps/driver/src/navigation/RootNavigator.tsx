@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { MyLocationBar } from '../components/MyLocationBar';
 import { WalletHeaderButton } from '../components/WalletHeaderButton';
 import { useAuth } from '../context/AuthContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
@@ -60,7 +61,8 @@ function TripsNavigator() {
         name="TripsList"
         component={TripsListScreen}
         options={({ navigation }) => ({
-          title: 'Mes trajets',
+          headerTitle: () => <MyLocationBar />,
+          headerTitleAlign: 'center',
           headerRight: () => <WalletHeaderButton onPress={() => navigation.navigate('Wallet')} />,
         })}
       />
