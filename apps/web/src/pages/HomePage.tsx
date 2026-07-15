@@ -149,9 +149,11 @@ export function HomePage() {
             onChange={(e) => setDate(e.target.value)}
             style={{
               width: '100%',
+              height: 46,
+              boxSizing: 'border-box',
               border: `1px solid ${colors.border}`,
               borderRadius: radius.sm,
-              padding: '13px 10px',
+              padding: '0 10px',
               fontSize: 15,
               color: colors.text,
               backgroundColor: colors.surface,

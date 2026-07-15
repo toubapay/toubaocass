@@ -50,11 +50,12 @@ const styles = StyleSheet.create({
   wrapper: { marginBottom: spacing.md },
   label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   selector: {
+    height: 46,
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
     backgroundColor: colors.surface,
   },
   text: { fontSize: 18, color: colors.text },
