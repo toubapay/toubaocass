@@ -142,23 +142,42 @@ export function HomePage() {
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
             Date
           </label>
-          <input
-            type="date"
-            value={date}
-            min={new Date().toISOString().slice(0, 10)}
-            onChange={(e) => setDate(e.target.value)}
-            style={{
-              width: '100%',
-              height: 46,
-              boxSizing: 'border-box',
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.sm,
-              padding: '0 10px',
-              fontSize: 15,
-              color: colors.text,
-              backgroundColor: colors.surface,
-            }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              type="date"
+              value={date}
+              min={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => setDate(e.target.value)}
+              style={{
+                width: '100%',
+                height: 46,
+                boxSizing: 'border-box',
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.sm,
+                padding: '0 10px',
+                fontSize: 15,
+                color: date ? colors.text : 'transparent',
+                backgroundColor: colors.surface,
+              }}
+            />
+            {!date && (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 11,
+                  top: 0,
+                  height: 46,
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 15,
+                  color: colors.textMuted,
+                  pointerEvents: 'none',
+                }}
+              >
+                jj/mm/aaaa
+              </span>
+            )}
+          </div>
         </div>
         <div style={{ width: 100 }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>

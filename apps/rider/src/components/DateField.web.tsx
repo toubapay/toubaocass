@@ -32,14 +32,20 @@ export function DateField({ label, value, onChange, minimumDate, placeholder }: 
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
-      <input
-        type="date"
-        value={value ? toInputValue(value) : ''}
-        placeholder={placeholder}
-        min={minimumDate ? toInputValue(minimumDate) : undefined}
-        onChange={handleChange}
-        style={webInputStyle}
-      />
+      <View style={{ position: 'relative' }}>
+        <input
+          type="date"
+          value={value ? toInputValue(value) : ''}
+          min={minimumDate ? toInputValue(minimumDate) : undefined}
+          onChange={handleChange}
+          style={{ ...webInputStyle, color: value ? colors.text : 'transparent' }}
+        />
+        {!value && (
+          <Text style={styles.mask} pointerEvents="none">
+            {placeholder ?? 'jj/mm/aaaa'}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -59,4 +65,14 @@ const webInputStyle: React.CSSProperties = {
 const styles = StyleSheet.create({
   wrapper: { marginBottom: spacing.md },
   label: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
+  mask: {
+    position: 'absolute',
+    left: spacing.md,
+    top: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: 18,
+    color: colors.textMuted,
+  },
 });

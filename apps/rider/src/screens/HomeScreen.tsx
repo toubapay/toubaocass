@@ -116,7 +116,7 @@ export function HomeScreen({ navigation }: Props) {
 
         <View style={styles.dateRow}>
           <View style={styles.dateField}>
-            <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="Toutes les dates" />
+            <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="jj/mm/aaaa" />
           </View>
           <View style={styles.seatsField}>
             <Text style={styles.seatsLabel}>Places</Text>
