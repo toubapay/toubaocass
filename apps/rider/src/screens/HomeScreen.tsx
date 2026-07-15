@@ -114,8 +114,8 @@ export function HomeScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={styles.filterRow}>
-          <View style={styles.filterField}>
+        <View style={styles.dateRow}>
+          <View style={styles.dateField}>
             <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="Toutes les dates" />
           </View>
           <View style={styles.seatsField}>
@@ -197,7 +197,9 @@ const styles = StyleSheet.create({
   nearMeTextActive: { color: '#fff' },
   filterRow: { flexDirection: 'row', gap: spacing.sm },
   filterField: { flex: 1 },
-  seatsField: { width: 108 },
+  dateRow: { flexDirection: 'row', gap: spacing.lg },
+  dateField: { width: 150 },
+  seatsField: { width: 100 },
   seatsLabel: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   stepper: {
     flexDirection: 'row',

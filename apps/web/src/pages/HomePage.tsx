@@ -137,8 +137,8 @@ export function HomePage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: spacing.sm, alignItems: 'flex-start' }}>
-        <div style={{ flex: 1 }}>
+      <div style={{ display: 'flex', gap: spacing.lg, alignItems: 'flex-start' }}>
+        <div style={{ width: 150 }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
             Date
           </label>
@@ -151,14 +151,14 @@ export function HomePage() {
               width: '100%',
               border: `1px solid ${colors.border}`,
               borderRadius: radius.sm,
-              padding: '13px 16px',
-              fontSize: 16,
+              padding: '13px 10px',
+              fontSize: 15,
               color: colors.text,
               backgroundColor: colors.surface,
             }}
           />
         </div>
-        <div style={{ width: 108 }}>
+        <div style={{ width: 100 }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
             Places
           </label>
