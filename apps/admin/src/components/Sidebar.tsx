@@ -18,7 +18,11 @@ interface NavItem {
   permission: string;
 }
 
-const NAV_ITEMS: NavItem[] = [{ to: '/users', label: 'Utilisateurs', permission: 'manage_users' }];
+const NAV_ITEMS: NavItem[] = [
+  { to: '/users', label: 'Utilisateurs', permission: 'manage_users' },
+  { to: '/kyc', label: 'Vérification KYC', permission: 'manage_kyc' },
+  { to: '/settings', label: 'Paramètres', permission: 'manage_system_settings' },
+];
 
 export function Sidebar({ admin, onSignOut }: { admin: AdminUser; onSignOut: () => void }) {
   const items = NAV_ITEMS.filter((item) => admin.permissions.includes(item.permission));

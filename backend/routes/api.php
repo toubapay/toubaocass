@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
+use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
@@ -100,6 +102,19 @@ Route::prefix('admin')->group(function () {
             Route::get('users', [AdminUserController::class, 'index']);
             Route::get('users/{user}', [AdminUserController::class, 'show']);
             Route::put('users/{user}/status', [AdminUserController::class, 'updateStatus']);
+        });
+
+        Route::middleware('admin.permission:manage_kyc')->group(function () {
+            Route::get('kyc/queue', [AdminKycController::class, 'queue']);
+            Route::get('kyc/{driverProfile}', [AdminKycController::class, 'show']);
+            Route::get('kyc/{driverProfile}/document/{field}', [AdminKycController::class, 'document']);
+            Route::post('kyc/{driverProfile}/approve', [AdminKycController::class, 'approve']);
+            Route::post('kyc/{driverProfile}/reject', [AdminKycController::class, 'reject']);
+        });
+
+        Route::middleware('admin.permission:manage_system_settings')->group(function () {
+            Route::get('settings/kyc-mode', [AdminSettingsController::class, 'kycMode']);
+            Route::put('settings/kyc-mode', [AdminSettingsController::class, 'updateKycMode']);
         });
     });
 });

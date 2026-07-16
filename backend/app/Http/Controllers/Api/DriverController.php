@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\SubmitKycRequest;
 use App\Http\Resources\DriverProfileResource;
 use App\Models\DriverProfile;
+use App\Services\KycReviewService;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+    public function __construct(private readonly KycReviewService $kycReviewService) {}
+
     public function showKyc(Request $request)
     {
         $profile = $request->user()->driverProfile;
@@ -36,6 +39,8 @@ class DriverController extends Controller
                 'kyc_rejection_reason' => null,
             ]),
         );
+
+        $profile = $this->kycReviewService->maybeAutoReview($profile);
 
         return new DriverProfileResource($profile);
     }

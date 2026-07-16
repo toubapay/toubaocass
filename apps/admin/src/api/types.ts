@@ -56,6 +56,25 @@ export interface UserDetail {
   wallet_balance?: number;
 }
 
+export type KycDocumentField = 'id_document' | 'license_document' | 'selfie';
+
+export interface KycProfile {
+  id: number;
+  user_id: number;
+  driver_name: string | null;
+  driver_phone: string;
+  license_number: string | null;
+  license_expiry: string | null;
+  national_id_number: string | null;
+  kyc_status: KycStatus;
+  kyc_rejection_reason: string | null;
+  documents: Record<KycDocumentField, boolean>;
+  approved_at: string | null;
+  updated_at: string;
+}
+
+export type KycReviewMode = 'automatic' | 'manual';
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };
