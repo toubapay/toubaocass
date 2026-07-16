@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'phone', 'role', 'password', 'phone_verified_at', 'fcm_token'])]
+#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -22,6 +22,10 @@ class User extends Authenticatable
     const ROLE_RIDER = 'rider';
 
     const ROLE_DRIVER = 'driver';
+
+    const STATUS_ACTIVE = 'active';
+
+    const STATUS_SUSPENDED = 'suspended';
 
     protected function casts(): array
     {

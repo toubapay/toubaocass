@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureAdminHasPermission;
+use App\Http\Middleware\EnsureIsAdminUser;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
+            'admin.permission' => EnsureAdminHasPermission::class,
+            'admin.auth' => EnsureIsAdminUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

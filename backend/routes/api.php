@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
@@ -83,5 +85,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('deliveries/{delivery}/accept', [DeliveryController::class, 'accept']);
         Route::post('deliveries/{delivery}/pickup', [DeliveryController::class, 'pickup']);
         Route::post('deliveries/{delivery}/deliver', [DeliveryController::class, 'deliver']);
+    });
+});
+
+// Admin back-office — separate admin_users identity/guard, not riders/drivers.
+Route::prefix('admin')->group(function () {
+    Route::post('login', [AdminAuthController::class, 'login']);
+
+    Route::middleware(['auth:sanctum', 'admin.auth'])->group(function () {
+        Route::get('me', [AdminAuthController::class, 'me']);
+        Route::post('logout', [AdminAuthController::class, 'logout']);
+
+        Route::middleware('admin.permission:manage_users')->group(function () {
+            Route::get('users', [AdminUserController::class, 'index']);
+            Route::get('users/{user}', [AdminUserController::class, 'show']);
+            Route::put('users/{user}/status', [AdminUserController::class, 'updateStatus']);
+        });
     });
 });
