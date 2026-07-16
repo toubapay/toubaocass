@@ -21,6 +21,8 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/users', label: 'Utilisateurs', permission: 'manage_users' },
   { to: '/kyc', label: 'Vérification KYC', permission: 'manage_kyc' },
+  { to: '/fares', label: 'Tarifs & commission', permission: 'manage_fares' },
+  { to: '/financials', label: 'Finances', permission: 'view_financials' },
   { to: '/settings', label: 'Paramètres', permission: 'manage_system_settings' },
 ];
 

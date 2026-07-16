@@ -75,6 +75,26 @@ export interface KycProfile {
 
 export type KycReviewMode = 'automatic' | 'manual';
 
+export interface FareSettings {
+  delivery_base_fee: number;
+  delivery_fee_per_km: number;
+  commission_rate_trip: number;
+  commission_rate_delivery: number;
+}
+
+export interface FinancialsBreakdown {
+  completed_count: number;
+  commission_earned: number;
+  driver_earnings: number;
+}
+
+export interface FinancialsSummary {
+  trips: FinancialsBreakdown;
+  deliveries: FinancialsBreakdown;
+  total_commission_earned: number;
+  total_driver_earnings: number;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

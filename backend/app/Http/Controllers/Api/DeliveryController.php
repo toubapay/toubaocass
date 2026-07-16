@@ -14,6 +14,7 @@ use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
 use App\Models\DriverProfile;
 use App\Models\WalletTransaction;
+use App\Services\CommissionService;
 use App\Services\DeliveryPricingService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -191,7 +192,7 @@ class DeliveryController extends Controller
         return new DeliveryResource($delivery->fresh(['sender', 'driver.driverProfile']));
     }
 
-    public function deliver(Request $request, Delivery $delivery)
+    public function deliver(Request $request, Delivery $delivery, CommissionService $commission)
     {
         $this->authorize('update', $delivery);
 
@@ -199,7 +200,10 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Seule une livraison récupérée peut être marquée livrée.'], 422);
         }
 
-        $delivery->update(['status' => Delivery::STATUS_DELIVERED, 'delivered_at' => now()]);
+        DB::transaction(function () use ($delivery, $commission) {
+            $delivery->update(['status' => Delivery::STATUS_DELIVERED, 'delivered_at' => now()]);
+            $commission->applyToDelivery($delivery);
+        });
 
         DeliveryDelivered::dispatch($delivery->fresh());
 

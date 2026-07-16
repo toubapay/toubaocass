@@ -12,12 +12,16 @@ use App\Models\Booking;
 use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
+use App\Services\CommissionService;
 use App\Support\Geo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TripController extends Controller
 {
+    public function __construct(private readonly CommissionService $commissionService) {}
+
     /**
      * Rider-facing search across available trips.
      */
@@ -151,7 +155,13 @@ class TripController extends Controller
             return response()->json(['message' => 'Seul un trajet en cours peut être terminé.'], 422);
         }
 
-        $trip->update(['status' => Trip::STATUS_COMPLETED]);
+        DB::transaction(function () use ($trip) {
+            $trip->update(['status' => Trip::STATUS_COMPLETED]);
+
+            $trip->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(
+                fn (Booking $booking) => $this->commissionService->applyToBooking($booking),
+            );
+        });
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }

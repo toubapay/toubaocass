@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
+use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
 use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
 use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
@@ -115,6 +117,15 @@ Route::prefix('admin')->group(function () {
         Route::middleware('admin.permission:manage_system_settings')->group(function () {
             Route::get('settings/kyc-mode', [AdminSettingsController::class, 'kycMode']);
             Route::put('settings/kyc-mode', [AdminSettingsController::class, 'updateKycMode']);
+        });
+
+        Route::middleware('admin.permission:manage_fares')->group(function () {
+            Route::get('settings/fares', [AdminFareSettingsController::class, 'index']);
+            Route::put('settings/fares', [AdminFareSettingsController::class, 'update']);
+        });
+
+        Route::middleware('admin.permission:view_financials')->group(function () {
+            Route::get('financials/summary', [AdminFinancialsController::class, 'summary']);
         });
     });
 });

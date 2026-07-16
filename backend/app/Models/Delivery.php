@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'sender_id', 'driver_id', 'receiver_name', 'receiver_phone', 'receiver_address_line',
     'receiver_latitude', 'receiver_longitude', 'pickup_address_line', 'pickup_latitude',
-    'pickup_longitude', 'package_type', 'notes', 'distance_km', 'fee', 'payment_method',
-    'status', 'accepted_at', 'picked_up_at', 'delivered_at', 'cancelled_at',
+    'pickup_longitude', 'package_type', 'notes', 'distance_km', 'fee', 'commission_amount',
+    'commission_rate', 'payment_method', 'status', 'accepted_at', 'picked_up_at',
+    'delivered_at', 'cancelled_at',
 ])]
 class Delivery extends Model
 {
@@ -49,6 +50,7 @@ class Delivery extends Model
             'pickup_latitude' => 'float',
             'pickup_longitude' => 'float',
             'distance_km' => 'float',
+            'commission_rate' => 'decimal:2',
             'accepted_at' => 'datetime',
             'picked_up_at' => 'datetime',
             'delivered_at' => 'datetime',
