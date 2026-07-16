@@ -95,6 +95,66 @@ export interface FinancialsSummary {
   total_driver_earnings: number;
 }
 
+export interface DashboardStats {
+  registered_drivers: number;
+  registered_riders: number;
+  active_cars: number;
+  kyc_pending: number;
+  total_trips: number;
+  trips_in_progress: number;
+  total_deliveries: number;
+  total_commission_earned: number;
+}
+
+export interface TripRoute {
+  origin_city: string;
+  destination_city: string;
+  trips_count: number;
+}
+
+export interface DeliveryZone {
+  zone: string;
+  deliveries_count: number;
+}
+
+export interface DashboardRoutes {
+  top_trip_routes: TripRoute[];
+  delivery_zone_coverage: DeliveryZone[];
+}
+
+export interface LiveTrip {
+  id: number;
+  driver_name: string | null;
+  driver_phone: string | null;
+  car: string | null;
+  origin_city: string | null;
+  destination_city: string | null;
+  latitude: number;
+  longitude: number;
+  departure_date: string | null;
+  departure_time: string | null;
+}
+
+export type SecurityAlertType = 'repeated_otp_failures' | 'kyc_rejected';
+
+export type SecurityAlertSeverity = 'low' | 'medium' | 'high';
+
+export type SecurityAlertStatus = 'open' | 'acknowledged';
+
+export interface SecurityAlert {
+  id: number;
+  type: SecurityAlertType;
+  severity: SecurityAlertSeverity;
+  message: string;
+  user_id: number | null;
+  user_name: string | null;
+  metadata: Record<string, unknown> | null;
+  status: SecurityAlertStatus;
+  acknowledged_by: string | null;
+  acknowledged_at: string | null;
+  created_at: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AdminUser;
 use App\Models\DriverProfile;
+use App\Models\SecurityAlert;
 
 class KycReviewService
 {
@@ -13,7 +14,10 @@ class KycReviewService
 
     const MODE_MANUAL = 'manual';
 
-    public function __construct(private readonly PlatformSettingsService $settings) {}
+    public function __construct(
+        private readonly PlatformSettingsService $settings,
+        private readonly SecurityAlertService $securityAlerts,
+    ) {}
 
     public function mode(): string
     {
@@ -77,6 +81,14 @@ class KycReviewService
             'kyc_rejection_reason' => $reason,
             'approved_at' => null,
         ]);
+
+        $this->securityAlerts->record(
+            SecurityAlert::TYPE_KYC_REJECTED,
+            SecurityAlert::SEVERITY_LOW,
+            "Dossier KYC rejeté pour le chauffeur #{$profile->user_id}.",
+            $profile->user,
+            ['driver_profile_id' => $profile->id, 'reason' => $reason],
+        );
 
         return $profile->fresh();
     }

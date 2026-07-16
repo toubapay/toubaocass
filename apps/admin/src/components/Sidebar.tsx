@@ -19,8 +19,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { to: '/dashboard', label: 'Tableau de bord', permission: 'view_dashboard' },
   { to: '/users', label: 'Utilisateurs', permission: 'manage_users' },
   { to: '/kyc', label: 'Vérification KYC', permission: 'manage_kyc' },
+  { to: '/live-trips', label: 'Trajets en direct', permission: 'view_dashboard' },
+  { to: '/security-alerts', label: 'Alertes de sécurité', permission: 'view_security_alerts' },
   { to: '/fares', label: 'Tarifs & commission', permission: 'manage_fares' },
   { to: '/financials', label: 'Finances', permission: 'view_financials' },
   { to: '/settings', label: 'Paramètres', permission: 'manage_system_settings' },

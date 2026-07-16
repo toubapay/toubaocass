@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
 use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
+use App\Http\Controllers\Api\Admin\LiveTripsController as AdminLiveTripsController;
+use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
 use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
@@ -126,6 +129,17 @@ Route::prefix('admin')->group(function () {
 
         Route::middleware('admin.permission:view_financials')->group(function () {
             Route::get('financials/summary', [AdminFinancialsController::class, 'summary']);
+        });
+
+        Route::middleware('admin.permission:view_dashboard')->group(function () {
+            Route::get('dashboard/stats', [AdminDashboardController::class, 'stats']);
+            Route::get('dashboard/routes', [AdminDashboardController::class, 'routes']);
+            Route::get('trips/live', [AdminLiveTripsController::class, 'index']);
+        });
+
+        Route::middleware('admin.permission:view_security_alerts')->group(function () {
+            Route::get('security-alerts', [AdminSecurityAlertController::class, 'index']);
+            Route::put('security-alerts/{securityAlert}/acknowledge', [AdminSecurityAlertController::class, 'acknowledge']);
         });
     });
 });

@@ -3,10 +3,13 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { FinancialsPage } from './pages/financials/FinancialsPage';
 import { KycQueuePage } from './pages/kyc/KycQueuePage';
 import { KycReviewPage } from './pages/kyc/KycReviewPage';
+import { LiveTripsPage } from './pages/live/LiveTripsPage';
 import { LoginPage } from './pages/LoginPage';
+import { SecurityAlertsPage } from './pages/security/SecurityAlertsPage';
 import { FaresPage } from './pages/settings/FaresPage';
 import { SystemSettingsPage } from './pages/settings/SystemSettingsPage';
 import { UserDetailPage } from './pages/users/UserDetailPage';
@@ -31,11 +34,14 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Navigate to="/users" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/users" element={<UsersListPage />} />
         <Route path="/users/:id" element={<UserDetailPage />} />
         <Route path="/kyc" element={<KycQueuePage />} />
         <Route path="/kyc/:id" element={<KycReviewPage />} />
+        <Route path="/live-trips" element={<LiveTripsPage />} />
+        <Route path="/security-alerts" element={<SecurityAlertsPage />} />
         <Route path="/fares" element={<FaresPage />} />
         <Route path="/financials" element={<FinancialsPage />} />
         <Route path="/settings" element={<SystemSettingsPage />} />
