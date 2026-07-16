@@ -17,6 +17,7 @@ class KycReviewService
     public function __construct(
         private readonly PlatformSettingsService $settings,
         private readonly SecurityAlertService $securityAlerts,
+        private readonly AuditLogService $auditLog,
     ) {}
 
     public function mode(): string
@@ -63,7 +64,7 @@ class KycReviewService
         return $profile;
     }
 
-    public function approve(DriverProfile $profile): DriverProfile
+    public function approve(DriverProfile $profile, ?AdminUser $admin = null): DriverProfile
     {
         $profile->update([
             'kyc_status' => DriverProfile::STATUS_APPROVED,
@@ -71,10 +72,14 @@ class KycReviewService
             'approved_at' => now(),
         ]);
 
+        if ($admin !== null) {
+            $this->auditLog->record($admin, 'kyc.approve', "Dossier KYC approuvé pour le chauffeur #{$profile->user_id}.", $profile);
+        }
+
         return $profile->fresh();
     }
 
-    public function reject(DriverProfile $profile, string $reason): DriverProfile
+    public function reject(DriverProfile $profile, string $reason, ?AdminUser $admin = null): DriverProfile
     {
         $profile->update([
             'kyc_status' => DriverProfile::STATUS_REJECTED,
@@ -89,6 +94,10 @@ class KycReviewService
             $profile->user,
             ['driver_profile_id' => $profile->id, 'reason' => $reason],
         );
+
+        if ($admin !== null) {
+            $this->auditLog->record($admin, 'kyc.reject', "Dossier KYC rejeté pour le chauffeur #{$profile->user_id}.", $profile, ['reason' => $reason]);
+        }
 
         return $profile->fresh();
     }

@@ -52,16 +52,16 @@ class KycController extends Controller
         return Storage::disk(config('filesystems.kyc_disk'))->response($path);
     }
 
-    public function approve(DriverProfile $driverProfile)
+    public function approve(Request $request, DriverProfile $driverProfile)
     {
-        $profile = $this->kycReviewService->approve($driverProfile);
+        $profile = $this->kycReviewService->approve($driverProfile, $request->user());
 
         return new KycProfileResource($profile->load('user'));
     }
 
     public function reject(RejectKycRequest $request, DriverProfile $driverProfile)
     {
-        $profile = $this->kycReviewService->reject($driverProfile, $request->string('reason'));
+        $profile = $this->kycReviewService->reject($driverProfile, $request->string('reason'), $request->user());
 
         return new KycProfileResource($profile->load('user'));
     }

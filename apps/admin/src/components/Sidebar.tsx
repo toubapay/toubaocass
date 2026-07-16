@@ -26,6 +26,9 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/security-alerts', label: 'Alertes de sécurité', permission: 'view_security_alerts' },
   { to: '/fares', label: 'Tarifs & commission', permission: 'manage_fares' },
   { to: '/financials', label: 'Finances', permission: 'view_financials' },
+  { to: '/backups', label: 'Sauvegardes', permission: 'manage_backups' },
+  { to: '/staff', label: 'Équipe back-office', permission: 'manage_admins' },
+  { to: '/audit-log', label: "Journal d'audit", permission: 'manage_admins' },
   { to: '/settings', label: 'Paramètres', permission: 'manage_system_settings' },
 ];
 

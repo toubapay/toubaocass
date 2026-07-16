@@ -7,11 +7,14 @@ use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserDetailResource;
 use App\Http\Resources\Admin\UserSummaryResource;
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct(private readonly AuditLogService $auditLog) {}
+
     public function index(Request $request)
     {
         $request->validate([
@@ -44,7 +47,10 @@ class UserController extends Controller
 
     public function updateStatus(UpdateUserStatusRequest $request, User $user)
     {
-        $user->update(['status' => $request->string('status')]);
+        $status = $request->string('status')->toString();
+        $user->update(['status' => $status]);
+
+        $this->auditLog->record($request->user(), 'user.status.update', "Statut de l'utilisateur #{$user->id} changé en \"{$status}\".", $user);
 
         return new UserDetailResource($user->fresh(['driverProfile', 'wallet'])->loadCount(['cars', 'trips', 'bookings']));
     }

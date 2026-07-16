@@ -101,6 +101,23 @@ return [
             'report' => false,
         ],
 
+        // Private bucket for spatie/laravel-backup archives — same
+        // credentials/provider as the disks above, separate bucket. Set
+        // BACKUP_DISK=backups in production to point the backup package at
+        // it; defaults to the local disk so backups work out of the box in
+        // development without any S3 setup.
+        'backups' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BACKUPS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

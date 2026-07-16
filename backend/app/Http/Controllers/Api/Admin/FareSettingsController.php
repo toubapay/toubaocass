@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateFareSettingsRequest;
+use App\Services\AuditLogService;
 use App\Services\CommissionService;
 use App\Services\DeliveryPricingService;
 use App\Services\PlatformSettingsService;
@@ -14,6 +15,7 @@ class FareSettingsController extends Controller
         private readonly PlatformSettingsService $settings,
         private readonly DeliveryPricingService $pricing,
         private readonly CommissionService $commission,
+        private readonly AuditLogService $auditLog,
     ) {}
 
     public function index()
@@ -32,10 +34,17 @@ class FareSettingsController extends Controller
             'commission_rate_delivery' => CommissionService::RATE_KEY_DELIVERY,
         ];
 
+        $changed = [];
+
         foreach ($keys as $field => $settingKey) {
             if ($request->filled($field)) {
                 $this->settings->set($settingKey, (string) $request->input($field), $admin);
+                $changed[$field] = $request->input($field);
             }
+        }
+
+        if ($changed !== []) {
+            $this->auditLog->record($admin, 'fares.update', 'Mise à jour des tarifs et de la commission.', metadata: $changed);
         }
 
         return response()->json($this->currentSettings());

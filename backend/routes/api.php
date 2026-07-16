@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
 use App\Http\Controllers\Api\Admin\LiveTripsController as AdminLiveTripsController;
 use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
 use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Api\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
@@ -140,6 +143,19 @@ Route::prefix('admin')->group(function () {
         Route::middleware('admin.permission:view_security_alerts')->group(function () {
             Route::get('security-alerts', [AdminSecurityAlertController::class, 'index']);
             Route::put('security-alerts/{securityAlert}/acknowledge', [AdminSecurityAlertController::class, 'acknowledge']);
+        });
+
+        Route::middleware('admin.permission:manage_admins')->group(function () {
+            Route::get('admins', [AdminStaffController::class, 'index']);
+            Route::post('admins', [AdminStaffController::class, 'store']);
+            Route::put('admins/{adminUser}', [AdminStaffController::class, 'update']);
+            Route::get('audit-log', [AdminAuditLogController::class, 'index']);
+        });
+
+        Route::middleware('admin.permission:manage_backups')->group(function () {
+            Route::get('backups', [AdminBackupController::class, 'index']);
+            Route::post('backups', [AdminBackupController::class, 'store']);
+            Route::get('backups/{path}/download', [AdminBackupController::class, 'download']);
         });
     });
 });

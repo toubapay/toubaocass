@@ -155,6 +155,44 @@ export interface SecurityAlert {
   created_at: string;
 }
 
+export interface BackupEntry {
+  path: string;
+  date: string;
+  size_bytes: number;
+}
+
+export interface BackupsResponse {
+  disk: string;
+  reachable: boolean;
+  backups: BackupEntry[];
+}
+
+export interface AuditLogEntry {
+  id: number;
+  admin_name: string | null;
+  action: string;
+  description: string;
+  subject_type: string | null;
+  subject_id: number | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface CreateAdminUserInput {
+  name: string;
+  email: string;
+  password: string;
+  role: AdminRole;
+}
+
+export interface UpdateAdminUserInput {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: AdminRole;
+  status?: AdminStatus;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };
