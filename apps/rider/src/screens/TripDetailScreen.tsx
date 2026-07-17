@@ -15,7 +15,7 @@ import { Screen } from '../components/Screen';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
-import { formatDuration } from '../utils/trip';
+import { formatDuration, hasDeparted } from '../utils/trip';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
@@ -84,9 +84,11 @@ export function TripDetailScreen({ route, navigation }: Props) {
     );
   }
 
-  const isUnavailable = editing
-    ? !['scheduled', 'full'].includes(trip.status)
-    : trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const tripDeparted = hasDeparted(trip);
+  const isUnavailable = tripDeparted
+    || (editing
+      ? !['scheduled', 'full'].includes(trip.status)
+      : trip.available_seats <= 0 || trip.status !== 'scheduled');
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
   const insufficientWalletFunds =
@@ -223,7 +225,9 @@ export function TripDetailScreen({ route, navigation }: Props) {
         )}
 
         {isUnavailable ? (
-          <Text style={styles.fullNotice}>Ce trajet n'est plus disponible.</Text>
+          <Text style={styles.fullNotice}>
+            {tripDeparted ? 'Ce trajet est déjà terminé ou est déjà parti.' : "Ce trajet n'est plus disponible."}
+          </Text>
         ) : (
           <View style={styles.seatsRow}>
             <Text style={styles.seatsLabel}>{editing ? 'Nombre de places' : 'Places à réserver'}</Text>

@@ -12,7 +12,7 @@ import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
-import { formatDuration } from '../utils/trip';
+import { formatDuration, hasDeparted } from '../utils/trip';
 
 export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +73,11 @@ export function TripDetailPage() {
     return <CenteredSpinner />;
   }
 
-  const isUnavailable = editing
-    ? !['scheduled', 'full'].includes(trip.status)
-    : trip.available_seats <= 0 || trip.status !== 'scheduled';
+  const tripDeparted = hasDeparted(trip);
+  const isUnavailable = tripDeparted
+    || (editing
+      ? !['scheduled', 'full'].includes(trip.status)
+      : trip.available_seats <= 0 || trip.status !== 'scheduled');
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const insufficientWalletFunds =
     !editing && paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats;
@@ -321,7 +323,9 @@ export function TripDetailPage() {
       )}
 
       {isUnavailable ? (
-        <p style={{ color: colors.danger, textAlign: 'center', marginBottom: spacing.md }}>Ce trajet n'est plus disponible.</p>
+        <p style={{ color: colors.danger, textAlign: 'center', marginBottom: spacing.md }}>
+          {tripDeparted ? 'Ce trajet est déjà terminé ou est déjà parti.' : "Ce trajet n'est plus disponible."}
+        </p>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: colors.text }}>

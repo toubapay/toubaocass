@@ -7,6 +7,10 @@ export function hoursUntilDeparture(trip: Trip): number {
   return (departsAt.getTime() - Date.now()) / (1000 * 60 * 60);
 }
 
+export function hasDeparted(trip: Trip): boolean {
+  return hoursUntilDeparture(trip) < 0;
+}
+
 export function isDepartingSoon(trip: Trip): boolean {
   const hours = hoursUntilDeparture(trip);
   return trip.status === 'scheduled' && hours >= 0 && hours <= DEPARTING_SOON_HOURS;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\TripFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -86,8 +87,19 @@ class Trip extends Model
         return $this->hasOne(Booking::class);
     }
 
+    /**
+     * True once the scheduled departure instant (date + time) is in the
+     * past — regardless of whether the driver ever marked the trip
+     * in-progress/completed. Bookings and booking changes must be blocked
+     * once this is true, so a stale "scheduled" trip can't still be booked.
+     */
+    public function hasDeparted(): bool
+    {
+        return Carbon::parse($this->departure_date->toDateString().' '.$this->departure_time)->isPast();
+    }
+
     public function isBookable(): bool
     {
-        return $this->status === self::STATUS_SCHEDULED && $this->available_seats > 0;
+        return $this->status === self::STATUS_SCHEDULED && $this->available_seats > 0 && ! $this->hasDeparted();
     }
 }

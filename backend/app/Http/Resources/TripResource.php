@@ -34,6 +34,7 @@ class TripResource extends JsonResource
             'total_seats' => $this->total_seats,
             'available_seats' => $this->available_seats,
             'status' => $this->status,
+            'is_bookable' => $this->isBookable(),
             'notes' => $this->notes,
             'created_at' => $this->created_at,
             'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 1)),

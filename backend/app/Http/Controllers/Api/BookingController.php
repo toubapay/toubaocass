@@ -38,6 +38,12 @@ class BookingController extends Controller
             /** @var Trip $locked */
             $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
+            if ($locked->hasDeparted()) {
+                throw ValidationException::withMessages([
+                    'trip' => ['Ce trajet est déjà terminé ou est déjà parti.'],
+                ]);
+            }
+
             if ($locked->status !== Trip::STATUS_SCHEDULED) {
                 throw ValidationException::withMessages([
                     'trip' => ['Ce trajet n\'accepte plus de réservations.'],
@@ -112,6 +118,12 @@ class BookingController extends Controller
         $updated = DB::transaction(function () use ($booking, $newSeats, $walletService) {
             /** @var Trip $trip */
             $trip = Trip::where('id', $booking->trip_id)->lockForUpdate()->firstOrFail();
+
+            if ($trip->hasDeparted()) {
+                throw ValidationException::withMessages([
+                    'trip' => ['Ce trajet est déjà terminé ou est déjà parti.'],
+                ]);
+            }
 
             if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
                 throw ValidationException::withMessages([

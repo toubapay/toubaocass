@@ -16,7 +16,7 @@ class BookingTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeTrip(int $seats = 4): Trip
+    private function makeTrip(int $seats = 4, array $overrides = []): Trip
     {
         $driver = User::factory()->driver()->create();
         $car = Car::factory()->create(['driver_id' => $driver->id, 'seats' => $seats]);
@@ -29,6 +29,7 @@ class BookingTest extends TestCase
             'destination_city_id' => $destination->id,
             'total_seats' => $seats,
             'available_seats' => $seats,
+            ...$overrides,
         ]);
     }
 
@@ -87,6 +88,58 @@ class BookingTest extends TestCase
             ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('trip');
+    }
+
+    public function test_rider_cannot_book_a_trip_whose_departure_has_already_passed(): void
+    {
+        $trip = $this->makeTrip(4, [
+            'status' => Trip::STATUS_SCHEDULED,
+            'departure_date' => now()->subDay()->toDateString(),
+            'departure_time' => '08:00',
+        ]);
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('trip');
+
+        $this->assertDatabaseHas('trips', ['id' => $trip->id, 'available_seats' => 4]);
+    }
+
+    public function test_rider_cannot_book_a_trip_scheduled_for_today_at_an_earlier_time(): void
+    {
+        $trip = $this->makeTrip(4, [
+            'status' => Trip::STATUS_SCHEDULED,
+            'departure_date' => now()->toDateString(),
+            'departure_time' => now()->subHour()->format('H:i'),
+        ]);
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('trip');
+    }
+
+    public function test_rider_cannot_modify_a_booking_once_the_trip_has_departed(): void
+    {
+        $trip = $this->makeTrip(4);
+        $rider = User::factory()->create();
+
+        $bookingId = $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1])
+            ->assertCreated()
+            ->json('id');
+
+        $trip->update(['departure_date' => now()->subDay()->toDateString(), 'departure_time' => '08:00']);
+
+        $this->actingAs($rider, 'sanctum')
+            ->putJson("/api/bookings/{$bookingId}", ['seats' => 2])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('trip');
+
+        $this->assertDatabaseHas('bookings', ['id' => $bookingId, 'seats_booked' => 1]);
     }
 
     public function test_a_driver_account_cannot_use_the_rider_booking_endpoint(): void
