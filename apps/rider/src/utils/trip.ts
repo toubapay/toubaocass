@@ -44,17 +44,13 @@ export function formatDuration(minutes: number): string {
   return remaining === 0 ? `${hours}h` : `${hours}h${String(remaining).padStart(2, '0')}`;
 }
 
-const URGENT_HOURS = 2;
-
 /**
- * Drives the always-visible trip-detail urgency badge: departure within the
- * next 2 hours, or down to the last seat (0 seats already gets its own
- * distinct "no longer available" notice, so it's excluded here).
+ * Drives the always-visible trip-detail urgency badge: pulsing red only
+ * when exactly one seat remains (0 seats gets its own distinct "no longer
+ * available" notice, so it's excluded here). Departure time alone never
+ * triggers the flashing state — more than one seat left always reads as
+ * calmly available regardless of how soon the trip departs.
  */
 export function isUrgent(trip: Trip): boolean {
-  if (trip.status !== 'scheduled') return false;
-  const hours = hoursUntilDeparture(trip);
-  const departingUrgently = hours >= 0 && hours <= URGENT_HOURS;
-  const almostFull = trip.available_seats > 0 && trip.available_seats < 2;
-  return departingUrgently || almostFull;
+  return trip.status === 'scheduled' && trip.available_seats === 1;
 }
