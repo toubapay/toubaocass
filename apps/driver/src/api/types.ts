@@ -170,3 +170,30 @@ export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+export type InsuranceCoverageType = 'tiers_simple' | 'tiers_collision' | 'tous_risques';
+
+export interface InsuranceQuote {
+  provider_id: number;
+  provider_name: string;
+  plan_name: string;
+  coverage_type: InsuranceCoverageType;
+  annual_premium: number;
+  monthly_premium: number;
+  highlights: string[];
+}
+
+export interface InsurancePolicy {
+  id: number;
+  car: Car;
+  provider: { id: number; name: string };
+  coverage_type: InsuranceCoverageType;
+  plan_name: string;
+  annual_premium: number;
+  policy_number: string;
+  starts_at: string;
+  ends_at: string;
+  status: 'active' | 'expired' | 'cancelled';
+  is_active: boolean;
+  created_at: string;
+}

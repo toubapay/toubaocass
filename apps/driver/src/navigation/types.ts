@@ -17,6 +17,8 @@ export type TripsStackParamList = {
 export type FleetStackParamList = {
   CarsList: undefined;
   AddCar: undefined;
+  InsuranceCompare: { carId: number; carLabel: string };
+  MyPolicies: undefined;
 };
 
 export type DeliveriesStackParamList = {

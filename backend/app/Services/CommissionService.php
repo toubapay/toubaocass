@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Delivery;
+use App\Models\InsurancePolicy;
 
 class CommissionService
 {
@@ -63,5 +64,23 @@ class CommissionService
         ]);
 
         return $delivery->fresh();
+    }
+
+    /**
+     * Unlike trip/delivery commission (one platform-wide rate), each
+     * insurer negotiates its own brokerage commission — so the rate comes
+     * from the policy's provider, not a global platform_settings value.
+     */
+    public function applyToInsurancePolicy(InsurancePolicy $policy): InsurancePolicy
+    {
+        $rate = (float) ($policy->provider->commission_rate ?? self::DEFAULT_RATE);
+        $result = $this->calculate($policy->annual_premium, $rate);
+
+        $policy->update([
+            'commission_rate' => $result['rate'],
+            'commission_amount' => $result['amount'],
+        ]);
+
+        return $policy->fresh();
     }
 }

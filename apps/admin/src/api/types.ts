@@ -193,6 +193,55 @@ export interface UpdateAdminUserInput {
   status?: AdminStatus;
 }
 
+export interface InsuranceProvider {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  commission_rate: number;
+  is_active: boolean;
+  has_api_credentials: boolean;
+  created_at: string;
+}
+
+export interface CreateInsuranceProviderInput {
+  code: string;
+  name: string;
+  description?: string;
+  commission_rate: number;
+  api_base_url?: string;
+  api_key?: string;
+}
+
+export interface UpdateInsuranceProviderInput {
+  name?: string;
+  description?: string;
+  commission_rate?: number;
+  is_active?: boolean;
+  api_base_url?: string;
+  api_key?: string;
+}
+
+export type InsuranceCoverageType = 'tiers_simple' | 'tiers_collision' | 'tous_risques';
+
+export interface InsurancePolicy {
+  id: number;
+  driver_name: string;
+  driver_phone: string;
+  car: string;
+  provider_name: string;
+  coverage_type: InsuranceCoverageType;
+  plan_name: string;
+  annual_premium: number;
+  commission_amount: number | null;
+  commission_rate: number | null;
+  policy_number: string;
+  starts_at: string;
+  ends_at: string;
+  status: 'active' | 'expired' | 'cancelled';
+  created_at: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

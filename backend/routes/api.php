@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
+use App\Http\Controllers\Api\Admin\InsuranceController as AdminInsuranceController;
 use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
 use App\Http\Controllers\Api\Admin\LiveTripsController as AdminLiveTripsController;
 use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
@@ -95,6 +97,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('deliveries/{delivery}/accept', [DeliveryController::class, 'accept']);
         Route::post('deliveries/{delivery}/pickup', [DeliveryController::class, 'pickup']);
         Route::post('deliveries/{delivery}/deliver', [DeliveryController::class, 'deliver']);
+
+        // Assurance (vehicle insurance comparison & purchase).
+        Route::get('insurance/providers', [InsuranceController::class, 'providers']);
+        Route::post('insurance/quotes', [InsuranceController::class, 'quote']);
+        Route::post('insurance/policies', [InsuranceController::class, 'purchase']);
+        Route::get('insurance/policies', [InsuranceController::class, 'index']);
     });
 });
 
@@ -156,6 +164,13 @@ Route::prefix('admin')->group(function () {
             Route::get('backups', [AdminBackupController::class, 'index']);
             Route::post('backups', [AdminBackupController::class, 'store']);
             Route::get('backups/{path}/download', [AdminBackupController::class, 'download']);
+        });
+
+        Route::middleware('admin.permission:manage_insurance')->group(function () {
+            Route::get('insurance/providers', [AdminInsuranceController::class, 'providers']);
+            Route::post('insurance/providers', [AdminInsuranceController::class, 'storeProvider']);
+            Route::put('insurance/providers/{insuranceProvider}', [AdminInsuranceController::class, 'updateProvider']);
+            Route::get('insurance/policies', [AdminInsuranceController::class, 'policies']);
         });
     });
 });

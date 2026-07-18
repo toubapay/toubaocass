@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\City;
+use App\Models\InsuranceProvider;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -54,5 +55,19 @@ class DatabaseSeeder extends Seeder
 
         $this->call(TestRoutesSeeder::class);
         $this->call(AdditionalRoutesSeeder::class);
+
+        // Insurance comparison partners — no real api_base_url/api_key yet,
+        // so each runs in simulated-quote mode until real credentials are
+        // added via the admin back-office.
+        $insuranceProviders = [
+            ['code' => InsuranceProvider::CODE_ASS_SENEGAL, 'name' => 'Ass Sénégal', 'commission_rate' => 10],
+            ['code' => InsuranceProvider::CODE_AMSA, 'name' => 'AMSA Assurances', 'commission_rate' => 10],
+            ['code' => InsuranceProvider::CODE_PROVIDENCE, 'name' => 'Providence Assurances', 'commission_rate' => 10],
+            ['code' => InsuranceProvider::CODE_INTOUCH_AGGREGATOR, 'name' => 'InTouch', 'commission_rate' => 8],
+        ];
+
+        foreach ($insuranceProviders as $data) {
+            InsuranceProvider::firstOrCreate(['code' => $data['code']], $data);
+        }
     }
 }

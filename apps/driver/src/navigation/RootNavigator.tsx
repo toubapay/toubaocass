@@ -16,6 +16,8 @@ import { DeliveryDetailScreen } from '../screens/deliveries/DeliveryDetailScreen
 import { DeliveriesListScreen } from '../screens/deliveries/DeliveriesListScreen';
 import { AddCarScreen } from '../screens/fleet/AddCarScreen';
 import { CarsListScreen } from '../screens/fleet/CarsListScreen';
+import { InsuranceCompareScreen } from '../screens/insurance/InsuranceCompareScreen';
+import { MyPoliciesScreen } from '../screens/insurance/MyPoliciesScreen';
 import { KycFormScreen } from '../screens/kyc/KycFormScreen';
 import { KycStatusScreen } from '../screens/kyc/KycStatusScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -86,6 +88,8 @@ function FleetNavigator() {
     <FleetStackNav.Navigator>
       <FleetStackNav.Screen name="CarsList" component={CarsListScreen} options={{ title: 'Mes véhicules' }} />
       <FleetStackNav.Screen name="AddCar" component={AddCarScreen} options={{ title: 'Ajouter un véhicule' }} />
+      <FleetStackNav.Screen name="InsuranceCompare" component={InsuranceCompareScreen} options={{ title: 'Comparer les assurances' }} />
+      <FleetStackNav.Screen name="MyPolicies" component={MyPoliciesScreen} options={{ title: 'Mes assurances' }} />
     </FleetStackNav.Navigator>
   );
 }

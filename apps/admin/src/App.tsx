@@ -7,6 +7,8 @@ import { AuditLogPage } from './pages/audit/AuditLogPage';
 import { BackupsPage } from './pages/backups/BackupsPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { FinancialsPage } from './pages/financials/FinancialsPage';
+import { InsurancePoliciesPage } from './pages/insurance/InsurancePoliciesPage';
+import { InsuranceProvidersPage } from './pages/insurance/InsuranceProvidersPage';
 import { KycQueuePage } from './pages/kyc/KycQueuePage';
 import { KycReviewPage } from './pages/kyc/KycReviewPage';
 import { LiveTripsPage } from './pages/live/LiveTripsPage';
@@ -47,6 +49,8 @@ function AppRoutes() {
         <Route path="/security-alerts" element={<SecurityAlertsPage />} />
         <Route path="/fares" element={<FaresPage />} />
         <Route path="/financials" element={<FinancialsPage />} />
+        <Route path="/insurance/providers" element={<InsuranceProvidersPage />} />
+        <Route path="/insurance/policies" element={<InsurancePoliciesPage />} />
         <Route path="/backups" element={<BackupsPage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="/audit-log" element={<AuditLogPage />} />

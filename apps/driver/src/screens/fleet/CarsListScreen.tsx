@@ -66,9 +66,22 @@ export function CarsListScreen({ navigation }: Props) {
             <Text style={styles.meta}>
               {item.plate_number} · {item.seats} places · {item.type.toUpperCase()}
             </Text>
-            <Pressable onPress={() => handleDelete(item)} style={styles.removeButton}>
-              <Text style={styles.removeText}>Supprimer</Text>
-            </Pressable>
+            <View style={styles.actionsRow}>
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('InsuranceCompare', {
+                    carId: item.id,
+                    carLabel: `${item.make} ${item.model} (${item.plate_number})`,
+                  })
+                }
+                style={styles.insuranceButton}
+              >
+                <Text style={styles.insuranceText}>🛡️ Assurance</Text>
+              </Pressable>
+              <Pressable onPress={() => handleDelete(item)} style={styles.removeButton}>
+                <Text style={styles.removeText}>Supprimer</Text>
+              </Pressable>
+            </View>
           </View>
         )}
         ListEmptyComponent={
@@ -77,6 +90,7 @@ export function CarsListScreen({ navigation }: Props) {
           </View>
         }
       />
+      <Button label="Mes assurances" variant="outline" onPress={() => navigation.navigate('MyPolicies')} style={{ marginBottom: spacing.sm }} />
       <Button label="Ajouter un véhicule" onPress={() => navigation.navigate('AddCar')} />
     </Screen>
   );
@@ -95,7 +109,10 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 18, fontWeight: '700', color: colors.text },
   meta: { fontSize: 14, color: colors.textMuted, marginTop: spacing.xs },
-  removeButton: { marginTop: spacing.sm },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
+  insuranceButton: {},
+  insuranceText: { color: colors.primary, fontWeight: '600' },
+  removeButton: {},
   removeText: { color: colors.danger, fontWeight: '600' },
   empty: { marginTop: spacing.lg, marginBottom: spacing.lg, alignItems: 'center' },
   emptyText: { color: colors.textMuted, fontSize: 16, textAlign: 'center' },

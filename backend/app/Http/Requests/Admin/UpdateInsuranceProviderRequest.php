@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateInsuranceProviderRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'api_base_url' => ['nullable', 'string', 'max:255'],
+            'api_key' => ['nullable', 'string', 'max:1000'],
+            'commission_rate' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'is_active' => ['sometimes', 'boolean'],
+            'code' => ['prohibited'],
+        ];
+    }
+}

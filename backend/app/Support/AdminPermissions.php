@@ -26,6 +26,8 @@ class AdminPermissions
 
     const MODERATE_CONTENT = 'moderate_content';
 
+    const MANAGE_INSURANCE = 'manage_insurance';
+
     /**
      * Small, fixed role set — a hardcoded map is simpler and easier to audit
      * than a granular DB-backed permissions package for 6 roles.
@@ -34,11 +36,12 @@ class AdminPermissions
         AdminUser::ROLE_SUPER_ADMIN => [
             self::MANAGE_ADMINS, self::MANAGE_USERS, self::MANAGE_KYC, self::MANAGE_FARES,
             self::MANAGE_SYSTEM_SETTINGS, self::VIEW_DASHBOARD, self::VIEW_FINANCIALS,
-            self::MANAGE_BACKUPS, self::VIEW_SECURITY_ALERTS, self::MODERATE_CONTENT,
+            self::MANAGE_BACKUPS, self::VIEW_SECURITY_ALERTS, self::MODERATE_CONTENT, self::MANAGE_INSURANCE,
         ],
         AdminUser::ROLE_ADMIN => [
             self::MANAGE_USERS, self::MANAGE_KYC, self::MANAGE_FARES,
             self::VIEW_DASHBOARD, self::VIEW_FINANCIALS, self::VIEW_SECURITY_ALERTS, self::MODERATE_CONTENT,
+            self::MANAGE_INSURANCE,
         ],
         AdminUser::ROLE_CONTROLLERS => [
             self::VIEW_DASHBOARD, self::VIEW_SECURITY_ALERTS, self::MANAGE_KYC,
@@ -47,7 +50,7 @@ class AdminPermissions
             self::MANAGE_USERS, self::VIEW_DASHBOARD, self::MODERATE_CONTENT,
         ],
         AdminUser::ROLE_ACCOUNTANT => [
-            self::VIEW_DASHBOARD, self::VIEW_FINANCIALS, self::MANAGE_FARES,
+            self::VIEW_DASHBOARD, self::VIEW_FINANCIALS, self::MANAGE_FARES, self::MANAGE_INSURANCE,
         ],
         AdminUser::ROLE_SUPERVISEUR => [
             self::VIEW_DASHBOARD, self::VIEW_SECURITY_ALERTS, self::MANAGE_USERS, self::MODERATE_CONTENT,

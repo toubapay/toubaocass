@@ -76,6 +76,11 @@ class User extends Authenticatable
         return $this->hasMany(Delivery::class, 'driver_id');
     }
 
+    public function insurancePolicies(): HasMany
+    {
+        return $this->hasMany(InsurancePolicy::class, 'driver_id');
+    }
+
     public function isDriver(): bool
     {
         return $this->role === self::ROLE_DRIVER;
