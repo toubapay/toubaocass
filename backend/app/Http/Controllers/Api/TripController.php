@@ -26,7 +26,7 @@ class TripController extends Controller
      * How long an instant-posted trip stays bookable after the driver
      * posts it, before the existing past-departure protections kick in.
      */
-    private const INSTANT_GRACE_MINUTES = 20;
+    public const INSTANT_GRACE_MINUTES = 20;
 
     public function __construct(private readonly CommissionService $commissionService) {}
 
