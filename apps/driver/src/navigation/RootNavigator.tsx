@@ -22,6 +22,7 @@ import { KycFormScreen } from '../screens/kyc/KycFormScreen';
 import { KycStatusScreen } from '../screens/kyc/KycStatusScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { PostInstantTripScreen } from '../screens/trips/PostInstantTripScreen';
 import { PostTripScreen } from '../screens/trips/PostTripScreen';
 import { TripDetailScreen } from '../screens/trips/TripDetailScreen';
 import { TripsListScreen } from '../screens/trips/TripsListScreen';
@@ -67,6 +68,11 @@ function TripsNavigator() {
         }}
       />
       <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Publier un trajet' }} />
+      <TripsStackNav.Screen
+        name="PostInstantTrip"
+        component={PostInstantTripScreen}
+        options={{ title: 'Départ immédiat' }}
+      />
       <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
       <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
       <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />

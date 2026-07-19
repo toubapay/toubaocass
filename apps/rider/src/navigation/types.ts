@@ -12,6 +12,7 @@ export type HomeStackParamList = {
   Chat: ChatParams;
   Wallet: undefined;
   Map: undefined;
+  InstantDepartures: undefined;
 };
 
 export type BookingsStackParamList = {

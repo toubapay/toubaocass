@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\InstantTripPosted;
 use App\Events\TripCancelled;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Driver\StoreInstantTripRequest;
 use App\Http\Requests\Driver\StoreTripRequest;
 use App\Http\Requests\Driver\UpdateTripRequest;
 use App\Http\Requests\Rider\SearchTripsRequest;
@@ -20,6 +22,12 @@ use Illuminate\Validation\ValidationException;
 
 class TripController extends Controller
 {
+    /**
+     * How long an instant-posted trip stays bookable after the driver
+     * posts it, before the existing past-departure protections kick in.
+     */
+    private const INSTANT_GRACE_MINUTES = 20;
+
     public function __construct(private readonly CommissionService $commissionService) {}
 
     /**
@@ -67,6 +75,36 @@ class TripController extends Controller
                 fn ($q) => $q->orderBy('departure_date')->orderBy('departure_time'),
             )
             ->paginate(20);
+
+        return TripResource::collection($trips);
+    }
+
+    /**
+     * "Instant Post" style departures — trips a driver posted without
+     * scheduling ahead, still open for booking right now. Backs the
+     * home-screen badge/list rather than the full search filters above.
+     */
+    public function instantIndex(Request $request)
+    {
+        $rider = $request->user();
+
+        $trips = Trip::query()
+            ->with([
+                'driver.driverProfile', 'car', 'originCity', 'destinationCity',
+                'riderBooking' => fn ($q) => $q->where('rider_id', $rider->id)->where('status', Booking::STATUS_CONFIRMED),
+            ])
+            ->where('is_instant', true)
+            ->where('status', Trip::STATUS_SCHEDULED)
+            ->where('available_seats', '>', 0)
+            ->where(function ($q) {
+                $q->where('departure_date', '>', now()->toDateString())
+                    ->orWhere(function ($q) {
+                        $q->where('departure_date', now()->toDateString())
+                            ->where('departure_time', '>=', now()->format('H:i'));
+                    });
+            })
+            ->latest()
+            ->get();
 
         return TripResource::collection($trips);
     }
@@ -123,6 +161,44 @@ class TripController extends Controller
         ]);
 
         return new TripResource($trip->load(['car', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * "Instant Post" style publish — no date/time picker, the driver is
+     * leaving right away. departure_date/departure_time still get a real
+     * value (now + a short grace window) rather than the exact posting
+     * instant, so the trip stays bookable for a few minutes instead of
+     * immediately tripping the past-departure block every other booking
+     * path already enforces (Trip::hasDeparted()).
+     */
+    public function storeInstant(StoreInstantTripRequest $request)
+    {
+        $user = $request->user();
+
+        if ($user->driverProfile?->kyc_status !== DriverProfile::STATUS_APPROVED) {
+            throw ValidationException::withMessages([
+                'kyc' => ['Votre vérification conducteur (KYC) doit être approuvée avant de pouvoir publier des trajets.'],
+            ]);
+        }
+
+        $car = Car::findOrFail($request->validated('car_id'));
+        $departsAt = now()->addMinutes(self::INSTANT_GRACE_MINUTES);
+
+        $trip = $user->trips()->create([
+            ...$request->validated(),
+            'departure_date' => $departsAt->toDateString(),
+            'departure_time' => $departsAt->format('H:i'),
+            'total_seats' => $car->seats,
+            'available_seats' => $car->seats,
+            'status' => Trip::STATUS_SCHEDULED,
+            'is_instant' => true,
+        ]);
+
+        $trip->load(['car', 'originCity', 'destinationCity']);
+
+        InstantTripPosted::dispatch($trip);
+
+        return new TripResource($trip);
     }
 
     public function update(UpdateTripRequest $request, Trip $trip)

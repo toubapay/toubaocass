@@ -22,3 +22,9 @@ export async function fetchTrip(tripId: number): Promise<Trip> {
   const { data } = await apiClient.get(`/trips/${tripId}`);
   return data;
 }
+
+/** Not paginated on the backend, so the response is a plain array. */
+export async function fetchInstantTrips(): Promise<Trip[]> {
+  const { data } = await apiClient.get('/trips/instant');
+  return data;
+}

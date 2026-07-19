@@ -74,6 +74,7 @@ export interface Trip {
   total_seats: number;
   available_seats: number;
   status: TripStatus;
+  is_instant: boolean;
   notes: string | null;
   created_at: string;
   bookings?: Booking[];

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'driver_id', 'car_id', 'origin_city_id', 'destination_city_id',
     'departure_latitude', 'departure_longitude', 'departure_address',
     'departure_date', 'departure_time', 'fare', 'ride_type',
-    'total_seats', 'available_seats', 'status', 'notes',
+    'total_seats', 'available_seats', 'status', 'is_instant', 'notes',
 ])]
 class Trip extends Model
 {
@@ -44,6 +44,7 @@ class Trip extends Model
             'departure_date' => 'date',
             'departure_latitude' => 'float',
             'departure_longitude' => 'float',
+            'is_instant' => 'boolean',
         ];
     }
 

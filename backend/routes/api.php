@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
         Route::get('trips', [TripController::class, 'search']);
+        Route::get('trips/instant', [TripController::class, 'instantIndex']);
         Route::get('trips/{trip}', [TripController::class, 'show']);
         Route::post('trips/{trip}/bookings', [BookingController::class, 'store']);
         Route::get('bookings', [BookingController::class, 'index']);
@@ -84,6 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('trips', [TripController::class, 'driverIndex']);
         Route::post('trips', [TripController::class, 'store']);
+        Route::post('trips/instant', [TripController::class, 'storeInstant']);
         Route::get('trips/{trip}', [TripController::class, 'driverShow']);
         Route::put('trips/{trip}', [TripController::class, 'update']);
         Route::post('trips/{trip}/start', [TripController::class, 'start']);

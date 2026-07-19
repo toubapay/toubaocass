@@ -5,6 +5,7 @@ import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
+import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
 import { useMyLocation } from '../hooks/useMyLocation';
@@ -105,6 +106,8 @@ export function HomePage() {
       <h1 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.sm }}>
         Choisissez destination
       </h1>
+
+      <InstantDeparturesBanner />
 
       <button
         onClick={toggleNearMe}

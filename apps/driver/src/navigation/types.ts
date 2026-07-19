@@ -9,6 +9,7 @@ export type ChatParams = { bookingId: number; title?: string; subtitle?: string 
 export type TripsStackParamList = {
   TripsList: undefined;
   PostTrip: undefined;
+  PostInstantTrip: undefined;
   TripDetail: { tripId: number };
   Chat: ChatParams;
   Wallet: undefined;

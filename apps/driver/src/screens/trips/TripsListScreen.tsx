@@ -53,6 +53,14 @@ export function TripsListScreen({ navigation }: Props) {
     <Screen>
       <Text style={styles.title}>Mes trajets</Text>
 
+      <Pressable style={styles.instantCard} onPress={() => navigation.navigate('PostInstantTrip')}>
+        <Text style={styles.mapCardIcon}>🚀</Text>
+        <View style={styles.mapCardText}>
+          <Text style={styles.instantCardTitle}>Départ immédiat</Text>
+          <Text style={styles.instantCardSubtitle}>Publiez un trajet maintenant, sans date à choisir</Text>
+        </View>
+      </Pressable>
+
       <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
         <Text style={styles.mapCardIcon}>🗺️</Text>
         <View style={styles.mapCardText}>
@@ -109,6 +117,19 @@ const styles = StyleSheet.create({
   mapCardText: { flex: 1 },
   mapCardTitle: { fontSize: 16.0, fontWeight: '700', color: colors.text },
   mapCardSubtitle: { fontSize: 14.0, color: colors.textMuted, marginTop: 2 },
+  instantCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  instantCardTitle: { fontSize: 16.0, fontWeight: '700', color: '#fff' },
+  instantCardSubtitle: { fontSize: 14.0, color: '#fff', opacity: 0.85, marginTop: 2 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

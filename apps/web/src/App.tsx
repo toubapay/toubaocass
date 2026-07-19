@@ -7,6 +7,7 @@ import { usePushNotifications } from './hooks/usePushNotifications';
 import { ChatPage } from './pages/ChatPage';
 import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
+import { InstantDeparturesPage } from './pages/InstantDeparturesPage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
 import { MyDeliveriesPage } from './pages/MyDeliveriesPage';
@@ -55,6 +56,7 @@ function AppRoutes() {
     <Layout>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/instant" element={<InstantDeparturesPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/livraison" element={<NewDeliveryPage />} />

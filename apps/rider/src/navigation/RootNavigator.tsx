@@ -14,6 +14,7 @@ import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
+import { InstantDeparturesScreen } from '../screens/InstantDeparturesScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { MyDeliveriesScreen } from '../screens/MyDeliveriesScreen';
@@ -72,6 +73,7 @@ function HomeNavigator() {
       <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
       <HomeStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
       <HomeStackNav.Screen name="Map" component={MapScreen} options={{ title: 'Carte des trajets' }} />
+      <HomeStackNav.Screen name="InstantDepartures" component={InstantDeparturesScreen} options={{ title: 'Départs immédiats' }} />
     </HomeStackNav.Navigator>
   );
 }

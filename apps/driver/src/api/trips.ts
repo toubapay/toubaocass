@@ -17,6 +17,18 @@ export interface CreateTripInput {
 
 export type UpdateTripInput = Partial<Omit<CreateTripInput, 'car_id' | 'origin_city_id' | 'destination_city_id'>>;
 
+export interface CreateInstantTripInput {
+  car_id: number;
+  origin_city_id: number;
+  destination_city_id: number;
+  departure_latitude?: number;
+  departure_longitude?: number;
+  departure_address?: string;
+  fare: number;
+  ride_type: RideType;
+  notes?: string;
+}
+
 export async function fetchMyTrips(): Promise<Paginated<Trip>> {
   const { data } = await apiClient.get('/driver/trips');
   return data;
@@ -29,6 +41,11 @@ export async function fetchMyTrip(tripId: number): Promise<Trip> {
 
 export async function createTrip(input: CreateTripInput): Promise<Trip> {
   const { data } = await apiClient.post('/driver/trips', input);
+  return data;
+}
+
+export async function createInstantTrip(input: CreateInstantTripInput): Promise<Trip> {
+  const { data } = await apiClient.post('/driver/trips/instant', input);
   return data;
 }
 

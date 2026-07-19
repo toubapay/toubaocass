@@ -34,6 +34,7 @@ class TripResource extends JsonResource
             'total_seats' => $this->total_seats,
             'available_seats' => $this->available_seats,
             'status' => $this->status,
+            'is_instant' => $this->is_instant,
             'is_bookable' => $this->isBookable(),
             'notes' => $this->notes,
             'created_at' => $this->created_at,
