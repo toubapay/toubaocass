@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Screen } from '../components/Screen';
 import { ServicesStackParamList } from '../navigation/types';
@@ -9,17 +10,18 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'Services'>;
 
-const SERVICES: { key: string; label: string; description: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'livraison', label: 'Livraison', description: 'Envoi de colis en ville et entre villes', icon: 'cube-outline' },
-  { key: 'cargaison', label: 'Cargaison', description: 'Transport de marchandises en gros volume', icon: 'boat-outline' },
-  { key: 'camion', label: 'Camion', description: 'Déménagement et transport de gros objets', icon: 'bus-outline' },
-  { key: 'location', label: 'Location', description: 'Location de véhicules avec ou sans chauffeur', icon: 'key-outline' },
+const SERVICES: { key: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: 'livraison', icon: 'cube-outline' },
+  { key: 'cargaison', icon: 'boat-outline' },
+  { key: 'camion', icon: 'bus-outline' },
+  { key: 'location', icon: 'key-outline' },
 ];
 
 export function ServicesScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   return (
     <Screen>
-      <Text style={styles.title}>Services</Text>
+      <Text style={styles.title}>{t('services.title')}</Text>
       {SERVICES.map((service) => (
         <Pressable
           key={service.key}
@@ -27,15 +29,15 @@ export function ServicesScreen({ navigation }: Props) {
           onPress={() =>
             service.key === 'livraison'
               ? navigation.navigate('NewDelivery')
-              : Alert.alert('Bientôt disponible', `${service.label} arrive prochainement.`)
+              : Alert.alert(t('services.comingSoonTitle'), t('services.comingSoonBody', { label: t(`services.${service.key}.label`) }))
           }
         >
           <View style={styles.iconWrap}>
             <Ionicons name={service.icon} size={24} color={colors.primary} />
           </View>
           <View style={styles.textWrap}>
-            <Text style={styles.label}>{service.label}</Text>
-            <Text style={styles.description}>{service.description}</Text>
+            <Text style={styles.label}>{t(`services.${service.key}.label`)}</Text>
+            <Text style={styles.description}>{t(`services.${service.key}.description`)}</Text>
           </View>
           <Text style={styles.arrow}>→</Text>
         </Pressable>

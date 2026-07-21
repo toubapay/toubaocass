@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -15,6 +16,7 @@ import { colors, radius, spacing } from '../theme';
 import { formatDuration, hasDeparted } from '../utils/trip';
 
 export function TripDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -50,15 +52,15 @@ export function TripDetailPage() {
       if (editing) {
         await updateBooking(trip.my_booking!.id, seats);
         if (seats === 0) {
-          alert('Réservation annulée.');
+          alert(t('tripDetail.bookingCancelledAlert'));
           navigate('/bookings');
           return;
         }
-        alert('Réservation mise à jour.');
+        alert(t('tripDetail.bookingUpdatedAlert'));
         load();
       } else {
         await bookTrip(trip.id, seats, paymentMethod);
-        alert(`Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`);
+        alert(t('tripDetail.bookingConfirmedAlert', { count: seats }));
         navigate('/bookings');
       }
     } catch (err) {
@@ -114,7 +116,7 @@ export function TripDetailPage() {
         <span style={{ fontSize: 24, fontWeight: 800, color: colors.text }}>{trip.destination_city?.name}</span>
       </div>
       <p style={{ color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg }}>
-        {trip.departure_date} à {trip.departure_time}
+        {t('tripDetail.departureAt', { date: trip.departure_date, time: trip.departure_time })}
       </p>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
         <TripUrgencyBadge trip={trip} />
@@ -135,20 +137,20 @@ export function TripDetailPage() {
               marginBottom: spacing.sm,
             }}
           >
-            {booking ? '…' : `⚡ Réserver — ${(trip.fare * seats).toLocaleString()} FCFA`}
+            {booking ? '…' : t('tripDetail.reserveButton', { amount: (trip.fare * seats).toLocaleString() })}
           </button>
         )}
       </div>
       {editing && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: colors.success, margin: 0 }}>
-            ✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet
+            {t('tripDetail.bookedSeats', { count: trip.my_booking!.seats_booked })}
           </p>
           <button
             onClick={() =>
               navigate(`/chat/${trip.my_booking!.id}`, {
                 state: {
-                  title: trip.driver.name ?? 'Conducteur',
+                  title: trip.driver.name ?? t('common.driverFallback'),
                   subtitle: `${trip.origin_city?.name} → ${trip.destination_city?.name}`,
                 },
               })
@@ -164,17 +166,17 @@ export function TripDetailPage() {
               cursor: 'pointer',
             }}
           >
-            💬 Discuter avec le conducteur
+            {t('tripDetail.chatWithDriver')}
           </button>
         </div>
       )}
 
       {trip.route_distance_km !== null && (
         <div style={cardStyle}>
-          <p style={sectionTitleStyle}>Itinéraire</p>
+          <p style={sectionTitleStyle}>{t('tripDetail.itinerary')}</p>
           <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>
             🛣️ {trip.route_distance_km} km
-            {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)} de route`}
+            {trip.route_duration_minutes !== null && t('tripDetail.drivingDuration', { duration: formatDuration(trip.route_duration_minutes) })}
           </p>
           <div style={{ marginTop: spacing.sm }}>
             <RouteMap trip={trip} />
@@ -184,7 +186,7 @@ export function TripDetailPage() {
 
       {hasPin && (
         <div style={cardStyle}>
-          <p style={sectionTitleStyle}>Point de départ</p>
+          <p style={sectionTitleStyle}>{t('tripDetail.departurePoint')}</p>
           {trip.departure_address && <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{trip.departure_address}</p>}
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${trip.departure_latitude},${trip.departure_longitude}`}
@@ -192,15 +194,15 @@ export function TripDetailPage() {
             rel="noreferrer"
             style={{ color: colors.primary, fontWeight: 700, fontSize: 14, marginTop: spacing.sm, display: 'inline-block' }}
           >
-            Ouvrir dans Google Maps
+            {t('common.openInMaps')}
           </a>
         </div>
       )}
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Conducteur</p>
-        <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{trip.driver.name ?? 'Conducteur'}</p>
-        <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>Note : {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</p>
+        <p style={sectionTitleStyle}>{t('tripDetail.driverSection')}</p>
+        <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{trip.driver.name ?? t('common.driverFallback')}</p>
+        <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</p>
         <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.sm }}>
           <a
             href={`tel:${trip.driver.phone}`}
@@ -216,7 +218,7 @@ export function TripDetailPage() {
               textDecoration: 'none',
             }}
           >
-            📞 Appeler
+            📞 {t('common.call')}
           </a>
           <a
             href={`sms:${trip.driver.phone}`}
@@ -232,13 +234,13 @@ export function TripDetailPage() {
               textDecoration: 'none',
             }}
           >
-            💬 SMS
+            💬 {t('common.sms')}
           </a>
         </div>
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Véhicule</p>
+        <p style={sectionTitleStyle}>{t('tripDetail.vehicle')}</p>
         <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>
           {trip.car?.make} {trip.car?.model} · {trip.car?.color}
         </p>
@@ -246,16 +248,16 @@ export function TripDetailPage() {
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Tarif</p>
-        <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, margin: 0 }}>{trip.fare.toLocaleString()} FCFA / place</p>
+        <p style={sectionTitleStyle}>{t('tripDetail.fare')}</p>
+        <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, margin: 0 }}>{t('tripDetail.farePerSeat', { amount: trip.fare.toLocaleString() })}</p>
         <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>
-          {trip.available_seats} place(s) restante(s) sur {trip.total_seats}
+          {t('tripDetail.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
         </p>
       </div>
 
       {trip.notes && (
         <div style={cardStyle}>
-          <p style={sectionTitleStyle}>Remarques</p>
+          <p style={sectionTitleStyle}>{t('tripDetail.notes')}</p>
           <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{trip.notes}</p>
         </div>
       )}
@@ -263,7 +265,7 @@ export function TripDetailPage() {
       {!editing && !isUnavailable && (
         <div style={{ marginBottom: spacing.lg }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: colors.text, display: 'block', marginBottom: spacing.sm }}>
-            Mode de paiement
+            {t('tripDetail.paymentMethod')}
           </span>
           <div style={{ display: 'flex', gap: spacing.sm }}>
             <button
@@ -281,7 +283,7 @@ export function TripDetailPage() {
                 textAlign: 'center',
               }}
             >
-              💵 Espèces
+              💵 {t('common.cash')}
             </button>
             <button
               onClick={() => setPaymentMethod('wallet')}
@@ -304,18 +306,18 @@ export function TripDetailPage() {
                   color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted}
                   detailColor={paymentMethod === 'wallet' ? colors.accentSoft : colors.surface}
                 />
-                Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+                {t('tripDetail.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
               </span>
             </button>
           </div>
           {paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats && (
             <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
-              Solde insuffisant pour ce paiement.{' '}
+              {t('common.insufficientFunds')}{' '}
               <button
                 onClick={() => navigate('/wallet')}
                 style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
               >
-                Recharger
+                {t('tripDetail.topUpLink')}
               </button>
             </p>
           )}
@@ -324,12 +326,12 @@ export function TripDetailPage() {
 
       {isUnavailable ? (
         <p style={{ color: colors.danger, textAlign: 'center', marginBottom: spacing.md }}>
-          {tripDeparted ? 'Ce trajet est déjà terminé ou est déjà parti.' : "Ce trajet n'est plus disponible."}
+          {tripDeparted ? t('tripDetail.tripDeparted') : t('tripDetail.tripUnavailable')}
         </p>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: colors.text }}>
-            {editing ? 'Nombre de places' : 'Places à réserver'}
+            {editing ? t('tripDetail.seatsCountEditing') : t('tripDetail.seatsCountBooking')}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
             <button
@@ -351,7 +353,7 @@ export function TripDetailPage() {
 
       {editing && seats === 0 && !isUnavailable && (
         <p style={{ fontSize: 13, color: colors.danger, marginTop: -spacing.md, marginBottom: spacing.md }}>
-          Réduire à 0 place annulera votre réservation.
+          {t('tripDetail.reduceToZeroWarning')}
         </p>
       )}
 
@@ -359,9 +361,9 @@ export function TripDetailPage() {
         label={
           editing
             ? seats === 0
-              ? 'Annuler la réservation'
-              : `Enregistrer pour ${(trip.fare * seats).toLocaleString()} FCFA`
-            : `Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`
+              ? t('tripDetail.cancelReservation')
+              : t('tripDetail.saveForAmount', { amount: (trip.fare * seats).toLocaleString() })
+            : t('tripDetail.bookForAmount', { amount: (trip.fare * seats).toLocaleString() })
         }
         onClick={handleBook}
         loading={booking}

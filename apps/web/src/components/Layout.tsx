@@ -1,18 +1,21 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
 import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Accueil', icon: '🏠', end: true },
-  { to: '/services', label: 'Services', icon: 'services' as const, end: false },
-  { to: '/bookings', label: 'Réservations', icon: '🎫', end: false },
-  { to: '/profile', label: 'Profil', icon: '👤', end: false },
+  { to: '/', labelKey: 'nav.home', icon: '🏠', end: true },
+  { to: '/services', labelKey: 'nav.services', icon: 'services' as const, end: false },
+  { to: '/bookings', labelKey: 'nav.bookings', icon: '🎫', end: false },
+  { to: '/profile', labelKey: 'nav.profile', icon: '👤', end: false },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <header
@@ -38,12 +41,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 fontSize: 12.5,
                 fontWeight: 600,
                 color: 'rgba(255,255,255,0.85)',
-                overflow: 'hidden',
+  overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
               }}
             >
-              Voyagez à partir de chez vous. Recherchez et réservez.
+              {t('layout.tagline')}
             </span>
           </div>
         </div>
@@ -136,7 +139,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   ) : (
                     <span style={{ fontSize: 20 }}>{item.icon}</span>
                   )}
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </>
               )}
             </NavLink>

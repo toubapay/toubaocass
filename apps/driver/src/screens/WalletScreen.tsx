@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchWallet } from '../api/wallet';
-import { Wallet, WalletTransaction } from '../api/types';
+import { Wallet } from '../api/types';
 import { Screen } from '../components/Screen';
 import { colors, radius, spacing } from '../theme';
 
-const TYPE_LABEL: Record<WalletTransaction['type'], string> = {
-  top_up: 'Rechargement',
-  payment: 'Paiement de trajet',
-  earning: 'Revenu de trajet',
-  refund: 'Remboursement',
-  refund_reversal: 'Reprise de revenu',
-};
-
 export function WalletScreen() {
+  const { t } = useTranslation();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,22 +29,20 @@ export function WalletScreen() {
   return (
     <Screen>
       <View style={styles.balanceCard}>
-        <Text style={styles.balanceLabel}>Solde disponible</Text>
+        <Text style={styles.balanceLabel}>{t('wallet.availableBalance')}</Text>
         <Text style={styles.balanceValue}>{wallet.balance.toLocaleString()} FCFA</Text>
       </View>
-      <Text style={styles.note}>
-        Pour recharger votre portefeuille, contactez notre équipe — le rechargement est ajouté par un administrateur.
-      </Text>
+      <Text style={styles.note}>{t('wallet.topUpNote')}</Text>
 
-      <Text style={styles.sectionTitle}>Historique</Text>
+      <Text style={styles.sectionTitle}>{t('wallet.history')}</Text>
       <FlatList
         data={wallet.transactions}
         keyExtractor={(item) => String(item.id)}
-        ListEmptyComponent={<Text style={styles.emptyText}>Aucune transaction pour l'instant.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>{t('wallet.emptyHistory')}</Text>}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Text style={styles.rowTitle}>{item.description || TYPE_LABEL[item.type]}</Text>
+              <Text style={styles.rowTitle}>{item.description || t(`wallet.type.${item.type}`)}</Text>
               <Text style={styles.rowDate}>
                 {new Date(item.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}
               </Text>

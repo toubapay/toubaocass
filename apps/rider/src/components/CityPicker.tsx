@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { City } from '../api/types';
 import { colors, radius, spacing } from '../theme';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function CityPicker({ label, cities, value, onChange, placeholder }: Props) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -23,7 +25,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
       <Text style={styles.label}>{label}</Text>
       <Pressable style={styles.selector} onPress={() => setVisible(true)}>
         <Text style={value ? styles.selectorText : styles.placeholder}>
-          {value ? value.name : placeholder ?? 'Sélectionner une ville'}
+          {value ? value.name : placeholder ?? t('common.selectCity')}
         </Text>
       </Pressable>
 
@@ -31,7 +33,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
         <View style={styles.modal}>
           <TextInput
             autoFocus
-            placeholder="Rechercher une ville..."
+            placeholder={t('common.searchCity')}
             placeholderTextColor={colors.textMuted}
             value={query}
             onChangeText={setQuery}
@@ -55,7 +57,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
           <Pressable style={styles.closeButton} onPress={() => setVisible(false)}>
-            <Text style={styles.closeText}>Annuler</Text>
+            <Text style={styles.closeText}>{t('settings.cancel')}</Text>
           </Pressable>
         </View>
       </Modal>

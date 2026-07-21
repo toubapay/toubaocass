@@ -1,22 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
 
 const SERVICES = [
-  { key: 'livraison', label: 'Livraison', description: 'Envoi de colis en ville et entre villes', icon: '📦' },
-  { key: 'cargaison', label: 'Cargaison', description: "Transport de marchandises en gros volume", icon: '🛳️' },
-  { key: 'camion', label: 'Camion', description: 'Déménagement et transport de gros objets', icon: '🚛' },
-  { key: 'location', label: 'Location', description: 'Location de véhicules avec ou sans chauffeur', icon: '🔑' },
+  { key: 'livraison', icon: '📦' },
+  { key: 'cargaison', icon: '🛳️' },
+  { key: 'camion', icon: '🚛' },
+  { key: 'location', icon: '🔑' },
 ];
 
 export function ServicesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [comingSoonKey, setComingSoonKey] = useState<string | null>(null);
 
   return (
     <div>
-      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Services</h1>
+      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('services.title')}</h1>
 
       {SERVICES.map((service) => (
         <div key={service.key} style={{ marginBottom: spacing.md }}>
@@ -43,8 +45,8 @@ export function ServicesPage() {
             <span style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
               <span style={{ fontSize: 28 }}>{service.icon}</span>
               <span>
-                <span style={{ display: 'block', fontSize: 18, fontWeight: 700 }}>{service.label}</span>
-                <span style={{ display: 'block', fontSize: 14, color: colors.textMuted }}>{service.description}</span>
+                <span style={{ display: 'block', fontSize: 18, fontWeight: 700 }}>{t(`services.${service.key}.label`)}</span>
+                <span style={{ display: 'block', fontSize: 14, color: colors.textMuted }}>{t(`services.${service.key}.description`)}</span>
               </span>
             </span>
             <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
@@ -60,7 +62,7 @@ export function ServicesPage() {
                 marginTop: spacing.xs,
               }}
             >
-              🚧 Bientôt disponible — ce service arrive prochainement.
+              {t('services.comingSoon')}
             </p>
           )}
         </div>

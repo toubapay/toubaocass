@@ -1,19 +1,15 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchMyInsurancePolicies } from '../../api/insurance';
-import { InsuranceCoverageType, InsurancePolicy } from '../../api/types';
+import { InsurancePolicy } from '../../api/types';
 import { Screen } from '../../components/Screen';
 import { colors, radius, spacing } from '../../theme';
 
-const COVERAGE_LABELS: Record<InsuranceCoverageType, string> = {
-  tiers_simple: 'Tiers simple',
-  tiers_collision: 'Tiers collision',
-  tous_risques: 'Tous risques',
-};
-
 export function MyPoliciesScreen() {
+  const { t } = useTranslation();
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +32,7 @@ export function MyPoliciesScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>Mes assurances</Text>
+      <Text style={styles.title}>{t('insurance.myPoliciesTitle')}</Text>
       <FlatList
         data={policies}
         keyExtractor={(item) => String(item.id)}
@@ -46,7 +42,7 @@ export function MyPoliciesScreen() {
               <Text style={styles.provider}>{item.provider.name}</Text>
               <View style={[styles.badge, item.is_active ? styles.badgeActive : styles.badgeInactive]}>
                 <Text style={[styles.badgeText, item.is_active ? styles.badgeTextActive : styles.badgeTextInactive]}>
-                  {item.is_active ? 'Active' : item.status === 'expired' ? 'Expirée' : 'Annulée'}
+                  {item.is_active ? t('insurance.statusActive') : item.status === 'expired' ? t('insurance.statusExpired') : t('insurance.statusCancelled')}
                 </Text>
               </View>
             </View>
@@ -54,18 +50,16 @@ export function MyPoliciesScreen() {
               {item.car.make} {item.car.model} ({item.car.plate_number})
             </Text>
             <Text style={styles.plan}>
-              {item.plan_name} · {COVERAGE_LABELS[item.coverage_type]}
+              {item.plan_name} · {t(`common.insuranceCoverage.${item.coverage_type}`)}
             </Text>
-            <Text style={styles.premium}>{item.annual_premium.toLocaleString()} FCFA / an</Text>
-            <Text style={styles.dates}>
-              Valide du {item.starts_at} au {item.ends_at}
-            </Text>
-            <Text style={styles.policyNumber}>N° {item.policy_number}</Text>
+            <Text style={styles.premium}>{t('insurance.perYear', { amount: item.annual_premium.toLocaleString() })}</Text>
+            <Text style={styles.dates}>{t('insurance.validFromTo', { start: item.starts_at, end: item.ends_at })}</Text>
+            <Text style={styles.policyNumber}>{t('insurance.policyNumber', { number: item.policy_number })}</Text>
           </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Aucune assurance souscrite pour le moment.</Text>
+            <Text style={styles.emptyText}>{t('insurance.emptyPolicies')}</Text>
           </View>
         }
       />

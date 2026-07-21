@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { createAddress, deleteAddress, fetchAddresses, updateAddress } from '../api/addresses';
 import { updateProfile } from '../api/auth';
@@ -31,6 +32,7 @@ function AddressForm({
   const [isDefault, setIsDefault] = useState(initial?.is_default ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const { t } = useTranslation();
 
   const handleSubmit = async () => {
     setError(undefined);
@@ -54,8 +56,8 @@ function AddressForm({
 
   return (
     <View style={styles.formCard}>
-      <TextField label="Libellé" placeholder="Domicile, Travail…" value={label} onChangeText={setLabel} />
-      <Text style={styles.fieldLabel}>Adresse</Text>
+      <TextField label={t('settings.addressLabelField')} placeholder={t('settings.addressLabelPlaceholder')} value={label} onChangeText={setLabel} />
+      <Text style={styles.fieldLabel}>{t('settings.addressField')}</Text>
       <AddressMapPicker
         addressLine={addressLine}
         onAddressLineChange={setAddressLine}
@@ -68,7 +70,7 @@ function AddressForm({
         <View style={[styles.checkbox, isDefault && styles.checkboxChecked]}>
           {isDefault && <Text style={styles.checkboxMark}>✓</Text>}
         </View>
-        <Text style={styles.checkboxLabel}>Définir comme adresse par défaut</Text>
+        <Text style={styles.checkboxLabel}>{t('settings.setAsDefault')}</Text>
       </Pressable>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -76,14 +78,14 @@ function AddressForm({
       <View style={styles.formActions}>
         <View style={{ flex: 1 }}>
           <Button
-            label="Enregistrer"
+            label={t('settings.save')}
             onPress={handleSubmit}
             loading={saving}
             disabled={label.trim().length === 0 || addressLine.trim().length === 0}
           />
         </View>
         <View style={{ flex: 1, marginLeft: spacing.sm }}>
-          <Button label="Annuler" onPress={onCancel} variant="outline" />
+          <Button label={t('settings.cancel')} onPress={onCancel} variant="outline" />
         </View>
       </View>
     </View>
@@ -91,6 +93,7 @@ function AddressForm({
 }
 
 export function SettingsScreen() {
+  const { t } = useTranslation();
   const { user, setUser } = useAuth();
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
@@ -121,10 +124,10 @@ export function SettingsScreen() {
   };
 
   const handleDelete = (address: Address) => {
-    Alert.alert('Supprimer l\'adresse', `Supprimer l'adresse "${address.label}" ?`, [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('settings.deleteAria'), t('settings.deleteConfirm', { label: address.label }), [
+      { text: t('settings.cancel'), style: 'cancel' },
       {
-        text: 'Supprimer',
+        text: t('settings.deleteAria'),
         style: 'destructive',
         onPress: async () => {
           await deleteAddress(address.id);
@@ -149,21 +152,21 @@ export function SettingsScreen() {
 
   return (
     <Screen>
-      <Text style={styles.sectionTitle}>Informations du compte</Text>
+      <Text style={styles.sectionTitle}>{t('settings.accountInfo')}</Text>
       <View style={styles.card}>
-        <TextField label="Nom complet" value={name} onChangeText={setName} />
-        <TextField label="E-mail (facultatif)" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
-        <Text style={styles.phoneText}>Téléphone : {user?.phone} (non modifiable)</Text>
+        <TextField label={t('settings.fullName')} value={name} onChangeText={setName} />
+        <TextField label={t('settings.email')} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+        <Text style={styles.phoneText}>{t('settings.phoneNotEditable', { phone: user?.phone })}</Text>
         {profileError && <Text style={styles.errorText}>{profileError}</Text>}
-        {profileSaved && <Text style={styles.successText}>Profil mis à jour ✓</Text>}
-        <Button label="Enregistrer" onPress={handleSaveProfile} loading={savingProfile} disabled={name.trim().length < 2} />
+        {profileSaved && <Text style={styles.successText}>{t('settings.profileUpdated')}</Text>}
+        <Button label={t('settings.save')} onPress={handleSaveProfile} loading={savingProfile} disabled={name.trim().length < 2} />
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Adresses enregistrées</Text>
+        <Text style={styles.sectionTitle}>{t('settings.savedAddresses')}</Text>
         {formOpen === null && (
           <Pressable onPress={() => setFormOpen('new')}>
-            <Text style={styles.addLink}>+ Ajouter</Text>
+            <Text style={styles.addLink}>{t('settings.add')}</Text>
           </Pressable>
         )}
       </View>
@@ -173,7 +176,7 @@ export function SettingsScreen() {
       {addresses === null ? (
         <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.lg }} />
       ) : addresses.length === 0 && formOpen === null ? (
-        <Text style={styles.emptyText}>Aucune adresse enregistrée pour l'instant.</Text>
+        <Text style={styles.emptyText}>{t('settings.noAddresses')}</Text>
       ) : (
         addresses.map((address) =>
           formOpen === address.id ? (
@@ -185,7 +188,7 @@ export function SettingsScreen() {
                   <Text style={styles.addressLabel}>{address.label}</Text>
                   {address.is_default && (
                     <View style={styles.defaultBadge}>
-                      <Text style={styles.defaultBadgeText}>Par défaut</Text>
+                      <Text style={styles.defaultBadgeText}>{t('settings.defaultBadge')}</Text>
                     </View>
                   )}
                 </View>

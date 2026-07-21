@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import { Button } from '../../components/Button';
@@ -8,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, spacing } from '../../theme';
 
 export function PhoneEntryPage() {
+  const { t } = useTranslation();
   const { sendOtp } = useAuth();
   const navigate = useNavigate();
   const [phone, setPhone] = useState('+221');
@@ -31,20 +33,20 @@ export function PhoneEntryPage() {
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ marginTop: spacing.xl, marginBottom: spacing.xl * 1.5 }}>
-        <h1 style={{ fontSize: 35, fontWeight: 800, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>Intercity</h1>
-        <p style={{ fontSize: 18, color: colors.textMuted, margin: 0 }}>Réservez une place pour un trajet entre villes.</p>
+        <h1 style={{ fontSize: 35, fontWeight: 800, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>{t('auth.phoneEntry.appName')}</h1>
+        <p style={{ fontSize: 18, color: colors.textMuted, margin: 0 }}>{t('auth.phoneEntry.subtitle')}</p>
       </div>
 
       <TextField
-        label="Numéro de téléphone"
-        placeholder="+221 77 000 00 00"
+        label={t('auth.phoneEntry.phoneLabel')}
+        placeholder={t('auth.phoneEntry.phonePlaceholder')}
         type="tel"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         error={error}
       />
 
-      <Button label="Continuer" type="submit" loading={loading} />
+      <Button label={t('auth.phoneEntry.continue')} type="submit" loading={loading} />
     </form>
   );
 }

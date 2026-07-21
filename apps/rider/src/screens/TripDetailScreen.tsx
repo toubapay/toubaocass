@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -20,6 +21,7 @@ import { formatDuration, hasDeparted } from '../utils/trip';
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
 export function TripDetailScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { tripId } = route.params;
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,21 +57,21 @@ export function TripDetailScreen({ route, navigation }: Props) {
       if (editing) {
         await updateBooking(trip.my_booking!.id, seats);
         if (seats === 0) {
-          Alert.alert('Réservation annulée', undefined, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+          Alert.alert(t('tripDetail.bookingCancelledTitle'), undefined, [{ text: t('common.ok'), onPress: () => navigation.goBack() }]);
           return;
         }
-        Alert.alert('Réservation mise à jour', undefined, [{ text: 'OK' }]);
+        Alert.alert(t('tripDetail.bookingUpdatedTitle'), undefined, [{ text: t('common.ok') }]);
         load();
       } else {
         await bookTrip(tripId, seats, paymentMethod);
         Alert.alert(
-          'Réservation confirmée',
-          `Vous avez réservé ${seats} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.`,
-          [{ text: 'OK', onPress: () => navigation.goBack() }],
+          t('tripDetail.bookingConfirmedTitle'),
+          t('tripDetail.bookingConfirmedAlert', { count: seats }),
+          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
         );
       }
     } catch (e) {
-      Alert.alert(editing ? 'Modification impossible' : 'Réservation impossible', extractErrorMessage(e));
+      Alert.alert(editing ? t('tripDetail.updateFailedTitle') : t('tripDetail.bookingFailedTitle'), extractErrorMessage(e));
       load();
     } finally {
       setBooking(false);
@@ -108,33 +110,33 @@ export function TripDetailScreen({ route, navigation }: Props) {
           <Text style={styles.city}>{trip.destination_city?.name}</Text>
         </View>
         <Text style={styles.meta}>
-          {trip.departure_date} à {trip.departure_time}
+          {t('tripDetail.departureAt', { date: trip.departure_date, time: trip.departure_time })}
         </Text>
         <TripUrgencyBadge trip={trip} />
         {editing && (
           <View style={styles.bookedRow}>
-            <Text style={styles.bookedNotice}>✓ Vous avez réservé {trip.my_booking!.seats_booked} place(s) sur ce trajet</Text>
+            <Text style={styles.bookedNotice}>{t('tripDetail.bookedSeats', { count: trip.my_booking!.seats_booked })}</Text>
             <Pressable
               onPress={() =>
                 navigation.navigate('Chat', {
                   bookingId: trip.my_booking!.id,
-                  title: trip.driver.name ?? 'Conducteur',
+                  title: trip.driver.name ?? t('common.driverFallback'),
                   subtitle: `${trip.origin_city?.name} → ${trip.destination_city?.name}`,
                 })
               }
               style={styles.chatButton}
             >
-              <Text style={styles.chatButtonText}>💬 Discuter</Text>
+              <Text style={styles.chatButtonText}>{t('myBookings.chat')}</Text>
             </Pressable>
           </View>
         )}
 
         {trip.route_distance_km !== null && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Itinéraire</Text>
+            <Text style={styles.sectionTitle}>{t('tripDetail.itinerary')}</Text>
             <Text style={styles.line}>
               🛣️ {trip.route_distance_km} km
-              {trip.route_duration_minutes !== null && ` · ~${formatDuration(trip.route_duration_minutes)} de route`}
+              {trip.route_duration_minutes !== null && t('tripDetail.drivingDuration', { duration: formatDuration(trip.route_duration_minutes) })}
             </Text>
             <View style={{ marginTop: spacing.sm }}>
               <RouteMap trip={trip} />
@@ -144,7 +146,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
 
         {hasPin && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Point de départ</Text>
+            <Text style={styles.sectionTitle}>{t('tripDetail.departurePoint')}</Text>
             <DepartureMap
               latitude={trip.departure_latitude as number}
               longitude={trip.departure_longitude as number}
@@ -152,27 +154,27 @@ export function TripDetailScreen({ route, navigation }: Props) {
             />
             {trip.departure_address && <Text style={styles.line}>{trip.departure_address}</Text>}
             <Pressable onPress={openInGoogleMaps}>
-              <Text style={styles.mapLink}>Ouvrir dans Google Maps</Text>
+              <Text style={styles.mapLink}>{t('common.openInMaps')}</Text>
             </Pressable>
           </View>
         )}
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Conducteur</Text>
-          <Text style={styles.line}>{trip.driver.name ?? 'Conducteur'}</Text>
-          <Text style={styles.lineMuted}>Note : {trip.driver.rating?.toFixed(1) ?? '5.0'} ★</Text>
+          <Text style={styles.sectionTitle}>{t('tripDetail.driverSection')}</Text>
+          <Text style={styles.line}>{trip.driver.name ?? t('common.driverFallback')}</Text>
+          <Text style={styles.lineMuted}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</Text>
           <View style={styles.contactRow}>
             <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${trip.driver.phone}`)}>
-              <Text style={styles.contactButtonText}>📞 Appeler</Text>
+              <Text style={styles.contactButtonText}>📞 {t('common.call')}</Text>
             </Pressable>
             <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`sms:${trip.driver.phone}`)}>
-              <Text style={styles.contactButtonText}>💬 SMS</Text>
+              <Text style={styles.contactButtonText}>💬 {t('common.sms')}</Text>
             </Pressable>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Véhicule</Text>
+          <Text style={styles.sectionTitle}>{t('tripDetail.vehicle')}</Text>
           <Text style={styles.line}>
             {trip.car?.make} {trip.car?.model} · {trip.car?.color}
           </Text>
@@ -180,28 +182,28 @@ export function TripDetailScreen({ route, navigation }: Props) {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Tarif</Text>
-          <Text style={styles.fare}>{trip.fare.toLocaleString()} FCFA / place</Text>
-          <Text style={styles.lineMuted}>{trip.available_seats} place(s) restante(s) sur {trip.total_seats}</Text>
+          <Text style={styles.sectionTitle}>{t('tripDetail.fare')}</Text>
+          <Text style={styles.fare}>{t('tripDetail.farePerSeat', { amount: trip.fare.toLocaleString() })}</Text>
+          <Text style={styles.lineMuted}>{t('tripDetail.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}</Text>
         </View>
 
         {trip.notes ? (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Remarques</Text>
+            <Text style={styles.sectionTitle}>{t('tripDetail.notes')}</Text>
             <Text style={styles.line}>{trip.notes}</Text>
           </View>
         ) : null}
 
         {!editing && !isUnavailable && (
           <View style={styles.paymentSection}>
-            <Text style={styles.seatsLabel}>Mode de paiement</Text>
+            <Text style={styles.seatsLabel}>{t('tripDetail.paymentMethod')}</Text>
             <View style={styles.paymentRow}>
               <Pressable
                 onPress={() => setPaymentMethod('cash')}
                 style={[styles.paymentOption, paymentMethod === 'cash' && styles.paymentOptionActive]}
               >
                 <Text style={[styles.paymentOptionText, paymentMethod === 'cash' && styles.paymentOptionTextActive]}>
-                  💵 Espèces
+                  💵 {t('common.cash')}
                 </Text>
               </Pressable>
               <Pressable
@@ -215,22 +217,22 @@ export function TripDetailScreen({ route, navigation }: Props) {
                     color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted}
                   />
                   <Text style={[styles.paymentOptionText, paymentMethod === 'wallet' && styles.paymentOptionTextActive]}>
-                    Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+                    {t('tripDetail.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
                   </Text>
                 </View>
               </Pressable>
             </View>
-            {insufficientWalletFunds && <Text style={styles.paymentWarning}>Solde insuffisant pour ce paiement.</Text>}
+            {insufficientWalletFunds && <Text style={styles.paymentWarning}>{t('tripDetail.insufficientFundsShort')}</Text>}
           </View>
         )}
 
         {isUnavailable ? (
           <Text style={styles.fullNotice}>
-            {tripDeparted ? 'Ce trajet est déjà terminé ou est déjà parti.' : "Ce trajet n'est plus disponible."}
+            {tripDeparted ? t('tripDetail.tripDeparted') : t('tripDetail.tripUnavailable')}
           </Text>
         ) : (
           <View style={styles.seatsRow}>
-            <Text style={styles.seatsLabel}>{editing ? 'Nombre de places' : 'Places à réserver'}</Text>
+            <Text style={styles.seatsLabel}>{editing ? t('tripDetail.seatsCountEditing') : t('tripDetail.seatsCountBooking')}</Text>
             <View style={styles.stepper}>
               <Button
                 label="-"
@@ -250,16 +252,16 @@ export function TripDetailScreen({ route, navigation }: Props) {
         )}
 
         {editing && seats === 0 && !isUnavailable && (
-          <Text style={styles.warningNotice}>Réduire à 0 place annulera votre réservation.</Text>
+          <Text style={styles.warningNotice}>{t('tripDetail.reduceToZeroWarning')}</Text>
         )}
 
         <Button
           label={
             editing
               ? seats === 0
-                ? 'Annuler la réservation'
-                : `Enregistrer pour ${(trip.fare * seats).toLocaleString()} FCFA`
-              : `Réserver pour ${(trip.fare * seats).toLocaleString()} FCFA`
+                ? t('tripDetail.cancelReservation')
+                : t('tripDetail.saveForAmount', { amount: (trip.fare * seats).toLocaleString() })
+              : t('tripDetail.bookForAmount', { amount: (trip.fare * seats).toLocaleString() })
           }
           onPress={handleBook}
           loading={booking}

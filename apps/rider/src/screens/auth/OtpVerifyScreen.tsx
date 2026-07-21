@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -14,6 +15,7 @@ import { colors, spacing } from '../../theme';
 type Props = NativeStackScreenProps<AuthStackParamList, 'OtpVerify'>;
 
 export function OtpVerifyScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { phone } = route.params;
   const { confirmOtp, sendOtp } = useAuth();
   const [code, setCode] = useState('');
@@ -54,12 +56,12 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
         <Ionicons name="chevron-back" size={24} color={colors.text} />
       </Pressable>
 
-      <Text style={styles.title}>Saisissez le code</Text>
-      <Text style={styles.subtitle}>Nous avons envoyé un code de vérification par SMS au {phone}.</Text>
+      <Text style={styles.title}>{t('auth.otpVerify.title')}</Text>
+      <Text style={styles.subtitle}>{t('auth.otpVerify.subtitle', { phone })}</Text>
 
       <TextField
-        label="Code de vérification"
-        placeholder="123456"
+        label={t('auth.otpVerify.codeLabel')}
+        placeholder={t('auth.otpVerify.codePlaceholder')}
         keyboardType="number-pad"
         maxLength={6}
         value={code}
@@ -67,9 +69,9 @@ export function OtpVerifyScreen({ route, navigation }: Props) {
         error={error}
       />
 
-      <Button label="Vérifier" onPress={handleVerify} loading={loading} disabled={code.length < 4} />
+      <Button label={t('auth.otpVerify.verify')} onPress={handleVerify} loading={loading} disabled={code.length < 4} />
       <Button
-        label={resending ? 'Envoi en cours...' : 'Renvoyer le code'}
+        label={resending ? t('auth.otpVerify.resending') : t('auth.otpVerify.resend')}
         onPress={handleResend}
         loading={resending}
         variant="outline"

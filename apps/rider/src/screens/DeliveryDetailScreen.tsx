@@ -1,24 +1,17 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { cancelDelivery, fetchDelivery } from '../api/deliveries';
-import { Delivery, PackageType } from '../api/types';
+import { Delivery } from '../api/types';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'DeliveryDetail'>;
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'En attente',
-  accepted: 'Acceptée',
-  picked_up: 'Récupérée',
-  delivered: 'Livrée',
-  cancelled: 'Annulée',
-};
 
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
@@ -28,14 +21,8 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: colors.danger,
 };
 
-const PACKAGE_TYPE_LABEL: Record<PackageType, string> = {
-  document: 'Document',
-  colis_leger: 'Colis léger (< 5 kg)',
-  colis_moyen: 'Colis moyen (5–15 kg)',
-  colis_volumineux: 'Colis volumineux (> 15 kg)',
-};
-
 export function DeliveryDetailScreen({ route }: Props) {
+  const { t } = useTranslation();
   const { deliveryId } = route.params;
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,10 +39,10 @@ export function DeliveryDetailScreen({ route }: Props) {
 
   const handleCancel = () => {
     if (!delivery) return;
-    Alert.alert('Annuler la livraison', 'Voulez-vous vraiment annuler cette livraison ?', [
-      { text: 'Non', style: 'cancel' },
+    Alert.alert(t('deliveryDetail.cancelDelivery'), t('deliveryDetail.cancelConfirm'), [
+      { text: t('deliveryDetail.cancelConfirmNo'), style: 'cancel' },
       {
-        text: 'Oui, annuler',
+        text: t('deliveryDetail.cancelConfirmYes'),
         style: 'destructive',
         onPress: async () => {
           setCancelling(true);
@@ -63,7 +50,7 @@ export function DeliveryDetailScreen({ route }: Props) {
             await cancelDelivery(delivery.id);
             load();
           } catch (e) {
-            Alert.alert('Action impossible', extractErrorMessage(e));
+            Alert.alert(t('deliveryDetail.actionFailedTitle'), extractErrorMessage(e));
           } finally {
             setCancelling(false);
           }
@@ -86,24 +73,24 @@ export function DeliveryDetailScreen({ route }: Props) {
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Livraison #{delivery.id}</Text>
-          <Text style={[styles.status, { color: STATUS_COLOR[delivery.status] }]}>{STATUS_LABEL[delivery.status]}</Text>
+          <Text style={styles.title}>{t('deliveryDetail.titleWithId', { id: delivery.id })}</Text>
+          <Text style={[styles.status, { color: STATUS_COLOR[delivery.status] }]}>{t(`common.deliveryStatus.${delivery.status}`)}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Ramassage</Text>
+          <Text style={styles.sectionTitle}>{t('deliveryDetail.pickup')}</Text>
           <Text style={styles.line}>{delivery.pickup_address_line}</Text>
           <Pressable
             onPress={() =>
               Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${delivery.pickup_latitude},${delivery.pickup_longitude}`)
             }
           >
-            <Text style={styles.mapLink}>Ouvrir dans Google Maps</Text>
+            <Text style={styles.mapLink}>{t('common.openInMaps')}</Text>
           </Pressable>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Destinataire</Text>
+          <Text style={styles.sectionTitle}>{t('deliveryDetail.receiver')}</Text>
           <Text style={styles.line}>{delivery.receiver_name}</Text>
           <Text style={styles.lineMuted}>{delivery.receiver_phone}</Text>
           <Text style={[styles.line, { marginTop: spacing.xs }]}>{delivery.receiver_address_line}</Text>
@@ -114,41 +101,44 @@ export function DeliveryDetailScreen({ route }: Props) {
               )
             }
           >
-            <Text style={styles.mapLink}>Ouvrir dans Google Maps</Text>
+            <Text style={styles.mapLink}>{t('common.openInMaps')}</Text>
           </Pressable>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Colis</Text>
-          <Text style={styles.line}>{PACKAGE_TYPE_LABEL[delivery.package_type]}</Text>
+          <Text style={styles.sectionTitle}>{t('deliveryDetail.package')}</Text>
+          <Text style={styles.line}>{t(`common.packageType.${delivery.package_type}`)}</Text>
           {delivery.notes ? <Text style={styles.lineMuted}>{delivery.notes}</Text> : null}
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Frais</Text>
+          <Text style={styles.sectionTitle}>{t('deliveryDetail.fee')}</Text>
           <Text style={styles.fare}>{delivery.fee.toLocaleString()} FCFA</Text>
           <Text style={styles.lineMuted}>
-            {delivery.distance_km} km · {delivery.payment_method === 'wallet' ? 'Portefeuille' : 'Espèces'}
+            {t('deliveryDetail.distanceAndPayment', {
+              distance: delivery.distance_km,
+              payment: delivery.payment_method === 'wallet' ? t('common.wallet') : t('common.cash'),
+            })}
           </Text>
         </View>
 
         {delivery.driver && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Livreur</Text>
-            <Text style={styles.line}>{delivery.driver.name ?? 'Livreur'}</Text>
+            <Text style={styles.sectionTitle}>{t('deliveryDetail.courier')}</Text>
+            <Text style={styles.line}>{delivery.driver.name ?? t('common.courierFallback')}</Text>
             <View style={styles.contactRow}>
               <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${delivery.driver!.phone}`)}>
-                <Text style={styles.contactButtonText}>📞 Appeler</Text>
+                <Text style={styles.contactButtonText}>📞 {t('common.call')}</Text>
               </Pressable>
               <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`sms:${delivery.driver!.phone}`)}>
-                <Text style={styles.contactButtonText}>💬 SMS</Text>
+                <Text style={styles.contactButtonText}>💬 {t('common.sms')}</Text>
               </Pressable>
             </View>
           </View>
         )}
 
         {isCancellable && (
-          <Button label="Annuler la livraison" onPress={handleCancel} loading={cancelling} variant="danger" />
+          <Button label={t('deliveryDetail.cancelDelivery')} onPress={handleCancel} loading={cancelling} variant="danger" />
         )}
       </ScrollView>
     </Screen>

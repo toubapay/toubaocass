@@ -2,24 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchWallet } from '../api/wallet';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
+import { setStoredLanguage, type SupportedLanguage } from '../i18n/i18n';
 import { ProfileStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
-
-const KYC_LABEL: Record<string, string> = {
-  pending: 'Non soumis',
-  submitted: 'En cours d\'examen',
-  approved: 'Vérifié',
-  rejected: 'Refusé',
-};
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'Profile'>;
 
 export function ProfileScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
@@ -29,25 +25,27 @@ export function ProfileScreen({ navigation }: Props) {
       .catch(() => setWalletBalance(null));
   }, []);
 
+  const language = i18n.language as SupportedLanguage;
+
   return (
     <Screen>
-      <Text style={styles.title}>Mon profil</Text>
+      <Text style={styles.title}>{t('profile.title')}</Text>
 
       <View style={styles.card}>
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.meta}>{user?.phone}</Text>
         {user?.email ? <Text style={styles.meta}>{user.email}</Text> : null}
         <Text style={styles.kyc}>
-          Vérification : {KYC_LABEL[user?.driver_profile?.kyc_status ?? 'pending']}
+          {t('profile.kycLabel', { status: t(`common.kycStatus.${user?.driver_profile?.kyc_status ?? 'pending'}`) })}
         </Text>
-        <Text style={styles.meta}>Note : {(user?.driver_profile?.rating ?? 5).toFixed(1)} ★</Text>
+        <Text style={styles.meta}>{t('profile.rating', { value: (user?.driver_profile?.rating ?? 5).toFixed(1) })}</Text>
       </View>
 
       <Pressable style={styles.walletCard} onPress={() => navigation.navigate('Wallet')}>
         <View style={styles.walletLeft}>
           <Ionicons name="wallet" size={26} color="#fff" />
           <View>
-            <Text style={styles.walletLabel}>Mon portefeuille</Text>
+            <Text style={styles.walletLabel}>{t('profile.wallet')}</Text>
             <Text style={styles.walletValue}>{walletBalance !== null ? `${walletBalance.toLocaleString()} FCFA` : '…'}</Text>
           </View>
         </View>
@@ -55,11 +53,33 @@ export function ProfileScreen({ navigation }: Props) {
       </Pressable>
 
       <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Settings')}>
-        <Text style={styles.settingsLabel}>⚙️ Paramètres</Text>
+        <Text style={styles.settingsLabel}>{t('profile.settings')}</Text>
         <Text style={styles.settingsArrow}>→</Text>
       </Pressable>
 
-      <Button label="Déconnexion" onPress={signOut} variant="outline" />
+      <View style={styles.languageCard}>
+        <Text style={styles.languageTitle}>{t('profile.language')}</Text>
+        <View style={styles.languageRow}>
+          <Pressable
+            style={[styles.languageButton, language === 'fr' && styles.languageButtonActive]}
+            onPress={() => setStoredLanguage('fr')}
+          >
+            <Text style={[styles.languageButtonText, language === 'fr' && styles.languageButtonTextActive]}>
+              {t('profile.languageFrench')}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.languageButton, language === 'ar' && styles.languageButtonActive]}
+            onPress={() => setStoredLanguage('ar')}
+          >
+            <Text style={[styles.languageButtonText, language === 'ar' && styles.languageButtonTextActive]}>
+              {t('profile.languageArabic')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <Button label={t('profile.signOut')} onPress={signOut} variant="outline" />
     </Screen>
   );
 }
@@ -103,4 +123,25 @@ const styles = StyleSheet.create({
   },
   settingsLabel: { fontSize: 19, fontWeight: '600', color: colors.text },
   settingsArrow: { fontSize: 21, color: colors.textMuted },
+  languageCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  languageTitle: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: spacing.sm },
+  languageRow: { flexDirection: 'row', gap: spacing.sm },
+  languageButton: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  languageButtonActive: { borderColor: colors.primary, backgroundColor: colors.accentSoft },
+  languageButtonText: { fontSize: 15, fontWeight: '700', color: colors.textMuted },
+  languageButtonTextActive: { color: colors.primary },
 });

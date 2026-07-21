@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -17,6 +18,7 @@ export function BookingQuickActionModal({
   onClose: () => void;
   onSuccess: (updatedTrip: Trip) => void;
 }) {
+  const { t } = useTranslation();
   const editing = trip.my_booking != null;
   const maxSeats = trip.available_seats + (trip.my_booking?.seats_booked ?? 0);
   const [seats, setSeats] = useState(trip.my_booking?.seats_booked ?? 1);
@@ -67,15 +69,20 @@ export function BookingQuickActionModal({
         }}
       >
         <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>
-          {editing ? 'Modifier la réservation' : 'Réserver ce trajet'}
+          {editing ? t('bookingQuickAction.editTitle') : t('bookingQuickAction.bookTitle')}
         </h2>
         <p style={{ fontSize: 14, color: colors.textMuted, margin: `0 0 ${spacing.md}px` }}>
-          {trip.origin_city?.name} → {trip.destination_city?.name} · {trip.departure_date} à {trip.departure_time}
+          {t('bookingQuickAction.tripSummary', {
+            origin: trip.origin_city?.name,
+            destination: trip.destination_city?.name,
+            date: trip.departure_date,
+            time: trip.departure_time,
+          })}
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: colors.text }}>
-            {editing ? 'Nombre de places' : 'Places à réserver'}
+            {editing ? t('bookingQuickAction.seatsCountEditing') : t('bookingQuickAction.seatsCountBooking')}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
             <button
@@ -118,7 +125,7 @@ export function BookingQuickActionModal({
 
         {editing && seats === 0 && (
           <p style={{ fontSize: 13, color: colors.danger, marginTop: -spacing.sm, marginBottom: spacing.md }}>
-            Réduire à 0 place annulera votre réservation.
+            {t('bookingQuickAction.reduceToZeroWarning')}
           </p>
         )}
         {error && <p style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.sm }}>{error}</p>}
@@ -128,13 +135,19 @@ export function BookingQuickActionModal({
         </p>
 
         <Button
-          label={editing ? (seats === 0 ? 'Annuler la réservation' : 'Enregistrer') : 'Confirmer la réservation'}
+          label={
+            editing
+              ? seats === 0
+                ? t('bookingQuickAction.cancelReservation')
+                : t('bookingQuickAction.save')
+              : t('bookingQuickAction.confirmReservation')
+          }
           onClick={handleConfirm}
           loading={loading}
           variant={editing && seats === 0 ? 'danger' : 'primary'}
         />
         <div style={{ marginTop: spacing.sm }}>
-          <Button label="Fermer" onClick={onClose} variant="outline" />
+          <Button label={t('bookingQuickAction.close')} onClick={onClose} variant="outline" />
         </div>
       </div>
     </div>,

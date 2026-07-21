@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { updateProfile } from '../../api/auth';
 import { extractErrorMessage } from '../../api/client';
@@ -9,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, spacing } from '../../theme';
 
 export function ProfileSetupPage() {
+  const { t } = useTranslation();
   const { setUser } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -34,20 +36,26 @@ export function ProfileSetupPage() {
   return (
     <form onSubmit={handleSubmit}>
       <h1 style={{ fontSize: 26, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
-        Parlez-nous de vous
+        {t('auth.profileSetup.title')}
       </h1>
-      <p style={{ fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg }}>Votre nom suffit pour commencer.</p>
+      <p style={{ fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg }}>{t('auth.profileSetup.subtitle')}</p>
 
-      <TextField label="Nom complet" placeholder="Awa Ndiaye" value={name} onChange={(e) => setName(e.target.value)} error={error} />
       <TextField
-        label="E-mail (facultatif)"
-        placeholder="awa@example.com"
+        label={t('auth.profileSetup.nameLabel')}
+        placeholder={t('auth.profileSetup.namePlaceholder')}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        error={error}
+      />
+      <TextField
+        label={t('auth.profileSetup.emailLabel')}
+        placeholder={t('auth.profileSetup.emailPlaceholder')}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <Button label="Terminer" type="submit" loading={loading} disabled={name.trim().length < 2} />
+      <Button label={t('auth.profileSetup.finish')} type="submit" loading={loading} disabled={name.trim().length < 2} />
     </form>
   );
 }

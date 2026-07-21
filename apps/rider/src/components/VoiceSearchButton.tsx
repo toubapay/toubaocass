@@ -2,8 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme';
+
+const SPEECH_LANG: Record<string, string> = { fr: 'fr-FR', ar: 'ar-SA' };
 
 interface Props {
   onResult: (text: string) => void;
@@ -11,6 +14,7 @@ interface Props {
 }
 
 export function VoiceSearchButton({ onResult, color = colors.textMuted }: Props) {
+  const { t, i18n } = useTranslation();
   const [listening, setListening] = useState(false);
 
   useSpeechRecognitionEvent('start', () => setListening(true));
@@ -22,7 +26,7 @@ export function VoiceSearchButton({ onResult, color = colors.textMuted }: Props)
   useSpeechRecognitionEvent('error', (event) => {
     setListening(false);
     if (event.error !== 'no-speech' && event.error !== 'aborted') {
-      Alert.alert('Recherche vocale indisponible', "Impossible d'utiliser la reconnaissance vocale sur cet appareil.");
+      Alert.alert(t('common.voiceSearchUnavailableTitle'), t('common.voiceSearchUnavailableBody'));
     }
   });
 
@@ -33,10 +37,14 @@ export function VoiceSearchButton({ onResult, color = colors.textMuted }: Props)
     }
     const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!result.granted) {
-      Alert.alert('Micro non autorisé', "Activez l'accès au microphone dans les réglages pour utiliser la recherche vocale.");
+      Alert.alert(t('common.micNotAuthorizedTitle'), t('common.micNotAuthorizedBody'));
       return;
     }
-    ExpoSpeechRecognitionModule.start({ lang: 'fr-FR', interimResults: false, continuous: false });
+    ExpoSpeechRecognitionModule.start({
+      lang: SPEECH_LANG[i18n.language] ?? 'fr-FR',
+      interimResults: false,
+      continuous: false,
+    });
   };
 
   return (

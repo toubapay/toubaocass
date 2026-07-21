@@ -1,0 +1,343 @@
+{
+  "common": {
+    "back": "Retour",
+    "ok": "OK",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "add": "Ajouter",
+    "call": "Appeler",
+    "sms": "SMS",
+    "openInMaps": "Ouvrir dans Google Maps",
+    "cash": "Espèces",
+    "wallet": "Portefeuille",
+    "selectCity": "Sélectionner une ville",
+    "searchCity": "Rechercher une ville...",
+    "locationPermissionDenied": "L'autorisation de localisation a été refusée.",
+    "locationUnavailable": "Impossible d'obtenir votre position. Vérifiez les paramètres de votre appareil.",
+    "selectDate": "Sélectionner une date",
+    "selectTime": "Sélectionner une heure",
+    "rideType": {
+      "standard": "Standard",
+      "comfort": "Confort",
+      "xl": "XL"
+    },
+    "tripStatus": {
+      "scheduled": "Programmé",
+      "full": "Complet",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "deliveryStatus": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "picked_up": "Récupérée",
+      "delivered": "Livrée",
+      "cancelled": "Annulée"
+    },
+    "packageType": {
+      "document": "Document",
+      "colis_leger": "Colis léger (< 5 kg)",
+      "colis_moyen": "Colis moyen (5–15 kg)",
+      "colis_volumineux": "Colis volumineux (> 15 kg)"
+    },
+    "kycStatus": {
+      "pending": "Non soumis",
+      "submitted": "En cours d'examen",
+      "approved": "Vérifié",
+      "rejected": "Refusé"
+    },
+    "carType": {
+      "sedan": "Berline",
+      "suv": "SUV",
+      "van": "Fourgonnette",
+      "minibus": "Minibus"
+    },
+    "insuranceCoverage": {
+      "tiers_simple": "Tiers simple",
+      "tiers_collision": "Tiers collision",
+      "tous_risques": "Tous risques"
+    }
+  },
+  "nav": {
+    "trips": "Trajets",
+    "deliveries": "Livraisons",
+    "fleet": "Flotte",
+    "kyc": "Vérification",
+    "profile": "Profil",
+    "screenTitles": {
+      "tripsList": "Mes trajets",
+      "postTrip": "Publier un trajet",
+      "postInstantTrip": "Départ immédiat",
+      "tripDetail": "Détails du trajet",
+      "chat": "Discussion",
+      "wallet": "Mon portefeuille",
+      "deliveriesList": "Livraisons",
+      "deliveryDetail": "Détails de la livraison",
+      "carsList": "Mes véhicules",
+      "addCar": "Ajouter un véhicule",
+      "insuranceCompare": "Comparer les assurances",
+      "myPolicies": "Mes assurances",
+      "kycStatus": "Vérification",
+      "kycForm": "Soumettre les documents",
+      "profile": "Mon profil",
+      "settings": "Paramètres"
+    }
+  },
+  "chat": {
+    "defaultTitle": "Discussion",
+    "empty": "Aucun message pour l'instant. Dites bonjour !",
+    "placeholder": "Écrire un message...",
+    "send": "Envoyer"
+  },
+  "wallet": {
+    "title": "Mon portefeuille",
+    "availableBalance": "Solde disponible",
+    "topUpNote": "Pour recharger votre portefeuille, contactez notre équipe — le rechargement est ajouté par un administrateur.",
+    "history": "Historique",
+    "emptyHistory": "Aucune transaction pour l'instant.",
+    "type": {
+      "top_up": "Rechargement",
+      "payment": "Paiement de trajet",
+      "earning": "Revenu de trajet",
+      "refund": "Remboursement",
+      "refund_reversal": "Reprise de revenu"
+    }
+  },
+  "myLocationBar": {
+    "myPosition": "Ma position",
+    "currentPositionFallback": "Position actuelle",
+    "modalTitle": "Ma position",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  },
+  "addressMapPicker": {
+    "placeholder": "Sacré-Cœur 3, Dakar",
+    "searchPlaceholder": "Rechercher une adresse ou un lieu...",
+    "positionSaved": "Position enregistrée ✓",
+    "useMyLocation": "Utiliser ma position actuelle",
+    "dragHintTouch": "Touchez la carte pour ajuster l'emplacement exact.",
+    "mapPreviewMobile": "Une carte interactive pour placer un repère est disponible dans l'application mobile.",
+    "hintTouch": "Touchez la carte pour placer un repère à l'endroit où les passagers doivent vous retrouver.",
+    "pinPlacedAt": "Repère placé à {{lat}}, {{lng}}"
+  },
+  "tripUrgencyBadge": {
+    "urgent": "⚡ Départ imminent",
+    "available": "🟢 Places disponibles"
+  },
+  "auth": {
+    "phoneEntry": {
+      "appName": "Intercity Driver",
+      "subtitle": "Publiez vos trajets et prenez des passagers partout au Sénégal.",
+      "phoneLabel": "Numéro de téléphone",
+      "phonePlaceholder": "+221 77 000 00 00",
+      "continue": "Continuer"
+    },
+    "otpVerify": {
+      "title": "Saisissez le code",
+      "subtitle": "Nous avons envoyé un code de vérification par SMS au {{phone}}.",
+      "codeLabel": "Code de vérification",
+      "codePlaceholder": "123456",
+      "verify": "Vérifier",
+      "resend": "Renvoyer le code",
+      "resending": "Envoi en cours..."
+    },
+    "profileSetup": {
+      "title": "Parlez-nous de vous",
+      "subtitle": "Ces informations apparaîtront sur votre profil conducteur.",
+      "nameLabel": "Nom complet",
+      "namePlaceholder": "Modou Fall",
+      "emailLabel": "E-mail (facultatif)",
+      "emailPlaceholder": "modou@example.com",
+      "finish": "Terminer"
+    }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "kycLabel": "Vérification : {{status}}",
+    "rating": "Note : {{value}} ★",
+    "wallet": "Mon portefeuille",
+    "settings": "⚙️ Paramètres",
+    "language": "Langue",
+    "languageFrench": "Français",
+    "languageArabic": "العربية",
+    "signOut": "Déconnexion"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "accountInfo": "Informations du compte",
+    "fullName": "Nom complet",
+    "email": "E-mail (facultatif)",
+    "phoneNotEditable": "Téléphone : {{phone}} (non modifiable)",
+    "profileUpdated": "Profil mis à jour ✓",
+    "save": "Enregistrer",
+    "savedAddresses": "Adresses enregistrées",
+    "add": "+ Ajouter",
+    "noAddresses": "Aucune adresse enregistrée pour l'instant.",
+    "addressLabelField": "Libellé",
+    "addressLabelPlaceholder": "Domicile, Travail…",
+    "addressField": "Adresse",
+    "setAsDefault": "Définir comme adresse par défaut",
+    "defaultBadge": "Par défaut",
+    "editAria": "Modifier",
+    "deleteAria": "Supprimer",
+    "deleteConfirmTitle": "Supprimer l'adresse",
+    "deleteConfirm": "Supprimer l'adresse \"{{label}}\" ?",
+    "cancel": "Annuler"
+  },
+  "trips": {
+    "listTitle": "Mes trajets",
+    "instantCardTitle": "Départ immédiat",
+    "instantCardSubtitle": "Publiez un trajet maintenant, sans date à choisir",
+    "mapCardTitle": "Définir un point de départ sur la carte",
+    "mapCardSubtitle": "Recherchez une adresse ou utilisez votre position actuelle",
+    "seatsRemaining": "{{available}}/{{total}} places restantes",
+    "farePerSeat": "{{fare}} FCFA / place",
+    "emptyList": "Vous n'avez publié aucun trajet pour l'instant.",
+    "publishNew": "Publier un nouveau trajet",
+    "post": {
+      "title": "Publier un trajet",
+      "kycNotice": "Votre vérification conducteur doit être approuvée avant de pouvoir publier des trajets. Consultez l'onglet Vérification.",
+      "noCarsNotice": "Ajoutez d'abord un véhicule depuis l'onglet Flotte.",
+      "vehicleLabel": "Véhicule",
+      "originLabel": "Départ",
+      "originPlaceholder": "Ville de départ",
+      "destinationLabel": "Arrivée",
+      "destinationPlaceholder": "Ville de destination",
+      "meetingPointLabel": "Point de rendez-vous exact (facultatif)",
+      "meetingPointDescLabel": "Description du point de rendez-vous",
+      "meetingPointPlaceholder": "ex. Station Total, Route de l'Aéroport",
+      "dateLabel": "Date de départ",
+      "timeLabel": "Heure de départ",
+      "fareLabel": "Tarif par place (FCFA)",
+      "rideTypeLabel": "Type de trajet",
+      "notesLabel": "Remarques (facultatif)",
+      "submit": "Publier le trajet"
+    },
+    "postInstant": {
+      "title": "⚡ Départ immédiat",
+      "subtitle": "Pas de date à choisir — vous partez maintenant. Les voyageurs à proximité seront notifiés aussitôt publié.",
+      "submit": "Publier le départ immédiat",
+      "successTitle": "Départ publié",
+      "successBody": "Les voyageurs à proximité viennent d'être notifiés."
+    },
+    "detail": {
+      "passengers": "Passagers ({{count}})",
+      "noBookings": "Aucune réservation pour l'instant.",
+      "passengerFallback": "Passager",
+      "seatsCount": "{{count}} place(s)",
+      "meetingPoint": "Point de rendez-vous",
+      "tripSection": "Trajet",
+      "seatsAvailable": "{{available}} place(s) disponible(s) sur {{total}}",
+      "chat": "💬 Discuter",
+      "startTrip": "Démarrer le trajet",
+      "completeTrip": "Terminer le trajet",
+      "cancelTrip": "Annuler le trajet",
+      "cancelConfirmTitle": "Annuler le trajet",
+      "cancelConfirmBody": "Tous les passagers confirmés seront notifiés. Continuer ?",
+      "cancelConfirmNo": "Non",
+      "cancelConfirmYes": "Oui, annuler le trajet",
+      "actionFailedTitle": "Échec de l'action"
+    }
+  },
+  "deliveries": {
+    "title": "Livraisons",
+    "kycNotice": "Votre vérification conducteur doit être approuvée avant d'accepter des livraisons. Consultez l'onglet Vérification.",
+    "tabAvailable": "Disponibles",
+    "tabMine": "Mes livraisons",
+    "emptyAvailable": "Aucune livraison disponible pour le moment.",
+    "emptyMine": "Vous n'avez pas encore de livraison.",
+    "detail": {
+      "titleWithId": "Livraison #{{id}}",
+      "pickupSection": "Ramassage",
+      "receiverSection": "Destinataire",
+      "packageSection": "Colis",
+      "feeSection": "Frais",
+      "paymentWallet": "Portefeuille",
+      "paymentCash": "Espèces",
+      "accept": "Accepter",
+      "markPickedUp": "Marquer récupéré",
+      "markDelivered": "Marquer livré",
+      "actionFailedTitle": "Échec de l'action"
+    }
+  },
+  "fleet": {
+    "carsListTitle": "Mes véhicules",
+    "yearFallback": "N/A",
+    "seatsCount": "{{count}} places",
+    "insuranceLink": "🛡️ Assurance",
+    "remove": "Supprimer",
+    "emptyCars": "Ajoutez un véhicule pour commencer à publier des trajets.",
+    "myPolicies": "Mes assurances",
+    "addCar": "Ajouter un véhicule",
+    "deleteConfirmTitle": "Supprimer le véhicule",
+    "deleteConfirmBody": "Supprimer {{make}} {{model}} ({{plate}}) ?",
+    "deleteFailedTitle": "Suppression impossible",
+    "addCarScreen": {
+      "title": "Ajouter un véhicule",
+      "typeLabel": "Type de véhicule",
+      "makeLabel": "Marque",
+      "makePlaceholder": "Toyota",
+      "modelLabel": "Modèle",
+      "modelPlaceholder": "Corolla",
+      "yearLabel": "Année",
+      "yearPlaceholder": "2020",
+      "colorLabel": "Couleur",
+      "colorPlaceholder": "Blanc",
+      "plateLabel": "Numéro d'immatriculation",
+      "platePlaceholder": "DK-1234-AB",
+      "seatsLabel": "Nombre de places (passagers)",
+      "submit": "Enregistrer le véhicule"
+    }
+  },
+  "insurance": {
+    "compareTitle": "Comparer les assurances",
+    "chooseOffer": "Choisir cette offre",
+    "perYear": "{{amount}} FCFA / an",
+    "perMonthApprox": "≈ {{amount}} FCFA / mois",
+    "emptyQuotes": "Aucune offre disponible pour ce type de couverture.",
+    "purchaseConfirmTitle": "Confirmer la souscription",
+    "purchaseConfirmCancel": "Annuler",
+    "purchaseConfirmSubmit": "Souscrire",
+    "purchaseSuccessTitle": "Assurance souscrite",
+    "purchaseSuccessBody": "Police n° {{number}} active jusqu'au {{date}}.",
+    "purchaseFailedTitle": "Échec de la souscription",
+    "errorTitle": "Erreur",
+    "myPoliciesTitle": "Mes assurances",
+    "emptyPolicies": "Aucune assurance souscrite pour le moment.",
+    "statusActive": "Active",
+    "statusExpired": "Expirée",
+    "statusCancelled": "Annulée",
+    "validFromTo": "Valide du {{start}} au {{end}}",
+    "policyNumber": "N° {{number}}"
+  },
+  "kyc": {
+    "title": "Vérification conducteur",
+    "submitDocs": "Soumettre les documents",
+    "pendingTitle": "Vérification requise",
+    "pendingBody": "Soumettez votre pièce d'identité, votre permis de conduire et un selfie pour commencer à publier des trajets.",
+    "submittedTitle": "En cours d'examen",
+    "submittedBody": "Nous examinons vos documents. Cela prend généralement moins de 24 heures.",
+    "approvedTitle": "Vérifié",
+    "approvedBody": "Votre compte est vérifié. Vous pouvez publier des trajets à tout moment.",
+    "rejectedTitle": "Vérification refusée",
+    "rejectedBody": "Veuillez consulter la raison ci-dessous et soumettre à nouveau vos documents.",
+    "form": {
+      "title": "Soumettre les documents KYC",
+      "licenseNumberLabel": "Numéro de permis de conduire",
+      "licenseExpiryLabel": "Date d'expiration du permis",
+      "nationalIdLabel": "Numéro de carte d'identité nationale",
+      "idPhotoLabel": "Photo de la carte d'identité",
+      "licensePhotoLabel": "Photo du permis de conduire",
+      "selfieLabel": "Selfie",
+      "pickPlaceholder": "Appuyez pour envoyer une photo",
+      "submit": "Soumettre pour examen",
+      "submittedTitle": "Documents soumis",
+      "submittedBody": "Nous examinerons vos documents sous peu.",
+      "submitFailedTitle": "Envoi impossible"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { reverseGeocode, useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -16,6 +17,7 @@ interface StoredLocation {
 }
 
 export function MyLocationBar() {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState<StoredLocation | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [draftAddress, setDraftAddress] = useState('');
@@ -38,7 +40,7 @@ export function MyLocationBar() {
 
       const coords = await requestLocation();
       if (!coords) return;
-      const addressLine = (await reverseGeocode(coords)) ?? 'Position actuelle';
+      const addressLine = (await reverseGeocode(coords)) ?? t('myLocationBar.currentPositionFallback');
       const value = { addressLine, latitude: coords.latitude, longitude: coords.longitude };
       setCurrent(value);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(value));
@@ -66,7 +68,7 @@ export function MyLocationBar() {
       <Pressable style={styles.pill} onPress={openModal}>
         <Text style={styles.pillIcon}>📍</Text>
         <Text style={styles.pillText} numberOfLines={1}>
-          {!current && locating ? '…' : (current?.addressLine ?? 'Ma position')}
+          {!current && locating ? '…' : (current?.addressLine ?? t('myLocationBar.myPosition'))}
         </Text>
       </Pressable>
 
@@ -75,7 +77,7 @@ export function MyLocationBar() {
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalVisible(false)} />
           <View style={styles.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.sheetTitle}>Ma position</Text>
+              <Text style={styles.sheetTitle}>{t('myLocationBar.modalTitle')}</Text>
               <AddressMapPicker
                 addressLine={draftAddress}
                 onAddressLineChange={setDraftAddress}
@@ -86,9 +88,9 @@ export function MyLocationBar() {
                   setDraftLng(coords.longitude);
                 }}
               />
-              <Button label="Enregistrer" onPress={save} disabled={draftLat == null || !draftAddress.trim()} />
+              <Button label={t('myLocationBar.save')} onPress={save} disabled={draftLat == null || !draftAddress.trim()} />
               <View style={{ marginTop: spacing.sm, marginBottom: spacing.sm }}>
-                <Button label="Fermer" variant="outline" onPress={() => setModalVisible(false)} />
+                <Button label={t('myLocationBar.close')} variant="outline" onPress={() => setModalVisible(false)} />
               </View>
             </ScrollView>
           </View>

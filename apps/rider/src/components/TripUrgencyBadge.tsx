@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
@@ -13,6 +14,7 @@ import { isUrgent } from '../utils/trip';
  * either way.
  */
 export function TripUrgencyBadge({ trip }: { trip: Trip }) {
+  const { t } = useTranslation();
   const urgent = isUrgent(trip);
   const opacity = useRef(new Animated.Value(1)).current;
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -41,7 +43,7 @@ export function TripUrgencyBadge({ trip }: { trip: Trip }) {
       style={[styles.badge, urgent ? styles.urgent : styles.calm, { opacity: urgent && !reduceMotion ? opacity : 1 }]}
     >
       <Text style={[styles.text, urgent ? styles.urgentText : styles.calmText]}>
-        {urgent ? '⚡ Départ imminent' : '🟢 Places disponibles'}
+        {urgent ? t('tripUrgencyBadge.urgent') : t('tripUrgencyBadge.available')}
       </Text>
     </Animated.View>
   );

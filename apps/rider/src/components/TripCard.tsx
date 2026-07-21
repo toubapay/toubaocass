@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, formatDuration, RIDE_TYPE_LABEL } from '../utils/trip';
+import { bookingFillState, fillStateLabel, formatDuration, rideTypeLabel } from '../utils/trip';
 import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
@@ -22,6 +23,7 @@ export function TripCard({
   onPress: () => void;
   onTripUpdated?: (trip: Trip) => void;
 }) {
+  const { t } = useTranslation();
   const fillState = bookingFillState(trip);
   const fillStyle = FILL_STATE_STYLE[fillState];
   const [showQuickAction, setShowQuickAction] = useState(false);
@@ -36,7 +38,7 @@ export function TripCard({
           <Text style={styles.city}>{trip.destination_city?.name}</Text>
         </View>
         <View style={[styles.pill, { backgroundColor: fillStyle.bg }]}>
-          <Text style={[styles.pillText, { color: fillStyle.fg }]}>{FILL_STATE_LABEL[fillState]}</Text>
+          <Text style={[styles.pillText, { color: fillStyle.fg }]}>{fillStateLabel(t, fillState)}</Text>
         </View>
       </View>
 
@@ -52,30 +54,32 @@ export function TripCard({
         <Text style={styles.metaDot}>•</Text>
         <Text style={styles.meta}>{trip.departure_time}</Text>
         <Text style={styles.metaDot}>•</Text>
-        <Text style={styles.meta}>{RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}</Text>
+        <Text style={styles.meta}>{rideTypeLabel(t, trip.ride_type)}</Text>
         {trip.distance_km !== undefined && (
           <>
             <Text style={styles.metaDot}>•</Text>
-            <Text style={styles.metaDistance}>{trip.distance_km < 1 ? 'à < 1 km' : `à ${trip.distance_km} km`}</Text>
+            <Text style={styles.metaDistance}>
+              {trip.distance_km < 1 ? t('tripCard.distanceUnderOneKm') : t('tripCard.distanceAt', { value: trip.distance_km })}
+            </Text>
           </>
         )}
       </View>
       {trip.departure_address && <Text style={styles.address}>📍 {trip.departure_address}</Text>}
 
       <View style={styles.footerRow}>
-        <Text style={styles.driver}>{trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}</Text>
+        <Text style={styles.driver}>{trip.driver.name ?? t('common.driverFallback')} · {trip.car?.make} {trip.car?.model}</Text>
         <Text style={styles.fare}>{trip.fare.toLocaleString()} FCFA</Text>
       </View>
 
       <Text style={styles.seats}>
-        {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
+        {t('tripCard.seatsAvailable', { available: trip.available_seats, total: trip.total_seats })}
       </Text>
 
       <TripUrgencyBadge trip={trip} />
 
       <View style={styles.quickActionRow}>
         {booked ? (
-          <Text style={styles.bookedLabel}>✓ Réservé · {trip.my_booking!.seats_booked} place(s)</Text>
+          <Text style={styles.bookedLabel}>{t('tripCard.bookedSeats', { count: trip.my_booking!.seats_booked })}</Text>
         ) : (
           <View />
         )}
@@ -87,7 +91,7 @@ export function TripCard({
           }}
         >
           <Text style={[styles.quickActionText, booked && styles.quickActionTextOutline]}>
-            {booked ? 'Modifier' : 'Réserver'}
+            {booked ? t('tripCard.modify') : t('tripCard.reserve')}
           </Text>
         </Pressable>
       </View>

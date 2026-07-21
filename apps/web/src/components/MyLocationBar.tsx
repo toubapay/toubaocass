@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
+import i18n from '../i18n/i18n';
 import { colors, radius, spacing } from '../theme';
 import { AddressMapPicker } from './AddressMapPicker';
 import { Button } from './Button';
@@ -19,7 +21,7 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
   if (!GOOGLE_MAPS_API_KEY) return null;
   try {
     const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&language=fr&key=${GOOGLE_MAPS_API_KEY}`,
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&language=${i18n.language}&key=${GOOGLE_MAPS_API_KEY}`,
     );
     const data = await res.json();
     return data.results?.[0]?.formatted_address ?? null;
@@ -29,6 +31,7 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
 }
 
 export function MyLocationBar() {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState<StoredLocation | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [draftAddress, setDraftAddress] = useState('');
@@ -50,7 +53,7 @@ export function MyLocationBar() {
 
     requestLocation().then(async (coords) => {
       if (!coords) return;
-      const addressLine = (await reverseGeocode(coords.latitude, coords.longitude)) ?? 'Position actuelle';
+      const addressLine = (await reverseGeocode(coords.latitude, coords.longitude)) ?? t('myLocationBar.currentPositionFallback');
       const value = { addressLine, latitude: coords.latitude, longitude: coords.longitude };
       setCurrent(value);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
@@ -77,7 +80,7 @@ export function MyLocationBar() {
     <>
       <button
         onClick={openModal}
-        aria-label="Ma position"
+        aria-label={t('myLocationBar.ariaLabel')}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -102,7 +105,7 @@ export function MyLocationBar() {
             whiteSpace: 'nowrap',
           }}
         >
-          {!current && locating ? '…' : (current?.addressLine ?? 'Ma position')}
+          {!current && locating ? '…' : (current?.addressLine ?? t('myLocationBar.myPosition'))}
         </span>
       </button>
 
@@ -134,7 +137,7 @@ export function MyLocationBar() {
               }}
             >
               <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.md}px` }}>
-                Ma position
+                {t('myLocationBar.modalTitle')}
               </h2>
 
               <AddressMapPicker
@@ -149,10 +152,10 @@ export function MyLocationBar() {
               />
 
               <div style={{ marginTop: spacing.md }}>
-                <Button label="Enregistrer" onClick={save} disabled={draftLat == null || !draftAddress.trim()} />
+                <Button label={t('myLocationBar.save')} onClick={save} disabled={draftLat == null || !draftAddress.trim()} />
               </div>
               <div style={{ marginTop: spacing.sm }}>
-                <Button label="Fermer" onClick={() => setModalOpen(false)} variant="outline" />
+                <Button label={t('myLocationBar.close')} onClick={() => setModalOpen(false)} variant="outline" />
               </div>
             </div>
           </div>,

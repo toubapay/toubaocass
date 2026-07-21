@@ -1,10 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
 
 import { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { RIDE_TYPE_LABEL } from '../utils/trip';
+import { rideTypeLabel } from '../utils/trip';
 
 // Dakar city center — only used as a fallback map center when no trip has a
 // pin yet.
@@ -22,7 +23,8 @@ interface Props {
  * so riders see actual pins without leaving the screen.
  */
 export function TripsMapView({ trips, onSelectTrip, height = 260 }: Props) {
-  const withCoords = trips.filter((t) => t.departure_latitude !== null && t.departure_longitude !== null);
+  const { t } = useTranslation();
+  const withCoords = trips.filter((trip) => trip.departure_latitude !== null && trip.departure_longitude !== null);
   const initialRegion =
     withCoords.length > 0
       ? {
@@ -35,11 +37,11 @@ export function TripsMapView({ trips, onSelectTrip, height = 260 }: Props) {
 
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.title}>Carte des trajets</Text>
+      <Text style={styles.title}>{t('tripsMap.title')}</Text>
       <Text style={styles.subtitle}>
         {withCoords.length === 0
-          ? "Aucun trajet affiché n'a de point de départ précis pour l'instant."
-          : `${withCoords.length} trajet(s) avec un point de départ affiché.`}
+          ? t('tripsMap.emptyNoPin')
+          : t('tripsMap.countWithPin', { count: withCoords.length })}
       </Text>
       <View style={[styles.mapContainer, { height }]}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} initialRegion={initialRegion}>
@@ -54,12 +56,12 @@ export function TripsMapView({ trips, onSelectTrip, height = 260 }: Props) {
                     {trip.origin_city?.name} → {trip.destination_city?.name}
                   </Text>
                   <Text style={styles.calloutLine}>
-                    {trip.departure_date} à {trip.departure_time} · {RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}
+                    {trip.departure_date} à {trip.departure_time} · {rideTypeLabel(t, trip.ride_type)}
                   </Text>
                   <Text style={styles.calloutLine}>
-                    {trip.available_seats} place(s) · {trip.fare.toLocaleString()} FCFA
+                    {t('map.seatsAvailable', { count: trip.available_seats })} · {trip.fare.toLocaleString()} FCFA
                   </Text>
-                  <Text style={styles.calloutLink}>Voir le trajet →</Text>
+                  <Text style={styles.calloutLink}>{t('tripsMap.viewTrip')} →</Text>
                 </View>
               </Callout>
             </Marker>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
 
 import { radius } from '../theme';
 
@@ -16,6 +17,7 @@ interface Props {
  * this file automatically — react-native-maps has no web renderer.
  */
 export function DepartureMap({ latitude, longitude, address }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <MapView
@@ -27,7 +29,7 @@ export function DepartureMap({ latitude, longitude, address }: Props) {
         rotateEnabled={false}
         pointerEvents="none"
       >
-        <Marker coordinate={{ latitude, longitude }} title={address ?? 'Point de départ'} />
+        <Marker coordinate={{ latitude, longitude }} title={address ?? t('addressMapPicker.departurePointFallback')} />
       </MapView>
     </View>
   );

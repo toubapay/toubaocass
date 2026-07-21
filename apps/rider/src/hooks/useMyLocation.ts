@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as Location from 'expo-location';
+import { useTranslation } from 'react-i18next';
 
 export interface Coordinates {
   latitude: number;
@@ -12,6 +13,7 @@ export interface Coordinates {
  * trips departing near the rider right now.
  */
 export function useMyLocation() {
+  const { t } = useTranslation();
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -22,7 +24,7 @@ export function useMyLocation() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setError('L\'autorisation de localisation a été refusée.');
+        setError(t('common.locationPermissionDenied'));
         return null;
       }
 
@@ -33,7 +35,7 @@ export function useMyLocation() {
       setLocation(coords);
       return coords;
     } catch {
-      setError('Impossible d\'obtenir votre position. Vérifiez les paramètres de votre appareil.');
+      setError(t('common.locationUnavailable'));
       return null;
     } finally {
       setLoading(false);

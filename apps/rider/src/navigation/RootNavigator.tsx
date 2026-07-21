@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { MyLocationBar } from '../components/MyLocationBar';
 import { useAuth } from '../context/AuthContext';
@@ -59,43 +60,46 @@ function AuthNavigator() {
 }
 
 function HomeNavigator() {
+  const { t } = useTranslation();
   return (
     <HomeStackNav.Navigator>
       <HomeStackNav.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          title: 'Choisissez votre Destination',
+          title: t('nav.screenTitles.home'),
           headerRight: () => <MyLocationBar />,
         }}
       />
-      <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
-      <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
-      <HomeStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
-      <HomeStackNav.Screen name="Map" component={MapScreen} options={{ title: 'Carte des trajets' }} />
-      <HomeStackNav.Screen name="InstantDepartures" component={InstantDeparturesScreen} options={{ title: 'Départs immédiats' }} />
+      <HomeStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: t('nav.screenTitles.tripDetail') }} />
+      <HomeStackNav.Screen name="Chat" component={ChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
+      <HomeStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
+      <HomeStackNav.Screen name="Map" component={MapScreen} options={{ title: t('nav.screenTitles.map') }} />
+      <HomeStackNav.Screen name="InstantDepartures" component={InstantDeparturesScreen} options={{ title: t('nav.screenTitles.instantDepartures') }} />
     </HomeStackNav.Navigator>
   );
 }
 
 function BookingsNavigator() {
+  const { t } = useTranslation();
   return (
     <BookingsStackNav.Navigator>
-      <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: 'Mes réservations' }} />
-      <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
-      <BookingsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
+      <BookingsStackNav.Screen name="MyBookings" component={MyBookingsScreen} options={{ title: t('nav.screenTitles.myBookings') }} />
+      <BookingsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: t('nav.screenTitles.tripDetail') }} />
+      <BookingsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
     </BookingsStackNav.Navigator>
   );
 }
 
 function ServicesNavigator() {
+  const { t } = useTranslation();
   return (
     <ServicesStackNav.Navigator>
       <ServicesStackNav.Screen
         name="Services"
         component={ServicesScreen}
         options={({ navigation }) => ({
-          title: 'Services',
+          title: t('nav.screenTitles.services'),
           headerRight: () => (
             <Pressable onPress={() => navigation.navigate('MyDeliveries')}>
               <Ionicons name="receipt-outline" size={22} color={colors.accent} />
@@ -103,25 +107,27 @@ function ServicesNavigator() {
           ),
         })}
       />
-      <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: 'Nouvelle livraison' }} />
-      <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: 'Mes livraisons' }} />
-      <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: 'Détails de la livraison' }} />
+      <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
+      <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
+      <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
     </ServicesStackNav.Navigator>
   );
 }
 
 function ProfileNavigator() {
+  const { t } = useTranslation();
   return (
     <ProfileStackNav.Navigator>
-      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
-      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
-      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: 'Paramètres' }} />
+      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.screenTitles.profile') }} />
+      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
+      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: t('nav.screenTitles.settings') }} />
     </ProfileStackNav.Navigator>
   );
 }
 
 function MainTabs() {
   useRegisterPushToken(true);
+  const { t } = useTranslation();
 
   return (
     <Tab.Navigator
@@ -136,10 +142,10 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: 'Accueil' }} />
-      <Tab.Screen name="ServicesTab" component={ServicesNavigator} options={{ title: 'Services' }} />
-      <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: 'Réservations' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />
+      <Tab.Screen name="HomeTab" component={HomeNavigator} options={{ title: t('nav.home') }} />
+      <Tab.Screen name="ServicesTab" component={ServicesNavigator} options={{ title: t('nav.services') }} />
+      <Tab.Screen name="BookingsTab" component={BookingsNavigator} options={{ title: t('nav.bookings') }} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: t('nav.profile') }} />
     </Tab.Navigator>
   );
 }

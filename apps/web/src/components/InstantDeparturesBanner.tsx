@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { fetchInstantTrips } from '../api/trips';
 import { colors, radius, spacing } from '../theme';
@@ -13,6 +14,7 @@ const POLL_INTERVAL_MS = 20000;
  * permission granted.
  */
 export function InstantDeparturesBanner() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [count, setCount] = useState(0);
 
@@ -57,8 +59,8 @@ export function InstantDeparturesBanner() {
         animation: 'pulse 1.3s ease-in-out infinite',
       }}
     >
-      <span>⚡ {count} départ{count > 1 ? 's' : ''} immédiat{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}</span>
-      <span>Voir →</span>
+      <span>{t('instantDepartures.bannerLabel', { count })}</span>
+      <span>{t('instantDepartures.bannerView')}</span>
     </button>
   );
 }

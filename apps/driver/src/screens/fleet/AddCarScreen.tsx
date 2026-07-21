@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { createCar } from '../../api/cars';
 import { extractErrorMessage } from '../../api/client';
@@ -13,14 +14,10 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<FleetStackParamList, 'AddCar'>;
 
-const CAR_TYPES: { value: CarType; label: string }[] = [
-  { value: 'sedan', label: 'Berline' },
-  { value: 'suv', label: 'SUV' },
-  { value: 'van', label: 'Fourgonnette' },
-  { value: 'minibus', label: 'Minibus' },
-];
+const CAR_TYPES: CarType[] = ['sedan', 'suv', 'van', 'minibus'];
 
 export function AddCarScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [type, setType] = useState<CarType>('sedan');
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
@@ -57,41 +54,41 @@ export function AddCarScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Ajouter un véhicule</Text>
+        <Text style={styles.title}>{t('fleet.addCarScreen.title')}</Text>
 
-        <Text style={styles.label}>Type de véhicule</Text>
+        <Text style={styles.label}>{t('fleet.addCarScreen.typeLabel')}</Text>
         <View style={styles.typeRow}>
-          {CAR_TYPES.map((t) => (
+          {CAR_TYPES.map((ct) => (
             <Pressable
-              key={t.value}
-              style={[styles.typeChip, type === t.value && styles.typeChipActive]}
-              onPress={() => setType(t.value)}
+              key={ct}
+              style={[styles.typeChip, type === ct && styles.typeChipActive]}
+              onPress={() => setType(ct)}
             >
-              <Text style={[styles.typeChipText, type === t.value && styles.typeChipTextActive]}>{t.label}</Text>
+              <Text style={[styles.typeChipText, type === ct && styles.typeChipTextActive]}>{t(`common.carType.${ct}`)}</Text>
             </Pressable>
           ))}
         </View>
 
-        <TextField label="Marque" placeholder="Toyota" value={make} onChangeText={setMake} />
-        <TextField label="Modèle" placeholder="Corolla" value={model} onChangeText={setModel} />
-        <TextField label="Année" placeholder="2020" keyboardType="number-pad" value={year} onChangeText={setYear} />
-        <TextField label="Couleur" placeholder="Blanc" value={color} onChangeText={setColor} />
+        <TextField label={t('fleet.addCarScreen.makeLabel')} placeholder={t('fleet.addCarScreen.makePlaceholder')} value={make} onChangeText={setMake} />
+        <TextField label={t('fleet.addCarScreen.modelLabel')} placeholder={t('fleet.addCarScreen.modelPlaceholder')} value={model} onChangeText={setModel} />
+        <TextField label={t('fleet.addCarScreen.yearLabel')} placeholder={t('fleet.addCarScreen.yearPlaceholder')} keyboardType="number-pad" value={year} onChangeText={setYear} />
+        <TextField label={t('fleet.addCarScreen.colorLabel')} placeholder={t('fleet.addCarScreen.colorPlaceholder')} value={color} onChangeText={setColor} />
         <TextField
-          label="Numéro d'immatriculation"
-          placeholder="DK-1234-AB"
+          label={t('fleet.addCarScreen.plateLabel')}
+          placeholder={t('fleet.addCarScreen.platePlaceholder')}
           autoCapitalize="characters"
           value={plateNumber}
           onChangeText={setPlateNumber}
           error={error}
         />
         <TextField
-          label="Nombre de places (passagers)"
+          label={t('fleet.addCarScreen.seatsLabel')}
           keyboardType="number-pad"
           value={seats}
           onChangeText={setSeats}
         />
 
-        <Button label="Enregistrer le véhicule" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+        <Button label={t('fleet.addCarScreen.submit')} onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
       </ScrollView>
     </Screen>
   );

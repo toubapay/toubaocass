@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -20,6 +21,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 const NEARBY_RADIUS_KM = 25;
 
 export function HomeScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -57,7 +59,7 @@ export function HomeScreen({ navigation }: Props) {
         radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
       })
         .then((res) => setTrips(res.data))
-        .catch(() => setError('Impossible de charger les trajets. Tirez pour actualiser.'))
+        .catch(() => setError(t('home.loadError')))
         .finally(() => {
           setLoading(false);
           setRefreshing(false);
@@ -89,7 +91,7 @@ export function HomeScreen({ navigation }: Props) {
     if (coords) {
       setNearMe(coords);
     } else if (locationError) {
-      Alert.alert('Position indisponible', locationError);
+      Alert.alert(t('home.locationUnavailableTitle'), locationError);
     }
   };
 
@@ -103,26 +105,26 @@ export function HomeScreen({ navigation }: Props) {
             <ActivityIndicator size="small" color={nearMe ? '#fff' : colors.primary} />
           ) : (
             <Text style={[styles.nearMeText, nearMe && styles.nearMeTextActive]}>
-              {nearMe ? `📍 Trajets affichés dans un rayon de ${NEARBY_RADIUS_KM} km` : '📍 Trouver des trajets près de moi'}
+              {nearMe ? t('home.nearMeActive', { radius: NEARBY_RADIUS_KM }) : t('home.nearMeInactive')}
             </Text>
           )}
         </Pressable>
 
         <View style={styles.filterRow}>
           <View style={styles.filterField}>
-            <CityPicker label="Départ" cities={cities} value={origin} onChange={setOrigin} placeholder="Toutes les villes" />
+            <CityPicker label={t('home.departureLabel')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('home.allCities')} />
           </View>
           <View style={styles.filterField}>
-            <CityPicker label="Arrivée" cities={cities} value={destination} onChange={setDestination} placeholder="Toutes les villes" />
+            <CityPicker label={t('home.arrivalLabel')} cities={cities} value={destination} onChange={setDestination} placeholder={t('home.allCities')} />
           </View>
         </View>
 
         <View style={styles.dateRow}>
           <View style={styles.dateField}>
-            <DateField label="Date" value={date} onChange={setDate} minimumDate={new Date()} placeholder="jj/mm/aaaa" />
+            <DateField label={t('home.dateLabel')} value={date} onChange={setDate} minimumDate={new Date()} placeholder={t('home.datePlaceholder')} />
           </View>
           <View style={styles.seatsField}>
-            <Text style={styles.seatsLabel}>Places</Text>
+            <Text style={styles.seatsLabel}>{t('home.seatsLabel')}</Text>
             <View style={styles.stepper}>
               <Pressable style={styles.stepperButton} onPress={() => setSeats((s) => Math.max(1, s - 1))}>
                 <Text style={styles.stepperButtonText}>−</Text>
@@ -137,10 +139,10 @@ export function HomeScreen({ navigation }: Props) {
 
         {hasFilters && (
           <Pressable onPress={clearFilters}>
-            <Text style={styles.clearLink}>Effacer les filtres</Text>
+            <Text style={styles.clearLink}>{t('home.clearFilters')}</Text>
           </Pressable>
         )}
-        {invalidRoute && <Text style={styles.errorText}>La ville de départ et d'arrivée ne peuvent pas être identiques.</Text>}
+        {invalidRoute && <Text style={styles.errorText}>{t('home.invalidRoute')}</Text>}
       </View>
 
       {loading && trips.length === 0 ? (
@@ -166,10 +168,10 @@ export function HomeScreen({ navigation }: Props) {
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
                 {nearMe
-                  ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                  ? t('home.emptyNearby', { radius: NEARBY_RADIUS_KM })
                   : hasFilters
-                    ? 'Aucun trajet trouvé pour ces filtres. Essayez d\'élargir votre recherche.'
-                    : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                    ? t('home.emptyFiltered')
+                    : t('home.emptyDefault')}
               </Text>
             </View>
           }

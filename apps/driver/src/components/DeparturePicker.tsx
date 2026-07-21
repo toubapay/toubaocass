@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import MapView, { MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -27,6 +28,7 @@ const DEFAULT_REGION = { latitude: 14.6928, longitude: -17.4467 };
  * current GPS position. See DeparturePicker.web.tsx for the web build.
  */
 export function DeparturePicker({ latitude, longitude, onChange }: Props) {
+  const { t, i18n } = useTranslation();
   const mapRef = useRef<MapView>(null);
   const { loading, error, requestLocation } = useMyLocation();
   const [region] = useState({
@@ -53,7 +55,7 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
       setSearching(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=sn&accept-language=fr&q=${encodeURIComponent(searchQuery)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=sn&accept-language=${i18n.language}&q=${encodeURIComponent(searchQuery)}`,
         );
         const data: Array<{ display_name: string; lat: string; lon: string }> = await res.json();
         setSuggestions(data.map((d) => ({ label: d.display_name, latitude: parseFloat(d.lat), longitude: parseFloat(d.lon) })));
@@ -96,7 +98,7 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
       <View style={styles.searchWrapper}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Rechercher une adresse ou un lieu..."
+          placeholder={t('addressMapPicker.searchPlaceholder')}
           placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -132,11 +134,11 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Text style={styles.locateText}>📍 Utiliser ma position actuelle</Text>
+          <Text style={styles.locateText}>📍 {t('addressMapPicker.useMyLocation')}</Text>
         )}
       </Pressable>
       {error && <Text style={styles.error}>{error}</Text>}
-      {!hasPin && <Text style={styles.hint}>Touchez la carte pour placer un repère à l'endroit où les passagers doivent vous retrouver.</Text>}
+      {!hasPin && <Text style={styles.hint}>{t('addressMapPicker.hintTouch')}</Text>}
     </View>
   );
 }

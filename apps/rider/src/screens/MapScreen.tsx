@@ -12,13 +12,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
 
 import { searchTrips } from '../api/trips';
 import { Trip } from '../api/types';
 import { useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
-import { RIDE_TYPE_LABEL } from '../utils/trip';
+import { rideTypeLabel } from '../utils/trip';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Map'>;
 
@@ -47,6 +48,7 @@ function haversineKm(a: { latitude: number; longitude: number }, b: { latitude: 
 }
 
 export function MapScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation();
   const mapRef = useRef<MapView>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ export function MapScreen({ navigation }: Props) {
       setSearching(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=sn&accept-language=fr&q=${encodeURIComponent(searchQuery)}`,
+          `https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=sn&accept-language=${i18n.language}&q=${encodeURIComponent(searchQuery)}`,
         );
         const data: Array<{ display_name: string; lat: string; lon: string }> = await res.json();
         setSuggestions(data.map((d) => ({ label: d.display_name, latitude: parseFloat(d.lat), longitude: parseFloat(d.lon) })));
@@ -108,7 +110,7 @@ export function MapScreen({ navigation }: Props) {
   const useCurrentPosition = async () => {
     const coords = await requestLocation();
     if (coords) {
-      setSelectedPoint({ label: 'Ma position actuelle', latitude: coords.latitude, longitude: coords.longitude, source: 'gps' });
+      setSelectedPoint({ label: t('map.myCurrentLocation'), latitude: coords.latitude, longitude: coords.longitude, source: 'gps' });
       setSearchQuery('');
       setSuggestions([]);
       focusOn(coords.latitude, coords.longitude);
@@ -159,7 +161,7 @@ export function MapScreen({ navigation }: Props) {
         <View>
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher une adresse ou un lieu..."
+            placeholder={t('map.searchPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={(text) => {
@@ -194,12 +196,12 @@ export function MapScreen({ navigation }: Props) {
             {locating ? (
               <ActivityIndicator size="small" color={colors.accent} />
             ) : (
-              <Text style={styles.gpsButtonText}>📍 Utiliser ma position actuelle</Text>
+              <Text style={styles.gpsButtonText}>📍 {t('map.useMyLocation')}</Text>
             )}
           </Pressable>
           {selectedPoint && (
             <Pressable onPress={clearSelectedPoint}>
-              <Text style={styles.clearLink}>Effacer</Text>
+              <Text style={styles.clearLink}>{t('map.clear')}</Text>
             </Pressable>
           )}
         </View>
@@ -211,7 +213,7 @@ export function MapScreen({ navigation }: Props) {
           <Marker coordinate={selectedPoint} anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.selectedDot} />
             <Callout>
-              <Text style={styles.calloutTitle}>{selectedPoint.source === 'gps' ? 'Votre position actuelle' : selectedPoint.label}</Text>
+              <Text style={styles.calloutTitle}>{selectedPoint.source === 'gps' ? t('map.myCurrentLocation') : selectedPoint.label}</Text>
             </Callout>
           </Marker>
         )}
@@ -226,20 +228,22 @@ export function MapScreen({ navigation }: Props) {
                   {trip.origin_city?.name} → {trip.destination_city?.name}
                 </Text>
                 <Text style={styles.calloutLine}>
-                  {trip.departure_date} à {trip.departure_time} · {RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}
+                  {trip.departure_date} à {trip.departure_time} · {rideTypeLabel(t, trip.ride_type)}
                 </Text>
                 <Text style={styles.calloutLine}>
-                  {trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}
+                  {trip.driver.name ?? t('common.driverFallback')} · {trip.car?.make} {trip.car?.model}
                 </Text>
                 <Text style={styles.calloutLine}>
-                  {trip.available_seats} place(s) · {trip.fare.toLocaleString()} FCFA
+                  {t('map.seatsAvailable', { count: trip.available_seats })} · {trip.fare.toLocaleString()} FCFA
                 </Text>
                 {distanceKm !== null && (
                   <Text style={styles.calloutDistance}>
-                    {distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`} du point choisi
+                    {distanceKm < 1
+                      ? t('map.distanceFromPointM', { value: Math.round(distanceKm * 1000) })
+                      : t('map.distanceFromPointKm', { value: distanceKm.toFixed(1) })}
                   </Text>
                 )}
-                <Text style={styles.calloutLink}>Voir le trajet →</Text>
+                <Text style={styles.calloutLink}>{t('map.viewTrip')} →</Text>
               </View>
             </Callout>
           </Marker>

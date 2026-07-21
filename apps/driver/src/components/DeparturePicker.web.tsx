@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -17,6 +18,7 @@ interface Props {
  * app gets the full interactive map (see DeparturePicker.tsx).
  */
 export function DeparturePicker({ latitude, longitude, onChange }: Props) {
+  const { t } = useTranslation();
   const { loading, error, requestLocation } = useMyLocation();
 
   const handleUseCurrentLocation = async () => {
@@ -32,16 +34,16 @@ export function DeparturePicker({ latitude, longitude, onChange }: Props) {
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Text style={styles.locateText}>📍 Utiliser ma position actuelle</Text>
+          <Text style={styles.locateText}>📍 {t('addressMapPicker.useMyLocation')}</Text>
         )}
       </Pressable>
       {error && <Text style={styles.error}>{error}</Text>}
       {hasPin ? (
         <Text style={styles.coords}>
-          Repère placé à {(latitude as number).toFixed(5)}, {(longitude as number).toFixed(5)}
+          {t('addressMapPicker.pinPlacedAt', { lat: (latitude as number).toFixed(5), lng: (longitude as number).toFixed(5) })}
         </Text>
       ) : (
-        <Text style={styles.hint}>Une carte interactive pour placer un repère est disponible dans l'application mobile.</Text>
+        <Text style={styles.hint}>{t('addressMapPicker.mapPreviewMobile')}</Text>
       )}
     </View>
   );

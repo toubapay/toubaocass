@@ -5,10 +5,11 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
+import { useTranslation } from 'react-i18next';
 
 import type { Trip } from '../api/types';
 import { colors, spacing } from '../theme';
-import { RIDE_TYPE_LABEL } from '../utils/trip';
+import { rideTypeLabel } from '../utils/trip';
 
 // Vite doesn't resolve Leaflet's default marker image paths correctly out of
 // the box (a well-known Leaflet + bundler issue) — wire them up explicitly.
@@ -33,6 +34,7 @@ interface Props {
  * box and results so riders see actual pins without navigating away.
  */
 export function TripsMap({ trips, height = 300 }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const withCoords = trips.filter((t) => t.departure_latitude !== null && t.departure_longitude !== null);
   const center: [number, number] =
@@ -42,11 +44,11 @@ export function TripsMap({ trips, height = 300 }: Props) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginBottom: spacing.xs }}>Carte des trajets</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginBottom: spacing.xs }}>{t('tripsMap.title')}</h2>
       <p style={{ fontSize: 14.0, color: colors.textMuted, marginBottom: spacing.sm }}>
         {withCoords.length === 0
-          ? "Aucun trajet affiché n'a de point de départ précis pour l'instant."
-          : `${withCoords.length} trajet(s) avec un point de départ affiché.`}
+          ? t('tripsMap.emptyNoPin')
+          : t('tripsMap.countWithPin', { count: withCoords.length })}
       </p>
       <div
         style={{
@@ -75,9 +77,9 @@ export function TripsMap({ trips, height = 300 }: Props) {
                     {trip.origin_city?.name} → {trip.destination_city?.name}
                   </strong>
                   <br />
-                  {trip.departure_date} à {trip.departure_time} · {RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}
+                  {trip.departure_date} à {trip.departure_time} · {rideTypeLabel(t, trip.ride_type)}
                   <br />
-                  {trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}
+                  {trip.driver.name ?? t('common.driverFallback')} · {trip.car?.make} {trip.car?.model}
                   <br />
                   {trip.available_seats} place(s) disponible(s) · {trip.fare.toLocaleString()} FCFA
                   <br />
@@ -95,7 +97,7 @@ export function TripsMap({ trips, height = 300 }: Props) {
                       cursor: 'pointer',
                     }}
                   >
-                    Voir le trajet
+                    {t('tripsMap.viewTrip')}
                   </button>
                 </div>
               </Popup>

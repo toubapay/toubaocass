@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -20,6 +21,7 @@ interface Props {
  * AddressMapPicker.tsx).
  */
 export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, onLocationChange }: Props) {
+  const { t } = useTranslation();
   const { loading, error, requestLocation } = useMyLocation();
 
   const handleUseCurrentLocation = async () => {
@@ -31,7 +33,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, o
     <View style={styles.wrapper}>
       <TextInput
         style={styles.searchInput}
-        placeholder="Sacré-Cœur 3, Dakar"
+        placeholder={t('addressMapPicker.placeholder')}
         placeholderTextColor={colors.textMuted}
         value={addressLine}
         onChangeText={onAddressLineChange}
@@ -41,7 +43,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, o
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
           <Text style={styles.locateText}>
-            📍 {latitude != null ? 'Position enregistrée ✓' : 'Utiliser ma position actuelle'}
+            📍 {latitude != null ? t('addressMapPicker.positionSaved') : t('addressMapPicker.useMyLocation')}
           </Text>
         )}
       </Pressable>

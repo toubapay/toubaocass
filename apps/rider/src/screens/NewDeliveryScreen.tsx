@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { createDelivery, quoteDelivery } from '../api/deliveries';
@@ -17,14 +18,10 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'NewDelivery'>;
 
-const PACKAGE_TYPES: { value: PackageType; label: string }[] = [
-  { value: 'document', label: 'Document' },
-  { value: 'colis_leger', label: 'Colis léger (< 5 kg)' },
-  { value: 'colis_moyen', label: 'Colis moyen (5–15 kg)' },
-  { value: 'colis_volumineux', label: 'Colis volumineux (> 15 kg)' },
-];
+const PACKAGE_TYPES: PackageType[] = ['document', 'colis_leger', 'colis_moyen', 'colis_volumineux'];
 
 export function NewDeliveryScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const [pickupAddressLine, setPickupAddressLine] = useState('');
@@ -103,7 +100,7 @@ export function NewDeliveryScreen({ navigation }: Props) {
       });
       navigation.replace('DeliveryDetail', { deliveryId: delivery.id });
     } catch (e) {
-      Alert.alert('Envoi impossible', extractErrorMessage(e));
+      Alert.alert(t('newDelivery.submitFailedTitle'), extractErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -112,15 +109,15 @@ export function NewDeliveryScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Nouvelle livraison</Text>
+        <Text style={styles.title}>{t('newDelivery.title')}</Text>
 
-        <Text style={styles.sectionTitle}>Expéditeur</Text>
+        <Text style={styles.sectionTitle}>{t('newDelivery.sender')}</Text>
         <View style={styles.card}>
           <Text style={styles.line}>{user?.name}</Text>
           <Text style={styles.lineMuted}>{user?.phone}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Adresse de ramassage</Text>
+        <Text style={styles.sectionTitle}>{t('newDelivery.pickupAddress')}</Text>
         <AddressMapPicker
           addressLine={pickupAddressLine}
           onAddressLineChange={setPickupAddressLine}
@@ -132,16 +129,16 @@ export function NewDeliveryScreen({ navigation }: Props) {
           }}
         />
 
-        <Text style={styles.sectionTitle}>Destinataire</Text>
-        <TextField label="Nom" value={receiverName} onChangeText={setReceiverName} placeholder="Nom complet" />
+        <Text style={styles.sectionTitle}>{t('newDelivery.receiver')}</Text>
+        <TextField label={t('newDelivery.receiverName')} value={receiverName} onChangeText={setReceiverName} placeholder={t('newDelivery.receiverNamePlaceholder')} />
         <TextField
-          label="Téléphone"
+          label={t('newDelivery.receiverPhone')}
           value={receiverPhone}
           onChangeText={setReceiverPhone}
-          placeholder="+221 7XX XX XX XX"
+          placeholder={t('newDelivery.receiverPhonePlaceholder')}
           keyboardType="phone-pad"
         />
-        <Text style={styles.fieldLabel}>Adresse de livraison</Text>
+        <Text style={styles.fieldLabel}>{t('newDelivery.deliveryAddress')}</Text>
         <AddressMapPicker
           addressLine={receiverAddressLine}
           onAddressLineChange={setReceiverAddressLine}
@@ -153,59 +150,60 @@ export function NewDeliveryScreen({ navigation }: Props) {
           }}
         />
 
-        <Text style={styles.sectionTitle}>Type de colis</Text>
+        <Text style={styles.sectionTitle}>{t('newDelivery.packageType')}</Text>
         <View style={styles.chipRow}>
           {PACKAGE_TYPES.map((pt) => (
             <Text
-              key={pt.value}
-              onPress={() => setPackageType(pt.value)}
-              style={[styles.chip, packageType === pt.value && styles.chipActive]}
+              key={pt}
+              onPress={() => setPackageType(pt)}
+              style={[styles.chip, packageType === pt && styles.chipActive]}
             >
-              {pt.label}
+              {t(`common.packageType.${pt}`)}
             </Text>
           ))}
         </View>
 
         <TextField
-          label="Remarques (optionnel)"
+          label={t('newDelivery.notes')}
           value={notes}
           onChangeText={setNotes}
-          placeholder="Instructions particulières pour le livreur"
+          placeholder={t('newDelivery.notesPlaceholder')}
         />
 
-        <Text style={styles.sectionTitle}>Frais estimés</Text>
+        <Text style={styles.sectionTitle}>{t('newDelivery.estimatedFee')}</Text>
         <View style={styles.card}>
           {quoting ? (
-            <Text style={styles.lineMuted}>Calcul en cours…</Text>
+            <Text style={styles.lineMuted}>{t('newDelivery.calculating')}</Text>
           ) : quote ? (
             <>
               <Text style={styles.fare}>{quote.fee.toLocaleString()} FCFA</Text>
               <Text style={styles.lineMuted}>{quote.distance_km} km</Text>
             </>
           ) : (
-            <Text style={styles.lineMuted}>Placez les deux adresses pour voir le tarif.</Text>
+            <Text style={styles.lineMuted}>{t('newDelivery.placeAddressesPrompt')}</Text>
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>Mode de paiement</Text>
+        <Text style={styles.sectionTitle}>{t('newDelivery.paymentMethod')}</Text>
         <View style={styles.paymentRow}>
           <Text
             onPress={() => setPaymentMethod('cash')}
             style={[styles.paymentOption, paymentMethod === 'cash' && styles.paymentOptionActive]}
           >
-            💵 Espèces
+            💵 {t('common.cash')}
           </Text>
           <View style={[styles.paymentOption, paymentMethod === 'wallet' && styles.paymentOptionActive]}>
             <Text onPress={() => setPaymentMethod('wallet')} style={styles.paymentOptionInnerText}>
               <Ionicons name="wallet" size={15} color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted} />
-              {'  '}Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+              {'  '}
+              {t('newDelivery.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
             </Text>
           </View>
         </View>
-        {insufficientWalletFunds && <Text style={styles.warning}>Solde insuffisant pour ce paiement.</Text>}
+        {insufficientWalletFunds && <Text style={styles.warning}>{t('common.insufficientFunds')}</Text>}
 
         <Button
-          label={quote ? `Envoyer la demande — ${quote.fee.toLocaleString()} FCFA` : 'Envoyer la demande'}
+          label={quote ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() }) : t('newDelivery.submit')}
           onPress={handleSubmit}
           loading={submitting}
           disabled={!canSubmit || insufficientWalletFunds}

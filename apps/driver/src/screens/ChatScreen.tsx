@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { fetchMessages, sendMessage } from '../api/messages';
@@ -24,6 +25,7 @@ type Props = NativeStackScreenProps<TripsStackParamList, 'Chat'>;
 const POLL_INTERVAL_MS = 4000;
 
 export function ChatScreen({ route }: Props) {
+  const { t } = useTranslation();
   const { bookingId, title, subtitle } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export function ChatScreen({ route }: Props) {
 
   return (
     <Screen style={styles.screen}>
-      <Text style={styles.title}>{title ?? 'Discussion'}</Text>
+      <Text style={styles.title}>{title ?? t('chat.defaultTitle')}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
 
       <KeyboardAvoidingView
@@ -92,7 +94,7 @@ export function ChatScreen({ route }: Props) {
           contentContainerStyle={styles.listContent}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           ListEmptyComponent={
-            <Text style={styles.empty}>Aucun message pour l'instant. Dites bonjour !</Text>
+            <Text style={styles.empty}>{t('chat.empty')}</Text>
           }
           renderItem={({ item }) => (
             <View style={[styles.bubbleRow, item.is_mine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
@@ -113,7 +115,7 @@ export function ChatScreen({ route }: Props) {
           <TextInput
             value={body}
             onChangeText={setBody}
-            placeholder="Écrire un message..."
+            placeholder={t('chat.placeholder')}
             placeholderTextColor={colors.textMuted}
             style={styles.input}
             multiline
@@ -123,7 +125,7 @@ export function ChatScreen({ route }: Props) {
             disabled={sending || !body.trim()}
             style={[styles.sendButton, (sending || !body.trim()) && styles.sendButtonDisabled]}
           >
-            <Text style={styles.sendButtonText}>Envoyer</Text>
+            <Text style={styles.sendButtonText}>{t('chat.send')}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

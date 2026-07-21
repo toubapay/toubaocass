@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors, radius } from '../theme';
 
@@ -15,10 +16,11 @@ interface Props {
  * the iOS/Android app. "Open in Google Maps" nearby still works everywhere.
  */
 export function DepartureMap({ address }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>📍</Text>
-      <Text style={styles.text}>{address ?? 'Aperçu de la carte disponible dans l\'application mobile'}</Text>
+      <Text style={styles.text}>{address ?? t('addressMapPicker.mapPreviewMobile')}</Text>
     </View>
   );
 }

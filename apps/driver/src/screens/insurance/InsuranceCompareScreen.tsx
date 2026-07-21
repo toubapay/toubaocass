@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { purchaseInsurance, quoteInsurance } from '../../api/insurance';
 import { extractErrorMessage } from '../../api/client';
@@ -12,13 +13,10 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<FleetStackParamList, 'InsuranceCompare'>;
 
-const COVERAGE_OPTIONS: { value: InsuranceCoverageType; label: string }[] = [
-  { value: 'tiers_simple', label: 'Tiers simple' },
-  { value: 'tiers_collision', label: 'Tiers collision' },
-  { value: 'tous_risques', label: 'Tous risques' },
-];
+const COVERAGE_OPTIONS: InsuranceCoverageType[] = ['tiers_simple', 'tiers_collision', 'tous_risques'];
 
 export function InsuranceCompareScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { carId, carLabel } = route.params;
   const [coverageType, setCoverageType] = useState<InsuranceCoverageType>('tiers_simple');
   const [quotes, setQuotes] = useState<InsuranceQuote[]>([]);
@@ -30,7 +28,7 @@ export function InsuranceCompareScreen({ route, navigation }: Props) {
     setQuotes([]);
     quoteInsurance(carId, coverageType)
       .then(setQuotes)
-      .catch((e) => Alert.alert('Erreur', extractErrorMessage(e)))
+      .catch((e) => Alert.alert(t('insurance.errorTitle'), extractErrorMessage(e)))
       .finally(() => setLoading(false));
   }, [carId, coverageType]);
 
@@ -38,20 +36,20 @@ export function InsuranceCompareScreen({ route, navigation }: Props) {
 
   const handlePurchase = (quote: InsuranceQuote, index: number) => {
     Alert.alert(
-      'Confirmer la souscription',
-      `${quote.provider_name} — ${quote.plan_name}\n${quote.annual_premium.toLocaleString()} FCFA / an`,
+      t('insurance.purchaseConfirmTitle'),
+      `${quote.provider_name} — ${quote.plan_name}\n${t('insurance.perYear', { amount: quote.annual_premium.toLocaleString() })}`,
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('insurance.purchaseConfirmCancel'), style: 'cancel' },
         {
-          text: 'Souscrire',
+          text: t('insurance.purchaseConfirmSubmit'),
           onPress: async () => {
             setPurchasingIndex(index);
             try {
               const policy = await purchaseInsurance(carId, quote);
-              Alert.alert('Assurance souscrite', `Police n° ${policy.policy_number} active jusqu'au ${policy.ends_at}.`);
+              Alert.alert(t('insurance.purchaseSuccessTitle'), t('insurance.purchaseSuccessBody', { number: policy.policy_number, date: policy.ends_at }));
               navigation.navigate('MyPolicies');
             } catch (e) {
-              Alert.alert('Échec de la souscription', extractErrorMessage(e));
+              Alert.alert(t('insurance.purchaseFailedTitle'), extractErrorMessage(e));
             } finally {
               setPurchasingIndex(null);
             }
@@ -63,17 +61,17 @@ export function InsuranceCompareScreen({ route, navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Comparer les assurances</Text>
+      <Text style={styles.title}>{t('insurance.compareTitle')}</Text>
       <Text style={styles.subtitle}>{carLabel}</Text>
 
       <View style={styles.tabs}>
         {COVERAGE_OPTIONS.map((option) => (
           <Pressable
-            key={option.value}
-            onPress={() => setCoverageType(option.value)}
-            style={[styles.tab, coverageType === option.value && styles.tabActive]}
+            key={option}
+            onPress={() => setCoverageType(option)}
+            style={[styles.tab, coverageType === option && styles.tabActive]}
           >
-            <Text style={[styles.tabText, coverageType === option.value && styles.tabTextActive]}>{option.label}</Text>
+            <Text style={[styles.tabText, coverageType === option && styles.tabTextActive]}>{t(`common.insuranceCoverage.${option}`)}</Text>
           </Pressable>
         ))}
       </View>
@@ -88,15 +86,15 @@ export function InsuranceCompareScreen({ route, navigation }: Props) {
             <View style={styles.card}>
               <Text style={styles.provider}>{item.provider_name}</Text>
               <Text style={styles.plan}>{item.plan_name}</Text>
-              <Text style={styles.premium}>{item.annual_premium.toLocaleString()} FCFA / an</Text>
-              <Text style={styles.monthly}>≈ {item.monthly_premium.toLocaleString()} FCFA / mois</Text>
+              <Text style={styles.premium}>{t('insurance.perYear', { amount: item.annual_premium.toLocaleString() })}</Text>
+              <Text style={styles.monthly}>{t('insurance.perMonthApprox', { amount: item.monthly_premium.toLocaleString() })}</Text>
               {item.highlights.map((highlight) => (
                 <Text key={highlight} style={styles.highlight}>
                   • {highlight}
                 </Text>
               ))}
               <Button
-                label="Choisir cette offre"
+                label={t('insurance.chooseOffer')}
                 onPress={() => handlePurchase(item, index)}
                 loading={purchasingIndex === index}
                 disabled={purchasingIndex !== null}
@@ -106,7 +104,7 @@ export function InsuranceCompareScreen({ route, navigation }: Props) {
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>Aucune offre disponible pour ce type de couverture.</Text>
+              <Text style={styles.emptyText}>{t('insurance.emptyQuotes')}</Text>
             </View>
           }
         />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Trip } from '../api/types';
 import { colors, radius } from '../theme';
@@ -10,12 +11,14 @@ import { colors, radius } from '../theme';
  * on the iOS/Android app.
  */
 export function RouteMap({ trip }: { trip: Trip }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>🛣️</Text>
       <Text style={styles.text}>
         {trip.origin_city?.name} → {trip.destination_city?.name}
-        {'\n'}Aperçu de l'itinéraire disponible dans l'application mobile
+        {'\n'}
+        {t('addressMapPicker.routePreviewMobile')}
       </Text>
     </View>
   );

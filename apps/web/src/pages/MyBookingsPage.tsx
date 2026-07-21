@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { cancelBooking, fetchMyBookings } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -8,12 +9,8 @@ import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
 
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: 'Confirmée',
-  cancelled: 'Annulée',
-};
-
 export function MyBookingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +26,7 @@ export function MyBookingsPage() {
   useEffect(load, [load]);
 
   const handleCancel = async (booking: Booking) => {
-    if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) return;
+    if (!confirm(t('myBookings.cancelConfirm'))) return;
     try {
       await cancelBooking(booking.id);
       load();
@@ -62,11 +59,11 @@ export function MyBookingsPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Mes réservations</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('myBookings.title')}</h1>
 
       {bookings.length === 0 ? (
         <div style={{ marginTop: spacing.xl, textAlign: 'center' }}>
-          <p style={{ color: colors.textMuted, fontSize: 16 }}>Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.</p>
+          <p style={{ color: colors.textMuted, fontSize: 16 }}>{t('myBookings.empty')}</p>
         </div>
       ) : (
         bookings.map((item) => (
@@ -87,11 +84,11 @@ export function MyBookingsPage() {
                 {item.trip.origin_city?.name} → {item.trip.destination_city?.name}
               </span>
               <span style={{ fontSize: 13, fontWeight: 700, color: item.status === 'cancelled' ? colors.danger : colors.success }}>
-                {STATUS_LABEL[item.status]}
+                {item.status === 'cancelled' ? t('myBookings.statusCancelled') : t('myBookings.statusConfirmed')}
               </span>
             </div>
             <p style={{ fontSize: 14, color: colors.textMuted, marginTop: spacing.xs, marginBottom: 0 }}>
-              {item.trip.departure_date} à {item.trip.departure_time} · {item.seats_booked} place(s)
+              {t('myBookings.departureAt', { date: item.trip.departure_date, time: item.trip.departure_time, seats: item.seats_booked })}
             </p>
             <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, marginTop: spacing.xs, marginBottom: 0 }}>
               {item.fare_total.toLocaleString()} FCFA
@@ -104,14 +101,14 @@ export function MyBookingsPage() {
                     e.stopPropagation();
                     navigate(`/chat/${item.id}`, {
                       state: {
-                        title: item.trip.driver.name ?? 'Conducteur',
+                        title: item.trip.driver.name ?? t('common.driverFallback'),
                         subtitle: `${item.trip.origin_city?.name} → ${item.trip.destination_city?.name}`,
                       },
                     });
                   }}
                   style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
                 >
-                  💬 Discuter
+                  {t('myBookings.chat')}
                 </button>
                 <button
                   onClick={(e) => {
@@ -120,7 +117,7 @@ export function MyBookingsPage() {
                   }}
                   style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
                 >
-                  Modifier
+                  {t('myBookings.modify')}
                 </button>
                 <button
                   onClick={(e) => {
@@ -129,7 +126,7 @@ export function MyBookingsPage() {
                   }}
                   style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
                 >
-                  Annuler la réservation
+                  {t('myBookings.cancel')}
                 </button>
               </div>
             )}

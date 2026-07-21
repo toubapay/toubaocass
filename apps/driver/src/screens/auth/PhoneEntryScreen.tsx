@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +14,7 @@ import { colors, spacing } from '../../theme';
 type Props = NativeStackScreenProps<AuthStackParamList, 'PhoneEntry'>;
 
 export function PhoneEntryScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { sendOtp } = useAuth();
   const [phone, setPhone] = useState('+221');
   const [loading, setLoading] = useState(false);
@@ -34,20 +36,20 @@ export function PhoneEntryScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.hero}>
-        <Text style={styles.title}>Intercity Driver</Text>
-        <Text style={styles.subtitle}>Publiez vos trajets et prenez des passagers partout au Sénégal.</Text>
+        <Text style={styles.title}>{t('auth.phoneEntry.appName')}</Text>
+        <Text style={styles.subtitle}>{t('auth.phoneEntry.subtitle')}</Text>
       </View>
 
       <TextField
-        label="Numéro de téléphone"
-        placeholder="+221 77 000 00 00"
+        label={t('auth.phoneEntry.phoneLabel')}
+        placeholder={t('auth.phoneEntry.phonePlaceholder')}
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
         error={error}
       />
 
-      <Button label="Continuer" onPress={handleSubmit} loading={loading} />
+      <Button label={t('auth.phoneEntry.continue')} onPress={handleSubmit} loading={loading} />
     </Screen>
   );
 }

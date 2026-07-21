@@ -1,6 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
 
@@ -21,6 +22,7 @@ function format(date: Date, mode: 'date' | 'time'): string {
 }
 
 export function DateField({ label, value, onChange, mode = 'date', minimumDate, placeholder }: Props) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   return (
@@ -28,7 +30,7 @@ export function DateField({ label, value, onChange, mode = 'date', minimumDate, 
       <Text style={styles.label}>{label}</Text>
       <Pressable style={styles.selector} onPress={() => setVisible(true)}>
         <Text style={value ? styles.text : styles.placeholder}>
-          {value ? format(value, mode) : placeholder ?? (mode === 'time' ? 'Sélectionner une heure' : 'Sélectionner une date')}
+          {value ? format(value, mode) : placeholder ?? (mode === 'time' ? t('common.selectTime') : t('common.selectDate'))}
         </Text>
       </Pressable>
 

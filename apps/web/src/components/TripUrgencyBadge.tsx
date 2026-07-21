@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
 import { isUrgent } from '../utils/trip';
@@ -7,6 +9,7 @@ import { isUrgent } from '../utils/trip';
  * seats, pulsing red when departure is imminent or only one seat remains.
  */
 export function TripUrgencyBadge({ trip }: { trip: Trip }) {
+  const { t } = useTranslation();
   if (trip.status !== 'scheduled' || trip.available_seats <= 0) return null;
 
   const urgent = isUrgent(trip);
@@ -26,7 +29,7 @@ export function TripUrgencyBadge({ trip }: { trip: Trip }) {
         animation: urgent ? 'pulse 1.3s ease-in-out infinite' : 'none',
       }}
     >
-      {urgent ? '⚡ Départ imminent' : '🟢 Places disponibles'}
+      {urgent ? t('tripUrgencyBadge.urgent') : t('tripUrgencyBadge.available')}
     </span>
   );
 }

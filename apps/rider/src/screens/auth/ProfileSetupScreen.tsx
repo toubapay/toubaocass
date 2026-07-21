@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { updateProfile } from '../../api/auth';
 import { extractErrorMessage } from '../../api/client';
@@ -10,6 +11,7 @@ import { TextField } from '../../components/TextField';
 import { colors, spacing } from '../../theme';
 
 export function ProfileSetupScreen() {
+  const { t } = useTranslation();
   const { setUser } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -31,20 +33,20 @@ export function ProfileSetupScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>Parlez-nous de vous</Text>
-      <Text style={styles.subtitle}>Votre nom suffit pour commencer.</Text>
+      <Text style={styles.title}>{t('auth.profileSetup.title')}</Text>
+      <Text style={styles.subtitle}>{t('auth.profileSetup.subtitle')}</Text>
 
-      <TextField label="Nom complet" placeholder="Awa Ndiaye" value={name} onChangeText={setName} error={error} />
+      <TextField label={t('auth.profileSetup.nameLabel')} placeholder={t('auth.profileSetup.namePlaceholder')} value={name} onChangeText={setName} error={error} />
       <TextField
-        label="E-mail (facultatif)"
-        placeholder="awa@example.com"
+        label={t('auth.profileSetup.emailLabel')}
+        placeholder={t('auth.profileSetup.emailPlaceholder')}
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
 
-      <Button label="Terminer" onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
+      <Button label={t('auth.profileSetup.finish')} onPress={handleSubmit} loading={loading} disabled={name.trim().length < 2} />
     </Screen>
   );
 }

@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { MyLocationBar } from '../components/MyLocationBar';
 import { useAuth } from '../context/AuthContext';
@@ -57,70 +58,76 @@ function AuthNavigator() {
 }
 
 function TripsNavigator() {
+  const { t } = useTranslation();
   return (
     <TripsStackNav.Navigator>
       <TripsStackNav.Screen
         name="TripsList"
         component={TripsListScreen}
         options={{
-          title: 'Mes trajets',
+          title: t('nav.screenTitles.tripsList'),
           headerRight: () => <MyLocationBar />,
         }}
       />
-      <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: 'Publier un trajet' }} />
+      <TripsStackNav.Screen name="PostTrip" component={PostTripScreen} options={{ title: t('nav.screenTitles.postTrip') }} />
       <TripsStackNav.Screen
         name="PostInstantTrip"
         component={PostInstantTripScreen}
-        options={{ title: 'Départ immédiat' }}
+        options={{ title: t('nav.screenTitles.postInstantTrip') }}
       />
-      <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: 'Détails du trajet' }} />
-      <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: 'Discussion' }} />
-      <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
+      <TripsStackNav.Screen name="TripDetail" component={TripDetailScreen} options={{ title: t('nav.screenTitles.tripDetail') }} />
+      <TripsStackNav.Screen name="Chat" component={ChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
+      <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
     </TripsStackNav.Navigator>
   );
 }
 
 function DeliveriesNavigator() {
+  const { t } = useTranslation();
   return (
     <DeliveriesStackNav.Navigator>
-      <DeliveriesStackNav.Screen name="DeliveriesList" component={DeliveriesListScreen} options={{ title: 'Livraisons' }} />
-      <DeliveriesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: 'Détails de la livraison' }} />
+      <DeliveriesStackNav.Screen name="DeliveriesList" component={DeliveriesListScreen} options={{ title: t('nav.screenTitles.deliveriesList') }} />
+      <DeliveriesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
     </DeliveriesStackNav.Navigator>
   );
 }
 
 function FleetNavigator() {
+  const { t } = useTranslation();
   return (
     <FleetStackNav.Navigator>
-      <FleetStackNav.Screen name="CarsList" component={CarsListScreen} options={{ title: 'Mes véhicules' }} />
-      <FleetStackNav.Screen name="AddCar" component={AddCarScreen} options={{ title: 'Ajouter un véhicule' }} />
-      <FleetStackNav.Screen name="InsuranceCompare" component={InsuranceCompareScreen} options={{ title: 'Comparer les assurances' }} />
-      <FleetStackNav.Screen name="MyPolicies" component={MyPoliciesScreen} options={{ title: 'Mes assurances' }} />
+      <FleetStackNav.Screen name="CarsList" component={CarsListScreen} options={{ title: t('nav.screenTitles.carsList') }} />
+      <FleetStackNav.Screen name="AddCar" component={AddCarScreen} options={{ title: t('nav.screenTitles.addCar') }} />
+      <FleetStackNav.Screen name="InsuranceCompare" component={InsuranceCompareScreen} options={{ title: t('nav.screenTitles.insuranceCompare') }} />
+      <FleetStackNav.Screen name="MyPolicies" component={MyPoliciesScreen} options={{ title: t('nav.screenTitles.myPolicies') }} />
     </FleetStackNav.Navigator>
   );
 }
 
 function KycNavigator() {
+  const { t } = useTranslation();
   return (
     <KycStackNav.Navigator>
-      <KycStackNav.Screen name="KycStatus" component={KycStatusScreen} options={{ title: 'Vérification' }} />
-      <KycStackNav.Screen name="KycForm" component={KycFormScreen} options={{ title: 'Soumettre les documents' }} />
+      <KycStackNav.Screen name="KycStatus" component={KycStatusScreen} options={{ title: t('nav.screenTitles.kycStatus') }} />
+      <KycStackNav.Screen name="KycForm" component={KycFormScreen} options={{ title: t('nav.screenTitles.kycForm') }} />
     </KycStackNav.Navigator>
   );
 }
 
 function ProfileNavigator() {
+  const { t } = useTranslation();
   return (
     <ProfileStackNav.Navigator>
-      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: 'Mon profil' }} />
-      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: 'Mon portefeuille' }} />
-      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: 'Paramètres' }} />
+      <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.screenTitles.profile') }} />
+      <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
+      <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: t('nav.screenTitles.settings') }} />
     </ProfileStackNav.Navigator>
   );
 }
 
 function MainTabs() {
   useRegisterPushToken(true);
+  const { t } = useTranslation();
 
   return (
     <Tab.Navigator
@@ -143,11 +150,11 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: 'Trajets' }} />
-      <Tab.Screen name="DeliveriesTab" component={DeliveriesNavigator} options={{ title: 'Livraisons' }} />
-      <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: 'Flotte' }} />
-      <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: 'Vérification' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profil' }} />
+      <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: t('nav.trips') }} />
+      <Tab.Screen name="DeliveriesTab" component={DeliveriesNavigator} options={{ title: t('nav.deliveries') }} />
+      <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: t('nav.fleet') }} />
+      <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: t('nav.kyc') }} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: t('nav.profile') }} />
     </Tab.Navigator>
   );
 }

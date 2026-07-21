@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchAvailableDeliveries, fetchMyDeliveries } from '../../api/deliveries';
 import { Delivery } from '../../api/types';
@@ -12,14 +13,6 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<DeliveriesStackParamList, 'DeliveriesList'>;
 
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'En attente',
-  accepted: 'Acceptée',
-  picked_up: 'Récupérée',
-  delivered: 'Livrée',
-  cancelled: 'Annulée',
-};
-
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
   accepted: colors.accent,
@@ -29,6 +22,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export function DeliveriesListScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const kycApproved = user?.driver_profile?.kyc_status === 'approved';
 
@@ -50,25 +44,22 @@ export function DeliveriesListScreen({ navigation }: Props) {
   if (!kycApproved) {
     return (
       <Screen>
-        <Text style={styles.title}>Livraisons</Text>
-        <Text style={styles.notice}>
-          Votre vérification conducteur doit être approuvée avant d'accepter des livraisons. Consultez l'onglet
-          Vérification.
-        </Text>
+        <Text style={styles.title}>{t('deliveries.title')}</Text>
+        <Text style={styles.notice}>{t('deliveries.kycNotice')}</Text>
       </Screen>
     );
   }
 
   return (
     <Screen>
-      <Text style={styles.title}>Livraisons</Text>
+      <Text style={styles.title}>{t('deliveries.title')}</Text>
 
       <View style={styles.toggleRow}>
         <Pressable style={[styles.toggle, tab === 'available' && styles.toggleActive]} onPress={() => setTab('available')}>
-          <Text style={[styles.toggleText, tab === 'available' && styles.toggleTextActive]}>Disponibles</Text>
+          <Text style={[styles.toggleText, tab === 'available' && styles.toggleTextActive]}>{t('deliveries.tabAvailable')}</Text>
         </Pressable>
         <Pressable style={[styles.toggle, tab === 'mine' && styles.toggleActive]} onPress={() => setTab('mine')}>
-          <Text style={[styles.toggleText, tab === 'mine' && styles.toggleTextActive]}>Mes livraisons</Text>
+          <Text style={[styles.toggleText, tab === 'mine' && styles.toggleTextActive]}>{t('deliveries.tabMine')}</Text>
         </Pressable>
       </View>
 
@@ -80,7 +71,7 @@ export function DeliveriesListScreen({ navigation }: Props) {
           keyExtractor={(item) => String(item.id)}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              {tab === 'available' ? 'Aucune livraison disponible pour le moment.' : "Vous n'avez pas encore de livraison."}
+              {tab === 'available' ? t('deliveries.emptyAvailable') : t('deliveries.emptyMine')}
             </Text>
           }
           renderItem={({ item }) => (
@@ -89,7 +80,7 @@ export function DeliveriesListScreen({ navigation }: Props) {
                 <Text style={styles.route}>
                   {item.pickup_address_line} → {item.receiver_address_line}
                 </Text>
-                <Text style={[styles.status, { color: STATUS_COLOR[item.status] }]}>{STATUS_LABEL[item.status]}</Text>
+                <Text style={[styles.status, { color: STATUS_COLOR[item.status] }]}>{t(`common.deliveryStatus.${item.status}`)}</Text>
               </View>
               <Text style={styles.meta}>{item.distance_km} km</Text>
               <Text style={styles.fee}>{item.fee.toLocaleString()} FCFA</Text>

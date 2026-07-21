@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { updateProfile } from '../api/auth';
 import { createAddress, deleteAddress, fetchAddresses, updateAddress } from '../api/addresses';
@@ -31,6 +32,7 @@ function AddressForm({
   const [isDefault, setIsDefault] = useState(initial?.is_default ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,13 +67,13 @@ function AddressForm({
       }}
     >
       <TextField
-        label="Libellé"
-        placeholder="Domicile, Travail…"
+        label={t('settings.addressLabelField')}
+        placeholder={t('settings.addressLabelPlaceholder')}
         value={label}
         onChange={(e) => setLabel(e.target.value)}
       />
       <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-        Adresse
+        {t('settings.addressField')}
       </label>
       <div style={{ marginBottom: spacing.md }}>
         <AddressMapPicker
@@ -85,25 +87,26 @@ function AddressForm({
 
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: colors.text, marginBottom: spacing.md }}>
         <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />
-        Définir comme adresse par défaut
+        {t('settings.setAsDefault')}
       </label>
 
       {error && <p style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.sm }}>{error}</p>}
 
       <div style={{ display: 'flex', gap: spacing.sm }}>
         <Button
-          label="Enregistrer"
+          label={t('settings.save')}
           type="submit"
           loading={saving}
           disabled={label.trim().length === 0 || addressLine.trim().length === 0}
         />
-        <Button label="Annuler" variant="outline" onClick={onCancel} />
+        <Button label={t('settings.cancel')} variant="outline" onClick={onCancel} />
       </div>
     </form>
   );
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
 
@@ -137,7 +140,7 @@ export function SettingsPage() {
   };
 
   const handleDelete = async (address: Address) => {
-    if (!confirm(`Supprimer l'adresse "${address.label}" ?`)) return;
+    if (!confirm(t('settings.deleteConfirm', { label: address.label }))) return;
     await deleteAddress(address.id);
     setAddresses((prev) => (prev ?? []).filter((a) => a.id !== address.id));
   };
@@ -165,10 +168,10 @@ export function SettingsPage() {
       >
         ←
       </button>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Paramètres</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('settings.title')}</h1>
 
       <p style={{ fontSize: 13, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase', margin: `0 0 ${spacing.sm}px` }}>
-        Informations du compte
+        {t('settings.accountInfo')}
       </p>
       <form
         onSubmit={handleSaveProfile}
@@ -180,26 +183,26 @@ export function SettingsPage() {
           marginBottom: spacing.lg,
         }}
       >
-        <TextField label="Nom complet" value={name} onChange={(e) => setName(e.target.value)} />
-        <TextField label="E-mail (facultatif)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <TextField label={t('settings.fullName')} value={name} onChange={(e) => setName(e.target.value)} />
+        <TextField label={t('settings.email')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <p style={{ fontSize: 13, color: colors.textMuted, margin: `0 0 ${spacing.sm}px` }}>
-          Téléphone : {user?.phone} (non modifiable)
+          {t('settings.phoneNotEditable', { phone: user?.phone })}
         </p>
         {profileError && <p style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.sm }}>{profileError}</p>}
-        {profileSaved && <p style={{ fontSize: 13, color: colors.success, marginBottom: spacing.sm }}>Profil mis à jour ✓</p>}
-        <Button label="Enregistrer" type="submit" loading={savingProfile} disabled={name.trim().length < 2} />
+        {profileSaved && <p style={{ fontSize: 13, color: colors.success, marginBottom: spacing.sm }}>{t('settings.profileUpdated')}</p>}
+        <Button label={t('settings.save')} type="submit" loading={savingProfile} disabled={name.trim().length < 2} />
       </form>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
         <p style={{ fontSize: 13, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase', margin: 0 }}>
-          Adresses enregistrées
+          {t('settings.savedAddresses')}
         </p>
         {formOpen === null && (
           <button
             onClick={() => setFormOpen('new')}
             style={{ border: 'none', background: 'none', color: colors.accent, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
           >
-            + Ajouter
+            {t('settings.add')}
           </button>
         )}
       </div>
@@ -210,7 +213,7 @@ export function SettingsPage() {
         <CenteredSpinner />
       ) : addresses.length === 0 && formOpen === null ? (
         <p style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', marginTop: spacing.lg }}>
-          Aucune adresse enregistrée pour l'instant.
+          {t('settings.noAddresses')}
         </p>
       ) : (
         addresses.map((address) =>
@@ -245,7 +248,7 @@ export function SettingsPage() {
                         padding: '2px 6px',
                       }}
                     >
-                      Par défaut
+                      {t('settings.defaultBadge')}
                     </span>
                   )}
                 </p>
@@ -254,14 +257,14 @@ export function SettingsPage() {
               <div style={{ display: 'flex', gap: spacing.sm }}>
                 <button
                   onClick={() => setFormOpen(address.id)}
-                  aria-label="Modifier"
+                  aria-label={t('settings.editAria')}
                   style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 16, cursor: 'pointer' }}
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => handleDelete(address)}
-                  aria-label="Supprimer"
+                  aria-label={t('settings.deleteAria')}
                   style={{ border: 'none', background: 'none', color: colors.danger, fontSize: 16, cursor: 'pointer' }}
                 >
                   🗑️

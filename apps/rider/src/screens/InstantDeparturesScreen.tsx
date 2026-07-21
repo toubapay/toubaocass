@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchInstantTrips } from '../api/trips';
 import { Trip } from '../api/types';
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'InstantDepartures'>;
 const POLL_INTERVAL_MS = 20000;
 
 export function InstantDeparturesScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,8 +41,8 @@ export function InstantDeparturesScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>⚡ Départs immédiats</Text>
-      <Text style={styles.subtitle}>Des chauffeurs qui partent maintenant, sans réservation à l'avance.</Text>
+      <Text style={styles.title}>{t('instantDepartures.title')}</Text>
+      <Text style={styles.subtitle}>{t('instantDepartures.subtitle')}</Text>
       <FlatList
         data={trips}
         keyExtractor={(item) => String(item.id)}
@@ -53,7 +55,7 @@ export function InstantDeparturesScreen({ navigation }: Props) {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Aucun départ immédiat pour le moment.</Text>
+            <Text style={styles.emptyText}>{t('instantDepartures.empty')}</Text>
           </View>
         }
       />

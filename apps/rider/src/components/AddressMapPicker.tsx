@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import MapView, { MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -34,6 +35,7 @@ const DEFAULT_REGION = { latitude: 14.6928, longitude: -17.4467 };
  * Nominatim search. See AddressMapPicker.web.tsx for the Expo-web fallback.
  */
 export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, longitude, onLocationChange }: Props) {
+  const { t, i18n } = useTranslation();
   const mapRef = useRef<MapView>(null);
   const { loading: locating, error: locationError, requestLocation } = useMyLocation();
   const [region] = useState({
@@ -59,7 +61,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
       setSearching(true);
       try {
         const res = await fetch(
-          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(addressLine)}&components=country:sn&language=fr&key=${GOOGLE_MAPS_API_KEY}`,
+          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(addressLine)}&components=country:sn&language=${i18n.language}&key=${GOOGLE_MAPS_API_KEY}`,
         );
         const data = await res.json();
         const items: Array<{ place_id: string; description: string }> = data.predictions ?? [];
@@ -103,7 +105,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
     if (!GOOGLE_MAPS_API_KEY) return;
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&language=fr&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&language=${i18n.language}&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const data = await res.json();
       const formatted = data.results?.[0]?.formatted_address;
@@ -139,7 +141,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
       <View style={styles.searchWrapper}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Sacré-Cœur 3, Dakar"
+          placeholder={t('addressMapPicker.placeholder')}
           placeholderTextColor={colors.textMuted}
           value={addressLine}
           onChangeText={onAddressLineChange}
@@ -184,12 +186,12 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
         {locating ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Text style={styles.locateText}>📍 Utiliser ma position actuelle</Text>
+          <Text style={styles.locateText}>📍 {t('addressMapPicker.useMyLocation')}</Text>
         )}
       </Pressable>
       {locationError && <Text style={styles.error}>{locationError}</Text>}
       {GOOGLE_MAPS_API_KEY && !hasPin && (
-        <Text style={styles.hint}>Touchez la carte pour ajuster l'emplacement exact.</Text>
+        <Text style={styles.hint}>{t('addressMapPicker.dragHintTouch')}</Text>
       )}
     </View>
   );

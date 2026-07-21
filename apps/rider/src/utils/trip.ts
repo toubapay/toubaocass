@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 import { Trip } from '../api/types';
 
 const DEPARTING_SOON_HOURS = 3;
@@ -24,17 +26,13 @@ export function bookingFillState(trip: Trip): BookingFillState {
   return 'open';
 }
 
-export const FILL_STATE_LABEL: Record<BookingFillState, string> = {
-  open: 'Disponible',
-  filling: 'Se remplit',
-  full: 'Complet',
-};
+export function fillStateLabel(t: TFunction, state: BookingFillState): string {
+  return t(`common.fillState.${state}`);
+}
 
-export const RIDE_TYPE_LABEL: Record<string, string> = {
-  standard: 'Standard',
-  comfort: 'Confort',
-  xl: 'XL',
-};
+export function rideTypeLabel(t: TFunction, rideType: string): string {
+  return t(`common.rideType.${rideType}`, { defaultValue: rideType });
+}
 
 /** Formats a minute count as "1h30" (over an hour) or "45 min". */
 export function formatDuration(minutes: number): string {

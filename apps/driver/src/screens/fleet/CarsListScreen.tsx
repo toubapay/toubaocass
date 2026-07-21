@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { deleteCar, fetchMyCars } from '../../api/cars';
 import { extractErrorMessage } from '../../api/client';
@@ -14,6 +15,7 @@ import { colors, radius, spacing } from '../../theme';
 type Props = NativeStackScreenProps<FleetStackParamList, 'CarsList'>;
 
 export function CarsListScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,17 +29,17 @@ export function CarsListScreen({ navigation }: Props) {
   useFocusEffect(load);
 
   const handleDelete = (car: Car) => {
-    Alert.alert('Supprimer le véhicule', `Supprimer ${car.make} ${car.model} (${car.plate_number}) ?`, [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('fleet.deleteConfirmTitle'), t('fleet.deleteConfirmBody', { make: car.make, model: car.model, plate: car.plate_number }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Supprimer',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteCar(car.id);
             load();
           } catch (e) {
-            Alert.alert('Suppression impossible', extractErrorMessage(e));
+            Alert.alert(t('fleet.deleteFailedTitle'), extractErrorMessage(e));
           }
         },
       },
@@ -54,17 +56,17 @@ export function CarsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Mes véhicules</Text>
+      <Text style={styles.title}>{t('fleet.carsListTitle')}</Text>
       <FlatList
         data={cars}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.name}>
-              {item.make} {item.model} ({item.year ?? 'N/A'})
+              {item.make} {item.model} ({item.year ?? t('fleet.yearFallback')})
             </Text>
             <Text style={styles.meta}>
-              {item.plate_number} · {item.seats} places · {item.type.toUpperCase()}
+              {item.plate_number} · {t('fleet.seatsCount', { count: item.seats })} · {item.type.toUpperCase()}
             </Text>
             <View style={styles.actionsRow}>
               <Pressable
@@ -76,22 +78,22 @@ export function CarsListScreen({ navigation }: Props) {
                 }
                 style={styles.insuranceButton}
               >
-                <Text style={styles.insuranceText}>🛡️ Assurance</Text>
+                <Text style={styles.insuranceText}>{t('fleet.insuranceLink')}</Text>
               </Pressable>
               <Pressable onPress={() => handleDelete(item)} style={styles.removeButton}>
-                <Text style={styles.removeText}>Supprimer</Text>
+                <Text style={styles.removeText}>{t('fleet.remove')}</Text>
               </Pressable>
             </View>
           </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Ajoutez un véhicule pour commencer à publier des trajets.</Text>
+            <Text style={styles.emptyText}>{t('fleet.emptyCars')}</Text>
           </View>
         }
       />
-      <Button label="Mes assurances" variant="outline" onPress={() => navigation.navigate('MyPolicies')} style={{ marginBottom: spacing.sm }} />
-      <Button label="Ajouter un véhicule" onPress={() => navigation.navigate('AddCar')} />
+      <Button label={t('fleet.myPolicies')} variant="outline" onPress={() => navigation.navigate('MyPolicies')} style={{ marginBottom: spacing.sm }} />
+      <Button label={t('fleet.addCar')} onPress={() => navigation.navigate('AddCar')} />
     </Screen>
   );
 }

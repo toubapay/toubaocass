@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
-import { bookingFillState, FILL_STATE_LABEL, formatDuration, RIDE_TYPE_LABEL } from '../utils/trip';
+import { bookingFillState, fillStateLabel, formatDuration, rideTypeLabel } from '../utils/trip';
 import { BookingQuickActionModal } from './BookingQuickActionModal';
 import { TripUrgencyBadge } from './TripUrgencyBadge';
 
@@ -14,6 +15,7 @@ const FILL_STATE_STYLE: Record<string, { bg: string; fg: string }> = {
 };
 
 export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: (trip: Trip) => void }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const fillState = bookingFillState(trip);
   const fillStyle = FILL_STATE_STYLE[fillState];
@@ -58,7 +60,7 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
             whiteSpace: 'nowrap',
           }}
         >
-          {FILL_STATE_LABEL[fillState]}
+          {fillStateLabel(t, fillState)}
         </span>
       </div>
 
@@ -74,12 +76,12 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
         <span style={{ margin: `0 ${spacing.xs}px` }}>•</span>
         <span>{trip.departure_time}</span>
         <span style={{ margin: `0 ${spacing.xs}px` }}>•</span>
-        <span>{RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}</span>
+        <span>{rideTypeLabel(t, trip.ride_type)}</span>
         {trip.distance_km !== undefined && (
           <>
             <span style={{ margin: `0 ${spacing.xs}px` }}>•</span>
             <span style={{ color: colors.accent, fontWeight: 700 }}>
-              {trip.distance_km < 1 ? 'à < 1 km' : `à ${trip.distance_km} km`}
+              {trip.distance_km < 1 ? t('tripCard.distanceUnderOneKm') : t('tripCard.distanceAt', { value: trip.distance_km })}
             </span>
           </>
         )}
@@ -90,13 +92,13 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 15, color: colors.text }}>
-          {trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}
+          {trip.driver.name ?? t('common.driverFallback')} · {trip.car?.make} {trip.car?.model}
         </span>
         <span style={{ fontSize: 18, fontWeight: 700, color: colors.primary }}>{trip.fare.toLocaleString()} FCFA</span>
       </div>
 
       <p style={{ fontSize: 13, color: colors.textMuted, marginTop: spacing.xs, marginBottom: 0, fontWeight: 600 }}>
-        {trip.available_seats} place(s) disponible(s) sur {trip.total_seats}
+        {t('tripCard.seatsAvailable', { available: trip.available_seats, total: trip.total_seats })}
       </p>
 
       <TripUrgencyBadge trip={trip} />
@@ -104,7 +106,7 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm }}>
         {booked ? (
           <span style={{ fontSize: 13, fontWeight: 700, color: colors.success }}>
-            ✓ Réservé · {trip.my_booking!.seats_booked} place(s)
+            {t('tripCard.bookedSeats', { count: trip.my_booking!.seats_booked })}
           </span>
         ) : (
           <span />
@@ -125,7 +127,7 @@ export function TripCard({ trip, onTripUpdated }: { trip: Trip; onTripUpdated?: 
             cursor: 'pointer',
           }}
         >
-          {booked ? 'Modifier' : 'Réserver'}
+          {booked ? t('tripCard.modify') : t('tripCard.reserve')}
         </button>
       </div>
 

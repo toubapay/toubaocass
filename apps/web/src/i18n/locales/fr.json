@@ -1,0 +1,300 @@
+{
+  "common": {
+    "back": "Retour",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "add": "Ajouter",
+    "call": "Appeler",
+    "sms": "SMS",
+    "openInMaps": "Ouvrir dans Google Maps",
+    "driverFallback": "Conducteur",
+    "courierFallback": "Livreur",
+    "cash": "Espèces",
+    "wallet": "Portefeuille",
+    "insufficientFunds": "Solde insuffisant pour ce paiement.",
+    "topUp": "Recharger",
+    "selectCity": "Sélectionner une ville",
+    "rideType": { "standard": "Standard", "comfort": "Confort", "xl": "XL" },
+    "fillState": { "open": "Disponible", "filling": "Se remplit", "full": "Complet" },
+    "deliveryStatus": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "picked_up": "Récupérée",
+      "delivered": "Livrée",
+      "cancelled": "Annulée"
+    },
+    "packageType": {
+      "document": "Document",
+      "colis_leger": "Colis léger (< 5 kg)",
+      "colis_moyen": "Colis moyen (5–15 kg)",
+      "colis_volumineux": "Colis volumineux (> 15 kg)"
+    }
+  },
+  "nav": {
+    "home": "Accueil",
+    "services": "Services",
+    "bookings": "Réservations",
+    "profile": "Profil"
+  },
+  "layout": {
+    "tagline": "Voyagez à partir de chez vous. Recherchez et réservez."
+  },
+  "home": {
+    "title": "Choisissez destination",
+    "locating": "…",
+    "nearMeActive": "📍 Trajets affichés dans un rayon de {{radius}} km",
+    "nearMeInactive": "📍 Trouver des trajets près de moi",
+    "departureLabel": "Départ",
+    "arrivalLabel": "Arrivée",
+    "allCities": "Toutes les villes",
+    "dateLabel": "Date",
+    "datePlaceholder": "jj/mm/aaaa",
+    "seatsLabel": "Places",
+    "clearFilters": "Effacer les filtres",
+    "invalidRoute": "La ville de départ et d'arrivée ne peuvent pas être identiques.",
+    "loadError": "Impossible de charger les trajets. Réessayez.",
+    "emptyNearby": "Aucun trajet ne part dans un rayon de {{radius}} km pour l'instant.",
+    "emptyFiltered": "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche.",
+    "emptyDefault": "Aucun trajet à venir pour le moment — revenez bientôt.",
+    "prev": "← Précédent",
+    "next": "Suivant →",
+    "pageOf": "Page {{page}} sur {{lastPage}}",
+    "totalTrips": "{{count}} trajet(s) au total"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "wallet": "Mon portefeuille",
+    "settings": "⚙️ Paramètres",
+    "notificationsEnabled": "🔔 Notifications activées",
+    "notificationsBlocked": "Notifications bloquées. Autorisez-les dans les réglages de votre navigateur pour être prévenu(e) de vos réservations.",
+    "enableNotifications": "🔔 Activer les notifications",
+    "language": "Langue",
+    "languageFrench": "Français",
+    "languageArabic": "العربية",
+    "signOut": "Déconnexion"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "accountInfo": "Informations du compte",
+    "fullName": "Nom complet",
+    "email": "E-mail (facultatif)",
+    "phoneNotEditable": "Téléphone : {{phone}} (non modifiable)",
+    "profileUpdated": "Profil mis à jour ✓",
+    "save": "Enregistrer",
+    "savedAddresses": "Adresses enregistrées",
+    "add": "+ Ajouter",
+    "noAddresses": "Aucune adresse enregistrée pour l'instant.",
+    "addressLabelField": "Libellé",
+    "addressLabelPlaceholder": "Domicile, Travail…",
+    "addressField": "Adresse",
+    "setAsDefault": "Définir comme adresse par défaut",
+    "defaultBadge": "Par défaut",
+    "editAria": "Modifier",
+    "deleteAria": "Supprimer",
+    "deleteConfirm": "Supprimer l'adresse \"{{label}}\" ?",
+    "cancel": "Annuler"
+  },
+  "tripDetail": {
+    "departureAt": "{{date}} à {{time}}",
+    "reserveButton": "⚡ Réserver — {{amount}} FCFA",
+    "bookedSeats": "✓ Vous avez réservé {{count}} place(s) sur ce trajet",
+    "chatWithDriver": "💬 Discuter avec le conducteur",
+    "itinerary": "Itinéraire",
+    "drivingDuration": " · ~{{duration}} de route",
+    "departurePoint": "Point de départ",
+    "driverSection": "Conducteur",
+    "ratingLabel": "Note : {{rating}} ★",
+    "vehicle": "Véhicule",
+    "fare": "Tarif",
+    "farePerSeat": "{{amount}} FCFA / place",
+    "seatsRemaining": "{{available}} place(s) restante(s) sur {{total}}",
+    "notes": "Remarques",
+    "paymentMethod": "Mode de paiement",
+    "walletWithBalance": "Portefeuille {{balance}}",
+    "topUpLink": "Recharger",
+    "tripDeparted": "Ce trajet est déjà terminé ou est déjà parti.",
+    "tripUnavailable": "Ce trajet n'est plus disponible.",
+    "seatsCountEditing": "Nombre de places",
+    "seatsCountBooking": "Places à réserver",
+    "reduceToZeroWarning": "Réduire à 0 place annulera votre réservation.",
+    "cancelReservation": "Annuler la réservation",
+    "saveForAmount": "Enregistrer pour {{amount}} FCFA",
+    "bookForAmount": "Réserver pour {{amount}} FCFA",
+    "bookingCancelledAlert": "Réservation annulée.",
+    "bookingUpdatedAlert": "Réservation mise à jour.",
+    "bookingConfirmedAlert": "Vous avez réservé {{count}} place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations."
+  },
+  "myBookings": {
+    "title": "Mes réservations",
+    "empty": "Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.",
+    "statusConfirmed": "Confirmée",
+    "statusCancelled": "Annulée",
+    "departureAt": "{{date}} à {{time}} · {{seats}} place(s)",
+    "chat": "💬 Discuter",
+    "modify": "Modifier",
+    "cancel": "Annuler la réservation",
+    "cancelConfirm": "Voulez-vous vraiment annuler cette réservation ?"
+  },
+  "bookingQuickAction": {
+    "editTitle": "Modifier la réservation",
+    "bookTitle": "Réserver ce trajet",
+    "tripSummary": "{{origin}} → {{destination}} · {{date}} à {{time}}",
+    "seatsCountEditing": "Nombre de places",
+    "seatsCountBooking": "Places à réserver",
+    "reduceToZeroWarning": "Réduire à 0 place annulera votre réservation.",
+    "cancelReservation": "Annuler la réservation",
+    "save": "Enregistrer",
+    "confirmReservation": "Confirmer la réservation",
+    "close": "Fermer"
+  },
+  "wallet": {
+    "title": "Mon portefeuille",
+    "availableBalance": "Solde disponible",
+    "topUpNote": "Pour recharger votre portefeuille, contactez notre équipe — le rechargement est ajouté par un administrateur.",
+    "history": "Historique",
+    "emptyHistory": "Aucune transaction pour l'instant.",
+    "type": {
+      "top_up": "Rechargement",
+      "payment": "Paiement de trajet",
+      "earning": "Revenu de trajet",
+      "refund": "Remboursement",
+      "refund_reversal": "Reprise de revenu"
+    }
+  },
+  "chat": {
+    "defaultTitle": "Discussion",
+    "empty": "Aucun message pour l'instant. Dites bonjour !",
+    "placeholder": "Écrire un message...",
+    "send": "Envoyer"
+  },
+  "deliveryDetail": {
+    "titleWithId": "Livraison #{{id}}",
+    "pickup": "Ramassage",
+    "receiver": "Destinataire",
+    "package": "Colis",
+    "fee": "Frais",
+    "distanceAndPayment": "{{distance}} km · {{payment}}",
+    "courier": "Livreur",
+    "cancelDelivery": "Annuler la livraison",
+    "cancelConfirm": "Voulez-vous vraiment annuler cette livraison ?"
+  },
+  "myDeliveries": {
+    "title": "Mes livraisons",
+    "empty": "Vous n'avez pas encore de livraison."
+  },
+  "newDelivery": {
+    "title": "Nouvelle livraison",
+    "sender": "Expéditeur",
+    "pickupAddress": "Adresse de ramassage",
+    "receiver": "Destinataire",
+    "receiverName": "Nom",
+    "receiverNamePlaceholder": "Nom complet",
+    "receiverPhone": "Téléphone",
+    "receiverPhonePlaceholder": "+221 7XX XX XX XX",
+    "deliveryAddress": "Adresse de livraison",
+    "packageType": "Type de colis",
+    "notes": "Remarques (optionnel)",
+    "notesPlaceholder": "Instructions particulières pour le livreur",
+    "estimatedFee": "Frais estimés",
+    "calculating": "Calcul en cours…",
+    "placeAddressesPrompt": "Placez les deux adresses pour voir le tarif.",
+    "paymentMethod": "Mode de paiement",
+    "walletWithBalance": "Portefeuille {{balance}}",
+    "submit": "Envoyer la demande",
+    "submitWithFee": "Envoyer la demande — {{amount}} FCFA"
+  },
+  "services": {
+    "title": "Services",
+    "comingSoon": "🚧 Bientôt disponible — ce service arrive prochainement.",
+    "livraison": { "label": "Livraison", "description": "Envoi de colis en ville et entre villes" },
+    "cargaison": { "label": "Cargaison", "description": "Transport de marchandises en gros volume" },
+    "camion": { "label": "Camion", "description": "Déménagement et transport de gros objets" },
+    "location": { "label": "Location", "description": "Location de véhicules avec ou sans chauffeur" }
+  },
+  "map": {
+    "title": "Trajets sur la carte",
+    "emptyNoPin": "Aucun trajet actif n'a de point de départ précis pour l'instant.",
+    "countWithPin": "{{count}} trajet(s) avec un point de départ affiché.",
+    "searchPlaceholder": "Rechercher une adresse ou un lieu...",
+    "searching": "Recherche…",
+    "locating": "Localisation…",
+    "useMyLocation": "📍 Utiliser ma position actuelle",
+    "clear": "Effacer",
+    "myCurrentLocation": "Ma position actuelle",
+    "viewTrip": "Voir le trajet",
+    "seatsAvailable": "{{count}} place(s) disponible(s)",
+    "distanceFromPointM": "{{value}} m du point choisi",
+    "distanceFromPointKm": "{{value}} km du point choisi"
+  },
+  "instantDepartures": {
+    "title": "⚡ Départs immédiats",
+    "subtitle": "Des chauffeurs qui partent maintenant, sans réservation à l'avance.",
+    "empty": "Aucun départ immédiat pour le moment.",
+    "bannerLabel_one": "⚡ {{count}} départ immédiat disponible",
+    "bannerLabel_other": "⚡ {{count}} départs immédiats disponibles",
+    "bannerView": "Voir →"
+  },
+  "tripCard": {
+    "distanceUnderOneKm": "à < 1 km",
+    "distanceAt": "à {{value}} km",
+    "seatsAvailable": "{{available}} place(s) disponible(s) sur {{total}}",
+    "bookedSeats": "✓ Réservé · {{count}} place(s)",
+    "modify": "Modifier",
+    "reserve": "Réserver"
+  },
+  "tripUrgencyBadge": {
+    "urgent": "⚡ Départ imminent",
+    "available": "🟢 Places disponibles"
+  },
+  "myLocationBar": {
+    "ariaLabel": "Ma position",
+    "myPosition": "Ma position",
+    "currentPositionFallback": "Position actuelle",
+    "modalTitle": "Ma position",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  },
+  "addressMapPicker": {
+    "placeholder": "Sacré-Cœur 3, Dakar",
+    "locating": "Localisation…",
+    "positionSaved": "Position enregistrée ✓",
+    "useMyLocation": "Utiliser ma position actuelle",
+    "dragHint": "Faites glisser le repère pour ajuster l'emplacement exact."
+  },
+  "tripsMap": {
+    "title": "Carte des trajets",
+    "emptyNoPin": "Aucun trajet affiché n'a de point de départ précis pour l'instant.",
+    "countWithPin": "{{count}} trajet(s) avec un point de départ affiché.",
+    "viewTrip": "Voir le trajet"
+  },
+  "auth": {
+    "phoneEntry": {
+      "appName": "Intercity",
+      "subtitle": "Réservez une place pour un trajet entre villes.",
+      "phoneLabel": "Numéro de téléphone",
+      "phonePlaceholder": "+221 77 000 00 00",
+      "continue": "Continuer"
+    },
+    "otpVerify": {
+      "title": "Saisissez le code",
+      "subtitle": "Nous avons envoyé un code de vérification par SMS au {{phone}}.",
+      "codeLabel": "Code de vérification",
+      "codePlaceholder": "123456",
+      "verify": "Vérifier",
+      "resend": "Renvoyer le code",
+      "resending": "Envoi en cours..."
+    },
+    "profileSetup": {
+      "title": "Parlez-nous de vous",
+      "subtitle": "Votre nom suffit pour commencer.",
+      "nameLabel": "Nom complet",
+      "namePlaceholder": "Awa Ndiaye",
+      "emailLabel": "E-mail (facultatif)",
+      "emailPlaceholder": "awa@example.com",
+      "finish": "Terminer"
+    }
+  }
+}

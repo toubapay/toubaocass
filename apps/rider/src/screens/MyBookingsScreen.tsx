@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { cancelBooking, fetchMyBookings } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -13,12 +14,8 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<BookingsStackParamList, 'MyBookings'>;
 
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: 'Confirmée',
-  cancelled: 'Annulée',
-};
-
 export function MyBookingsScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [modifyingBookingId, setModifyingBookingId] = useState<number | null>(null);
@@ -33,17 +30,17 @@ export function MyBookingsScreen({ navigation }: Props) {
   useFocusEffect(load);
 
   const handleCancel = (booking: Booking) => {
-    Alert.alert('Annuler la réservation', 'Voulez-vous vraiment annuler cette réservation ?', [
-      { text: 'Non', style: 'cancel' },
+    Alert.alert(t('myBookings.cancel'), t('myBookings.cancelConfirm'), [
+      { text: t('myBookings.cancelConfirmNo'), style: 'cancel' },
       {
-        text: 'Oui, annuler',
+        text: t('myBookings.cancelConfirmYes'),
         style: 'destructive',
         onPress: async () => {
           try {
             await cancelBooking(booking.id);
             load();
           } catch (e) {
-            Alert.alert('Annulation impossible', extractErrorMessage(e));
+            Alert.alert(t('myBookings.cancelFailedTitle'), extractErrorMessage(e));
           }
         },
       },
@@ -80,7 +77,7 @@ export function MyBookingsScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Mes réservations</Text>
+      <Text style={styles.title}>{t('myBookings.title')}</Text>
       <FlatList
         data={bookings}
         keyExtractor={(item) => String(item.id)}
@@ -94,11 +91,11 @@ export function MyBookingsScreen({ navigation }: Props) {
                 {item.trip.origin_city?.name} → {item.trip.destination_city?.name}
               </Text>
               <Text style={[styles.status, item.status === 'cancelled' && styles.statusCancelled]}>
-                {STATUS_LABEL[item.status]}
+                {item.status === 'cancelled' ? t('myBookings.statusCancelled') : t('myBookings.statusConfirmed')}
               </Text>
             </View>
             <Text style={styles.meta}>
-              {item.trip.departure_date} à {item.trip.departure_time} · {item.seats_booked} place(s)
+              {t('myBookings.departureAt', { date: item.trip.departure_date, time: item.trip.departure_time, seats: item.seats_booked })}
             </Text>
             <Text style={styles.fare}>{item.fare_total.toLocaleString()} FCFA</Text>
 
@@ -108,18 +105,18 @@ export function MyBookingsScreen({ navigation }: Props) {
                   onPress={() =>
                     navigation.navigate('Chat', {
                       bookingId: item.id,
-                      title: item.trip.driver.name ?? 'Conducteur',
+                      title: item.trip.driver.name ?? t('common.driverFallback'),
                       subtitle: `${item.trip.origin_city?.name} → ${item.trip.destination_city?.name}`,
                     })
                   }
                 >
-                  <Text style={styles.modifyText}>💬 Discuter</Text>
+                  <Text style={styles.modifyText}>{t('myBookings.chat')}</Text>
                 </Pressable>
                 <Pressable onPress={() => setModifyingBookingId(item.id)}>
-                  <Text style={styles.modifyText}>Modifier</Text>
+                  <Text style={styles.modifyText}>{t('myBookings.modify')}</Text>
                 </Pressable>
                 <Pressable onPress={() => handleCancel(item)}>
-                  <Text style={styles.cancelText}>Annuler la réservation</Text>
+                  <Text style={styles.cancelText}>{t('myBookings.cancel')}</Text>
                 </Pressable>
               </View>
             )}
@@ -127,7 +124,7 @@ export function MyBookingsScreen({ navigation }: Props) {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.</Text>
+            <Text style={styles.emptyText}>{t('myBookings.empty')}</Text>
           </View>
         }
       />

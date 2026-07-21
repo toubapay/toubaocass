@@ -6,13 +6,14 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
+import { useTranslation } from 'react-i18next';
 
 import { searchTrips } from '../api/trips';
 import type { Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
-import { RIDE_TYPE_LABEL } from '../utils/trip';
+import { rideTypeLabel } from '../utils/trip';
 
 // Vite doesn't resolve Leaflet's default marker image paths correctly out of
 // the box (a well-known Leaflet + bundler issue) — wire them up explicitly.
@@ -67,6 +68,7 @@ function RecenterMap({ center, zoom }: { center: [number, number]; zoom: number 
 }
 
 export function MapPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +124,7 @@ export function MapPage() {
   async function useCurrentPosition() {
     const coords = await requestLocation();
     if (coords) {
-      setSelectedPoint({ label: 'Ma position actuelle', latitude: coords.latitude, longitude: coords.longitude, source: 'gps' });
+      setSelectedPoint({ label: t('map.myCurrentLocation'), latitude: coords.latitude, longitude: coords.longitude, source: 'gps' });
       setSearchQuery('');
       setSuggestions([]);
     }
@@ -159,11 +161,11 @@ export function MapPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.sm }}>Trajets sur la carte</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.sm }}>{t('map.title')}</h1>
       <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: spacing.md }}>
         {trips.length === 0
-          ? "Aucun trajet actif n'a de point de départ précis pour l'instant."
-          : `${trips.length} trajet(s) avec un point de départ affiché.`}
+          ? t('map.emptyNoPin')
+          : t('map.countWithPin', { count: trips.length })}
       </p>
 
       <div style={{ position: 'relative', marginBottom: spacing.sm }}>
@@ -173,7 +175,7 @@ export function MapPage() {
             setSearchQuery(e.target.value);
             if (selectedPoint?.source === 'search') setSelectedPoint(null);
           }}
-          placeholder="Rechercher une adresse ou un lieu..."
+          placeholder={t('map.searchPlaceholder')}
           style={{
             width: '100%',
             border: `1px solid ${colors.border}`,
@@ -185,7 +187,7 @@ export function MapPage() {
           }}
         />
         {searching && (
-          <span style={{ position: 'absolute', right: 14, top: 12, fontSize: 13, color: colors.textMuted }}>Recherche…</span>
+          <span style={{ position: 'absolute', right: 14, top: 12, fontSize: 13, color: colors.textMuted }}>{t('map.searching')}</span>
         )}
         {suggestions.length > 0 && (
           <div
@@ -243,14 +245,14 @@ export function MapPage() {
             cursor: locating ? 'default' : 'pointer',
           }}
         >
-          {locating ? 'Localisation…' : '📍 Utiliser ma position actuelle'}
+          {locating ? t('map.locating') : t('map.useMyLocation')}
         </button>
         {selectedPoint && (
           <button
             onClick={clearSelectedPoint}
             style={{ border: 'none', background: 'transparent', color: colors.textMuted, fontSize: 14, cursor: 'pointer' }}
           >
-            Effacer
+            {t('map.clear')}
           </button>
         )}
       </div>
@@ -280,7 +282,7 @@ export function MapPage() {
           />
           {selectedPoint && (
             <Marker position={[selectedPoint.latitude, selectedPoint.longitude]} icon={selectedPointIcon}>
-              <Popup>{selectedPoint.source === 'gps' ? 'Votre position actuelle' : selectedPoint.label}</Popup>
+              <Popup>{selectedPoint.source === 'gps' ? t('map.myCurrentLocation') : selectedPoint.label}</Popup>
             </Marker>
           )}
           {tripsWithDistance.map(({ trip, distanceKm }) => (
@@ -291,15 +293,17 @@ export function MapPage() {
                     {trip.origin_city?.name} → {trip.destination_city?.name}
                   </strong>
                   <br />
-                  {trip.departure_date} à {trip.departure_time} · {RIDE_TYPE_LABEL[trip.ride_type] ?? trip.ride_type}
+                  {trip.departure_date} à {trip.departure_time} · {rideTypeLabel(t, trip.ride_type)}
                   <br />
-                  {trip.driver.name ?? 'Conducteur'} · {trip.car?.make} {trip.car?.model}
+                  {trip.driver.name ?? t('common.driverFallback')} · {trip.car?.make} {trip.car?.model}
                   <br />
-                  {trip.available_seats} place(s) disponible(s) · {trip.fare.toLocaleString()} FCFA
+                  {t('map.seatsAvailable', { count: trip.available_seats })} · {trip.fare.toLocaleString()} FCFA
                   {distanceKm !== null && (
                     <>
                       <br />
-                      {distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`} du point choisi
+                      {distanceKm < 1
+                        ? t('map.distanceFromPointM', { value: Math.round(distanceKm * 1000) })
+                        : t('map.distanceFromPointKm', { value: distanceKm.toFixed(1) })}
                     </>
                   )}
                   <br />
@@ -317,7 +321,7 @@ export function MapPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    Voir le trajet
+                    {t('map.viewTrip')}
                   </button>
                 </div>
               </Popup>

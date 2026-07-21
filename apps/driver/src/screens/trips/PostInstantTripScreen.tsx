@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchMyCars } from '../../api/cars';
 import { fetchCities } from '../../api/cities';
@@ -19,11 +20,7 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'PostInstantTrip'>;
 
-const RIDE_TYPES: { value: RideType; label: string }[] = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'comfort', label: 'Confort' },
-  { value: 'xl', label: 'XL' },
-];
+const RIDE_TYPES: RideType[] = ['standard', 'comfort', 'xl'];
 
 /**
  * "Instant Post" style publish — no date/time picker. The driver is
@@ -31,6 +28,7 @@ const RIDE_TYPES: { value: RideType; label: string }[] = [
  * a short grace window so the trip stays bookable for a few minutes.
  */
 export function PostInstantTripScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [cars, setCars] = useState<Car[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -86,7 +84,7 @@ export function PostInstantTripScreen({ navigation }: Props) {
         ride_type: rideType,
         notes: notes.trim() || undefined,
       });
-      Alert.alert('Départ publié', 'Les voyageurs à proximité viennent d\'être notifiés.');
+      Alert.alert(t('trips.postInstant.successTitle'), t('trips.postInstant.successBody'));
       navigation.goBack();
     } catch (e) {
       setError(extractErrorMessage(e));
@@ -100,10 +98,8 @@ export function PostInstantTripScreen({ navigation }: Props) {
   if (!kycApproved) {
     return (
       <Screen>
-        <Text style={styles.title}>⚡ Départ immédiat</Text>
-        <Text style={styles.notice}>
-          Votre vérification conducteur doit être approuvée avant de pouvoir publier des trajets. Consultez l'onglet Vérification.
-        </Text>
+        <Text style={styles.title}>{t('trips.postInstant.title')}</Text>
+        <Text style={styles.notice}>{t('trips.post.kycNotice')}</Text>
       </Screen>
     );
   }
@@ -111,8 +107,8 @@ export function PostInstantTripScreen({ navigation }: Props) {
   if (!cars.length) {
     return (
       <Screen>
-        <Text style={styles.title}>⚡ Départ immédiat</Text>
-        <Text style={styles.notice}>Ajoutez d'abord un véhicule depuis l'onglet Flotte.</Text>
+        <Text style={styles.title}>{t('trips.postInstant.title')}</Text>
+        <Text style={styles.notice}>{t('trips.post.noCarsNotice')}</Text>
       </Screen>
     );
   }
@@ -120,10 +116,10 @@ export function PostInstantTripScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>⚡ Départ immédiat</Text>
-        <Text style={styles.subtitle}>Pas de date à choisir — vous partez maintenant. Les voyageurs à proximité seront notifiés aussitôt publié.</Text>
+        <Text style={styles.title}>{t('trips.postInstant.title')}</Text>
+        <Text style={styles.subtitle}>{t('trips.postInstant.subtitle')}</Text>
 
-        <Text style={styles.label}>Véhicule</Text>
+        <Text style={styles.label}>{t('trips.post.vehicleLabel')}</Text>
         <View style={styles.chipRow}>
           {cars.map((c) => (
             <Pressable
@@ -138,48 +134,48 @@ export function PostInstantTripScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <CityPicker label="Départ" cities={cities} value={origin} onChange={setOrigin} placeholder="Ville de départ" />
+        <CityPicker label={t('trips.post.originLabel')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('trips.post.originPlaceholder')} />
         <CityPicker
-          label="Arrivée"
+          label={t('trips.post.destinationLabel')}
           cities={cities}
           value={destination}
           onChange={setDestination}
-          placeholder="Ville de destination"
+          placeholder={t('trips.post.destinationPlaceholder')}
         />
 
-        <Text style={styles.label}>Point de rendez-vous exact (facultatif)</Text>
+        <Text style={styles.label}>{t('trips.post.meetingPointLabel')}</Text>
         <DeparturePicker latitude={departureLat} longitude={departureLng} onChange={handleDepartureChange} />
         <TextField
-          label="Description du point de rendez-vous"
-          placeholder="ex. Station Total, Route de l'Aéroport"
+          label={t('trips.post.meetingPointDescLabel')}
+          placeholder={t('trips.post.meetingPointPlaceholder')}
           value={departureAddress}
           onChangeText={setDepartureAddress}
         />
 
         <TextField
-          label="Tarif par place (FCFA)"
+          label={t('trips.post.fareLabel')}
           keyboardType="number-pad"
           value={fare}
           onChangeText={setFare}
           error={error}
         />
 
-        <Text style={styles.label}>Type de trajet</Text>
+        <Text style={styles.label}>{t('trips.post.rideTypeLabel')}</Text>
         <View style={styles.chipRow}>
-          {RIDE_TYPES.map((t) => (
+          {RIDE_TYPES.map((rt) => (
             <Pressable
-              key={t.value}
-              style={[styles.chip, rideType === t.value && styles.chipActive]}
-              onPress={() => setRideType(t.value)}
+              key={rt}
+              style={[styles.chip, rideType === rt && styles.chipActive]}
+              onPress={() => setRideType(rt)}
             >
-              <Text style={[styles.chipText, rideType === t.value && styles.chipTextActive]}>{t.label}</Text>
+              <Text style={[styles.chipText, rideType === rt && styles.chipTextActive]}>{t(`common.rideType.${rt}`)}</Text>
             </Pressable>
           ))}
         </View>
 
-        <TextField label="Remarques (facultatif)" value={notes} onChangeText={setNotes} multiline />
+        <TextField label={t('trips.post.notesLabel')} value={notes} onChangeText={setNotes} multiline />
 
-        <Button label="Publier le départ immédiat" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+        <Button label={t('trips.postInstant.submit')} onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
       </ScrollView>
     </Screen>
   );

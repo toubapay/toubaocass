@@ -1,20 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { cancelDelivery, fetchDelivery } from '../api/deliveries';
-import type { Delivery, PackageType } from '../api/types';
+import type { Delivery } from '../api/types';
 import { Button } from '../components/Button';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'En attente',
-  accepted: 'Acceptée',
-  picked_up: 'Récupérée',
-  delivered: 'Livrée',
-  cancelled: 'Annulée',
-};
 
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
@@ -22,13 +15,6 @@ const STATUS_COLOR: Record<string, string> = {
   picked_up: colors.accent,
   delivered: colors.success,
   cancelled: colors.danger,
-};
-
-const PACKAGE_TYPE_LABEL: Record<PackageType, string> = {
-  document: 'Document',
-  colis_leger: 'Colis léger (< 5 kg)',
-  colis_moyen: 'Colis moyen (5–15 kg)',
-  colis_volumineux: 'Colis volumineux (> 15 kg)',
 };
 
 const cardStyle: React.CSSProperties = {
@@ -48,6 +34,7 @@ const sectionTitleStyle: React.CSSProperties = {
 };
 
 export function DeliveryDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [delivery, setDelivery] = useState<Delivery | null>(null);
@@ -65,7 +52,7 @@ export function DeliveryDetailPage() {
   useEffect(load, [id]);
 
   const handleCancel = async () => {
-    if (!delivery || !confirm('Voulez-vous vraiment annuler cette livraison ?')) return;
+    if (!delivery || !confirm(t('deliveryDetail.cancelConfirm'))) return;
     setCancelling(true);
     try {
       await cancelDelivery(delivery.id);
@@ -93,12 +80,12 @@ export function DeliveryDetailPage() {
       </button>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>Livraison #{delivery.id}</h1>
-        <span style={{ fontSize: 13, fontWeight: 700, color: STATUS_COLOR[delivery.status] }}>{STATUS_LABEL[delivery.status]}</span>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>{t('deliveryDetail.titleWithId', { id: delivery.id })}</h1>
+        <span style={{ fontSize: 13, fontWeight: 700, color: STATUS_COLOR[delivery.status] }}>{t(`common.deliveryStatus.${delivery.status}`)}</span>
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Ramassage</p>
+        <p style={sectionTitleStyle}>{t('deliveryDetail.pickup')}</p>
         <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{delivery.pickup_address_line}</p>
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${delivery.pickup_latitude},${delivery.pickup_longitude}`}
@@ -106,12 +93,12 @@ export function DeliveryDetailPage() {
           rel="noreferrer"
           style={{ color: colors.primary, fontWeight: 700, fontSize: 14, marginTop: spacing.sm, display: 'inline-block' }}
         >
-          Ouvrir dans Google Maps
+          {t('common.openInMaps')}
         </a>
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Destinataire</p>
+        <p style={sectionTitleStyle}>{t('deliveryDetail.receiver')}</p>
         <p style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: 0 }}>{delivery.receiver_name}</p>
         <p style={{ fontSize: 15, color: colors.textMuted, margin: '2px 0 0' }}>{delivery.receiver_phone}</p>
         <p style={{ fontSize: 16, color: colors.text, margin: `${spacing.xs}px 0 0` }}>{delivery.receiver_address_line}</p>
@@ -121,28 +108,31 @@ export function DeliveryDetailPage() {
           rel="noreferrer"
           style={{ color: colors.primary, fontWeight: 700, fontSize: 14, marginTop: spacing.sm, display: 'inline-block' }}
         >
-          Ouvrir dans Google Maps
+          {t('common.openInMaps')}
         </a>
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Colis</p>
-        <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{PACKAGE_TYPE_LABEL[delivery.package_type]}</p>
+        <p style={sectionTitleStyle}>{t('deliveryDetail.package')}</p>
+        <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{t(`common.packageType.${delivery.package_type}`)}</p>
         {delivery.notes && <p style={{ fontSize: 15, color: colors.textMuted, margin: '4px 0 0' }}>{delivery.notes}</p>}
       </div>
 
       <div style={cardStyle}>
-        <p style={sectionTitleStyle}>Frais</p>
+        <p style={sectionTitleStyle}>{t('deliveryDetail.fee')}</p>
         <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, margin: 0 }}>{delivery.fee.toLocaleString()} FCFA</p>
         <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>
-          {delivery.distance_km} km · {delivery.payment_method === 'wallet' ? 'Portefeuille' : 'Espèces'}
+          {t('deliveryDetail.distanceAndPayment', {
+            distance: delivery.distance_km,
+            payment: delivery.payment_method === 'wallet' ? t('common.wallet') : t('common.cash'),
+          })}
         </p>
       </div>
 
       {delivery.driver && (
         <div style={cardStyle}>
-          <p style={sectionTitleStyle}>Livreur</p>
-          <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{delivery.driver.name ?? 'Livreur'}</p>
+          <p style={sectionTitleStyle}>{t('deliveryDetail.courier')}</p>
+          <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{delivery.driver.name ?? t('common.courierFallback')}</p>
           <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.sm }}>
             <a
               href={`tel:${delivery.driver.phone}`}
@@ -158,7 +148,7 @@ export function DeliveryDetailPage() {
                 textDecoration: 'none',
               }}
             >
-              📞 Appeler
+              📞 {t('common.call')}
             </a>
             <a
               href={`sms:${delivery.driver.phone}`}
@@ -174,14 +164,14 @@ export function DeliveryDetailPage() {
                 textDecoration: 'none',
               }}
             >
-              💬 SMS
+              💬 {t('common.sms')}
             </a>
           </div>
         </div>
       )}
 
       {isCancellable && (
-        <Button label="Annuler la livraison" onClick={handleCancel} loading={cancelling} variant="danger" />
+        <Button label={t('deliveryDetail.cancelDelivery')} onClick={handleCancel} loading={cancelling} variant="danger" />
       )}
     </div>
   );

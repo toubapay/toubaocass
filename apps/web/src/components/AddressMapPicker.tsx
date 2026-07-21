@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { APIProvider, Map, Marker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { useTranslation } from 'react-i18next';
 
 import { useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -37,6 +38,7 @@ function AutocompleteInput({
   onAddressLineChange: (value: string) => void;
   onPlaceSelected: (latitude: number, longitude: number, formattedAddress: string) => void;
 }) {
+  const { t } = useTranslation();
   const placesLib = useMapsLibrary('places');
   const inputRef = useRef<HTMLInputElement>(null);
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
@@ -69,7 +71,7 @@ function AutocompleteInput({
       ref={inputRef}
       value={addressLine}
       onChange={(e) => onAddressLineChange(e.target.value)}
-      placeholder="Sacré-Cœur 3, Dakar"
+      placeholder={t('addressMapPicker.placeholder')}
       style={inputStyle}
     />
   );
@@ -126,6 +128,7 @@ function PickerMap({
 }
 
 export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, longitude, onLocationChange }: Props) {
+  const { t } = useTranslation();
   const { loading: locating, error: locationError, requestLocation } = useMyLocation();
 
   const handleUseLocation = async () => {
@@ -149,7 +152,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
         <input
           value={addressLine}
           onChange={(e) => onAddressLineChange(e.target.value)}
-          placeholder="Sacré-Cœur 3, Dakar"
+          placeholder={t('addressMapPicker.placeholder')}
           style={inputStyle}
         />
         <button
@@ -169,7 +172,7 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
             marginTop: spacing.sm,
           }}
         >
-          📍 {locating ? 'Localisation…' : latitude != null ? 'Position enregistrée ✓' : 'Utiliser ma position actuelle'}
+          📍 {locating ? t('addressMapPicker.locating') : latitude != null ? t('addressMapPicker.positionSaved') : t('addressMapPicker.useMyLocation')}
         </button>
         {locationError && <p style={{ fontSize: 13, color: colors.danger, marginTop: spacing.xs }}>{locationError}</p>}
       </div>
@@ -209,11 +212,11 @@ export function AddressMapPicker({ addressLine, onAddressLineChange, latitude, l
           marginTop: spacing.sm,
         }}
       >
-        📍 {locating ? 'Localisation…' : 'Utiliser ma position actuelle'}
+        📍 {locating ? t('addressMapPicker.locating') : t('addressMapPicker.useMyLocation')}
       </button>
       {locationError && <p style={{ fontSize: 13, color: colors.danger, marginTop: spacing.xs }}>{locationError}</p>}
       <p style={{ fontSize: 12, color: colors.textMuted, marginTop: spacing.xs }}>
-        Faites glisser le repère pour ajuster l'emplacement exact.
+        {t('addressMapPicker.dragHint')}
       </p>
     </APIProvider>
   );

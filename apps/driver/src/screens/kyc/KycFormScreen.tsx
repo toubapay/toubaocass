@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import { KycFile, submitKyc } from '../../api/kyc';
@@ -16,6 +17,7 @@ import { colors, radius, spacing } from '../../theme';
 type Props = NativeStackScreenProps<KycStackParamList, 'KycForm'>;
 
 function DocumentPicker({ label, file, onPick }: { label: string; file: KycFile | null; onPick: (f: KycFile) => void }) {
+  const { t } = useTranslation();
   const pick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -38,7 +40,7 @@ function DocumentPicker({ label, file, onPick }: { label: string; file: KycFile 
         {file ? (
           <Image source={{ uri: file.uri }} style={styles.preview} />
         ) : (
-          <Text style={styles.pickerPlaceholder}>Appuyez pour envoyer une photo</Text>
+          <Text style={styles.pickerPlaceholder}>{t('kyc.form.pickPlaceholder')}</Text>
         )}
       </Pressable>
     </View>
@@ -46,6 +48,7 @@ function DocumentPicker({ label, file, onPick }: { label: string; file: KycFile 
 }
 
 export function KycFormScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const { refreshUser } = useAuth();
   const [licenseNumber, setLicenseNumber] = useState('');
   const [licenseExpiry, setLicenseExpiry] = useState<Date | null>(null);
@@ -77,11 +80,11 @@ export function KycFormScreen({ navigation }: Props) {
         selfie,
       });
       await refreshUser();
-      Alert.alert('Documents soumis', 'Nous examinerons vos documents sous peu.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+      Alert.alert(t('kyc.form.submittedTitle'), t('kyc.form.submittedBody'), [
+        { text: t('common.ok'), onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
-      Alert.alert('Envoi impossible', extractErrorMessage(e));
+      Alert.alert(t('kyc.form.submitFailedTitle'), extractErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -89,22 +92,22 @@ export function KycFormScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Soumettre les documents KYC</Text>
+      <Text style={styles.title}>{t('kyc.form.title')}</Text>
 
-      <TextField label="Numéro de permis de conduire" value={licenseNumber} onChangeText={setLicenseNumber} />
-      <DateField label="Date d'expiration du permis" value={licenseExpiry} onChange={setLicenseExpiry} minimumDate={new Date()} />
+      <TextField label={t('kyc.form.licenseNumberLabel')} value={licenseNumber} onChangeText={setLicenseNumber} />
+      <DateField label={t('kyc.form.licenseExpiryLabel')} value={licenseExpiry} onChange={setLicenseExpiry} minimumDate={new Date()} />
       <TextField
-        label="Numéro de carte d'identité nationale"
+        label={t('kyc.form.nationalIdLabel')}
         value={nationalId}
         onChangeText={setNationalId}
         keyboardType="number-pad"
       />
 
-      <DocumentPicker label="Photo de la carte d'identité" file={idDocument} onPick={setIdDocument} />
-      <DocumentPicker label="Photo du permis de conduire" file={licenseDocument} onPick={setLicenseDocument} />
-      <DocumentPicker label="Selfie" file={selfie} onPick={setSelfie} />
+      <DocumentPicker label={t('kyc.form.idPhotoLabel')} file={idDocument} onPick={setIdDocument} />
+      <DocumentPicker label={t('kyc.form.licensePhotoLabel')} file={licenseDocument} onPick={setLicenseDocument} />
+      <DocumentPicker label={t('kyc.form.selfieLabel')} file={selfie} onPick={setSelfie} />
 
-      <Button label="Soumettre pour examen" onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
+      <Button label={t('kyc.form.submit')} onPress={handleSubmit} disabled={!canSubmit} loading={loading} />
     </Screen>
   );
 }

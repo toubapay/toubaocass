@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
@@ -20,15 +21,8 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: colors.danger,
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  scheduled: 'Programmé',
-  full: 'Complet',
-  in_progress: 'En cours',
-  completed: 'Terminé',
-  cancelled: 'Annulé',
-};
-
 export function TripsListScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,21 +45,21 @@ export function TripsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.title}>Mes trajets</Text>
+      <Text style={styles.title}>{t('trips.listTitle')}</Text>
 
       <Pressable style={styles.instantCard} onPress={() => navigation.navigate('PostInstantTrip')}>
         <Text style={styles.mapCardIcon}>🚀</Text>
         <View style={styles.mapCardText}>
-          <Text style={styles.instantCardTitle}>Départ immédiat</Text>
-          <Text style={styles.instantCardSubtitle}>Publiez un trajet maintenant, sans date à choisir</Text>
+          <Text style={styles.instantCardTitle}>{t('trips.instantCardTitle')}</Text>
+          <Text style={styles.instantCardSubtitle}>{t('trips.instantCardSubtitle')}</Text>
         </View>
       </Pressable>
 
       <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
         <Text style={styles.mapCardIcon}>🗺️</Text>
         <View style={styles.mapCardText}>
-          <Text style={styles.mapCardTitle}>Définir un point de départ sur la carte</Text>
-          <Text style={styles.mapCardSubtitle}>Recherchez une adresse ou utilisez votre position actuelle</Text>
+          <Text style={styles.mapCardTitle}>{t('trips.mapCardTitle')}</Text>
+          <Text style={styles.mapCardSubtitle}>{t('trips.mapCardSubtitle')}</Text>
         </View>
       </Pressable>
 
@@ -79,22 +73,22 @@ export function TripsListScreen({ navigation }: Props) {
                 {item.origin_city?.name} → {item.destination_city?.name}
               </Text>
               <Text style={[styles.status, { color: STATUS_COLOR[item.status] }]}>
-                {STATUS_LABEL[item.status]}
+                {t(`common.tripStatus.${item.status}`)}
               </Text>
             </View>
             <Text style={styles.meta}>
-              {item.departure_date} à {item.departure_time} · {item.available_seats}/{item.total_seats} places restantes
+              {item.departure_date} à {item.departure_time} · {t('trips.seatsRemaining', { available: item.available_seats, total: item.total_seats })}
             </Text>
-            <Text style={styles.fare}>{item.fare.toLocaleString()} FCFA / place</Text>
+            <Text style={styles.fare}>{t('trips.farePerSeat', { fare: item.fare.toLocaleString() })}</Text>
           </Pressable>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>Vous n'avez publié aucun trajet pour l'instant.</Text>
+            <Text style={styles.emptyText}>{t('trips.emptyList')}</Text>
           </View>
         }
       />
-      <Button label="Publier un nouveau trajet" onPress={() => navigation.navigate('PostTrip')} />
+      <Button label={t('trips.publishNew')} onPress={() => navigation.navigate('PostTrip')} />
     </Screen>
   );
 }

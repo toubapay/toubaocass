@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { createDelivery, quoteDelivery } from '../api/deliveries';
 import { extractErrorMessage } from '../api/client';
@@ -12,12 +13,7 @@ import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
 
-const PACKAGE_TYPES: { value: PackageType; label: string }[] = [
-  { value: 'document', label: 'Document' },
-  { value: 'colis_leger', label: 'Colis léger (< 5 kg)' },
-  { value: 'colis_moyen', label: 'Colis moyen (5–15 kg)' },
-  { value: 'colis_volumineux', label: 'Colis volumineux (> 15 kg)' },
-];
+const PACKAGE_TYPES: PackageType[] = ['document', 'colis_leger', 'colis_moyen', 'colis_volumineux'];
 
 const sectionTitleStyle = {
   fontSize: 13,
@@ -28,6 +24,7 @@ const sectionTitleStyle = {
 };
 
 export function NewDeliveryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -124,10 +121,10 @@ export function NewDeliveryPage() {
         ←
       </button>
 
-      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>Nouvelle livraison</h1>
+      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('newDelivery.title')}</h1>
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Expéditeur</p>
+        <p style={sectionTitleStyle}>{t('newDelivery.sender')}</p>
         <div
           style={{
             backgroundColor: colors.surface,
@@ -142,7 +139,7 @@ export function NewDeliveryPage() {
       </div>
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Adresse de ramassage</p>
+        <p style={sectionTitleStyle}>{t('newDelivery.pickupAddress')}</p>
         <AddressMapPicker
           addressLine={pickupAddressLine}
           onAddressLineChange={setPickupAddressLine}
@@ -156,16 +153,21 @@ export function NewDeliveryPage() {
       </div>
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Destinataire</p>
-        <TextField label="Nom" value={receiverName} onChange={(e) => setReceiverName(e.target.value)} placeholder="Nom complet" />
+        <p style={sectionTitleStyle}>{t('newDelivery.receiver')}</p>
         <TextField
-          label="Téléphone"
+          label={t('newDelivery.receiverName')}
+          value={receiverName}
+          onChange={(e) => setReceiverName(e.target.value)}
+          placeholder={t('newDelivery.receiverNamePlaceholder')}
+        />
+        <TextField
+          label={t('newDelivery.receiverPhone')}
           value={receiverPhone}
           onChange={(e) => setReceiverPhone(e.target.value)}
-          placeholder="+221 7XX XX XX XX"
+          placeholder={t('newDelivery.receiverPhonePlaceholder')}
         />
         <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-          Adresse de livraison
+          {t('newDelivery.deliveryAddress')}
         </label>
         <AddressMapPicker
           addressLine={receiverAddressLine}
@@ -180,38 +182,38 @@ export function NewDeliveryPage() {
       </div>
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Type de colis</p>
+        <p style={sectionTitleStyle}>{t('newDelivery.packageType')}</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm }}>
           {PACKAGE_TYPES.map((pt) => (
             <button
-              key={pt.value}
-              onClick={() => setPackageType(pt.value)}
+              key={pt}
+              onClick={() => setPackageType(pt)}
               style={{
-                border: `1.5px solid ${packageType === pt.value ? colors.primary : colors.border}`,
+                border: `1.5px solid ${packageType === pt ? colors.primary : colors.border}`,
                 borderRadius: radius.md,
                 padding: `${spacing.sm}px ${spacing.md}px`,
-                backgroundColor: packageType === pt.value ? colors.accentSoft : colors.surface,
-                color: packageType === pt.value ? colors.primary : colors.textMuted,
+                backgroundColor: packageType === pt ? colors.accentSoft : colors.surface,
+                color: packageType === pt ? colors.primary : colors.textMuted,
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: 'pointer',
               }}
             >
-              {pt.label}
+              {t(`common.packageType.${pt}`)}
             </button>
           ))}
         </div>
       </div>
 
       <TextField
-        label="Remarques (optionnel)"
+        label={t('newDelivery.notes')}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        placeholder="Instructions particulières pour le livreur"
+        placeholder={t('newDelivery.notesPlaceholder')}
       />
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Frais estimés</p>
+        <p style={sectionTitleStyle}>{t('newDelivery.estimatedFee')}</p>
         <div
           style={{
             backgroundColor: colors.surface,
@@ -221,20 +223,20 @@ export function NewDeliveryPage() {
           }}
         >
           {quoting ? (
-            <p style={{ color: colors.textMuted, margin: 0 }}>Calcul en cours…</p>
+            <p style={{ color: colors.textMuted, margin: 0 }}>{t('newDelivery.calculating')}</p>
           ) : quote ? (
             <>
               <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, margin: 0 }}>{quote.fee.toLocaleString()} FCFA</p>
               <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>{quote.distance_km} km</p>
             </>
           ) : (
-            <p style={{ color: colors.textMuted, margin: 0 }}>Placez les deux adresses pour voir le tarif.</p>
+            <p style={{ color: colors.textMuted, margin: 0 }}>{t('newDelivery.placeAddressesPrompt')}</p>
           )}
         </div>
       </div>
 
       <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>Mode de paiement</p>
+        <p style={sectionTitleStyle}>{t('newDelivery.paymentMethod')}</p>
         <div style={{ display: 'flex', gap: spacing.sm }}>
           <button
             onClick={() => setPaymentMethod('cash')}
@@ -251,7 +253,7 @@ export function NewDeliveryPage() {
               textAlign: 'center',
             }}
           >
-            💵 Espèces
+            💵 {t('common.cash')}
           </button>
           <button
             onClick={() => setPaymentMethod('wallet')}
@@ -274,18 +276,18 @@ export function NewDeliveryPage() {
                 color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted}
                 detailColor={paymentMethod === 'wallet' ? colors.accentSoft : colors.surface}
               />
-              Portefeuille {walletBalance !== null && `(${walletBalance.toLocaleString()} F)`}
+              {t('newDelivery.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
             </span>
           </button>
         </div>
         {insufficientWalletFunds && (
           <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
-            Solde insuffisant pour ce paiement.{' '}
+            {t('common.insufficientFunds')}{' '}
             <button
               onClick={() => navigate('/wallet')}
               style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
             >
-              Recharger
+              {t('common.topUp')}
             </button>
           </p>
         )}
@@ -294,7 +296,7 @@ export function NewDeliveryPage() {
       {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
 
       <Button
-        label={quote ? `Envoyer la demande — ${quote.fee.toLocaleString()} FCFA` : 'Envoyer la demande'}
+        label={quote ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() }) : t('newDelivery.submit')}
         onClick={handleSubmit}
         loading={submitting}
         disabled={!canSubmit || insufficientWalletFunds}

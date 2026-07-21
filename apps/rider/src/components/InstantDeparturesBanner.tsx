@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchInstantTrips } from '../api/trips';
 import { HomeStackParamList } from '../navigation/types';
@@ -15,6 +16,7 @@ const POLL_INTERVAL_MS = 20000;
  * relying solely on push, matching the web app's equivalent banner.
  */
 export function InstantDeparturesBanner() {
+  const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const [count, setCount] = useState(0);
   const opacity = useRef(new Animated.Value(1)).current;
@@ -61,10 +63,8 @@ export function InstantDeparturesBanner() {
   return (
     <Pressable onPress={() => navigation.navigate('InstantDepartures')}>
       <Animated.View style={[styles.banner, { opacity: reduceMotion ? 1 : opacity }]}>
-        <Text style={styles.text}>
-          ⚡ {count} départ{count > 1 ? 's' : ''} immédiat{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}
-        </Text>
-        <Text style={styles.link}>Voir →</Text>
+        <Text style={styles.text}>{t('instantDepartures.bannerLabel', { count })}</Text>
+        <Text style={styles.link}>{t('instantDepartures.bannerView')}</Text>
       </Animated.View>
     </Pressable>
   );

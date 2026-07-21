@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { fetchMessages, sendMessage } from '../api/messages';
@@ -15,6 +16,7 @@ interface ChatLocationState {
 }
 
 export function ChatPage() {
+  const { t } = useTranslation();
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,7 +80,7 @@ export function ChatPage() {
       >
         ←
       </button>
-      <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.text, marginBottom: 2 }}>{state.title ?? 'Discussion'}</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.text, marginBottom: 2 }}>{state.title ?? t('chat.defaultTitle')}</h1>
       {state.subtitle && (
         <p style={{ fontSize: 13, color: colors.textMuted, marginTop: 0, marginBottom: spacing.md }}>{state.subtitle}</p>
       )}
@@ -86,7 +88,7 @@ export function ChatPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm, marginBottom: spacing.md }}>
         {messages.length === 0 ? (
           <p style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center', marginTop: spacing.xl }}>
-            Aucun message pour l'instant. Dites bonjour !
+            {t('chat.empty')}
           </p>
         ) : (
           messages.map((m) => (
@@ -125,7 +127,7 @@ export function ChatPage() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSend();
           }}
-          placeholder="Écrire un message..."
+          placeholder={t('chat.placeholder')}
           style={{
             flex: 1,
             border: `1px solid ${colors.border}`,
@@ -151,7 +153,7 @@ export function ChatPage() {
             opacity: sending || !body.trim() ? 0.6 : 1,
           }}
         >
-          Envoyer
+          {t('chat.send')}
         </button>
       </div>
     </div>

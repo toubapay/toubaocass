@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
@@ -15,6 +16,7 @@ import { colors, radius, spacing } from '../theme';
 const NEARBY_RADIUS_KM = 25;
 
 export function HomePage() {
+  const { t } = useTranslation();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -58,7 +60,7 @@ export function HomePage() {
           setLastPage(res.meta?.last_page ?? 1);
           setTotal(res.meta?.total ?? res.data.length);
         })
-        .catch(() => setError('Impossible de charger les trajets. Réessayez.'))
+        .catch(() => setError(t('home.loadError')))
         .finally(() => setLoading(false));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,7 +106,7 @@ export function HomePage() {
   return (
     <div>
       <h1 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.sm }}>
-        Choisissez destination
+        {t('home.title')}
       </h1>
 
       <InstantDeparturesBanner />
@@ -125,25 +127,25 @@ export function HomePage() {
         }}
       >
         {locating
-          ? '…'
+          ? t('home.locating')
           : nearMe
-            ? `📍 Trajets affichés dans un rayon de ${NEARBY_RADIUS_KM} km`
-            : '📍 Trouver des trajets près de moi'}
+            ? t('home.nearMeActive', { radius: NEARBY_RADIUS_KM })
+            : t('home.nearMeInactive')}
       </button>
 
       <div style={{ display: 'flex', gap: spacing.sm }}>
         <div style={{ flex: 1 }}>
-          <CityPicker label="Départ" cities={cities} value={origin} onChange={setOrigin} placeholder="Toutes les villes" />
+          <CityPicker label={t('home.departureLabel')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('home.allCities')} />
         </div>
         <div style={{ flex: 1 }}>
-          <CityPicker label="Arrivée" cities={cities} value={destination} onChange={setDestination} placeholder="Toutes les villes" />
+          <CityPicker label={t('home.arrivalLabel')} cities={cities} value={destination} onChange={setDestination} placeholder={t('home.allCities')} />
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: spacing.lg, alignItems: 'flex-start' }}>
         <div style={{ width: 150 }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-            Date
+            {t('home.dateLabel')}
           </label>
           <div style={{ position: 'relative' }}>
             <input
@@ -177,14 +179,14 @@ export function HomePage() {
                   pointerEvents: 'none',
                 }}
               >
-                jj/mm/aaaa
+                {t('home.datePlaceholder')}
               </span>
             )}
           </div>
         </div>
         <div style={{ width: 100 }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-            Places
+            {t('home.seatsLabel')}
           </label>
           <div
             style={{
@@ -220,12 +222,12 @@ export function HomePage() {
           onClick={clearFilters}
           style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, fontSize: 14, cursor: 'pointer', padding: 0, marginTop: spacing.sm, marginBottom: spacing.sm }}
         >
-          Effacer les filtres
+          {t('home.clearFilters')}
         </button>
       )}
       {invalidRoute && (
         <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.sm }}>
-          La ville de départ et d'arrivée ne peuvent pas être identiques.
+          {t('home.invalidRoute')}
         </p>
       )}
 
@@ -239,10 +241,10 @@ export function HomePage() {
               <div style={{ marginTop: spacing.xl, textAlign: 'center', padding: `0 ${spacing.lg}px` }}>
                 <p style={{ color: colors.textMuted, fontSize: 16 }}>
                   {nearMe
-                    ? `Aucun trajet ne part dans un rayon de ${NEARBY_RADIUS_KM} km pour l'instant.`
+                    ? t('home.emptyNearby', { radius: NEARBY_RADIUS_KM })
                     : hasFilters
-                      ? "Aucun trajet trouvé pour ces filtres. Essayez d'élargir votre recherche."
-                      : 'Aucun trajet à venir pour le moment — revenez bientôt.'}
+                      ? t('home.emptyFiltered')
+                      : t('home.emptyDefault')}
                 </p>
               </div>
             ) : (
@@ -280,12 +282,12 @@ export function HomePage() {
                     opacity: page <= 1 ? 0.4 : 1,
                   }}
                 >
-                  ← Précédent
+                  {t('home.prev')}
                 </button>
                 <span style={{ fontSize: 14, color: colors.textMuted, textAlign: 'center' }}>
-                  Page {page} sur {lastPage}
+                  {t('home.pageOf', { page, lastPage })}
                   <br />
-                  {total} trajet(s) au total
+                  {t('home.totalTrips', { count: total })}
                 </span>
                 <button
                   onClick={() => goToPage(page + 1)}
@@ -302,7 +304,7 @@ export function HomePage() {
                     opacity: page >= lastPage ? 0.4 : 1,
                   }}
                 >
-                  Suivant →
+                  {t('home.next')}
                 </button>
               </div>
             )}

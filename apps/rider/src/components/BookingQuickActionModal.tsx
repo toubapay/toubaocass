@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
@@ -19,6 +20,7 @@ export function BookingQuickActionModal({
   onClose: () => void;
   onSuccess: (updatedTrip: Trip) => void;
 }) {
+  const { t } = useTranslation();
   const editing = trip.my_booking != null;
   const maxSeats = trip.available_seats + (trip.my_booking?.seats_booked ?? 0);
   const [seats, setSeats] = useState(trip.my_booking?.seats_booked ?? 1);
@@ -48,13 +50,18 @@ export function BookingQuickActionModal({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>{editing ? 'Modifier la réservation' : 'Réserver ce trajet'}</Text>
+          <Text style={styles.title}>{editing ? t('bookingQuickAction.editTitle') : t('bookingQuickAction.bookTitle')}</Text>
           <Text style={styles.subtitle}>
-            {trip.origin_city?.name} → {trip.destination_city?.name} · {trip.departure_date} à {trip.departure_time}
+            {t('bookingQuickAction.tripSummary', {
+              origin: trip.origin_city?.name,
+              destination: trip.destination_city?.name,
+              date: trip.departure_date,
+              time: trip.departure_time,
+            })}
           </Text>
 
           <View style={styles.seatsRow}>
-            <Text style={styles.seatsLabel}>{editing ? 'Nombre de places' : 'Places à réserver'}</Text>
+            <Text style={styles.seatsLabel}>{editing ? t('bookingQuickAction.seatsCountEditing') : t('bookingQuickAction.seatsCountBooking')}</Text>
             <View style={styles.stepper}>
               <Pressable
                 style={styles.stepperButton}
@@ -69,18 +76,24 @@ export function BookingQuickActionModal({
             </View>
           </View>
 
-          {editing && seats === 0 && <Text style={styles.warning}>Réduire à 0 place annulera votre réservation.</Text>}
+          {editing && seats === 0 && <Text style={styles.warning}>{t('bookingQuickAction.reduceToZeroWarning')}</Text>}
           {error && <Text style={styles.error}>{error}</Text>}
 
           <Text style={styles.fare}>{(trip.fare * seats).toLocaleString()} FCFA</Text>
 
           <Button
-            label={editing ? (seats === 0 ? 'Annuler la réservation' : 'Enregistrer') : 'Confirmer la réservation'}
+            label={
+              editing
+                ? seats === 0
+                  ? t('bookingQuickAction.cancelReservation')
+                  : t('bookingQuickAction.save')
+                : t('bookingQuickAction.confirmReservation')
+            }
             onPress={handleConfirm}
             loading={loading}
             variant={editing && seats === 0 ? 'danger' : 'primary'}
           />
-          <Button label="Fermer" onPress={onClose} variant="outline" style={styles.closeButton} />
+          <Button label={t('bookingQuickAction.close')} onPress={onClose} variant="outline" style={styles.closeButton} />
         </Pressable>
       </Pressable>
     </Modal>

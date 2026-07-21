@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { fetchKycStatus } from '../../api/kyc';
 import { DriverProfile } from '../../api/types';
@@ -12,30 +13,8 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<KycStackParamList, 'KycStatus'>;
 
-const STATUS_COPY: Record<string, { title: string; body: string; color: string }> = {
-  pending: {
-    title: 'Vérification requise',
-    body: 'Soumettez votre pièce d\'identité, votre permis de conduire et un selfie pour commencer à publier des trajets.',
-    color: colors.textMuted,
-  },
-  submitted: {
-    title: 'En cours d\'examen',
-    body: 'Nous examinons vos documents. Cela prend généralement moins de 24 heures.',
-    color: colors.accent,
-  },
-  approved: {
-    title: 'Vérifié',
-    body: 'Votre compte est vérifié. Vous pouvez publier des trajets à tout moment.',
-    color: colors.success,
-  },
-  rejected: {
-    title: 'Vérification refusée',
-    body: 'Veuillez consulter la raison ci-dessous et soumettre à nouveau vos documents.',
-    color: colors.danger,
-  },
-};
-
 export function KycStatusScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<DriverProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,22 +36,27 @@ export function KycStatusScreen({ navigation }: Props) {
   }
 
   const status = profile?.kyc_status ?? 'pending';
-  const copy = STATUS_COPY[status];
+  const STATUS_COLOR: Record<string, string> = {
+    pending: colors.textMuted,
+    submitted: colors.accent,
+    approved: colors.success,
+    rejected: colors.danger,
+  };
 
   return (
     <Screen>
-      <Text style={styles.title}>Vérification conducteur</Text>
+      <Text style={styles.title}>{t('kyc.title')}</Text>
 
       <View style={styles.card}>
-        <Text style={[styles.status, { color: copy.color }]}>{copy.title}</Text>
-        <Text style={styles.body}>{copy.body}</Text>
+        <Text style={[styles.status, { color: STATUS_COLOR[status] }]}>{t(`kyc.${status}Title`)}</Text>
+        <Text style={styles.body}>{t(`kyc.${status}Body`)}</Text>
         {status === 'rejected' && profile?.kyc_rejection_reason ? (
           <Text style={styles.reason}>{profile.kyc_rejection_reason}</Text>
         ) : null}
       </View>
 
       {status !== 'submitted' && status !== 'approved' && (
-        <Button label="Soumettre les documents" onPress={() => navigation.navigate('KycForm')} />
+        <Button label={t('kyc.submitDocs')} onPress={() => navigation.navigate('KycForm')} />
       )}
     </Screen>
   );

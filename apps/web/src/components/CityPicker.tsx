@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { City } from '../api/types';
 import { colors, radius, spacing } from '../theme';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function CityPicker({ label, cities, value, onChange, placeholder }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState(value?.name ?? '');
   const [focused, setFocused] = useState(false);
 
@@ -36,7 +38,7 @@ export function CityPicker({ label, cities, value, onChange, placeholder }: Prop
         }}
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 150)}
-        placeholder={placeholder ?? 'Sélectionner une ville'}
+        placeholder={placeholder ?? t('common.selectCity')}
         style={{
           width: '100%',
           border: `1px solid ${colors.border}`,

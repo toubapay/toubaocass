@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import { Button } from '../../components/Button';
@@ -8,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, spacing } from '../../theme';
 
 export function OtpVerifyPage() {
+  const { t } = useTranslation();
   const { confirmOtp, sendOtp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,15 +65,15 @@ export function OtpVerifyPage() {
       </button>
 
       <h1 style={{ fontSize: 26, fontWeight: 700, color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm }}>
-        Saisissez le code
+        {t('auth.otpVerify.title')}
       </h1>
       <p style={{ fontSize: 16, color: colors.textMuted, marginBottom: spacing.lg }}>
-        Nous avons envoyé un code de vérification par SMS au {phone}.
+        {t('auth.otpVerify.subtitle', { phone })}
       </p>
 
       <TextField
-        label="Code de vérification"
-        placeholder="123456"
+        label={t('auth.otpVerify.codeLabel')}
+        placeholder={t('auth.otpVerify.codePlaceholder')}
         inputMode="numeric"
         maxLength={6}
         value={code}
@@ -79,10 +81,10 @@ export function OtpVerifyPage() {
         error={error}
       />
 
-      <Button label="Vérifier" type="submit" loading={loading} disabled={code.length < 4} />
+      <Button label={t('auth.otpVerify.verify')} type="submit" loading={loading} disabled={code.length < 4} />
       <div style={{ marginTop: spacing.sm }}>
         <Button
-          label={resending ? 'Envoi en cours...' : 'Renvoyer le code'}
+          label={resending ? t('auth.otpVerify.resending') : t('auth.otpVerify.resend')}
           type="button"
           onClick={handleResend}
           loading={resending}

@@ -1,0 +1,303 @@
+{
+  "common": {
+    "back": "رجوع",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "add": "إضافة",
+    "call": "اتصال",
+    "sms": "رسالة نصية",
+    "openInMaps": "فتح في خرائط جوجل",
+    "driverFallback": "السائق",
+    "courierFallback": "عامل التوصيل",
+    "cash": "نقداً",
+    "wallet": "المحفظة",
+    "insufficientFunds": "الرصيد غير كافٍ لإتمام هذه العملية.",
+    "topUp": "شحن الرصيد",
+    "selectCity": "اختر مدينة",
+    "rideType": { "standard": "عادي", "comfort": "مريح", "xl": "كبير" },
+    "fillState": { "open": "متاح", "filling": "يمتلئ", "full": "مكتمل" },
+    "deliveryStatus": {
+      "pending": "قيد الانتظار",
+      "accepted": "مقبولة",
+      "picked_up": "تم الاستلام",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغاة"
+    },
+    "packageType": {
+      "document": "وثيقة",
+      "colis_leger": "طرد خفيف (< 5 كغ)",
+      "colis_moyen": "طرد متوسط (5-15 كغ)",
+      "colis_volumineux": "طرد كبير (> 15 كغ)"
+    }
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "services": "الخدمات",
+    "bookings": "الحجوزات",
+    "profile": "الملف الشخصي"
+  },
+  "layout": {
+    "tagline": "سافر من منزلك. ابحث واحجز."
+  },
+  "home": {
+    "title": "اختر الوجهة",
+    "locating": "…",
+    "nearMeActive": "📍 الرحلات المعروضة ضمن دائرة نصف قطرها {{radius}} كم",
+    "nearMeInactive": "📍 البحث عن رحلات بالقرب مني",
+    "departureLabel": "الانطلاق",
+    "arrivalLabel": "الوصول",
+    "allCities": "كل المدن",
+    "dateLabel": "التاريخ",
+    "datePlaceholder": "يي/شش/سسسس",
+    "seatsLabel": "المقاعد",
+    "clearFilters": "مسح عوامل التصفية",
+    "invalidRoute": "لا يمكن أن تكون مدينة الانطلاق والوصول متطابقتين.",
+    "loadError": "تعذر تحميل الرحلات. أعد المحاولة.",
+    "emptyNearby": "لا توجد رحلات تنطلق ضمن دائرة نصف قطرها {{radius}} كم حالياً.",
+    "emptyFiltered": "لم يتم العثور على رحلات لهذه المعايير. حاول توسيع نطاق البحث.",
+    "emptyDefault": "لا توجد رحلات قادمة حالياً — عد قريباً.",
+    "prev": "→ السابق",
+    "next": "التالي ←",
+    "pageOf": "صفحة {{page}} من {{lastPage}}",
+    "totalTrips": "{{count}} رحلة إجمالاً"
+  },
+  "profile": {
+    "title": "ملفي الشخصي",
+    "wallet": "محفظتي",
+    "settings": "⚙️ الإعدادات",
+    "notificationsEnabled": "🔔 الإشعارات مفعّلة",
+    "notificationsBlocked": "الإشعارات محظورة. فعّلها من إعدادات متصفحك لتصلك تنبيهات حجوزاتك.",
+    "enableNotifications": "🔔 تفعيل الإشعارات",
+    "language": "اللغة",
+    "languageFrench": "Français",
+    "languageArabic": "العربية",
+    "signOut": "تسجيل الخروج"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "accountInfo": "معلومات الحساب",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني (اختياري)",
+    "phoneNotEditable": "الهاتف: {{phone}} (غير قابل للتعديل)",
+    "profileUpdated": "تم تحديث الملف الشخصي ✓",
+    "save": "حفظ",
+    "savedAddresses": "العناوين المحفوظة",
+    "add": "+ إضافة",
+    "noAddresses": "لا توجد عناوين محفوظة حالياً.",
+    "addressLabelField": "التسمية",
+    "addressLabelPlaceholder": "المنزل، العمل…",
+    "addressField": "العنوان",
+    "setAsDefault": "تعيين كعنوان افتراضي",
+    "defaultBadge": "افتراضي",
+    "editAria": "تعديل",
+    "deleteAria": "حذف",
+    "deleteConfirm": "حذف العنوان \"{{label}}\"؟",
+    "cancel": "إلغاء"
+  },
+  "tripDetail": {
+    "departureAt": "{{date}} في {{time}}",
+    "reserveButton": "⚡ حجز — {{amount}} فرنك",
+    "bookedSeats": "✓ لقد حجزت {{count}} مقعد/مقاعد في هذه الرحلة",
+    "chatWithDriver": "💬 التحدث مع السائق",
+    "itinerary": "المسار",
+    "drivingDuration": " · ~{{duration}} من القيادة",
+    "departurePoint": "نقطة الانطلاق",
+    "driverSection": "السائق",
+    "ratingLabel": "التقييم: {{rating}} ★",
+    "vehicle": "المركبة",
+    "fare": "التعرفة",
+    "farePerSeat": "{{amount}} فرنك / مقعد",
+    "seatsRemaining": "{{available}} مقعد/مقاعد متبقية من أصل {{total}}",
+    "notes": "ملاحظات",
+    "paymentMethod": "طريقة الدفع",
+    "walletWithBalance": "المحفظة {{balance}}",
+    "topUpLink": "شحن الرصيد",
+    "tripDeparted": "هذه الرحلة انتهت أو غادرت بالفعل.",
+    "tripUnavailable": "هذه الرحلة لم تعد متاحة.",
+    "seatsCountEditing": "عدد المقاعد",
+    "seatsCountBooking": "المقاعد المراد حجزها",
+    "reduceToZeroWarning": "تخفيض العدد إلى 0 سيؤدي إلى إلغاء حجزك.",
+    "cancelReservation": "إلغاء الحجز",
+    "saveForAmount": "حفظ مقابل {{amount}} فرنك",
+    "bookForAmount": "حجز مقابل {{amount}} فرنك",
+    "bookingCancelledAlert": "تم إلغاء الحجز.",
+    "bookingUpdatedAlert": "تم تحديث الحجز.",
+    "bookingConfirmedAlert": "لقد حجزت {{count}} مقعد/مقاعد. رحلة سعيدة! يمكنك مراجعتها في حجوزاتي."
+  },
+  "myBookings": {
+    "title": "حجوزاتي",
+    "empty": "ليس لديك أي حجز بعد. ابحث عن رحلة للبدء.",
+    "statusConfirmed": "مؤكد",
+    "statusCancelled": "ملغى",
+    "departureAt": "{{date}} في {{time}} · {{seats}} مقعد/مقاعد",
+    "chat": "💬 محادثة",
+    "modify": "تعديل",
+    "cancel": "إلغاء الحجز",
+    "cancelConfirm": "هل تريد فعلاً إلغاء هذا الحجز؟"
+  },
+  "bookingQuickAction": {
+    "editTitle": "تعديل الحجز",
+    "bookTitle": "حجز هذه الرحلة",
+    "tripSummary": "{{origin}} ← {{destination}} · {{date}} في {{time}}",
+    "seatsCountEditing": "عدد المقاعد",
+    "seatsCountBooking": "المقاعد المراد حجزها",
+    "reduceToZeroWarning": "تخفيض العدد إلى 0 سيؤدي إلى إلغاء حجزك.",
+    "cancelReservation": "إلغاء الحجز",
+    "save": "حفظ",
+    "confirmReservation": "تأكيد الحجز",
+    "close": "إغلاق"
+  },
+  "wallet": {
+    "title": "محفظتي",
+    "availableBalance": "الرصيد المتاح",
+    "topUpNote": "لشحن محفظتك، تواصل مع فريقنا — يتم إضافة الشحن من قبل أحد المسؤولين.",
+    "history": "السجل",
+    "emptyHistory": "لا توجد معاملات حالياً.",
+    "type": {
+      "top_up": "شحن رصيد",
+      "payment": "دفع رحلة",
+      "earning": "أرباح رحلة",
+      "refund": "استرداد",
+      "refund_reversal": "استرجاع أرباح"
+    }
+  },
+  "chat": {
+    "defaultTitle": "محادثة",
+    "empty": "لا توجد رسائل بعد. قل مرحباً!",
+    "placeholder": "اكتب رسالة...",
+    "send": "إرسال"
+  },
+  "deliveryDetail": {
+    "titleWithId": "توصيل #{{id}}",
+    "pickup": "الاستلام",
+    "receiver": "المستلم",
+    "package": "الطرد",
+    "fee": "الرسوم",
+    "distanceAndPayment": "{{distance}} كم · {{payment}}",
+    "courier": "عامل التوصيل",
+    "cancelDelivery": "إلغاء التوصيل",
+    "cancelConfirm": "هل تريد فعلاً إلغاء هذا التوصيل؟"
+  },
+  "myDeliveries": {
+    "title": "توصيلاتي",
+    "empty": "ليس لديك أي توصيل بعد."
+  },
+  "newDelivery": {
+    "title": "توصيل جديد",
+    "sender": "المرسل",
+    "pickupAddress": "عنوان الاستلام",
+    "receiver": "المستلم",
+    "receiverName": "الاسم",
+    "receiverNamePlaceholder": "الاسم الكامل",
+    "receiverPhone": "الهاتف",
+    "receiverPhonePlaceholder": "+221 7XX XX XX XX",
+    "deliveryAddress": "عنوان التسليم",
+    "packageType": "نوع الطرد",
+    "notes": "ملاحظات (اختياري)",
+    "notesPlaceholder": "تعليمات خاصة لعامل التوصيل",
+    "estimatedFee": "الرسوم التقديرية",
+    "calculating": "جارٍ الحساب…",
+    "placeAddressesPrompt": "حدد العنوانين لمعرفة السعر.",
+    "paymentMethod": "طريقة الدفع",
+    "walletWithBalance": "المحفظة {{balance}}",
+    "submit": "إرسال الطلب",
+    "submitWithFee": "إرسال الطلب — {{amount}} فرنك"
+  },
+  "services": {
+    "title": "الخدمات",
+    "comingSoon": "🚧 قريباً — هذه الخدمة قادمة قريباً.",
+    "livraison": { "label": "التوصيل", "description": "إرسال الطرود داخل المدينة وبين المدن" },
+    "cargaison": { "label": "الشحن", "description": "نقل البضائع بكميات كبيرة" },
+    "camion": { "label": "شاحنة", "description": "نقل الأثاث والأغراض الكبيرة" },
+    "location": { "label": "الإيجار", "description": "استئجار مركبات مع أو بدون سائق" }
+  },
+  "map": {
+    "title": "الرحلات على الخريطة",
+    "emptyNoPin": "لا توجد رحلة نشطة لها نقطة انطلاق دقيقة حالياً.",
+    "countWithPin": "{{count}} رحلة معروضة بنقطة انطلاق.",
+    "searchPlaceholder": "ابحث عن عنوان أو مكان...",
+    "searching": "جارٍ البحث…",
+    "locating": "تحديد الموقع…",
+    "useMyLocation": "📍 استخدام موقعي الحالي",
+    "clear": "مسح",
+    "myCurrentLocation": "موقعي الحالي",
+    "viewTrip": "عرض الرحلة",
+    "seatsAvailable": "{{count}} مقعد/مقاعد متاحة",
+    "distanceFromPointM": "{{value}} م من النقطة المحددة",
+    "distanceFromPointKm": "{{value}} كم من النقطة المحددة"
+  },
+  "instantDepartures": {
+    "title": "⚡ مغادرات فورية",
+    "subtitle": "سائقون ينطلقون الآن، بدون حجز مسبق.",
+    "empty": "لا توجد مغادرات فورية حالياً.",
+    "bannerLabel_one": "⚡ مغادرة فورية واحدة متاحة",
+    "bannerLabel_two": "⚡ مغادرتان فوريتان متاحتان",
+    "bannerLabel_few": "⚡ {{count}} مغادرات فورية متاحة",
+    "bannerLabel_many": "⚡ {{count}} مغادرة فورية متاحة",
+    "bannerLabel_other": "⚡ {{count}} مغادرة فورية متاحة",
+    "bannerView": "عرض ←"
+  },
+  "tripCard": {
+    "distanceUnderOneKm": "على بعد < 1 كم",
+    "distanceAt": "على بعد {{value}} كم",
+    "seatsAvailable": "{{available}} مقعد/مقاعد متاحة من أصل {{total}}",
+    "bookedSeats": "✓ محجوز · {{count}} مقعد/مقاعد",
+    "modify": "تعديل",
+    "reserve": "حجز"
+  },
+  "tripUrgencyBadge": {
+    "urgent": "⚡ المغادرة وشيكة",
+    "available": "🟢 مقاعد متاحة"
+  },
+  "myLocationBar": {
+    "ariaLabel": "موقعي",
+    "myPosition": "موقعي",
+    "currentPositionFallback": "الموقع الحالي",
+    "modalTitle": "موقعي",
+    "save": "حفظ",
+    "close": "إغلاق"
+  },
+  "addressMapPicker": {
+    "placeholder": "السكرى كور 3، داكار",
+    "locating": "تحديد الموقع…",
+    "positionSaved": "تم حفظ الموقع ✓",
+    "useMyLocation": "استخدام موقعي الحالي",
+    "dragHint": "اسحب العلامة لضبط الموقع الدقيق."
+  },
+  "tripsMap": {
+    "title": "خريطة الرحلات",
+    "emptyNoPin": "لا توجد رحلة معروضة لها نقطة انطلاق دقيقة حالياً.",
+    "countWithPin": "{{count}} رحلة معروضة بنقطة انطلاق.",
+    "viewTrip": "عرض الرحلة"
+  },
+  "auth": {
+    "phoneEntry": {
+      "appName": "Intercity",
+      "subtitle": "احجز مقعداً لرحلة بين المدن.",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "+221 77 000 00 00",
+      "continue": "متابعة"
+    },
+    "otpVerify": {
+      "title": "أدخل الرمز",
+      "subtitle": "لقد أرسلنا رمز تحقق عبر الرسائل النصية إلى {{phone}}.",
+      "codeLabel": "رمز التحقق",
+      "codePlaceholder": "123456",
+      "verify": "تحقق",
+      "resend": "إعادة إرسال الرمز",
+      "resending": "جارٍ الإرسال..."
+    },
+    "profileSetup": {
+      "title": "حدثنا عن نفسك",
+      "subtitle": "اسمك كافٍ للبدء.",
+      "nameLabel": "الاسم الكامل",
+      "namePlaceholder": "أوا نداي",
+      "emailLabel": "البريد الإلكتروني (اختياري)",
+      "emailPlaceholder": "awa@example.com",
+      "finish": "إنهاء"
+    }
+  }
+}
