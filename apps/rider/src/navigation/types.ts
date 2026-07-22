@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export type AuthStackParamList = {
   PhoneEntry: undefined;
   OtpVerify: { phone: string };
@@ -37,8 +39,8 @@ export type ProfileStackParamList = {
 };
 
 export type MainTabParamList = {
-  HomeTab: undefined;
-  ServicesTab: undefined;
-  BookingsTab: undefined;
-  ProfileTab: undefined;
+  HomeTab: NavigatorScreenParams<HomeStackParamList> | undefined;
+  ServicesTab: NavigatorScreenParams<ServicesStackParamList> | undefined;
+  BookingsTab: NavigatorScreenParams<BookingsStackParamList> | undefined;
+  ProfileTab: NavigatorScreenParams<ProfileStackParamList> | undefined;
 };

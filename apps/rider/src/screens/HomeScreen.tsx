@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
 import { City, Trip } from '../api/types';
+import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
@@ -98,6 +99,7 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
+        <AnandoAvailableToast />
         <InstantDeparturesBanner />
 
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
