@@ -13,6 +13,8 @@ export type TripsStackParamList = {
   TripDetail: { tripId: number };
   Chat: ChatParams;
   Wallet: undefined;
+  Anando: undefined;
+  AnandoRideDetail: { rideId: number };
 };
 
 export type FleetStackParamList = {

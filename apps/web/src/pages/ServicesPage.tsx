@@ -5,11 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { colors, radius, spacing } from '../theme';
 
 const SERVICES = [
+  { key: 'anando', icon: '🚗' },
   { key: 'livraison', icon: '📦' },
   { key: 'cargaison', icon: '🛳️' },
   { key: 'camion', icon: '🚛' },
   { key: 'location', icon: '🔑' },
 ];
+
+const LINKED_SERVICES: Record<string, string> = {
+  livraison: '/services/livraison',
+  anando: '/services/anando',
+};
 
 export function ServicesPage() {
   const { t } = useTranslation();
@@ -24,8 +30,8 @@ export function ServicesPage() {
         <div key={service.key} style={{ marginBottom: spacing.md }}>
           <button
             onClick={() =>
-              service.key === 'livraison'
-                ? navigate('/services/livraison')
+              LINKED_SERVICES[service.key]
+                ? navigate(LINKED_SERVICES[service.key])
                 : setComingSoonKey(comingSoonKey === service.key ? null : service.key)
             }
             style={{

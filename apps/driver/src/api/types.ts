@@ -161,6 +161,40 @@ export interface Delivery {
   created_at: string;
 }
 
+export type AnandoRideStatus = 'open' | 'full' | 'cancelled' | 'completed';
+
+export interface AnandoRide {
+  id: number;
+  poster: { id: number; name: string | null; phone: string; role: Role };
+  origin_city: City | null;
+  destination_city: City | null;
+  departure_point: string | null;
+  departure_latitude: number | null;
+  departure_longitude: number | null;
+  departure_at: string;
+  price_per_seat: number;
+  total_seats: number;
+  available_seats: number;
+  vehicle_info: string | null;
+  notes: string | null;
+  status: AnandoRideStatus;
+  is_joinable: boolean;
+  is_mine: boolean;
+  created_at: string;
+  bookings?: AnandoRideBooking[];
+}
+
+export interface AnandoRideBooking {
+  id: number;
+  anando_ride: AnandoRide;
+  user: { id: number; name: string | null; phone: string };
+  seats_booked: number;
+  price_total: number;
+  payment_method: PaymentMethod;
+  status: BookingStatus;
+  created_at: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

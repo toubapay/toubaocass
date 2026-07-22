@@ -55,6 +55,14 @@ export function TripsListScreen({ navigation }: Props) {
         </View>
       </Pressable>
 
+      <Pressable style={styles.anandoCard} onPress={() => navigation.navigate('Anando')}>
+        <Text style={styles.mapCardIcon}>🚗</Text>
+        <View style={styles.mapCardText}>
+          <Text style={styles.anandoCardTitle}>{t('anando.title')}</Text>
+          <Text style={styles.anandoCardSubtitle}>{t('anando.subtitle')}</Text>
+        </View>
+      </Pressable>
+
       <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
         <Text style={styles.mapCardIcon}>🗺️</Text>
         <View style={styles.mapCardText}>
@@ -124,6 +132,19 @@ const styles = StyleSheet.create({
   },
   instantCardTitle: { fontSize: 16.0, fontWeight: '700', color: '#fff' },
   instantCardSubtitle: { fontSize: 14.0, color: '#fff', opacity: 0.85, marginTop: 2 },
+  anandoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.md,
+    backgroundColor: colors.accent,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  anandoCardTitle: { fontSize: 16.0, fontWeight: '700', color: '#fff' },
+  anandoCardSubtitle: { fontSize: 14.0, color: '#fff', opacity: 0.85, marginTop: 2 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

@@ -83,6 +83,8 @@
       "myPolicies": "Mes assurances",
       "kycStatus": "Vérification",
       "kycForm": "Soumettre les documents",
+      "anando": "Anando",
+      "anandoRideDetail": "Détails du trajet Anando",
       "profile": "Mon profil",
       "settings": "Paramètres"
     }
@@ -241,6 +243,45 @@
       "cancelConfirmNo": "Non",
       "cancelConfirmYes": "Oui, annuler le trajet",
       "actionFailedTitle": "Échec de l'action"
+    }
+  },
+  "anando": {
+    "title": "Anando",
+    "subtitle": "Partagez un trajet instantané ou rejoignez celui de quelqu'un d'autre — comme du covoiturage.",
+    "postTitle": "Publier un trajet Anando",
+    "origin": "Départ",
+    "originPlaceholder": "Ville de départ",
+    "destination": "Arrivée",
+    "destinationPlaceholder": "Ville de destination",
+    "departurePoint": "Point de départ",
+    "departurePointPlaceholder": "ex. Station Total, Route de l'Aéroport",
+    "pricePerSeat": "Prix par place (FCFA)",
+    "seats": "Places",
+    "postSubmit": "Publier mon trajet Anando",
+    "myRides": "Mes trajets publiés",
+    "trendingTitle": "Trajets Anando disponibles",
+    "loading": "Chargement…",
+    "empty": "Aucun trajet Anando disponible pour l'instant.",
+    "seatsAvailable_one": "{{count}} place disponible",
+    "seatsAvailable_other": "{{count}} places disponibles",
+    "seatsBooked_one": "{{count}} place réservée",
+    "seatsBooked_other": "{{count}} places réservées",
+    "pricePerSeatValue": "{{amount}} FCFA / place",
+    "poster": "Publié par",
+    "price": "Prix",
+    "passengers_one": "Passager ({{count}})",
+    "passengers_other": "Passagers ({{count}})",
+    "noPassengers": "Personne n'a encore rejoint ce trajet.",
+    "cancelRide": "Annuler ce trajet Anando",
+    "cancelConfirm": "Tous les passagers confirmés seront remboursés et notifiés. Confirmer l'annulation ?",
+    "joinTitle": "Rejoindre ce trajet",
+    "seatsToJoin": "Nombre de places",
+    "joinSubmit": "Rejoindre — {{amount}} FCFA",
+    "status": {
+      "open": "Disponible",
+      "full": "Complet",
+      "cancelled": "Annulé",
+      "completed": "Terminé"
     }
   },
   "deliveries": {

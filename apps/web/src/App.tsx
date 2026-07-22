@@ -4,6 +4,8 @@ import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
+import { AnandoPage } from './pages/AnandoPage';
+import { AnandoRideDetailPage } from './pages/AnandoRideDetailPage';
 import { ChatPage } from './pages/ChatPage';
 import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
@@ -60,6 +62,8 @@ function AppRoutes() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/livraison" element={<NewDeliveryPage />} />
+        <Route path="/services/anando" element={<AnandoPage />} />
+        <Route path="/services/anando/:id" element={<AnandoRideDetailPage />} />
         <Route path="/deliveries" element={<MyDeliveriesPage />} />
         <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />

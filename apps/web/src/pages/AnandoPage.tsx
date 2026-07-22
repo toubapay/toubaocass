@@ -1,0 +1,207 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+import { fetchMyAnandoRides, fetchAnandoRides, postAnandoRide } from '../api/anando';
+import { extractErrorMessage } from '../api/client';
+import { fetchCities } from '../api/cities';
+import type { AnandoRide, City } from '../api/types';
+import { Button } from '../components/Button';
+import { CityPicker } from '../components/CityPicker';
+import { TextField } from '../components/TextField';
+import { colors, radius, spacing } from '../theme';
+
+const sectionTitleStyle = {
+  fontSize: 13,
+  fontWeight: 700,
+  color: colors.textMuted,
+  marginBottom: spacing.sm,
+  textTransform: 'uppercase' as const,
+};
+
+function RideCard({ ride, onClick }: { ride: AnandoRide; onClick: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
+        border: `1px solid ${colors.border}`,
+        borderRadius: radius.md,
+        padding: spacing.md,
+        backgroundColor: colors.surface,
+        marginBottom: spacing.sm,
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 17, fontWeight: 700, color: colors.text }}>
+          {ride.origin_city?.name} → {ride.destination_city?.name}
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '3px 9px',
+            borderRadius: 999,
+            backgroundColor: ride.status === 'open' ? colors.successSoft : colors.accentSoft,
+            color: ride.status === 'open' ? colors.success : colors.accent,
+          }}
+        >
+          {t(`anando.status.${ride.status}`)}
+        </span>
+      </div>
+      <p style={{ fontSize: 13.5, color: colors.textMuted, margin: '4px 0 0' }}>
+        {ride.poster.name} · {t('anando.seatsAvailable', { count: ride.available_seats })}
+      </p>
+      {ride.departure_point && (
+        <p style={{ fontSize: 13, color: colors.textMuted, margin: '2px 0 0' }}>📍 {ride.departure_point}</p>
+      )}
+      <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, margin: '6px 0 0' }}>
+        {t('anando.pricePerSeatValue', { amount: ride.price_per_seat.toLocaleString() })}
+      </p>
+    </button>
+  );
+}
+
+export function AnandoPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const [cities, setCities] = useState<City[]>([]);
+  const [rides, setRides] = useState<AnandoRide[]>([]);
+  const [myRides, setMyRides] = useState<AnandoRide[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [origin, setOrigin] = useState<City | null>(null);
+  const [destination, setDestination] = useState<City | null>(null);
+  const [departurePoint, setDeparturePoint] = useState('');
+  const [pricePerSeat, setPricePerSeat] = useState('');
+  const [seats, setSeats] = useState('3');
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    Promise.all([fetchAnandoRides(), fetchMyAnandoRides()])
+      .then(([available, mine]) => {
+        setRides(available.data);
+        setMyRides(mine.data);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCities().then(setCities);
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const canSubmit =
+    origin != null &&
+    destination != null &&
+    origin.id !== destination.id &&
+    Number(pricePerSeat) > 0 &&
+    Number(seats) > 0;
+
+  const handleSubmit = async () => {
+    if (!canSubmit || !origin || !destination) return;
+    setPosting(true);
+    setError(null);
+    try {
+      const ride = await postAnandoRide({
+        origin_city_id: origin.id,
+        destination_city_id: destination.id,
+        departure_point: departurePoint.trim() || undefined,
+        price_per_seat: Number(pricePerSeat),
+        total_seats: Number(seats),
+      });
+      setOrigin(null);
+      setDestination(null);
+      setDeparturePoint('');
+      setPricePerSeat('');
+      setSeats('3');
+      navigate(`/services/anando/${ride.id}`);
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  return (
+    <div>
+      <button
+        onClick={() => navigate('/services')}
+        style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
+      >
+        ←
+      </button>
+
+      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: 2 }}>{t('anando.title')}</h1>
+      <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 0, marginBottom: spacing.lg }}>{t('anando.subtitle')}</p>
+
+      <div
+        style={{
+          backgroundColor: colors.surface,
+          border: `1px solid ${colors.border}`,
+          borderRadius: radius.md,
+          padding: spacing.md,
+          marginBottom: spacing.xl,
+        }}
+      >
+        <p style={sectionTitleStyle}>{t('anando.postTitle')}</p>
+        <CityPicker label={t('anando.origin')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('anando.originPlaceholder')} />
+        <CityPicker
+          label={t('anando.destination')}
+          cities={cities}
+          value={destination}
+          onChange={setDestination}
+          placeholder={t('anando.destinationPlaceholder')}
+        />
+        <TextField
+          label={t('anando.departurePoint')}
+          value={departurePoint}
+          onChange={(e) => setDeparturePoint(e.target.value)}
+          placeholder={t('anando.departurePointPlaceholder')}
+        />
+        <div style={{ display: 'flex', gap: spacing.sm }}>
+          <div style={{ flex: 1 }}>
+            <TextField
+              label={t('anando.pricePerSeat')}
+              type="number"
+              inputMode="numeric"
+              value={pricePerSeat}
+              onChange={(e) => setPricePerSeat(e.target.value)}
+              placeholder="1500"
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <TextField label={t('anando.seats')} type="number" inputMode="numeric" value={seats} onChange={(e) => setSeats(e.target.value)} />
+          </div>
+        </div>
+        {error && <p style={{ color: colors.danger, fontSize: 13.5, marginBottom: spacing.sm }}>{error}</p>}
+        <Button label={t('anando.postSubmit')} onClick={handleSubmit} loading={posting} disabled={!canSubmit} />
+      </div>
+
+      {myRides.length > 0 && (
+        <div style={{ marginBottom: spacing.xl }}>
+          <p style={sectionTitleStyle}>{t('anando.myRides')}</p>
+          {myRides.map((ride) => (
+            <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />
+          ))}
+        </div>
+      )}
+
+      <p style={sectionTitleStyle}>{t('anando.trendingTitle')}</p>
+      {loading ? (
+        <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>
+      ) : rides.length === 0 ? (
+        <p style={{ color: colors.textMuted, fontSize: 14 }}>{t('anando.empty')}</p>
+      ) : (
+        rides.map((ride) => <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />)
+      )}
+    </div>
+  );
+}

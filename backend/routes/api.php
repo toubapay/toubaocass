@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController
 use App\Http\Controllers\Api\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\AnandoRideController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
@@ -54,6 +55,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('addresses', [AddressController::class, 'store']);
     Route::put('addresses/{address}', [AddressController::class, 'update']);
     Route::delete('addresses/{address}', [AddressController::class, 'destroy']);
+
+    // Anando — peer-to-peer instant ride sharing. Any authenticated user
+    // (rider or driver) can post a ride and any other user can join a
+    // seat, so this deliberately sits outside the role:rider/role:driver
+    // groups below.
+    Route::get('anando-rides', [AnandoRideController::class, 'index']);
+    Route::post('anando-rides', [AnandoRideController::class, 'store']);
+    Route::get('anando-rides/mine', [AnandoRideController::class, 'myRides']);
+    Route::get('anando-rides/my-bookings', [AnandoRideController::class, 'myBookings']);
+    Route::get('anando-rides/{anandoRide}', [AnandoRideController::class, 'show']);
+    Route::delete('anando-rides/{anandoRide}', [AnandoRideController::class, 'cancelRide']);
+    Route::post('anando-rides/{anandoRide}/join', [AnandoRideController::class, 'join']);
+    Route::delete('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'cancelBooking']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {

@@ -26,6 +26,8 @@ export type ServicesStackParamList = {
   NewDelivery: undefined;
   MyDeliveries: undefined;
   DeliveryDetail: { deliveryId: number };
+  Anando: undefined;
+  AnandoRideDetail: { rideId: number };
 };
 
 export type ProfileStackParamList = {

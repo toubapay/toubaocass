@@ -12,6 +12,8 @@ import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
 import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
+import { AnandoRideDetailScreen } from '../screens/AnandoRideDetailScreen';
+import { AnandoScreen } from '../screens/AnandoScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -110,6 +112,8 @@ function ServicesNavigator() {
       <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
       <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
       <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
+      <ServicesStackNav.Screen name="Anando" component={AnandoScreen} options={{ title: t('nav.screenTitles.anando') }} />
+      <ServicesStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
     </ServicesStackNav.Navigator>
   );
 }
