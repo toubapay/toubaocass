@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdminHasPermission;
 use App\Http\Middleware\EnsureIsAdminUser;
+use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'admin.permission' => EnsureAdminHasPermission::class,
             'admin.auth' => EnsureIsAdminUser::class,
+            'module' => EnsureModuleEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

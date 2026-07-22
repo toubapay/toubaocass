@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsContro
 use App\Http\Controllers\Api\Admin\InsuranceController as AdminInsuranceController;
 use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
 use App\Http\Controllers\Api\Admin\LiveTripsController as AdminLiveTripsController;
+use App\Http\Controllers\Api\Admin\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
 use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Api\Admin\StaffController as AdminStaffController;
@@ -61,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // seat, so this deliberately sits outside the role:rider/role:driver
     // groups below.
     Route::get('anando-rides', [AnandoRideController::class, 'index']);
-    Route::post('anando-rides', [AnandoRideController::class, 'store']);
+    Route::post('anando-rides', [AnandoRideController::class, 'store'])->middleware('module:anando');
     Route::get('anando-rides/mine', [AnandoRideController::class, 'myRides']);
     Route::get('anando-rides/my-bookings', [AnandoRideController::class, 'myBookings']);
     Route::get('anando-rides/{anandoRide}', [AnandoRideController::class, 'show']);
@@ -82,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Livraison (package delivery) requests.
         Route::post('deliveries/quote', [DeliveryController::class, 'quote']);
         Route::get('deliveries', [DeliveryController::class, 'index']);
-        Route::post('deliveries', [DeliveryController::class, 'store']);
+        Route::post('deliveries', [DeliveryController::class, 'store'])->middleware('module:livraison');
         Route::get('deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy']);
     });
@@ -99,7 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('trips', [TripController::class, 'driverIndex']);
         Route::post('trips', [TripController::class, 'store']);
-        Route::post('trips/instant', [TripController::class, 'storeInstant']);
+        Route::post('trips/instant', [TripController::class, 'storeInstant'])->middleware('module:instant_trips');
         Route::get('trips/{trip}', [TripController::class, 'driverShow']);
         Route::put('trips/{trip}', [TripController::class, 'update']);
         Route::post('trips/{trip}/start', [TripController::class, 'start']);
@@ -117,7 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Assurance (vehicle insurance comparison & purchase).
         Route::get('insurance/providers', [InsuranceController::class, 'providers']);
         Route::post('insurance/quotes', [InsuranceController::class, 'quote']);
-        Route::post('insurance/policies', [InsuranceController::class, 'purchase']);
+        Route::post('insurance/policies', [InsuranceController::class, 'purchase'])->middleware('module:assurance');
         Route::get('insurance/policies', [InsuranceController::class, 'index']);
     });
 });
@@ -187,6 +188,16 @@ Route::prefix('admin')->group(function () {
             Route::post('insurance/providers', [AdminInsuranceController::class, 'storeProvider']);
             Route::put('insurance/providers/{insuranceProvider}', [AdminInsuranceController::class, 'updateProvider']);
             Route::get('insurance/policies', [AdminInsuranceController::class, 'policies']);
+        });
+
+        // Module registry — enable/disable/configure platform services (e.g.
+        // Anando, Livraison, Assurance) without a deploy.
+        Route::middleware('admin.permission:manage_modules')->group(function () {
+            Route::get('modules', [AdminModuleController::class, 'index']);
+            Route::post('modules', [AdminModuleController::class, 'store']);
+            Route::put('modules/{module}', [AdminModuleController::class, 'update']);
+            Route::put('modules/{module}/status', [AdminModuleController::class, 'updateStatus']);
+            Route::delete('modules/{module}', [AdminModuleController::class, 'destroy']);
         });
     });
 });
