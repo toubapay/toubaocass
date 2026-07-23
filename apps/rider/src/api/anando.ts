@@ -52,6 +52,11 @@ export async function cancelAnandoRide(rideId: number): Promise<void> {
   await apiClient.delete(`/anando-rides/${rideId}`);
 }
 
+export async function updateAnandoRideBooking(bookingId: number, seats: number): Promise<AnandoRideBooking> {
+  const { data } = await apiClient.put(`/anando-ride-bookings/${bookingId}`, { seats });
+  return data;
+}
+
 export async function cancelAnandoRideBooking(bookingId: number): Promise<void> {
   await apiClient.delete(`/anando-ride-bookings/${bookingId}`);
 }

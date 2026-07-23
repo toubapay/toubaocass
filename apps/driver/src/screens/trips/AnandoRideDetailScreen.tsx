@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { cancelAnandoRide, fetchAnandoRide, joinAnandoRide } from '../../api/anando';
+import { cancelAnandoRide, cancelAnandoRideBooking, fetchAnandoRide, joinAnandoRide, updateAnandoRideBooking } from '../../api/anando';
 import { extractErrorMessage } from '../../api/client';
 import { AnandoRide, PaymentMethod } from '../../api/types';
 import { fetchWallet } from '../../api/wallet';
@@ -28,6 +28,10 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const [modifySeats, setModifySeats] = useState('1');
+  const [modifying, setModifying] = useState(false);
+  const [cancellingBooking, setCancellingBooking] = useState(false);
+
   const load = () => {
     setLoading(true);
     fetchAnandoRide(rideId)
@@ -43,6 +47,12 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rideId]);
 
+  useEffect(() => {
+    if (ride?.my_booking) {
+      setModifySeats(String(ride.my_booking.seats_booked));
+    }
+  }, [ride?.my_booking?.id, ride?.my_booking?.seats_booked]);
+
   if (loading || !ride) {
     return (
       <Screen style={styles.center}>
@@ -54,6 +64,10 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
   const priceTotal = ride.price_per_seat * (Number(seats) || 0);
   const insufficientWalletFunds = paymentMethod === 'wallet' && walletBalance !== null && walletBalance < priceTotal;
   const canJoin = ride.is_joinable && Number(seats) > 0 && Number(seats) <= ride.available_seats && !ride.is_mine;
+
+  const myBooking = ride.my_booking;
+  const maxModifySeats = myBooking ? ride.available_seats + myBooking.seats_booked : 0;
+  const canModify = myBooking != null && Number(modifySeats) > 0 && Number(modifySeats) <= maxModifySeats;
 
   const handleJoin = async () => {
     if (!canJoin) return;
@@ -67,6 +81,42 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
     } finally {
       setJoining(false);
     }
+  };
+
+  const handleModify = async () => {
+    if (!myBooking || !canModify) return;
+    setModifying(true);
+    setError(undefined);
+    try {
+      await updateAnandoRideBooking(myBooking.id, Number(modifySeats));
+      load();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setModifying(false);
+    }
+  };
+
+  const handleCancelBooking = () => {
+    if (!myBooking) return;
+    Alert.alert(t('anando.cancelBooking'), t('anando.cancelBookingConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.ok'),
+        style: 'destructive',
+        onPress: async () => {
+          setCancellingBooking(true);
+          try {
+            await cancelAnandoRideBooking(myBooking.id);
+            load();
+          } catch (e) {
+            Alert.alert(t('deliveries.detail.actionFailedTitle'), extractErrorMessage(e));
+          } finally {
+            setCancellingBooking(false);
+          }
+        },
+      },
+    ]);
   };
 
   const handleCancel = () => {
@@ -137,6 +187,34 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
             )}
             {['open', 'full'].includes(ride.status) && (
               <Button label={t('anando.cancelRide')} onPress={handleCancel} loading={cancelling} variant="danger" />
+            )}
+          </>
+        ) : myBooking ? (
+          <>
+            <Text style={styles.sectionTitle}>{t('anando.myBookingTitle')}</Text>
+            <View style={styles.card}>
+              <Text style={styles.line}>{t('anando.seatsBooked', { count: myBooking.seats_booked })}</Text>
+              <Text style={styles.lineMuted}>
+                {myBooking.price_total.toLocaleString()} FCFA · {myBooking.payment_method === 'wallet' ? t('common.wallet') : t('common.cash')}
+              </Text>
+            </View>
+
+            {ride.status !== 'cancelled' && (
+              <>
+                <Text style={styles.sectionTitle}>{t('anando.modifyBooking')}</Text>
+                <TextField label={t('anando.seatsToJoin')} keyboardType="number-pad" value={modifySeats} onChangeText={setModifySeats} />
+
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+
+                <Button
+                  label={t('anando.modifySubmit')}
+                  onPress={handleModify}
+                  loading={modifying}
+                  disabled={!canModify || Number(modifySeats) === myBooking.seats_booked}
+                  style={styles.modifyButton}
+                />
+                <Button label={t('anando.cancelBooking')} onPress={handleCancelBooking} loading={cancellingBooking} variant="danger" />
+              </>
             )}
           </>
         ) : (
@@ -214,4 +292,5 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: colors.primary },
   error: { color: colors.danger, fontSize: 13.5, marginBottom: spacing.sm },
   empty: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.md },
+  modifyButton: { marginBottom: spacing.sm },
 });

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'user_id', 'origin_city_id', 'destination_city_id', 'departure_point',
@@ -62,5 +63,15 @@ class AnandoRide extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(AnandoRideBooking::class);
+    }
+
+    /**
+     * The current request's own booking on this ride, if any — constrained
+     * per-query by the controller (mirrors Trip::riderBooking), not a
+     * fixed relation, since "current user" is request-scoped.
+     */
+    public function myBooking(): HasOne
+    {
+        return $this->hasOne(AnandoRideBooking::class);
     }
 }

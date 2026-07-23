@@ -290,6 +290,22 @@
     "joinSubmit": "Rejoindre — {{amount}} FCFA",
     "newRideToast": "🚗 Nouveau trajet Anando : {{origin}} → {{destination}}",
     "newRideToastView": "Voir →",
+    "tabs": {
+      "available": "Disponibles",
+      "mine": "Mes trajets"
+    },
+    "myBookings": "Mes réservations",
+    "noMyRides": "Vous n'avez publié aucun trajet Anando.",
+    "noMyBookings": "Vous n'avez rejoint aucun trajet Anando.",
+    "myBookingTitle": "Ma réservation",
+    "modifyBooking": "Modifier ma réservation",
+    "modifySubmit": "Enregistrer les modifications",
+    "cancelBooking": "Annuler ma réservation",
+    "cancelBookingConfirm": "Vous serez remboursé si vous avez payé par portefeuille. Confirmer l'annulation ?",
+    "bookingStatus": {
+      "confirmed": "Confirmée",
+      "cancelled": "Annulée"
+    },
     "status": {
       "open": "Disponible",
       "full": "Complet",

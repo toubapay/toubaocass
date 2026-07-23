@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { fetchAnandoRides, fetchMyAnandoRides, postAnandoRide } from '../../api/anando';
+import { fetchAnandoRides, fetchMyAnandoBookings, fetchMyAnandoRides, postAnandoRide } from '../../api/anando';
 import { extractErrorMessage } from '../../api/client';
 import { fetchCities } from '../../api/cities';
-import { AnandoRide, City } from '../../api/types';
+import { AnandoRide, AnandoRideBooking, City } from '../../api/types';
 import { Button } from '../../components/Button';
 import { CityPicker } from '../../components/CityPicker';
 import { Screen } from '../../components/Screen';
@@ -15,6 +15,7 @@ import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'Anando'>;
+type Tab = 'available' | 'mine';
 
 function RideCard({ ride, onPress }: { ride: AnandoRide; onPress: () => void }) {
   const { t } = useTranslation();
@@ -37,12 +38,33 @@ function RideCard({ ride, onPress }: { ride: AnandoRide; onPress: () => void }) 
   );
 }
 
+function BookingCard({ booking, onPress }: { booking: AnandoRideBooking; onPress: () => void }) {
+  const { t } = useTranslation();
+  const ride = booking.anando_ride;
+  return (
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={styles.rowBetween}>
+        <Text style={styles.route}>
+          {ride.origin_city?.name} → {ride.destination_city?.name}
+        </Text>
+        <Text style={[styles.badge, booking.status === 'confirmed' ? styles.badgeOther : styles.badgeCancelled]}>
+          {t(`anando.bookingStatus.${booking.status}`)}
+        </Text>
+      </View>
+      <Text style={styles.meta}>{t('anando.seatsBooked', { count: booking.seats_booked })}</Text>
+      <Text style={styles.price}>{booking.price_total.toLocaleString()} FCFA</Text>
+    </Pressable>
+  );
+}
+
 export function AnandoScreen({ navigation }: Props) {
   const { t } = useTranslation();
 
+  const [tab, setTab] = useState<Tab>('available');
   const [cities, setCities] = useState<City[]>([]);
   const [rides, setRides] = useState<AnandoRide[]>([]);
   const [myRides, setMyRides] = useState<AnandoRide[]>([]);
+  const [myBookings, setMyBookings] = useState<AnandoRideBooking[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [origin, setOrigin] = useState<City | null>(null);
@@ -54,10 +76,11 @@ export function AnandoScreen({ navigation }: Props) {
   const [error, setError] = useState<string | undefined>();
 
   const load = () => {
-    Promise.all([fetchAnandoRides(), fetchMyAnandoRides()])
-      .then(([available, mine]) => {
+    Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
+      .then(([available, mine, bookings]) => {
         setRides(available.data);
         setMyRides(mine.data);
+        setMyBookings(bookings.data);
       })
       .finally(() => setLoading(false));
   };
@@ -132,22 +155,43 @@ export function AnandoScreen({ navigation }: Props) {
           <Button label={t('anando.postSubmit')} onPress={handleSubmit} loading={posting} disabled={!canSubmit} />
         </View>
 
-        {myRides.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('anando.myRides')}</Text>
-            {myRides.map((ride) => (
-              <RideCard key={ride.id} ride={ride} onPress={() => navigation.navigate('AnandoRideDetail', { rideId: ride.id })} />
-            ))}
-          </View>
-        )}
+        <View style={styles.tabRow}>
+          <Pressable style={styles.tabButton} onPress={() => setTab('available')}>
+            <Text style={[styles.tabText, tab === 'available' && styles.tabTextActive]}>{t('anando.tabs.available')}</Text>
+            {tab === 'available' && <View style={styles.tabIndicator} />}
+          </Pressable>
+          <Pressable style={styles.tabButton} onPress={() => setTab('mine')}>
+            <Text style={[styles.tabText, tab === 'mine' && styles.tabTextActive]}>{t('anando.tabs.mine')}</Text>
+            {tab === 'mine' && <View style={styles.tabIndicator} />}
+          </Pressable>
+        </View>
 
-        <Text style={styles.sectionTitle}>{t('anando.trendingTitle')}</Text>
-        {loading ? (
-          <Text style={styles.meta}>{t('anando.loading')}</Text>
-        ) : rides.length === 0 ? (
-          <Text style={styles.empty}>{t('anando.empty')}</Text>
+        {tab === 'available' ? (
+          loading ? (
+            <Text style={styles.meta}>{t('anando.loading')}</Text>
+          ) : rides.length === 0 ? (
+            <Text style={styles.empty}>{t('anando.empty')}</Text>
+          ) : (
+            rides.map((ride) => <RideCard key={ride.id} ride={ride} onPress={() => navigation.navigate('AnandoRideDetail', { rideId: ride.id })} />)
+          )
         ) : (
-          rides.map((ride) => <RideCard key={ride.id} ride={ride} onPress={() => navigation.navigate('AnandoRideDetail', { rideId: ride.id })} />)
+          <>
+            <Text style={styles.sectionTitle}>{t('anando.myRides')}</Text>
+            {myRides.length === 0 ? (
+              <Text style={styles.empty}>{t('anando.noMyRides')}</Text>
+            ) : (
+              myRides.map((ride) => <RideCard key={ride.id} ride={ride} onPress={() => navigation.navigate('AnandoRideDetail', { rideId: ride.id })} />)
+            )}
+
+            <Text style={[styles.sectionTitle, { marginTop: spacing.md }]}>{t('anando.myBookings')}</Text>
+            {myBookings.length === 0 ? (
+              <Text style={styles.empty}>{t('anando.noMyBookings')}</Text>
+            ) : (
+              myBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} onPress={() => navigation.navigate('AnandoRideDetail', { rideId: booking.anando_ride.id })} />
+              ))
+            )}
+          </>
         )}
       </ScrollView>
     </Screen>
@@ -157,7 +201,6 @@ export function AnandoScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 2 },
   subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.lg },
-  section: { marginBottom: spacing.xl },
   postCard: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -169,6 +212,11 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', marginBottom: spacing.sm },
   rowFields: { flexDirection: 'row', gap: spacing.sm },
   error: { color: colors.danger, fontSize: 13.5, marginBottom: spacing.sm },
+  tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: spacing.md },
+  tabButton: { flex: 1, alignItems: 'center', paddingBottom: spacing.sm },
+  tabText: { fontSize: 14.5, fontWeight: '700', color: colors.textMuted },
+  tabTextActive: { color: colors.primary },
+  tabIndicator: { height: 2.5, backgroundColor: colors.primary, alignSelf: 'stretch', marginTop: spacing.sm, borderRadius: 2 },
   card: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -182,7 +230,8 @@ const styles = StyleSheet.create({
   badge: { fontSize: 11, fontWeight: '700', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   badgeOpen: { backgroundColor: colors.successSoft, color: colors.success },
   badgeOther: { backgroundColor: colors.accentSoft, color: colors.accent },
+  badgeCancelled: { backgroundColor: colors.dangerSoft, color: colors.danger },
   meta: { fontSize: 13.5, color: colors.textMuted, marginTop: 4 },
   price: { fontSize: 16, fontWeight: '700', color: colors.primary, marginTop: 6 },
-  empty: { color: colors.textMuted, fontSize: 14 },
+  empty: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.md },
 });

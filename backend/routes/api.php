@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('anando-rides/{anandoRide}', [AnandoRideController::class, 'show']);
     Route::delete('anando-rides/{anandoRide}', [AnandoRideController::class, 'cancelRide']);
     Route::post('anando-rides/{anandoRide}/join', [AnandoRideController::class, 'join']);
+    Route::put('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'updateBooking']);
     Route::delete('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'cancelBooking']);
 
     // Rider-facing trip search & booking.

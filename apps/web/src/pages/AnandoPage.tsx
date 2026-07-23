@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { fetchMyAnandoRides, fetchAnandoRides, postAnandoRide } from '../api/anando';
+import { fetchMyAnandoBookings, fetchMyAnandoRides, fetchAnandoRides, postAnandoRide } from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import { fetchCities } from '../api/cities';
-import type { AnandoRide, City } from '../api/types';
+import type { AnandoRide, AnandoRideBooking, City } from '../api/types';
 import { Button } from '../components/Button';
 import { CityPicker } from '../components/CityPicker';
 import { TextField } from '../components/TextField';
@@ -66,13 +66,62 @@ function RideCard({ ride, onClick }: { ride: AnandoRide; onClick: () => void }) 
   );
 }
 
+function BookingCard({ booking, onClick }: { booking: AnandoRideBooking; onClick: () => void }) {
+  const { t } = useTranslation();
+  const ride = booking.anando_ride;
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
+        border: `1px solid ${colors.border}`,
+        borderRadius: radius.md,
+        padding: spacing.md,
+        backgroundColor: colors.surface,
+        marginBottom: spacing.sm,
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 17, fontWeight: 700, color: colors.text }}>
+          {ride.origin_city?.name} → {ride.destination_city?.name}
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '3px 9px',
+            borderRadius: 999,
+            backgroundColor: booking.status === 'confirmed' ? colors.accentSoft : colors.dangerSoft,
+            color: booking.status === 'confirmed' ? colors.accent : colors.danger,
+          }}
+        >
+          {t(`anando.bookingStatus.${booking.status}`)}
+        </span>
+      </div>
+      <p style={{ fontSize: 13.5, color: colors.textMuted, margin: '4px 0 0' }}>
+        {t('anando.seatsBooked', { count: booking.seats_booked })}
+      </p>
+      <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, margin: '6px 0 0' }}>
+        {booking.price_total.toLocaleString()} FCFA
+      </p>
+    </button>
+  );
+}
+
+type Tab = 'available' | 'mine';
+
 export function AnandoPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const [tab, setTab] = useState<Tab>('available');
   const [cities, setCities] = useState<City[]>([]);
   const [rides, setRides] = useState<AnandoRide[]>([]);
   const [myRides, setMyRides] = useState<AnandoRide[]>([]);
+  const [myBookings, setMyBookings] = useState<AnandoRideBooking[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [origin, setOrigin] = useState<City | null>(null);
@@ -84,10 +133,11 @@ export function AnandoPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = () => {
-    Promise.all([fetchAnandoRides(), fetchMyAnandoRides()])
-      .then(([available, mine]) => {
+    Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
+      .then(([available, mine, bookings]) => {
         setRides(available.data);
         setMyRides(mine.data);
+        setMyBookings(bookings.data);
       })
       .finally(() => setLoading(false));
   };
@@ -129,6 +179,19 @@ export function AnandoPage() {
       setPosting(false);
     }
   };
+
+  const tabButtonStyle = (active: boolean) => ({
+    flex: 1,
+    border: 'none',
+    borderBottom: `2.5px solid ${active ? colors.primary : 'transparent'}`,
+    borderRadius: 0,
+    padding: `${spacing.sm}px 0`,
+    backgroundColor: 'transparent',
+    color: active ? colors.primary : colors.textMuted,
+    fontWeight: 700,
+    fontSize: 14.5,
+    cursor: 'pointer',
+  });
 
   return (
     <div>
@@ -185,22 +248,47 @@ export function AnandoPage() {
         <Button label={t('anando.postSubmit')} onClick={handleSubmit} loading={posting} disabled={!canSubmit} />
       </div>
 
-      {myRides.length > 0 && (
-        <div style={{ marginBottom: spacing.xl }}>
-          <p style={sectionTitleStyle}>{t('anando.myRides')}</p>
-          {myRides.map((ride) => (
-            <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />
-          ))}
-        </div>
-      )}
+      <div style={{ display: 'flex', borderBottom: `1px solid ${colors.border}`, marginBottom: spacing.md }}>
+        <button onClick={() => setTab('available')} style={tabButtonStyle(tab === 'available')}>
+          {t('anando.tabs.available')}
+        </button>
+        <button onClick={() => setTab('mine')} style={tabButtonStyle(tab === 'mine')}>
+          {t('anando.tabs.mine')}
+        </button>
+      </div>
 
-      <p style={sectionTitleStyle}>{t('anando.trendingTitle')}</p>
-      {loading ? (
-        <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>
-      ) : rides.length === 0 ? (
-        <p style={{ color: colors.textMuted, fontSize: 14 }}>{t('anando.empty')}</p>
+      {tab === 'available' ? (
+        <>
+          {loading ? (
+            <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>
+          ) : rides.length === 0 ? (
+            <p style={{ color: colors.textMuted, fontSize: 14 }}>{t('anando.empty')}</p>
+          ) : (
+            rides.map((ride) => <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />)
+          )}
+        </>
       ) : (
-        rides.map((ride) => <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />)
+        <>
+          <p style={sectionTitleStyle}>{t('anando.myRides')}</p>
+          {myRides.length === 0 ? (
+            <p style={{ color: colors.textMuted, fontSize: 14, marginBottom: spacing.lg }}>{t('anando.noMyRides')}</p>
+          ) : (
+            <div style={{ marginBottom: spacing.lg }}>
+              {myRides.map((ride) => (
+                <RideCard key={ride.id} ride={ride} onClick={() => navigate(`/services/anando/${ride.id}`)} />
+              ))}
+            </div>
+          )}
+
+          <p style={sectionTitleStyle}>{t('anando.myBookings')}</p>
+          {myBookings.length === 0 ? (
+            <p style={{ color: colors.textMuted, fontSize: 14 }}>{t('anando.noMyBookings')}</p>
+          ) : (
+            myBookings.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} onClick={() => navigate(`/services/anando/${booking.anando_ride.id}`)} />
+            ))
+          )}
+        </>
       )}
     </div>
   );

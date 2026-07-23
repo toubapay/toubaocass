@@ -7,6 +7,7 @@ use App\Models\AnandoRideBooking;
 use App\Models\City;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\AnandoBookingConfirmedNotification;
 use App\Notifications\AnandoRideJoinedNotification;
 use App\Notifications\AnandoRidePostedNotification;
 use App\Services\WalletService;
@@ -123,6 +124,33 @@ class AnandoRideTest extends TestCase
 
         $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'available_seats' => 1, 'status' => 'open']);
         Notification::assertSentTo($ride->poster, AnandoRideJoinedNotification::class);
+    }
+
+    public function test_joiner_receives_a_booking_confirmation_notification(): void
+    {
+        Notification::fake();
+        $poster = User::factory()->create(['fcm_token' => 'poster-token']);
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'total_seats' => 3, 'available_seats' => 3]);
+        $joiner = User::factory()->create(['fcm_token' => 'joiner-token']);
+
+        $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1])
+            ->assertCreated();
+
+        Notification::assertSentTo($joiner, AnandoBookingConfirmedNotification::class);
+    }
+
+    public function test_joiner_without_fcm_token_is_skipped_for_booking_confirmation(): void
+    {
+        Notification::fake();
+        $ride = AnandoRide::factory()->create(['total_seats' => 3, 'available_seats' => 3]);
+        $joiner = User::factory()->create(['fcm_token' => null]);
+
+        $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1])
+            ->assertCreated();
+
+        Notification::assertNotSentTo($joiner, AnandoBookingConfirmedNotification::class);
     }
 
     public function test_ride_flips_to_full_once_all_seats_are_taken(): void
@@ -264,5 +292,158 @@ class AnandoRideTest extends TestCase
         $this->actingAs($stranger, 'sanctum')
             ->deleteJson("/api/anando-ride-bookings/{$bookingId}")
             ->assertNotFound();
+    }
+
+    public function test_joiner_can_increase_seats_on_their_booking(): void
+    {
+        $ride = AnandoRide::factory()->create(['price_per_seat' => 1000, 'total_seats' => 4, 'available_seats' => 4]);
+        $joiner = User::factory()->create();
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1])
+            ->assertCreated()
+            ->json('id');
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 3])
+            ->assertOk()
+            ->assertJsonPath('seats_booked', 3)
+            ->assertJsonPath('price_total', 3000);
+
+        $this->assertDatabaseHas('anando_ride_bookings', ['id' => $bookingId, 'seats_booked' => 3, 'price_total' => 3000]);
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'available_seats' => 1]);
+    }
+
+    public function test_joiner_can_decrease_seats_on_their_booking_and_ride_reopens(): void
+    {
+        $ride = AnandoRide::factory()->create(['price_per_seat' => 1000, 'total_seats' => 2, 'available_seats' => 2]);
+        $joiner = User::factory()->create();
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2])
+            ->assertCreated()
+            ->json('id');
+
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'full', 'available_seats' => 0]);
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 1])
+            ->assertOk()
+            ->assertJsonPath('seats_booked', 1)
+            ->assertJsonPath('price_total', 1000);
+
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'open', 'available_seats' => 1]);
+    }
+
+    public function test_increasing_seats_fails_if_not_enough_are_available(): void
+    {
+        $otherJoiner = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['price_per_seat' => 1000, 'total_seats' => 3, 'available_seats' => 3]);
+        $joiner = User::factory()->create();
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1])
+            ->assertCreated()
+            ->json('id');
+
+        $this->actingAs($otherJoiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2])
+            ->assertCreated();
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 2])
+            ->assertUnprocessable();
+
+        $this->assertDatabaseHas('anando_ride_bookings', ['id' => $bookingId, 'seats_booked' => 1]);
+    }
+
+    public function test_setting_seats_to_zero_cancels_the_booking(): void
+    {
+        $ride = AnandoRide::factory()->create(['total_seats' => 2, 'available_seats' => 2]);
+        $joiner = User::factory()->create();
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2])
+            ->assertCreated()
+            ->json('id');
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 0])
+            ->assertOk();
+
+        $this->assertDatabaseHas('anando_ride_bookings', ['id' => $bookingId, 'status' => 'cancelled']);
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'open', 'available_seats' => 2]);
+    }
+
+    public function test_modifying_a_wallet_booking_charges_or_refunds_the_difference(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1000, 'total_seats' => 4, 'available_seats' => 4]);
+        $joiner = User::factory()->create();
+        app(WalletService::class)->topUp($joiner, 10000);
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1, 'payment_method' => 'wallet'])
+            ->assertCreated()
+            ->json('id');
+
+        // 10000 - 1000 = 9000 joiner, poster earned 1000.
+        $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(1000, Wallet::where('user_id', $poster->id)->value('balance'));
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 3])
+            ->assertOk()
+            ->assertJsonPath('price_total', 3000);
+
+        // Charged an extra 2000: 9000 - 2000 = 7000; poster earns 2000 more: 1000 + 2000 = 3000.
+        $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(3000, Wallet::where('user_id', $poster->id)->value('balance'));
+
+        $this->actingAs($joiner, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 1])
+            ->assertOk()
+            ->assertJsonPath('price_total', 1000);
+
+        // Refunded 2000: 7000 + 2000 = 9000; poster reversed 2000: 3000 - 2000 = 1000.
+        $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(1000, Wallet::where('user_id', $poster->id)->value('balance'));
+    }
+
+    public function test_only_the_booking_owner_can_modify_their_booking(): void
+    {
+        $ride = AnandoRide::factory()->create(['total_seats' => 3, 'available_seats' => 3]);
+        $joiner = User::factory()->create();
+        $stranger = User::factory()->create();
+
+        $bookingId = $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1])
+            ->assertCreated()
+            ->json('id');
+
+        $this->actingAs($stranger, 'sanctum')
+            ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 2])
+            ->assertNotFound();
+    }
+
+    public function test_show_exposes_my_booking_when_the_current_user_has_joined(): void
+    {
+        $ride = AnandoRide::factory()->create(['total_seats' => 3, 'available_seats' => 3]);
+        $joiner = User::factory()->create();
+        $stranger = User::factory()->create();
+
+        $this->actingAs($joiner, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2])
+            ->assertCreated();
+
+        $this->actingAs($joiner, 'sanctum')
+            ->getJson("/api/anando-rides/{$ride->id}")
+            ->assertOk()
+            ->assertJsonPath('my_booking.seats_booked', 2);
+
+        $this->actingAs($stranger, 'sanctum')
+            ->getJson("/api/anando-rides/{$ride->id}")
+            ->assertOk()
+            ->assertJsonPath('my_booking', null);
     }
 }

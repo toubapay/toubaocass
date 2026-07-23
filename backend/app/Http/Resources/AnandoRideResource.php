@@ -33,6 +33,13 @@ class AnandoRideResource extends JsonResource
             'is_mine' => $request->user() && $request->user()->id === $this->user_id,
             'created_at' => $this->created_at,
             'bookings' => AnandoRideBookingResource::collection($this->whenLoaded('bookings')),
+            'my_booking' => $this->when($this->relationLoaded('myBooking'), fn () => $this->myBooking ? [
+                'id' => $this->myBooking->id,
+                'seats_booked' => $this->myBooking->seats_booked,
+                'price_total' => $this->myBooking->price_total,
+                'payment_method' => $this->myBooking->payment_method,
+                'status' => $this->myBooking->status,
+            ] : null),
         ];
     }
 }

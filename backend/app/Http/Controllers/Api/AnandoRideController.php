@@ -7,6 +7,7 @@ use App\Events\AnandoRidePosted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\JoinAnandoRideRequest;
 use App\Http\Requests\StoreAnandoRideRequest;
+use App\Http\Requests\UpdateAnandoBookingRequest;
 use App\Http\Resources\AnandoRideBookingResource;
 use App\Http\Resources\AnandoRideResource;
 use App\Models\AnandoRide;
@@ -33,10 +34,15 @@ class AnandoRideController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
+
         $rides = AnandoRide::query()
             ->where('status', AnandoRide::STATUS_OPEN)
-            ->where('user_id', '!=', $request->user()->id)
-            ->with(['poster', 'originCity', 'destinationCity'])
+            ->where('user_id', '!=', $user->id)
+            ->with([
+                'poster', 'originCity', 'destinationCity',
+                'myBooking' => fn ($q) => $q->where('user_id', $user->id)->where('status', AnandoRideBooking::STATUS_CONFIRMED),
+            ])
             ->latest()
             ->paginate(20);
 
@@ -83,9 +89,14 @@ class AnandoRideController extends Controller
 
     public function show(Request $request, AnandoRide $anandoRide)
     {
-        $anandoRide->load(['poster', 'originCity', 'destinationCity']);
+        $user = $request->user();
 
-        if ($anandoRide->user_id === $request->user()->id) {
+        $anandoRide->load([
+            'poster', 'originCity', 'destinationCity',
+            'myBooking' => fn ($q) => $q->where('user_id', $user->id)->where('status', AnandoRideBooking::STATUS_CONFIRMED),
+        ]);
+
+        if ($anandoRide->user_id === $user->id) {
             $anandoRide->load('bookings.user');
         }
 
@@ -185,6 +196,82 @@ class AnandoRideController extends Controller
         });
 
         return response()->json(['message' => 'Trajet Anando annulé.']);
+    }
+
+    /**
+     * Change the seat count on an existing confirmed booking — mirrors
+     * BookingController::update() for regular Trip bookings. Reducing to 0
+     * seats is treated as a cancellation.
+     */
+    public function updateBooking(UpdateAnandoBookingRequest $request, AnandoRideBooking $anandoRideBooking, WalletService $walletService)
+    {
+        abort_unless($anandoRideBooking->user_id === $request->user()->id, 404);
+
+        $newSeats = (int) $request->validated('seats');
+
+        if ($newSeats === 0) {
+            return $this->cancelBooking($request, $anandoRideBooking, $walletService);
+        }
+
+        if ($anandoRideBooking->status !== AnandoRideBooking::STATUS_CONFIRMED) {
+            return response()->json(['message' => 'Cette réservation Anando est déjà annulée.'], 422);
+        }
+
+        $updated = DB::transaction(function () use ($anandoRideBooking, $newSeats, $walletService) {
+            /** @var AnandoRideBooking $lockedBooking */
+            $lockedBooking = AnandoRideBooking::where('id', $anandoRideBooking->id)->lockForUpdate()->firstOrFail();
+            /** @var AnandoRide $ride */
+            $ride = AnandoRide::where('id', $lockedBooking->anando_ride_id)->lockForUpdate()->firstOrFail();
+
+            if (! in_array($ride->status, [AnandoRide::STATUS_OPEN, AnandoRide::STATUS_FULL], true)) {
+                throw ValidationException::withMessages([
+                    'anando_ride' => ["Ce trajet Anando n'accepte plus de modifications."],
+                ]);
+            }
+
+            $seatDelta = $newSeats - $lockedBooking->seats_booked;
+
+            if ($seatDelta > 0 && $ride->available_seats < $seatDelta) {
+                throw ValidationException::withMessages([
+                    'seats' => ["Il ne reste que {$ride->available_seats} place(s) supplémentaire(s) disponible(s) sur ce trajet."],
+                ]);
+            }
+
+            $newPriceTotal = $ride->price_per_seat * $newSeats;
+            $priceDelta = $newPriceTotal - $lockedBooking->price_total;
+
+            if ($lockedBooking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET && $priceDelta !== 0) {
+                if ($priceDelta > 0) {
+                    $walletService->charge($lockedBooking->user, $priceDelta, null, "Ajustement Anando #{$ride->id}");
+                    $walletService->credit($ride->poster, $priceDelta, null, WalletTransaction::TYPE_EARNING, "Ajustement de revenu Anando #{$ride->id}");
+                } else {
+                    $refundAmount = abs($priceDelta);
+                    $walletService->credit($lockedBooking->user, $refundAmount, null, WalletTransaction::TYPE_REFUND, "Remboursement partiel Anando #{$ride->id}");
+                    $walletService->debit($ride->poster, $refundAmount, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Ajustement de revenu Anando #{$ride->id}");
+                }
+            }
+
+            $lockedBooking->update([
+                'seats_booked' => $newSeats,
+                'price_total' => $newPriceTotal,
+            ]);
+
+            if ($seatDelta !== 0) {
+                $ride->decrement('available_seats', $seatDelta);
+            }
+
+            $ride->refresh();
+
+            if ($ride->available_seats <= 0 && $ride->status !== AnandoRide::STATUS_FULL) {
+                $ride->update(['status' => AnandoRide::STATUS_FULL]);
+            } elseif ($ride->available_seats > 0 && $ride->status === AnandoRide::STATUS_FULL) {
+                $ride->update(['status' => AnandoRide::STATUS_OPEN]);
+            }
+
+            return $lockedBooking;
+        });
+
+        return new AnandoRideBookingResource($updated->load(['anandoRide.poster', 'anandoRide.originCity', 'anandoRide.destinationCity', 'user']));
     }
 
     public function cancelBooking(Request $request, AnandoRideBooking $anandoRideBooking, WalletService $walletService)

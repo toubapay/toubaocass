@@ -182,6 +182,13 @@ export interface AnandoRide {
   is_mine: boolean;
   created_at: string;
   bookings?: AnandoRideBooking[];
+  my_booking?: {
+    id: number;
+    seats_booked: number;
+    price_total: number;
+    payment_method: PaymentMethod;
+    status: BookingStatus;
+  } | null;
 }
 
 export interface AnandoRideBooking {

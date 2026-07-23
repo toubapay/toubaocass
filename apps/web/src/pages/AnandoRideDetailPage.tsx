@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { cancelAnandoRide, fetchAnandoRide, joinAnandoRide } from '../api/anando';
+import { cancelAnandoRide, cancelAnandoRideBooking, fetchAnandoRide, joinAnandoRide, updateAnandoRideBooking } from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import type { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
@@ -33,6 +33,10 @@ export function AnandoRideDetailPage() {
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [modifySeats, setModifySeats] = useState('1');
+  const [modifying, setModifying] = useState(false);
+  const [cancellingBooking, setCancellingBooking] = useState(false);
+
   const load = () => {
     if (!id) return;
     fetchAnandoRide(Number(id))
@@ -45,6 +49,12 @@ export function AnandoRideDetailPage() {
     fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (ride?.my_booking) {
+      setModifySeats(String(ride.my_booking.seats_booked));
+    }
+  }, [ride?.my_booking?.id, ride?.my_booking?.seats_booked]);
 
   if (loading || !ride) {
     return <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>;
@@ -78,6 +88,38 @@ export function AnandoRideDetailPage() {
       setError(extractErrorMessage(err));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const myBooking = ride.my_booking;
+  const maxModifySeats = myBooking ? ride.available_seats + myBooking.seats_booked : 0;
+  const canModify = myBooking != null && Number(modifySeats) > 0 && Number(modifySeats) <= maxModifySeats;
+
+  const handleModify = async () => {
+    if (!myBooking || !canModify) return;
+    setModifying(true);
+    setError(null);
+    try {
+      await updateAnandoRideBooking(myBooking.id, Number(modifySeats));
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setModifying(false);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (!myBooking) return;
+    if (!window.confirm(t('anando.cancelBookingConfirm') as string)) return;
+    setCancellingBooking(true);
+    try {
+      await cancelAnandoRideBooking(myBooking.id);
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setCancellingBooking(false);
     }
   };
 
@@ -138,6 +180,44 @@ export function AnandoRideDetailPage() {
           )}
           {['open', 'full'].includes(ride.status) && (
             <Button label={t('anando.cancelRide')} onClick={handleCancel} loading={cancelling} variant="danger" style={{ marginTop: spacing.sm }} />
+          )}
+        </>
+      ) : myBooking ? (
+        <>
+          <p style={sectionTitleStyle}>{t('anando.myBookingTitle')}</p>
+          <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.lg }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
+              {t('anando.seatsBooked', { count: myBooking.seats_booked })}
+            </p>
+            <p style={{ fontSize: 14, color: colors.textMuted, margin: '4px 0 0' }}>
+              {myBooking.price_total.toLocaleString()} FCFA · {myBooking.payment_method === 'wallet' ? t('common.wallet') : t('common.cash')}
+            </p>
+          </div>
+
+          {ride.status !== 'cancelled' && (
+            <>
+              <p style={sectionTitleStyle}>{t('anando.modifyBooking')}</p>
+              <TextField
+                label={t('anando.seatsToJoin')}
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={maxModifySeats}
+                value={modifySeats}
+                onChange={(e) => setModifySeats(e.target.value)}
+              />
+
+              {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
+
+              <Button
+                label={t('anando.modifySubmit')}
+                onClick={handleModify}
+                loading={modifying}
+                disabled={!canModify || Number(modifySeats) === myBooking.seats_booked}
+                style={{ marginBottom: spacing.sm }}
+              />
+              <Button label={t('anando.cancelBooking')} onClick={handleCancelBooking} loading={cancellingBooking} variant="danger" />
+            </>
           )}
         </>
       ) : (

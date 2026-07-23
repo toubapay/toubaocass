@@ -257,6 +257,22 @@
     "joinTitle": "الانضمام إلى هذه الرحلة",
     "seatsToJoin": "عدد المقاعد",
     "joinSubmit": "انضمام — {{amount}} FCFA",
+    "tabs": {
+      "available": "المتاحة",
+      "mine": "رحلاتي"
+    },
+    "myBookings": "حجوزاتي",
+    "noMyRides": "لم تنشر أي رحلة أناندو.",
+    "noMyBookings": "لم تنضم إلى أي رحلة أناندو.",
+    "myBookingTitle": "حجزي",
+    "modifyBooking": "تعديل حجزي",
+    "modifySubmit": "حفظ التعديلات",
+    "cancelBooking": "إلغاء حجزي",
+    "cancelBookingConfirm": "سيتم استرداد أموالك إذا دفعت عبر المحفظة. هل تريد تأكيد الإلغاء؟",
+    "bookingStatus": {
+      "confirmed": "مؤكدة",
+      "cancelled": "ملغاة"
+    },
     "status": {
       "open": "متاحة",
       "full": "مكتملة",
