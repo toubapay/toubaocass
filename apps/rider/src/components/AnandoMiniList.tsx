@@ -1,8 +1,8 @@
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { fetchAnandoRides } from '../api/anando';
@@ -30,6 +30,18 @@ export function AnandoMiniList() {
   const { t } = useTranslation();
   const navigation = useNavigation<Nav>();
   const [rides, setRides] = useState<AnandoRide[]>([]);
+  const flashOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(flashOpacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+        Animated.timing(flashOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [flashOpacity]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +86,7 @@ export function AnandoMiniList() {
             <Text style={styles.route} numberOfLines={1}>
               {ride.origin_city?.name} → {ride.destination_city?.name}
             </Text>
-            <Text style={styles.flashBadge}>{t('home.anandoMiniFlash')}</Text>
+            <Animated.Text style={[styles.flashBadge, { opacity: flashOpacity }]}>{t('home.anandoMiniFlash')}</Animated.Text>
           </View>
           <Text style={styles.meta}>{t('anando.pricePerSeatValue', { amount: ride.price_per_seat.toLocaleString() })}</Text>
         </Pressable>

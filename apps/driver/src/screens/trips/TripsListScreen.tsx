@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
+import { AnandoAvailableToast } from '../../components/AnandoAvailableToast';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
 import { useModuleStatus } from '../../context/ModuleStatusContext';
@@ -47,6 +48,7 @@ export function TripsListScreen({ navigation }: Props) {
 
   return (
     <Screen>
+      {isModuleEnabled('anando') && <AnandoAvailableToast />}
       <Text style={styles.title}>{t('trips.listTitle')}</Text>
 
       {isModuleEnabled('instant_trips') && (

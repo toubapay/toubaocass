@@ -277,6 +277,8 @@
     "joinTitle": "Rejoindre ce trajet",
     "seatsToJoin": "Nombre de places",
     "joinSubmit": "Rejoindre — {{amount}} FCFA",
+    "newRideToast": "🚗 Nouveau trajet Anando : {{origin}} → {{destination}}",
+    "newRideToastView": "Voir →",
     "tabs": {
       "available": "Disponibles",
       "mine": "Mes trajets"

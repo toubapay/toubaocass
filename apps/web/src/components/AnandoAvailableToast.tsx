@@ -10,6 +10,10 @@ const POLL_INTERVAL_MS = 20000;
 const VISIBLE_DURATION_MS = 4000;
 const FADE_DURATION_MS = 350;
 
+function playBeep() {
+  new Audio('/sounds/anando_beep.wav').play().catch(() => {});
+}
+
 /**
  * Small green pop-up on the Home page, one per newly-posted Anando ride —
  * polling (no WebSocket infra in this backend), mirroring
@@ -44,6 +48,7 @@ export function AnandoAvailableToast() {
 
           fresh.forEach((r) => seenIds.current!.add(r.id));
           setQueue((prev) => [...prev, ...fresh]);
+          playBeep();
         })
         .catch(() => {});
     };
@@ -83,34 +88,50 @@ export function AnandoAvailableToast() {
   };
 
   return (
-    <button
-      onClick={handleClick}
+    <div
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 200,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-        border: 'none',
-        borderRadius: radius.md,
-        padding: `${spacing.sm - 2}px ${spacing.md}px`,
-        marginBottom: spacing.sm,
-        backgroundColor: colors.successSoft,
-        color: colors.success,
-        fontWeight: 700,
-        fontSize: 12.5,
-        cursor: 'pointer',
-        opacity: visible ? 1 : 0,
-        transition: `opacity ${FADE_DURATION_MS}ms ease`,
-        gap: spacing.sm,
+        justifyContent: 'center',
+        padding: `${spacing.sm}px ${spacing.md}px 0`,
+        pointerEvents: 'none',
       }}
     >
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1 }}>
-        {t('anando.newRideToast', {
-          origin: current.origin_city?.name ?? '',
-          destination: current.destination_city?.name ?? '',
-        })}
-      </span>
-      <span>{t('anando.newRideToastView')}</span>
-    </button>
+      <button
+        onClick={handleClick}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: 480 - spacing.md * 2,
+          border: 'none',
+          borderRadius: radius.md,
+          padding: `${spacing.sm - 2}px ${spacing.md}px`,
+          backgroundColor: colors.successSoft,
+          color: colors.success,
+          fontWeight: 700,
+          fontSize: 12.5,
+          cursor: 'pointer',
+          opacity: visible ? 1 : 0,
+          transition: `opacity ${FADE_DURATION_MS}ms ease`,
+          gap: spacing.sm,
+          boxShadow: '0 4px 14px rgba(19, 26, 23, 0.18)',
+          pointerEvents: 'auto',
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1 }}>
+          {t('anando.newRideToast', {
+            origin: current.origin_city?.name ?? '',
+            destination: current.destination_city?.name ?? '',
+          })}
+        </span>
+        <span>{t('anando.newRideToastView')}</span>
+      </button>
+    </div>
   );
 }

@@ -97,6 +97,7 @@ export function AnandoMiniList() {
               {ride.origin_city?.name} → {ride.destination_city?.name}
             </span>
             <span
+              className="flash-badge"
               style={{
                 fontSize: 10.5,
                 fontWeight: 700,

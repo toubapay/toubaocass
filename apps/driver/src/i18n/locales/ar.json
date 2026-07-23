@@ -287,6 +287,8 @@
     "joinTitle": "الانضمام إلى هذه الرحلة",
     "seatsToJoin": "عدد المقاعد",
     "joinSubmit": "انضمام — {{amount}} FCFA",
+    "newRideToast": "🚗 رحلة أناندو جديدة: {{origin}} → {{destination}}",
+    "newRideToastView": "عرض ←",
     "tabs": {
       "available": "المتاحة",
       "mine": "رحلاتي"

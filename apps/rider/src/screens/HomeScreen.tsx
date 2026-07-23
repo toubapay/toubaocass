@@ -101,8 +101,8 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <Screen>
+      {isModuleEnabled('anando') && <AnandoAvailableToast />}
       <View style={styles.filters}>
-        {isModuleEnabled('anando') && <AnandoAvailableToast />}
         {isModuleEnabled('instant_trips') && <InstantDeparturesBanner />}
 
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>

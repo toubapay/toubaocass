@@ -1,5 +1,4 @@
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { CompositeNavigationProp, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text } from 'react-native';
@@ -8,24 +7,21 @@ import { useTranslation } from 'react-i18next';
 import { fetchAnandoRides } from '../api/anando';
 import { AnandoRide } from '../api/types';
 import { useAnandoBeep } from '../hooks/useAnandoBeep';
-import { HomeStackParamList, MainTabParamList } from '../navigation/types';
+import { TripsStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
 const POLL_INTERVAL_MS = 20000;
 const VISIBLE_DURATION_MS = 4000;
 const FADE_DURATION_MS = 350;
 
-type Nav = CompositeNavigationProp<
-  NativeStackNavigationProp<HomeStackParamList>,
-  BottomTabNavigationProp<MainTabParamList>
->;
+type Nav = NativeStackNavigationProp<TripsStackParamList>;
 
 /**
- * Small green pop-up on the Home screen, one per newly-posted/available
- * Anando ride — polling (no WebSocket infra in this backend), mirroring
- * InstantDeparturesBanner's approach. The first fetch only seeds "already
+ * Fixed banner pinned to the very top of the Trips screen, one per
+ * newly-posted Anando ride — polling (no WebSocket infra in this backend),
+ * mirroring the rider app's toast. The first fetch only seeds "already
  * seen" ride ids silently so existing rides don't all pop up at once on
- * app open; only rides discovered on later polls queue a toast.
+ * app open; only rides discovered on later polls queue a toast + beep.
  */
 export function AnandoAvailableToast() {
   const { t } = useTranslation();
@@ -51,7 +47,6 @@ export function AnandoAvailableToast() {
           const rides = res.data;
 
           if (seenIds.current === null) {
-            // First load: just remember what's already out there.
             seenIds.current = new Set(rides.map((r) => r.id));
             return;
           }
@@ -72,6 +67,7 @@ export function AnandoAvailableToast() {
       cancelled = true;
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -105,7 +101,7 @@ export function AnandoAvailableToast() {
 
   const handlePress = () => {
     setCurrent(null);
-    navigation.navigate('ServicesTab', { screen: 'AnandoRideDetail', params: { rideId: current.id } });
+    navigation.navigate('AnandoRideDetail', { rideId: current.id });
   };
 
   return (
