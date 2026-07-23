@@ -13,6 +13,7 @@ import { KycQueuePage } from './pages/kyc/KycQueuePage';
 import { KycReviewPage } from './pages/kyc/KycReviewPage';
 import { LiveTripsPage } from './pages/live/LiveTripsPage';
 import { LoginPage } from './pages/LoginPage';
+import { ModulesPage } from './pages/modules/ModulesPage';
 import { SecurityAlertsPage } from './pages/security/SecurityAlertsPage';
 import { FaresPage } from './pages/settings/FaresPage';
 import { SystemSettingsPage } from './pages/settings/SystemSettingsPage';
@@ -52,6 +53,7 @@ function AppRoutes() {
         <Route path="/insurance/providers" element={<InsuranceProvidersPage />} />
         <Route path="/insurance/policies" element={<InsurancePoliciesPage />} />
         <Route path="/backups" element={<BackupsPage />} />
+        <Route path="/modules" element={<ModulesPage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="/audit-log" element={<AuditLogPage />} />
         <Route path="/settings" element={<SystemSettingsPage />} />

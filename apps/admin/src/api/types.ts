@@ -248,6 +248,33 @@ export interface Paginated<T> {
   links?: unknown;
 }
 
+export interface Module {
+  id: number;
+  key: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  config: Record<string, unknown> | null;
+  is_enabled: boolean;
+  enabled_at: string | null;
+  disabled_at: string | null;
+  created_at: string;
+}
+
+export interface CreateModuleInput {
+  key: string;
+  name: string;
+  description?: string;
+  category?: string;
+  is_enabled?: boolean;
+}
+
+export interface UpdateModuleInput {
+  name?: string;
+  description?: string;
+  category?: string;
+}
+
 export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
