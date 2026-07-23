@@ -7,6 +7,7 @@ import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
 import { City, Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
+import { AnandoMiniList } from '../components/AnandoMiniList';
 import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
@@ -178,7 +179,10 @@ export function HomeScreen({ navigation }: Props) {
             </View>
           }
           ListFooterComponent={
-            <TripsMapView trips={visibleTrips} onSelectTrip={(tripId) => navigation.navigate('TripDetail', { tripId })} />
+            <>
+              <AnandoMiniList />
+              <TripsMapView trips={visibleTrips} onSelectTrip={(tripId) => navigation.navigate('TripDetail', { tripId })} />
+            </>
           }
         />
       )}

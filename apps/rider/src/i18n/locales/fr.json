@@ -88,7 +88,10 @@
     "prev": "← Précédent",
     "next": "Suivant →",
     "pageOf": "Page {{page}} sur {{lastPage}}",
-    "totalTrips": "{{count}} trajet(s) au total"
+    "totalTrips": "{{count}} trajet(s) au total",
+    "anandoMiniTitle": "⚡ Anando",
+    "anandoMiniViewAll": "Voir tout →",
+    "anandoMiniFlash": "⚡ Départ immédiat"
   },
   "profile": {
     "title": "Mon profil",

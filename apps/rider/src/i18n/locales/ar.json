@@ -88,7 +88,10 @@
     "prev": "→ السابق",
     "next": "التالي ←",
     "pageOf": "صفحة {{page}} من {{lastPage}}",
-    "totalTrips": "{{count}} رحلة إجمالاً"
+    "totalTrips": "{{count}} رحلة إجمالاً",
+    "anandoMiniTitle": "⚡ أناندو",
+    "anandoMiniViewAll": "عرض الكل ←",
+    "anandoMiniFlash": "⚡ مغادرة فورية"
   },
   "profile": {
     "title": "ملفي الشخصي",
