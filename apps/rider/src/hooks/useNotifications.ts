@@ -6,12 +6,17 @@ import * as Notifications from 'expo-notifications';
 import { registerPushToken } from '../api/auth';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const type = notification.request.content.data?.type;
+    const isAnando = typeof type === 'string' && type.startsWith('anando');
+
+    return {
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: isAnando,
+      shouldSetBadge: false,
+    };
+  },
 });
 
 /**
@@ -39,7 +44,8 @@ export function useRegisterPushToken(enabled: boolean) {
         if (Platform.OS === 'android') {
           await Notifications.setNotificationChannelAsync('default', {
             name: 'default',
-            importance: Notifications.AndroidImportance.DEFAULT,
+            importance: Notifications.AndroidImportance.HIGH,
+            sound: 'default',
           });
         }
 

@@ -45,6 +45,14 @@ export function usePushNotifications() {
           if (Notification.permission !== 'granted') return;
           const title = payload.notification?.title ?? 'Intercity';
           new Notification(title, { body: payload.notification?.body, icon: '/icons/icon-192.png' });
+
+          // The native Notification API has no reliable cross-browser sound
+          // option (Chrome on Android in particular stays silent for
+          // foreground-triggered notifications), so Anando alerts get an
+          // explicit beep to make sure they're actually noticed.
+          if (payload.data?.type?.toString().startsWith('anando')) {
+            new Audio('/sounds/anando_beep.wav').play().catch(() => {});
+          }
         });
       })
       .catch(() => {

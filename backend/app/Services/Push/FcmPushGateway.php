@@ -3,6 +3,7 @@
 namespace App\Services\Push;
 
 use App\Contracts\PushGateway;
+use App\Contracts\PushSendResult;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -26,14 +27,14 @@ class FcmPushGateway implements PushGateway
         private readonly array $credentials,
     ) {}
 
-    public function send(string $token, string $title, string $body, array $data = []): bool
+    public function send(string $token, string $title, string $body, array $data = []): PushSendResult
     {
         $accessToken = $this->getAccessToken();
 
         if (! $accessToken) {
             Log::warning('FCM push skipped: unable to obtain access token');
 
-            return false;
+            return PushSendResult::failed();
         }
 
         $response = Http::withToken($accessToken)
@@ -49,15 +50,33 @@ class FcmPushGateway implements PushGateway
             ]);
 
         if ($response->failed()) {
+            $tokenInvalid = $this->isInvalidTokenError($response->json());
+
             Log::warning('FCM push delivery failed', [
                 'status' => $response->status(),
                 'body' => $response->body(),
+                'token_invalid' => $tokenInvalid,
             ]);
 
-            return false;
+            return PushSendResult::failed(tokenInvalid: $tokenInvalid);
         }
 
-        return true;
+        return PushSendResult::success();
+    }
+
+    /**
+     * FCM's HTTP v1 API reports a dead registration token (app uninstalled,
+     * user revoked notification permission at the OS level, token rotated
+     * out from under us) as an UNREGISTERED or INVALID_ARGUMENT FcmError —
+     * distinct from transient failures (network blips, bad credentials)
+     * that shouldn't cause us to throw away a token that might still work
+     * on the next attempt.
+     */
+    private function isInvalidTokenError(?array $body): bool
+    {
+        $errorCodes = collect($body['error']['details'] ?? [])->pluck('errorCode');
+
+        return $errorCodes->intersect(['UNREGISTERED', 'INVALID_ARGUMENT'])->isNotEmpty();
     }
 
     private function getAccessToken(): ?string
