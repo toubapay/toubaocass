@@ -4,6 +4,7 @@
     "save": "حفظ",
     "cancel": "إلغاء",
     "close": "إغلاق",
+    "ok": "موافق",
     "edit": "تعديل",
     "delete": "حذف",
     "add": "إضافة",
@@ -17,8 +18,16 @@
     "insufficientFunds": "الرصيد غير كافٍ لإتمام هذه العملية.",
     "topUp": "شحن الرصيد",
     "selectCity": "اختر مدينة",
-    "rideType": { "standard": "عادي", "comfort": "مريح", "xl": "كبير" },
-    "fillState": { "open": "متاح", "filling": "يمتلئ", "full": "مكتمل" },
+    "rideType": {
+      "standard": "عادي",
+      "comfort": "مريح",
+      "xl": "كبير"
+    },
+    "fillState": {
+      "open": "متاح",
+      "filling": "يمتلئ",
+      "full": "مكتمل"
+    },
     "deliveryStatus": {
       "pending": "قيد الانتظار",
       "accepted": "مقبولة",
@@ -212,11 +221,26 @@
   "services": {
     "title": "الخدمات",
     "comingSoon": "🚧 قريباً — هذه الخدمة قادمة قريباً.",
-    "anando": { "label": "أناندو", "description": "شارك أو ابحث عن رحلة فورية، مثل التشارك في السيارة" },
-    "livraison": { "label": "التوصيل", "description": "إرسال الطرود داخل المدينة وبين المدن" },
-    "cargaison": { "label": "الشحن", "description": "نقل البضائع بكميات كبيرة" },
-    "camion": { "label": "شاحنة", "description": "نقل الأثاث والأغراض الكبيرة" },
-    "location": { "label": "الإيجار", "description": "استئجار مركبات مع أو بدون سائق" }
+    "anando": {
+      "label": "أناندو",
+      "description": "شارك أو ابحث عن رحلة فورية، مثل التشارك في السيارة"
+    },
+    "livraison": {
+      "label": "التوصيل",
+      "description": "إرسال الطرود داخل المدينة وبين المدن"
+    },
+    "cargaison": {
+      "label": "الشحن",
+      "description": "نقل البضائع بكميات كبيرة"
+    },
+    "camion": {
+      "label": "شاحنة",
+      "description": "نقل الأثاث والأغراض الكبيرة"
+    },
+    "location": {
+      "label": "الإيجار",
+      "description": "استئجار مركبات مع أو بدون سائق"
+    }
   },
   "anando": {
     "title": "أناندو",
@@ -283,7 +307,9 @@
       "full": "مكتملة",
       "cancelled": "ملغاة",
       "completed": "منتهية"
-    }
+    },
+    "postSuccessTitle": "تم نشر الرحلة!",
+    "postSuccessBody": "تم نشر رحلتك في أناندو بنجاح."
   },
   "map": {
     "title": "الرحلات على الخريطة",

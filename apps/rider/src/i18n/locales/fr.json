@@ -25,8 +25,16 @@
     "voiceSearchUnavailableBody": "Impossible d'utiliser la reconnaissance vocale sur cet appareil.",
     "micNotAuthorizedTitle": "Micro non autorisé",
     "micNotAuthorizedBody": "Activez l'accès au microphone dans les réglages pour utiliser la recherche vocale.",
-    "rideType": { "standard": "Standard", "comfort": "Confort", "xl": "XL" },
-    "fillState": { "open": "Disponible", "filling": "Se remplit", "full": "Complet" },
+    "rideType": {
+      "standard": "Standard",
+      "comfort": "Confort",
+      "xl": "XL"
+    },
+    "fillState": {
+      "open": "Disponible",
+      "filling": "Se remplit",
+      "full": "Complet"
+    },
     "deliveryStatus": {
       "pending": "En attente",
       "accepted": "Acceptée",
@@ -253,11 +261,26 @@
     "comingSoon": "🚧 Bientôt disponible — ce service arrive prochainement.",
     "comingSoonTitle": "Bientôt disponible",
     "comingSoonBody": "{{label}} arrive prochainement.",
-    "anando": { "label": "Anando", "description": "Partagez ou trouvez un trajet instantané, comme du covoiturage" },
-    "livraison": { "label": "Livraison", "description": "Envoi de colis en ville et entre villes" },
-    "cargaison": { "label": "Cargaison", "description": "Transport de marchandises en gros volume" },
-    "camion": { "label": "Camion", "description": "Déménagement et transport de gros objets" },
-    "location": { "label": "Location", "description": "Location de véhicules avec ou sans chauffeur" }
+    "anando": {
+      "label": "Anando",
+      "description": "Partagez ou trouvez un trajet instantané, comme du covoiturage"
+    },
+    "livraison": {
+      "label": "Livraison",
+      "description": "Envoi de colis en ville et entre villes"
+    },
+    "cargaison": {
+      "label": "Cargaison",
+      "description": "Transport de marchandises en gros volume"
+    },
+    "camion": {
+      "label": "Camion",
+      "description": "Déménagement et transport de gros objets"
+    },
+    "location": {
+      "label": "Location",
+      "description": "Location de véhicules avec ou sans chauffeur"
+    }
   },
   "anando": {
     "title": "Anando",
@@ -314,7 +337,9 @@
       "full": "Complet",
       "cancelled": "Annulé",
       "completed": "Terminé"
-    }
+    },
+    "postSuccessTitle": "Trajet publié !",
+    "postSuccessBody": "Votre trajet Anando a été publié avec succès."
   },
   "map": {
     "title": "Trajets sur la carte",

@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { fetchAnandoRides, fetchMyAnandoBookings, fetchMyAnandoRides, postAnandoRide } from '../../api/anando';
@@ -113,7 +113,9 @@ export function AnandoScreen({ navigation }: Props) {
       setDeparturePoint('');
       setPricePerSeat('');
       setSeats('3');
-      navigation.navigate('AnandoRideDetail', { rideId: ride.id });
+      Alert.alert(t('anando.postSuccessTitle'), t('anando.postSuccessBody'), [
+        { text: t('common.ok'), onPress: () => navigation.navigate('AnandoRideDetail', { rideId: ride.id }) },
+      ]);
     } catch (e) {
       setError(extractErrorMessage(e));
     } finally {

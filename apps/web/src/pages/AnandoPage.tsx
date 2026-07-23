@@ -8,6 +8,7 @@ import { fetchCities } from '../api/cities';
 import type { AnandoRide, AnandoRideBooking, City } from '../api/types';
 import { Button } from '../components/Button';
 import { CityPicker } from '../components/CityPicker';
+import { SuccessModal } from '../components/SuccessModal';
 import { TextField } from '../components/TextField';
 import { colors, radius, spacing } from '../theme';
 
@@ -131,6 +132,7 @@ export function AnandoPage() {
   const [seats, setSeats] = useState('3');
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [postedRideId, setPostedRideId] = useState<number | null>(null);
 
   const load = () => {
     Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
@@ -172,7 +174,7 @@ export function AnandoPage() {
       setDeparturePoint('');
       setPricePerSeat('');
       setSeats('3');
-      navigate(`/services/anando/${ride.id}`);
+      setPostedRideId(ride.id);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -289,6 +291,15 @@ export function AnandoPage() {
             ))
           )}
         </>
+      )}
+
+      {postedRideId != null && (
+        <SuccessModal
+          title={t('anando.postSuccessTitle')}
+          body={t('anando.postSuccessBody')}
+          buttonLabel={t('common.ok')}
+          onClose={() => navigate(`/services/anando/${postedRideId}`)}
+        />
       )}
     </div>
   );

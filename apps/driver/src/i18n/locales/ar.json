@@ -310,7 +310,9 @@
       "full": "مكتملة",
       "cancelled": "ملغاة",
       "completed": "منتهية"
-    }
+    },
+    "postSuccessTitle": "تم نشر الرحلة!",
+    "postSuccessBody": "تم نشر رحلتك في أناندو بنجاح."
   },
   "deliveries": {
     "title": "التوصيلات",
