@@ -16,11 +16,15 @@ type Nav = CompositeNavigationProp<
 >;
 
 const MAX_RIDES = 2;
+const POLL_INTERVAL_MS = 20000;
 
 /**
  * Small preview of the two most recently posted Anando rides, shown right
- * before the trips map on Home — a quick taste of ride-sharing without
- * leaving the tab, mirroring InstantDeparturesBanner's "flash" styling.
+ * before the main trip listing on Home — a quick taste of ride-sharing
+ * without leaving the tab, mirroring InstantDeparturesBanner's "flash"
+ * styling. Refetches on focus and polls while mounted, since Home tends to
+ * stay mounted for a while and a one-time fetch would go stale as soon as
+ * someone else posts a new ride.
  */
 export function AnandoMiniList() {
   const { t } = useTranslation();
@@ -29,15 +33,25 @@ export function AnandoMiniList() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchAnandoRides()
-      .then((res) => {
-        if (!cancelled) setRides(res.data.slice(0, MAX_RIDES));
-      })
-      .catch(() => {});
+
+    const load = () => {
+      fetchAnandoRides()
+        .then((res) => {
+          if (!cancelled) setRides(res.data.slice(0, MAX_RIDES));
+        })
+        .catch(() => {});
+    };
+
+    load();
+    const interval = setInterval(load, POLL_INTERVAL_MS);
+    const unsubscribeFocus = navigation.addListener('focus', load);
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
+      unsubscribeFocus();
     };
-  }, []);
+  }, [navigation]);
 
   if (rides.length === 0) return null;
 
