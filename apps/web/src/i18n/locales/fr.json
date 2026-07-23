@@ -62,7 +62,10 @@
     "prev": "← Précédent",
     "next": "Suivant →",
     "pageOf": "Page {{page}} sur {{lastPage}}",
-    "totalTrips": "{{count}} trajet(s) au total"
+    "totalTrips": "{{count}} trajet(s) au total",
+    "anandoMiniTitle": "⚡ Anando",
+    "anandoMiniViewAll": "Voir tout →",
+    "anandoMiniFlash": "⚡ Départ immédiat"
   },
   "profile": {
     "title": "Mon profil",
@@ -247,6 +250,8 @@
     "joinTitle": "Rejoindre ce trajet",
     "seatsToJoin": "Nombre de places",
     "joinSubmit": "Rejoindre — {{amount}} FCFA",
+    "newRideToast": "🚗 Nouveau trajet Anando : {{origin}} → {{destination}}",
+    "newRideToastView": "Voir →",
     "tabs": {
       "available": "Disponibles",
       "mine": "Mes trajets"

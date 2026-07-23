@@ -62,7 +62,10 @@
     "prev": "→ السابق",
     "next": "التالي ←",
     "pageOf": "صفحة {{page}} من {{lastPage}}",
-    "totalTrips": "{{count}} رحلة إجمالاً"
+    "totalTrips": "{{count}} رحلة إجمالاً",
+    "anandoMiniTitle": "⚡ أناندو",
+    "anandoMiniViewAll": "عرض الكل ←",
+    "anandoMiniFlash": "⚡ مغادرة فورية"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -257,6 +260,8 @@
     "joinTitle": "الانضمام إلى هذه الرحلة",
     "seatsToJoin": "عدد المقاعد",
     "joinSubmit": "انضمام — {{amount}} FCFA",
+    "newRideToast": "🚗 رحلة أناندو جديدة: {{origin}} → {{destination}}",
+    "newRideToastView": "عرض ←",
     "tabs": {
       "available": "المتاحة",
       "mine": "رحلاتي"

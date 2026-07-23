@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
+import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
+import { AnandoMiniList } from '../components/AnandoMiniList';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
@@ -109,6 +111,7 @@ export function HomePage() {
         {t('home.title')}
       </h1>
 
+      <AnandoAvailableToast />
       <InstantDeparturesBanner />
 
       <button
@@ -230,6 +233,8 @@ export function HomePage() {
           {t('home.invalidRoute')}
         </p>
       )}
+
+      <AnandoMiniList />
 
       <div style={{ marginTop: spacing.md }}>
         {loading && trips.length === 0 ? (
