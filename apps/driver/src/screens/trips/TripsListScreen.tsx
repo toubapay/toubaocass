@@ -8,6 +8,7 @@ import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { useModuleStatus } from '../../context/ModuleStatusContext';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
@@ -23,6 +24,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 export function TripsListScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,21 +49,25 @@ export function TripsListScreen({ navigation }: Props) {
     <Screen>
       <Text style={styles.title}>{t('trips.listTitle')}</Text>
 
-      <Pressable style={styles.instantCard} onPress={() => navigation.navigate('PostInstantTrip')}>
-        <Text style={styles.mapCardIcon}>🚀</Text>
-        <View style={styles.mapCardText}>
-          <Text style={styles.instantCardTitle}>{t('trips.instantCardTitle')}</Text>
-          <Text style={styles.instantCardSubtitle}>{t('trips.instantCardSubtitle')}</Text>
-        </View>
-      </Pressable>
+      {isModuleEnabled('instant_trips') && (
+        <Pressable style={styles.instantCard} onPress={() => navigation.navigate('PostInstantTrip')}>
+          <Text style={styles.mapCardIcon}>🚀</Text>
+          <View style={styles.mapCardText}>
+            <Text style={styles.instantCardTitle}>{t('trips.instantCardTitle')}</Text>
+            <Text style={styles.instantCardSubtitle}>{t('trips.instantCardSubtitle')}</Text>
+          </View>
+        </Pressable>
+      )}
 
-      <Pressable style={styles.anandoCard} onPress={() => navigation.navigate('Anando')}>
-        <Text style={styles.mapCardIcon}>🚗</Text>
-        <View style={styles.mapCardText}>
-          <Text style={styles.anandoCardTitle}>{t('anando.title')}</Text>
-          <Text style={styles.anandoCardSubtitle}>{t('anando.subtitle')}</Text>
-        </View>
-      </Pressable>
+      {isModuleEnabled('anando') && (
+        <Pressable style={styles.anandoCard} onPress={() => navigation.navigate('Anando')}>
+          <Text style={styles.mapCardIcon}>🚗</Text>
+          <View style={styles.mapCardText}>
+            <Text style={styles.anandoCardTitle}>{t('anando.title')}</Text>
+            <Text style={styles.anandoCardSubtitle}>{t('anando.subtitle')}</Text>
+          </View>
+        </Pressable>
+      )}
 
       <Pressable style={styles.mapCard} onPress={() => navigation.navigate('PostTrip')}>
         <Text style={styles.mapCardIcon}>🗺️</Text>

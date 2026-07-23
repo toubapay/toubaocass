@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MyLocationBar } from '../components/MyLocationBar';
 import { useAuth } from '../context/AuthContext';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { useRegisterPushToken } from '../hooks/useNotifications';
 import { OtpVerifyScreen } from '../screens/auth/OtpVerifyScreen';
 import { PhoneEntryScreen } from '../screens/auth/PhoneEntryScreen';
@@ -132,6 +133,7 @@ function ProfileNavigator() {
 function MainTabs() {
   useRegisterPushToken(true);
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
 
   return (
     <Tab.Navigator
@@ -155,7 +157,9 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="TripsTab" component={TripsNavigator} options={{ title: t('nav.trips') }} />
-      <Tab.Screen name="DeliveriesTab" component={DeliveriesNavigator} options={{ title: t('nav.deliveries') }} />
+      {isModuleEnabled('livraison') && (
+        <Tab.Screen name="DeliveriesTab" component={DeliveriesNavigator} options={{ title: t('nav.deliveries') }} />
+      )}
       <Tab.Screen name="FleetTab" component={FleetNavigator} options={{ title: t('nav.fleet') }} />
       <Tab.Screen name="KycTab" component={KycNavigator} options={{ title: t('nav.kyc') }} />
       <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: t('nav.profile') }} />

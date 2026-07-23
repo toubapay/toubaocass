@@ -5,6 +5,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Screen } from '../components/Screen';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
@@ -25,10 +26,11 @@ const LINKED_SERVICES: Record<string, keyof ServicesStackParamList> = {
 
 export function ServicesScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
   return (
     <Screen>
       <Text style={styles.title}>{t('services.title')}</Text>
-      {SERVICES.map((service) => (
+      {SERVICES.filter((service) => isModuleEnabled(service.key)).map((service) => (
         <Pressable
           key={service.key}
           style={styles.card}

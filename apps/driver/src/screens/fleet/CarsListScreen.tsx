@@ -9,6 +9,7 @@ import { extractErrorMessage } from '../../api/client';
 import { Car } from '../../api/types';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { useModuleStatus } from '../../context/ModuleStatusContext';
 import { FleetStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
@@ -16,6 +17,7 @@ type Props = NativeStackScreenProps<FleetStackParamList, 'CarsList'>;
 
 export function CarsListScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,17 +71,19 @@ export function CarsListScreen({ navigation }: Props) {
               {item.plate_number} · {t('fleet.seatsCount', { count: item.seats })} · {item.type.toUpperCase()}
             </Text>
             <View style={styles.actionsRow}>
-              <Pressable
-                onPress={() =>
-                  navigation.navigate('InsuranceCompare', {
-                    carId: item.id,
-                    carLabel: `${item.make} ${item.model} (${item.plate_number})`,
-                  })
-                }
-                style={styles.insuranceButton}
-              >
-                <Text style={styles.insuranceText}>{t('fleet.insuranceLink')}</Text>
-              </Pressable>
+              {isModuleEnabled('assurance') && (
+                <Pressable
+                  onPress={() =>
+                    navigation.navigate('InsuranceCompare', {
+                      carId: item.id,
+                      carLabel: `${item.make} ${item.model} (${item.plate_number})`,
+                    })
+                  }
+                  style={styles.insuranceButton}
+                >
+                  <Text style={styles.insuranceText}>{t('fleet.insuranceLink')}</Text>
+                </Pressable>
+              )}
               <Pressable onPress={() => handleDelete(item)} style={styles.removeButton}>
                 <Text style={styles.removeText}>{t('fleet.remove')}</Text>
               </Pressable>

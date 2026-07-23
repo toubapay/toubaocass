@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ModuleStatusProvider } from './context/ModuleStatusContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
 import { AnandoPage } from './pages/AnandoPage';
 import { AnandoRideDetailPage } from './pages/AnandoRideDetailPage';
@@ -81,7 +82,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <ModuleStatusProvider>
+        <AppRoutes />
+      </ModuleStatusProvider>
     </AuthProvider>
   );
 }

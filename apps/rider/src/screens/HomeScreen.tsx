@@ -14,6 +14,7 @@ import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { Screen } from '../components/Screen';
 import { TripCard } from '../components/TripCard';
 import { TripsMapView } from '../components/TripsMapView';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -24,6 +25,7 @@ const NEARBY_RADIUS_KM = 25;
 
 export function HomeScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -100,8 +102,8 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.filters}>
-        <AnandoAvailableToast />
-        <InstantDeparturesBanner />
+        {isModuleEnabled('anando') && <AnandoAvailableToast />}
+        {isModuleEnabled('instant_trips') && <InstantDeparturesBanner />}
 
         <Pressable style={[styles.nearMeButton, nearMe && styles.nearMeButtonActive]} onPress={toggleNearMe}>
           {locating ? (
@@ -169,7 +171,7 @@ export function HomeScreen({ navigation }: Props) {
           ListHeaderComponent={
             <>
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <AnandoMiniList />
+              {isModuleEnabled('anando') && <AnandoMiniList />}
             </>
           }
           ListEmptyComponent={

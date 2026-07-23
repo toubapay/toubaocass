@@ -11,6 +11,7 @@ import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
@@ -19,6 +20,7 @@ const NEARBY_RADIUS_KM = 25;
 
 export function HomePage() {
   const { t } = useTranslation();
+  const { isModuleEnabled } = useModuleStatus();
   const [cities, setCities] = useState<City[]>([]);
   const [origin, setOrigin] = useState<City | null>(null);
   const [destination, setDestination] = useState<City | null>(null);
@@ -111,8 +113,8 @@ export function HomePage() {
         {t('home.title')}
       </h1>
 
-      <AnandoAvailableToast />
-      <InstantDeparturesBanner />
+      {isModuleEnabled('anando') && <AnandoAvailableToast />}
+      {isModuleEnabled('instant_trips') && <InstantDeparturesBanner />}
 
       <button
         onClick={toggleNearMe}
@@ -234,7 +236,7 @@ export function HomePage() {
         </p>
       )}
 
-      <AnandoMiniList />
+      {isModuleEnabled('anando') && <AnandoMiniList />}
 
       <div style={{ marginTop: spacing.md }}>
         {loading && trips.length === 0 ? (

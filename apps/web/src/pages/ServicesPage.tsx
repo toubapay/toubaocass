@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
 
 const SERVICES = [
@@ -20,13 +21,14 @@ const LINKED_SERVICES: Record<string, string> = {
 export function ServicesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isModuleEnabled } = useModuleStatus();
   const [comingSoonKey, setComingSoonKey] = useState<string | null>(null);
 
   return (
     <div>
       <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('services.title')}</h1>
 
-      {SERVICES.map((service) => (
+      {SERVICES.filter((service) => isModuleEnabled(service.key)).map((service) => (
         <div key={service.key} style={{ marginBottom: spacing.md }}>
           <button
             onClick={() =>
