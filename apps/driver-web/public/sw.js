@@ -1,0 +1,51 @@
+// Minimal service worker: exists only to satisfy the browser's PWA
+// installability checks (manifest + registered SW with a fetch handler).
+// Deliberately does no caching — trip/booking data changes constantly, so
+// serving stale responses would be worse than no offline support at all.
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(fetch(event.request));
+});
+
+// Firebase Cloud Messaging: shows a system notification for pushes that
+// arrive while no tab has focus (the foreground case is handled in-app via
+// onMessage() in usePushNotifications.ts instead). This is a static file
+// served as-is, so it can't read import.meta.env like the rest of the app —
+// fill in the same (non-secret) values as VITE_FIREBASE_* in .env here.
+//
+// Wrapped in try/catch: until real Firebase credentials are filled in
+// above, or if the gstatic.com scripts fail to load, this must not break
+// the core service worker (installability, fetch passthrough) above.
+try {
+  importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
+
+  firebase.initializeApp({
+    apiKey: 'AIzaSyApu6NvW2RWVS9-oEKkmXFZMr5wKgGRjJQ',
+    authDomain: 'ocass-a1f8f.firebaseapp.com',
+    projectId: 'ocass-a1f8f',
+    storageBucket: 'ocass-a1f8f.firebasestorage.app',
+    messagingSenderId: '1070944386226',
+    appId: '1:1070944386226:web:ee1bfa949f57e999f69dab',
+  });
+
+  const messaging = firebase.messaging();
+
+  messaging.onBackgroundMessage((payload) => {
+    self.registration.showNotification(payload.notification?.title ?? 'Intercity', {
+      body: payload.notification?.body,
+      icon: '/icons/icon-192.png',
+    });
+  });
+} catch {
+  // Firebase config not filled in yet, or the CDN scripts failed to load —
+  // push notifications simply won't work until fixed, but the rest of the
+  // service worker (and the PWA) keeps functioning normally.
+}

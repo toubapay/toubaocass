@@ -1,0 +1,66 @@
+:root {
+  --primary: #8A6708;
+  --primary-dark: #6B4F06;
+  --accent: #2F6A8A;
+  --background: #F7F8FA;
+  --surface: #FFFFFF;
+  --text: #131A17;
+  --text-muted: #6B7570;
+  --border: #E2E6E4;
+  --danger: #C0392B;
+  --danger-soft: #FBEAE8;
+  --success: #1E8E5A;
+  --success-soft: #E4F3EC;
+  --accent-soft: #E4EFF3;
+
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  /* iOS Safari resizes the visual viewport as its address bar shows/hides,
+     which can make height:100% content jump under a position:fixed bottom
+     nav mid-scroll. dvh tracks the actual visible viewport instead. */
+  height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.flash-badge {
+  animation: flash 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
