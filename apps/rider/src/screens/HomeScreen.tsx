@@ -166,7 +166,12 @@ export function HomeScreen({ navigation }: Props) {
               onTripUpdated={(updated) => setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
             />
           )}
-          ListHeaderComponent={error ? <Text style={styles.errorText}>{error}</Text> : null}
+          ListHeaderComponent={
+            <>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              <AnandoMiniList />
+            </>
+          }
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>
@@ -179,10 +184,7 @@ export function HomeScreen({ navigation }: Props) {
             </View>
           }
           ListFooterComponent={
-            <>
-              <AnandoMiniList />
-              <TripsMapView trips={visibleTrips} onSelectTrip={(tripId) => navigation.navigate('TripDetail', { tripId })} />
-            </>
+            <TripsMapView trips={visibleTrips} onSelectTrip={(tripId) => navigation.navigate('TripDetail', { tripId })} />
           }
         />
       )}
