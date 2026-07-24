@@ -24,6 +24,7 @@ import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { formatDuration } from '../utils/trip';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
 
@@ -323,6 +324,16 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
         <Text style={styles.subtitle}>
           {t(`anando.status.${ride.status}`)} · {t('anando.seatsAvailable', { count: ride.available_seats })}
         </Text>
+
+        {ride.route_distance_km !== null ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>{t('anando.itinerary')}</Text>
+            <Text style={styles.line}>
+              🛣️ {ride.route_distance_km} km
+              {ride.route_duration_minutes !== null ? t('anando.drivingDuration', { duration: formatDuration(ride.route_duration_minutes) }) : ''}
+            </Text>
+          </View>
+        ) : null}
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>{t('anando.poster')}</Text>

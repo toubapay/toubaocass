@@ -183,6 +183,8 @@ export interface AnandoRide {
   };
   origin_city: City | null;
   destination_city: City | null;
+  route_distance_km: number | null;
+  route_duration_minutes: number | null;
   departure_point: string | null;
   departure_latitude: number | null;
   departure_longitude: number | null;

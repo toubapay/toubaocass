@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\Geo\CityDistanceService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,6 +10,9 @@ class AnandoRideResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $hasRoute = $this->relationLoaded('originCity') && $this->relationLoaded('destinationCity')
+            && $this->originCity && $this->destinationCity;
+
         return [
             'id' => $this->id,
             'poster' => [
@@ -21,6 +25,17 @@ class AnandoRideResource extends JsonResource
             ],
             'origin_city' => new CityResource($this->whenLoaded('originCity')),
             'destination_city' => new CityResource($this->whenLoaded('destinationCity')),
+            // Real driving distance/duration between the two cities, via
+            // Google's Distance Matrix API (cached per city pair) — same
+            // source as a regular Trip's route_distance_km.
+            'route_distance_km' => $this->when(
+                $hasRoute,
+                fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->distance_km,
+            ),
+            'route_duration_minutes' => $this->when(
+                $hasRoute,
+                fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->duration_minutes,
+            ),
             'departure_point' => $this->departure_point,
             'departure_latitude' => $this->departure_latitude,
             'departure_longitude' => $this->departure_longitude,

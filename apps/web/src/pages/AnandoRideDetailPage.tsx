@@ -21,6 +21,7 @@ import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
+import { formatDuration } from '../utils/trip';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
 
@@ -320,6 +321,16 @@ export function AnandoRideDetailPage() {
       <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 0, marginBottom: spacing.md }}>
         {t(`anando.status.${ride.status}`)} · {t('anando.seatsAvailable', { count: ride.available_seats })}
       </p>
+
+      {ride.route_distance_km !== null && (
+        <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.md }}>
+          <p style={sectionTitleStyle}>{t('anando.itinerary')}</p>
+          <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>
+            🛣️ {ride.route_distance_km} km
+            {ride.route_duration_minutes !== null && t('anando.drivingDuration', { duration: formatDuration(ride.route_duration_minutes) })}
+          </p>
+        </div>
+      )}
 
       <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.md }}>
         <p style={sectionTitleStyle}>{t('anando.poster')}</p>

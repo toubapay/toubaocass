@@ -259,6 +259,8 @@
     "destinationPlaceholder": "مدينة الوصول",
     "departurePoint": "نقطة الانطلاق",
     "departurePointPlaceholder": "مثال: محطة توتال، طريق المطار",
+    "itinerary": "المسار",
+    "drivingDuration": " · ~{{duration}} من القيادة",
     "pricePerSeat": "السعر لكل مقعد (FCFA)",
     "seats": "المقاعد",
     "postSubmit": "نشر رحلتي في أناندو",

@@ -252,6 +252,8 @@
     "destinationPlaceholder": "Ville de destination",
     "departurePoint": "Point de départ",
     "departurePointPlaceholder": "ex. Station Total, Route de l'Aéroport",
+    "itinerary": "Itinéraire",
+    "drivingDuration": " · ~{{duration}} de route",
     "pricePerSeat": "Prix par place (FCFA)",
     "seats": "Places",
     "postSubmit": "Publier mon trajet Anando",
