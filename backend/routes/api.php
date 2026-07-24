@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('anando-rides/{anandoRide}/join', [AnandoRideController::class, 'join']);
     Route::post('anando-rides/{anandoRide}/start', [AnandoRideController::class, 'start']);
     Route::post('anando-rides/{anandoRide}/complete', [AnandoRideController::class, 'complete']);
+    Route::post('anando-rides/{anandoRide}/location', [AnandoRideController::class, 'updateLocation']);
     Route::post('anando-rides/{anandoRide}/rate', [AnandoRideController::class, 'rate']);
     Route::put('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'updateBooking']);
     Route::delete('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'cancelBooking']);

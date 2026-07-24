@@ -80,3 +80,12 @@ export async function completeAnandoRide(rideId: number): Promise<AnandoRide> {
 export async function rateAnandoRide(rideId: number, input: RateAnandoRideInput): Promise<void> {
   await apiClient.post(`/anando-rides/${rideId}/rate`, input);
 }
+
+export interface UpdateAnandoRideLocationInput {
+  latitude: number;
+  longitude: number;
+}
+
+export async function updateAnandoRideLocation(rideId: number, input: UpdateAnandoRideLocationInput): Promise<void> {
+  await apiClient.post(`/anando-rides/${rideId}/location`, input);
+}

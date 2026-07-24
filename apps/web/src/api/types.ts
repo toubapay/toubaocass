@@ -191,6 +191,9 @@ export interface AnandoRide {
   departure_longitude: number | null;
   departure_at: string;
   started_at: string | null;
+  current_latitude: number | null;
+  current_longitude: number | null;
+  current_location_updated_at: string | null;
   price_per_seat: number;
   total_seats: number;
   available_seats: number;

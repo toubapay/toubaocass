@@ -359,7 +359,10 @@
     "yourRating": "تقييمك",
     "commentPlaceholder": "تعليق (اختياري)",
     "submitRating": "إرسال التقييم",
-    "alreadyRated": "لقد قيّمت: {{score}} ★"
+    "alreadyRated": "لقد قيّمت: {{score}} ★",
+    "liveMapCurrentPosition": "الموقع الحالي",
+    "liveMapUpdated": "آخر تحديث الساعة {{time}}",
+    "liveMapWaiting": "في انتظار موقع السائق…"
   },
   "map": {
     "title": "الرحلات على الخريطة",

@@ -630,4 +630,70 @@ class AnandoRideTest extends TestCase
             ->assertOk()
             ->assertJsonPath('my_ratings_given', []);
     }
+
+    public function test_poster_can_report_location_while_the_ride_is_in_progress(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_IN_PROGRESS]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/location", ['latitude' => 14.6928, 'longitude' => -17.4467])
+            ->assertOk();
+
+        $ride->refresh();
+        $this->assertSame(14.6928, $ride->current_latitude);
+        $this->assertSame(-17.4467, $ride->current_longitude);
+        $this->assertNotNull($ride->current_location_updated_at);
+    }
+
+    public function test_only_the_poster_can_report_location(): void
+    {
+        $ride = AnandoRide::factory()->create(['status' => AnandoRide::STATUS_IN_PROGRESS]);
+        $stranger = User::factory()->create();
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/location", ['latitude' => 14.6928, 'longitude' => -17.4467])
+            ->assertNotFound();
+    }
+
+    public function test_location_cannot_be_reported_unless_the_ride_is_in_progress(): void
+    {
+        $poster = User::factory()->create();
+        foreach ([AnandoRide::STATUS_OPEN, AnandoRide::STATUS_FULL, AnandoRide::STATUS_COMPLETED, AnandoRide::STATUS_CANCELLED] as $status) {
+            $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => $status]);
+
+            $this->actingAs($poster, 'sanctum')
+                ->postJson("/api/anando-rides/{$ride->id}/location", ['latitude' => 14.6928, 'longitude' => -17.4467])
+                ->assertUnprocessable();
+        }
+    }
+
+    public function test_location_update_rejects_out_of_range_coordinates(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_IN_PROGRESS]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/location", ['latitude' => 200, 'longitude' => -17.4467])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('latitude');
+    }
+
+    public function test_any_viewer_sees_the_reported_location_via_show(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_IN_PROGRESS]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/location", ['latitude' => 14.6928, 'longitude' => -17.4467])
+            ->assertOk();
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson("/api/anando-rides/{$ride->id}")
+            ->assertOk()
+            ->assertJsonPath('current_latitude', 14.6928)
+            ->assertJsonPath('current_longitude', -17.4467);
+    }
 }

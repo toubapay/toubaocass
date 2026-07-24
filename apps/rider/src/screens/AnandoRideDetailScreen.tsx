@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -12,15 +13,19 @@ import {
   rateAnandoRide,
   startAnandoRide,
   updateAnandoRideBooking,
+  updateAnandoRideLocation,
 } from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
+import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'AnandoRideDetail'>;
 
@@ -122,6 +127,13 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
       .finally(() => setLoading(false));
   };
 
+  // Background refresh used by the live-location poll below — unlike
+  // load(), this never flips loading back on, so periodic polling doesn't
+  // flash the full-screen spinner over an already-loaded ride.
+  const refresh = () => {
+    fetchAnandoRide(rideId).then(setRide).catch(() => {});
+  };
+
   useEffect(() => {
     load();
     fetchWallet()
@@ -135,6 +147,46 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
       setModifySeats(String(ride.my_booking.seats_booked));
     }
   }, [ride?.my_booking?.id, ride?.my_booking?.seats_booked]);
+
+  // While the ride is under way, every viewer (poster included) polls for
+  // the latest reported position rather than holding a live connection —
+  // same "recent position on an interval" honesty as the admin live map.
+  useEffect(() => {
+    if (ride?.status !== 'in_progress') return;
+    const interval = setInterval(refresh, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ride?.status, rideId]);
+
+  // Only the poster's own device reports its position — foreground-only,
+  // while this screen is open, no background tracking.
+  useEffect(() => {
+    if (!ride?.is_mine || ride.status !== 'in_progress') return;
+    let cancelled = false;
+
+    const report = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted' || cancelled) return;
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (cancelled) return;
+        await updateAnandoRideLocation(ride.id, {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      } catch {
+        // best-effort; skip this tick on failure
+      }
+    };
+
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ride?.is_mine, ride?.status, ride?.id]);
 
   if (loading || !ride) {
     return (
@@ -252,6 +304,19 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {ride.status === 'in_progress' &&
+          (ride.current_latitude != null && ride.current_longitude != null ? (
+            <AnandoLiveMap
+              currentLatitude={ride.current_latitude}
+              currentLongitude={ride.current_longitude}
+              destinationLatitude={ride.destination_city?.latitude}
+              destinationLongitude={ride.destination_city?.longitude}
+              destinationName={ride.destination_city?.name}
+              updatedAt={ride.current_location_updated_at}
+            />
+          ) : (
+            <Text style={styles.liveMapWaiting}>{t('anando.liveMapWaiting')}</Text>
+          ))}
         <Text style={styles.title}>
           {ride.origin_city?.name} → {ride.destination_city?.name}
         </Text>
@@ -405,6 +470,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
   subtitle: { fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md },
+  liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

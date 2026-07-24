@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'departure_latitude', 'departure_longitude', 'departure_at', 'price_per_seat',
     'total_seats', 'available_seats', 'vehicle_info', 'notes', 'status',
     'started_at', 'cancelled_at', 'completed_at',
+    'current_latitude', 'current_longitude', 'current_location_updated_at',
 ])]
 class AnandoRide extends Model
 {
@@ -40,6 +41,9 @@ class AnandoRide extends Model
             'started_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'completed_at' => 'datetime',
+            'current_latitude' => 'float',
+            'current_longitude' => 'float',
+            'current_location_updated_at' => 'datetime',
         ];
     }
 

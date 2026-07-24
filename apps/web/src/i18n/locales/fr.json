@@ -309,7 +309,10 @@
     "yourRating": "Votre note",
     "commentPlaceholder": "Commentaire (facultatif)",
     "submitRating": "Envoyer l'avis",
-    "alreadyRated": "Vous avez donné {{score}} ★"
+    "alreadyRated": "Vous avez donné {{score}} ★",
+    "liveMapCurrentPosition": "Position actuelle",
+    "liveMapUpdated": "Mis à jour à {{time}}",
+    "liveMapWaiting": "En attente de la position du conducteur…"
   },
   "map": {
     "title": "Trajets sur la carte",

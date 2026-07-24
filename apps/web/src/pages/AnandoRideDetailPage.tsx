@@ -11,14 +11,18 @@ import {
   rateAnandoRide,
   startAnandoRide,
   updateAnandoRideBooking,
+  updateAnandoRideLocation,
 } from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import type { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
+import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 const sectionTitleStyle = {
   fontSize: 13,
@@ -157,6 +161,40 @@ export function AnandoRideDetailPage() {
     }
   }, [ride?.my_booking?.id, ride?.my_booking?.seats_booked]);
 
+  // While the ride is under way, every viewer (poster included) polls for
+  // the latest reported position rather than holding a live connection —
+  // same "recent position on an interval" honesty as the admin live map.
+  useEffect(() => {
+    if (ride?.status !== 'in_progress') return;
+    const interval = setInterval(load, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ride?.status, id]);
+
+  // Only the poster's own device reports its position — foreground-only,
+  // while this page is open, no background tracking.
+  useEffect(() => {
+    if (!ride?.is_mine || ride.status !== 'in_progress') return;
+    if (!('geolocation' in navigator)) return;
+
+    const rideId = ride.id;
+    const report = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateAnandoRideLocation(rideId, {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          }).catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 10000 },
+      );
+    };
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [ride?.is_mine, ride?.status, ride?.id]);
+
   if (loading || !ride) {
     return <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>;
   }
@@ -258,6 +296,21 @@ export function AnandoRideDetailPage() {
       >
         ←
       </button>
+
+      {ride.status === 'in_progress' && (
+        ride.current_latitude != null && ride.current_longitude != null ? (
+          <AnandoLiveMap
+            currentLatitude={ride.current_latitude}
+            currentLongitude={ride.current_longitude}
+            destinationLatitude={ride.destination_city?.latitude}
+            destinationLongitude={ride.destination_city?.longitude}
+            destinationName={ride.destination_city?.name}
+            updatedAt={ride.current_location_updated_at}
+          />
+        ) : (
+          <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('anando.liveMapWaiting')}</p>
+        )
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginBottom: 2 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>

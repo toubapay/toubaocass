@@ -9,6 +9,7 @@ use App\Http\Requests\JoinAnandoRideRequest;
 use App\Http\Requests\RateAnandoRideRequest;
 use App\Http\Requests\StoreAnandoRideRequest;
 use App\Http\Requests\UpdateAnandoBookingRequest;
+use App\Http\Requests\UpdateAnandoRideLocationRequest;
 use App\Http\Resources\AnandoRideBookingResource;
 use App\Http\Resources\AnandoRideResource;
 use App\Models\AnandoRide;
@@ -137,6 +138,31 @@ class AnandoRideController extends Controller
         $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
 
         return new AnandoRideResource($anandoRide->load(['poster', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * Poster-reported position while the ride is under way — polled by
+     * every viewer (poster included) via show(), not pushed live. The
+     * platform doesn't hold a persistent connection to any client, so this
+     * is "recent position on an interval", the same honesty the admin live
+     * trip map already applies, just fed by the poster's own device instead
+     * of a fixed departure point.
+     */
+    public function updateLocation(UpdateAnandoRideLocationRequest $request, AnandoRide $anandoRide)
+    {
+        abort_unless($anandoRide->user_id === $request->user()->id, 404);
+
+        if ($anandoRide->status !== AnandoRide::STATUS_IN_PROGRESS) {
+            return response()->json(['message' => 'Ce trajet Anando doit être en cours pour partager la position.'], 422);
+        }
+
+        $anandoRide->update([
+            'current_latitude' => $request->validated('latitude'),
+            'current_longitude' => $request->validated('longitude'),
+            'current_location_updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Position mise à jour.']);
     }
 
     /**
