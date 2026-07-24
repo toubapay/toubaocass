@@ -163,17 +163,31 @@ export interface Delivery {
   created_at: string;
 }
 
-export type AnandoRideStatus = 'open' | 'full' | 'cancelled' | 'completed';
+export type AnandoRideStatus = 'open' | 'full' | 'in_progress' | 'cancelled' | 'completed';
+
+export interface AnandoRating {
+  ratee_id: number;
+  score: number;
+  comment: string | null;
+}
 
 export interface AnandoRide {
   id: number;
-  poster: { id: number; name: string | null; phone: string; role: Role };
+  poster: {
+    id: number;
+    name: string | null;
+    phone: string;
+    role: Role;
+    anando_rating: number | null;
+    anando_ratings_count: number;
+  };
   origin_city: City | null;
   destination_city: City | null;
   departure_point: string | null;
   departure_latitude: number | null;
   departure_longitude: number | null;
   departure_at: string;
+  started_at: string | null;
   price_per_seat: number;
   total_seats: number;
   available_seats: number;
@@ -191,12 +205,19 @@ export interface AnandoRide {
     payment_method: PaymentMethod;
     status: BookingStatus;
   } | null;
+  my_ratings_given?: AnandoRating[];
 }
 
 export interface AnandoRideBooking {
   id: number;
   anando_ride: AnandoRide;
-  user: { id: number; name: string | null; phone: string };
+  user: {
+    id: number;
+    name: string | null;
+    phone: string;
+    anando_rating: number | null;
+    anando_ratings_count: number;
+  };
   seats_booked: number;
   price_total: number;
   payment_method: PaymentMethod;

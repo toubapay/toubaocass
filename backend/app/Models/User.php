@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token'])]
+#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token', 'anando_rating', 'anando_ratings_count'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -33,6 +33,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
+            'anando_rating' => 'float',
         ];
     }
 
@@ -89,6 +90,16 @@ class User extends Authenticatable
     public function anandoRideBookings(): HasMany
     {
         return $this->hasMany(AnandoRideBooking::class);
+    }
+
+    public function ratingsGiven(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'rater_id');
+    }
+
+    public function ratingsReceived(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'ratee_id');
     }
 
     public function isDriver(): bool

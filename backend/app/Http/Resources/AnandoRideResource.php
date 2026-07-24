@@ -16,6 +16,8 @@ class AnandoRideResource extends JsonResource
                 'name' => $this->poster->name,
                 'phone' => $this->poster->phone,
                 'role' => $this->poster->role,
+                'anando_rating' => $this->poster->anando_rating,
+                'anando_ratings_count' => $this->poster->anando_ratings_count,
             ],
             'origin_city' => new CityResource($this->whenLoaded('originCity')),
             'destination_city' => new CityResource($this->whenLoaded('destinationCity')),
@@ -23,6 +25,7 @@ class AnandoRideResource extends JsonResource
             'departure_latitude' => $this->departure_latitude,
             'departure_longitude' => $this->departure_longitude,
             'departure_at' => $this->departure_at,
+            'started_at' => $this->started_at,
             'price_per_seat' => $this->price_per_seat,
             'total_seats' => $this->total_seats,
             'available_seats' => $this->available_seats,
@@ -40,6 +43,15 @@ class AnandoRideResource extends JsonResource
                 'payment_method' => $this->myBooking->payment_method,
                 'status' => $this->myBooking->status,
             ] : null),
+            // Ratings the *current* requester has already submitted for this
+            // ride (scoped server-side via `ratings` => rater_id = viewer),
+            // so the frontend can show "already rated" vs. a rating prompt
+            // without a second round trip.
+            'my_ratings_given' => $this->when($this->relationLoaded('ratings'), fn () => $this->ratings->map(fn ($r) => [
+                'ratee_id' => $r->ratee_id,
+                'score' => $r->score,
+                'comment' => $r->comment,
+            ])->values()),
         ];
     }
 }

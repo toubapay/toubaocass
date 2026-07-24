@@ -3,7 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { cancelAnandoRide, cancelAnandoRideBooking, fetchAnandoRide, joinAnandoRide, updateAnandoRideBooking } from '../api/anando';
+import {
+  cancelAnandoRide,
+  cancelAnandoRideBooking,
+  completeAnandoRide,
+  fetchAnandoRide,
+  joinAnandoRide,
+  rateAnandoRide,
+  startAnandoRide,
+  updateAnandoRideBooking,
+} from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
@@ -14,6 +23,78 @@ import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'AnandoRideDetail'>;
+
+function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <View style={styles.starRow}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Pressable key={n} onPress={() => onChange(n)} hitSlop={6}>
+          <Text style={[styles.star, n <= value && styles.starActive]}>★</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+function RatingBox({
+  rideId,
+  rateeId,
+  existing,
+  onSubmitted,
+}: {
+  rideId: number;
+  rateeId: number;
+  existing?: { score: number; comment: string | null };
+  onSubmitted: () => void;
+}) {
+  const { t } = useTranslation();
+  const [editing, setEditing] = useState(!existing);
+  const [score, setScore] = useState(existing?.score ?? 5);
+  const [comment, setComment] = useState(existing?.comment ?? '');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  if (!editing && existing) {
+    return (
+      <View style={styles.ratedRow}>
+        <Text style={styles.ratedText}>{t('anando.alreadyRated', { score: existing.score })}</Text>
+        <Pressable onPress={() => setEditing(true)}>
+          <Text style={styles.editLink}>{t('anando.editReview')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError(undefined);
+    try {
+      await rateAnandoRide(rideId, { ratee_id: rateeId, score, comment: comment.trim() || undefined });
+      setEditing(false);
+      onSubmitted();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <View style={styles.ratingBox}>
+      <Text style={styles.ratingLabel}>{t('anando.yourRating')}</Text>
+      <StarPicker value={score} onChange={setScore} />
+      <TextField
+        value={comment}
+        onChangeText={setComment}
+        placeholder={t('anando.commentPlaceholder')}
+        multiline
+        style={styles.commentInput}
+      />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Button label={t('anando.submitRating')} onPress={handleSubmit} loading={submitting} />
+    </View>
+  );
+}
 
 export function AnandoRideDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
@@ -26,6 +107,8 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [joining, setJoining] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const [modifySeats, setModifySeats] = useState('1');
@@ -140,6 +223,32 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
     ]);
   };
 
+  const handleStart = async () => {
+    setStarting(true);
+    setError(undefined);
+    try {
+      await startAnandoRide(ride.id);
+      load();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    setCompleting(true);
+    setError(undefined);
+    try {
+      await completeAnandoRide(ride.id);
+      load();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setCompleting(false);
+    }
+  };
+
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -154,6 +263,11 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
           <Text style={styles.sectionTitle}>{t('anando.poster')}</Text>
           <Text style={styles.line}>{ride.poster.name}</Text>
           <Text style={styles.lineMuted}>{ride.poster.phone}</Text>
+          {ride.poster.anando_ratings_count > 0 ? (
+            <Text style={styles.lineMuted}>
+              ★ {ride.poster.anando_rating?.toFixed(1)} ({ride.poster.anando_ratings_count})
+            </Text>
+          ) : null}
           {ride.vehicle_info ? <Text style={styles.lineMuted}>🚗 {ride.vehicle_info}</Text> : null}
         </View>
 
@@ -182,11 +296,25 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
                   <Text style={styles.lineMuted}>
                     {booking.user.phone} · {t('anando.seatsBooked', { count: booking.seats_booked })}
                   </Text>
+                  {ride.status === 'completed' && booking.status === 'confirmed' ? (
+                    <RatingBox
+                      rideId={ride.id}
+                      rateeId={booking.user.id}
+                      existing={ride.my_ratings_given?.find((r) => r.ratee_id === booking.user.id)}
+                      onSubmitted={load}
+                    />
+                  ) : null}
                 </View>
               ))
             )}
             {['open', 'full'].includes(ride.status) && (
-              <Button label={t('anando.cancelRide')} onPress={handleCancel} loading={cancelling} variant="danger" />
+              <>
+                <Button label={t('anando.startTrip')} onPress={handleStart} loading={starting} style={styles.actionSpacing} />
+                <Button label={t('anando.cancelRide')} onPress={handleCancel} loading={cancelling} variant="danger" />
+              </>
+            )}
+            {ride.status === 'in_progress' && (
+              <Button label={t('anando.completeTrip')} onPress={handleComplete} loading={completing} />
             )}
           </>
         ) : myBooking ? (
@@ -199,7 +327,7 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
               </Text>
             </View>
 
-            {ride.status !== 'cancelled' && (
+            {!['cancelled', 'in_progress', 'completed'].includes(ride.status) && (
               <>
                 <Text style={styles.sectionTitle}>{t('anando.modifyBooking')}</Text>
                 <TextField label={t('anando.seatsToJoin')} keyboardType="number-pad" value={modifySeats} onChangeText={setModifySeats} />
@@ -215,6 +343,18 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
                 />
                 <Button label={t('anando.cancelBooking')} onPress={handleCancelBooking} loading={cancellingBooking} variant="danger" />
               </>
+            )}
+
+            {ride.status === 'completed' && myBooking.status === 'confirmed' && (
+              <View style={styles.card}>
+                <Text style={styles.sectionTitle}>{t('anando.rateSectionTitle')}</Text>
+                <RatingBox
+                  rideId={ride.id}
+                  rateeId={ride.poster.id}
+                  existing={ride.my_ratings_given?.find((r) => r.ratee_id === ride.poster.id)}
+                  onSubmitted={load}
+                />
+              </View>
             )}
           </>
         ) : (
@@ -293,4 +433,14 @@ const styles = StyleSheet.create({
   error: { color: colors.danger, fontSize: 13.5, marginBottom: spacing.sm },
   empty: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.md },
   modifyButton: { marginBottom: spacing.sm },
+  actionSpacing: { marginBottom: spacing.sm },
+  starRow: { flexDirection: 'row', gap: 6, marginBottom: spacing.sm },
+  star: { fontSize: 26, lineHeight: 26, color: colors.border },
+  starActive: { color: colors.primary },
+  ratingBox: { marginTop: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
+  ratingLabel: { fontSize: 12.5, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
+  commentInput: { minHeight: 60, textAlignVertical: 'top' },
+  ratedRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xs },
+  ratedText: { fontSize: 13.5, fontWeight: '600', color: colors.text },
+  editLink: { color: colors.primary, fontWeight: '700', fontSize: 12.5 },
 });

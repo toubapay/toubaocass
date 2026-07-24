@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'user_id', 'origin_city_id', 'destination_city_id', 'departure_point',
     'departure_latitude', 'departure_longitude', 'departure_at', 'price_per_seat',
     'total_seats', 'available_seats', 'vehicle_info', 'notes', 'status',
-    'cancelled_at', 'completed_at',
+    'started_at', 'cancelled_at', 'completed_at',
 ])]
 class AnandoRide extends Model
 {
@@ -24,6 +24,8 @@ class AnandoRide extends Model
     const STATUS_OPEN = 'open';
 
     const STATUS_FULL = 'full';
+
+    const STATUS_IN_PROGRESS = 'in_progress';
 
     const STATUS_CANCELLED = 'cancelled';
 
@@ -35,6 +37,7 @@ class AnandoRide extends Model
             'departure_latitude' => 'float',
             'departure_longitude' => 'float',
             'departure_at' => 'datetime',
+            'started_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
@@ -63,6 +66,11 @@ class AnandoRide extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(AnandoRideBooking::class);
+    }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
     }
 
     /**

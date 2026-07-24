@@ -446,4 +446,188 @@ class AnandoRideTest extends TestCase
             ->assertOk()
             ->assertJsonPath('my_booking', null);
     }
+
+    public function test_poster_can_start_a_ride_from_open_or_full(): void
+    {
+        $poster = User::factory()->create();
+        foreach ([AnandoRide::STATUS_OPEN, AnandoRide::STATUS_FULL] as $status) {
+            $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => $status]);
+
+            $this->actingAs($poster, 'sanctum')
+                ->postJson("/api/anando-rides/{$ride->id}/start")
+                ->assertOk()
+                ->assertJsonPath('status', 'in_progress');
+
+            $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'in_progress']);
+            $this->assertNotNull($ride->fresh()->started_at);
+        }
+    }
+
+    public function test_only_the_poster_can_start_the_ride(): void
+    {
+        $ride = AnandoRide::factory()->create(['status' => AnandoRide::STATUS_FULL]);
+        $stranger = User::factory()->create();
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/start")
+            ->assertNotFound();
+    }
+
+    public function test_a_cancelled_or_completed_ride_cannot_be_started(): void
+    {
+        $poster = User::factory()->create();
+        foreach ([AnandoRide::STATUS_CANCELLED, AnandoRide::STATUS_COMPLETED] as $status) {
+            $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => $status]);
+
+            $this->actingAs($poster, 'sanctum')
+                ->postJson("/api/anando-rides/{$ride->id}/start")
+                ->assertUnprocessable();
+        }
+    }
+
+    public function test_poster_can_complete_an_in_progress_ride(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_IN_PROGRESS]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/complete")
+            ->assertOk()
+            ->assertJsonPath('status', 'completed');
+
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'completed']);
+        $this->assertNotNull($ride->fresh()->completed_at);
+    }
+
+    public function test_a_ride_that_has_not_started_cannot_be_completed(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_FULL]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/complete")
+            ->assertUnprocessable();
+    }
+
+    public function test_only_the_poster_can_complete_the_ride(): void
+    {
+        $ride = AnandoRide::factory()->create(['status' => AnandoRide::STATUS_IN_PROGRESS]);
+        $stranger = User::factory()->create();
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/complete")
+            ->assertNotFound();
+    }
+
+    public function test_poster_can_rate_a_rider_who_booked_a_confirmed_seat(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED, 'total_seats' => 3, 'available_seats' => 1]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 5, 'comment' => 'Excellent passager'])
+            ->assertOk();
+
+        $this->assertDatabaseHas('ratings', ['anando_ride_id' => $ride->id, 'rater_id' => $poster->id, 'ratee_id' => $rider->id, 'score' => 5]);
+        $this->assertSame(5.0, $rider->fresh()->anando_rating);
+        $this->assertSame(1, $rider->fresh()->anando_ratings_count);
+    }
+
+    public function test_rider_can_rate_the_poster(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $poster->id, 'score' => 4])
+            ->assertOk();
+
+        $this->assertDatabaseHas('ratings', ['anando_ride_id' => $ride->id, 'rater_id' => $rider->id, 'ratee_id' => $poster->id, 'score' => 4]);
+        $this->assertSame(4.0, $poster->fresh()->anando_rating);
+    }
+
+    public function test_riders_cannot_rate_each_other(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED]);
+        $riderA = User::factory()->create();
+        $riderB = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $riderA->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $riderB->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($riderA, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $riderB->id, 'score' => 3])
+            ->assertUnprocessable();
+    }
+
+    public function test_poster_cannot_rate_a_rider_without_a_confirmed_booking(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED]);
+        $stranger = User::factory()->create();
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $stranger->id, 'score' => 3])
+            ->assertUnprocessable();
+    }
+
+    public function test_rating_is_rejected_before_the_ride_is_completed(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_IN_PROGRESS]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 5])
+            ->assertUnprocessable();
+    }
+
+    public function test_re_rating_the_same_person_updates_the_existing_review_and_recomputes_the_average(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 2])
+            ->assertOk();
+        $this->assertSame(2.0, $rider->fresh()->anando_rating);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 5])
+            ->assertOk();
+
+        $this->assertSame(5.0, $rider->fresh()->anando_rating);
+        $this->assertSame(1, $rider->fresh()->anando_ratings_count);
+        $this->assertDatabaseCount('ratings', 1);
+    }
+
+    public function test_show_exposes_my_ratings_given_for_the_current_user(): void
+    {
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'status' => AnandoRide::STATUS_COMPLETED]);
+        $rider = User::factory()->create();
+        AnandoRideBooking::factory()->create(['anando_ride_id' => $ride->id, 'user_id' => $rider->id, 'status' => AnandoRideBooking::STATUS_CONFIRMED]);
+
+        $this->actingAs($poster, 'sanctum')
+            ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 4])
+            ->assertOk();
+
+        $this->actingAs($poster, 'sanctum')
+            ->getJson("/api/anando-rides/{$ride->id}")
+            ->assertOk()
+            ->assertJsonPath('my_ratings_given.0.ratee_id', $rider->id)
+            ->assertJsonPath('my_ratings_given.0.score', 4);
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson("/api/anando-rides/{$ride->id}")
+            ->assertOk()
+            ->assertJsonPath('my_ratings_given', []);
+    }
 }

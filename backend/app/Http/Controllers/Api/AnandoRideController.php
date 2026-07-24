@@ -6,13 +6,16 @@ use App\Events\AnandoRideJoined;
 use App\Events\AnandoRidePosted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\JoinAnandoRideRequest;
+use App\Http\Requests\RateAnandoRideRequest;
 use App\Http\Requests\StoreAnandoRideRequest;
 use App\Http\Requests\UpdateAnandoBookingRequest;
 use App\Http\Resources\AnandoRideBookingResource;
 use App\Http\Resources\AnandoRideResource;
 use App\Models\AnandoRide;
 use App\Models\AnandoRideBooking;
+use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Services\RatingService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +97,7 @@ class AnandoRideController extends Controller
         $anandoRide->load([
             'poster', 'originCity', 'destinationCity',
             'myBooking' => fn ($q) => $q->where('user_id', $user->id)->where('status', AnandoRideBooking::STATUS_CONFIRMED),
+            'ratings' => fn ($q) => $q->where('rater_id', $user->id),
         ]);
 
         if ($anandoRide->user_id === $user->id) {
@@ -101,6 +105,86 @@ class AnandoRideController extends Controller
         }
 
         return new AnandoRideResource($anandoRide);
+    }
+
+    /**
+     * Poster starts the ride once riders are aboard. Allowed from OPEN too
+     * (not just FULL) so a poster whose remaining seats never fill isn't
+     * stuck waiting forever — mirrors Trip::start()'s ['scheduled', 'full']
+     * gate.
+     */
+    public function start(Request $request, AnandoRide $anandoRide)
+    {
+        abort_unless($anandoRide->user_id === $request->user()->id, 404);
+
+        if (! in_array($anandoRide->status, [AnandoRide::STATUS_OPEN, AnandoRide::STATUS_FULL], true)) {
+            return response()->json(['message' => 'Ce trajet Anando ne peut pas être démarré.'], 422);
+        }
+
+        $anandoRide->update(['status' => AnandoRide::STATUS_IN_PROGRESS, 'started_at' => now()]);
+
+        return new AnandoRideResource($anandoRide->load(['poster', 'originCity', 'destinationCity']));
+    }
+
+    public function complete(Request $request, AnandoRide $anandoRide)
+    {
+        abort_unless($anandoRide->user_id === $request->user()->id, 404);
+
+        if ($anandoRide->status !== AnandoRide::STATUS_IN_PROGRESS) {
+            return response()->json(['message' => "Ce trajet Anando doit d'abord être démarré."], 422);
+        }
+
+        $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
+
+        return new AnandoRideResource($anandoRide->load(['poster', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * Leave a 1-5 star review of another participant on a completed ride.
+     * The poster may rate any rider who booked a confirmed seat; a rider
+     * may only rate the poster — riders don't rate each other. Re-rating
+     * the same person on the same ride updates the existing review rather
+     * than stacking a new one.
+     */
+    public function rate(RateAnandoRideRequest $request, AnandoRide $anandoRide, RatingService $ratingService)
+    {
+        $rater = $request->user();
+        $rateeId = (int) $request->validated('ratee_id');
+
+        if ($anandoRide->status !== AnandoRide::STATUS_COMPLETED) {
+            return response()->json(['message' => 'Ce trajet Anando doit être terminé avant de laisser un avis.'], 422);
+        }
+
+        if ($rateeId === $rater->id) {
+            throw ValidationException::withMessages(['ratee_id' => ['Vous ne pouvez pas vous auto-évaluer.']]);
+        }
+
+        $isPoster = $anandoRide->user_id === $rater->id;
+
+        if ($isPoster) {
+            $ratableRiderIds = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)
+                ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
+                ->pluck('user_id');
+
+            if (! $ratableRiderIds->contains($rateeId)) {
+                throw ValidationException::withMessages(['ratee_id' => ["Cet utilisateur n'a pas réservé de place sur ce trajet."]]);
+            }
+        } else {
+            $hasConfirmedBooking = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)
+                ->where('user_id', $rater->id)
+                ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
+                ->exists();
+
+            if (! $hasConfirmedBooking || $rateeId !== $anandoRide->user_id) {
+                throw ValidationException::withMessages(['ratee_id' => ['Vous ne pouvez évaluer que le publicateur de ce trajet.']]);
+            }
+        }
+
+        $ratee = User::findOrFail($rateeId);
+
+        $ratingService->submitAnandoRating($anandoRide, $rater, $ratee, (int) $request->validated('score'), $request->validated('comment'));
+
+        return response()->json(['message' => 'Avis enregistré.']);
     }
 
     public function join(JoinAnandoRideRequest $request, AnandoRide $anandoRide, WalletService $walletService)

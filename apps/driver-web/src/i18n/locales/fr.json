@@ -302,11 +302,21 @@
     "status": {
       "open": "Disponible",
       "full": "Complet",
+      "in_progress": "En cours",
       "cancelled": "Annulé",
       "completed": "Terminé"
     },
     "postSuccessTitle": "Trajet publié !",
-    "postSuccessBody": "Votre trajet Anando a été publié avec succès."
+    "postSuccessBody": "Votre trajet Anando a été publié avec succès.",
+    "startTrip": "Démarrer le trajet",
+    "completeTrip": "Terminer le trajet",
+    "rateSectionTitle": "Avis",
+    "leaveReview": "Laisser un avis",
+    "editReview": "Modifier",
+    "yourRating": "Votre note",
+    "commentPlaceholder": "Commentaire (facultatif)",
+    "submitRating": "Envoyer l'avis",
+    "alreadyRated": "Vous avez donné {{score}} ★"
   },
   "deliveries": {
     "title": "Livraisons",

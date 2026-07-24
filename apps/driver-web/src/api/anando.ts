@@ -60,3 +60,23 @@ export async function updateAnandoRideBooking(bookingId: number, seats: number):
 export async function cancelAnandoRideBooking(bookingId: number): Promise<void> {
   await apiClient.delete(`/anando-ride-bookings/${bookingId}`);
 }
+
+export interface RateAnandoRideInput {
+  ratee_id: number;
+  score: number;
+  comment?: string;
+}
+
+export async function startAnandoRide(rideId: number): Promise<AnandoRide> {
+  const { data } = await apiClient.post(`/anando-rides/${rideId}/start`);
+  return data;
+}
+
+export async function completeAnandoRide(rideId: number): Promise<AnandoRide> {
+  const { data } = await apiClient.post(`/anando-rides/${rideId}/complete`);
+  return data;
+}
+
+export async function rateAnandoRide(rideId: number, input: RateAnandoRideInput): Promise<void> {
+  await apiClient.post(`/anando-rides/${rideId}/rate`, input);
+}

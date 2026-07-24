@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { cancelAnandoRide, cancelAnandoRideBooking, fetchAnandoRide, joinAnandoRide, updateAnandoRideBooking } from '../api/anando';
+import {
+  cancelAnandoRide,
+  cancelAnandoRideBooking,
+  completeAnandoRide,
+  fetchAnandoRide,
+  joinAnandoRide,
+  rateAnandoRide,
+  startAnandoRide,
+  updateAnandoRideBooking,
+} from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import type { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
@@ -19,6 +28,96 @@ const sectionTitleStyle = {
   textTransform: 'uppercase' as const,
 };
 
+function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, marginBottom: spacing.sm }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(n)}
+          aria-label={`${n} ★`}
+          style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, fontSize: 26, lineHeight: 1, color: n <= value ? colors.primary : colors.border }}
+        >
+          ★
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function RatingBox({
+  rideId,
+  rateeId,
+  existing,
+  onSubmitted,
+}: {
+  rideId: number;
+  rateeId: number;
+  existing?: { score: number; comment: string | null };
+  onSubmitted: () => void;
+}) {
+  const { t } = useTranslation();
+  const [editing, setEditing] = useState(!existing);
+  const [score, setScore] = useState(existing?.score ?? 5);
+  const [comment, setComment] = useState(existing?.comment ?? '');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!editing && existing) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.xs }}>
+        <span style={{ fontSize: 13.5, color: colors.text, fontWeight: 600 }}>{t('anando.alreadyRated', { score: existing.score })}</span>
+        <button
+          onClick={() => setEditing(true)}
+          style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+        >
+          {t('anando.editReview')}
+        </button>
+      </div>
+    );
+  }
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      await rateAnandoRide(rideId, { ratee_id: rateeId, score, comment: comment.trim() || undefined });
+      setEditing(false);
+      onSubmitted();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: spacing.sm, paddingTop: spacing.sm, borderTop: `1px solid ${colors.border}` }}>
+      <p style={{ fontSize: 12.5, fontWeight: 700, color: colors.textMuted, margin: `0 0 ${spacing.xs}px` }}>{t('anando.yourRating')}</p>
+      <StarPicker value={score} onChange={setScore} />
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder={t('anando.commentPlaceholder')}
+        rows={2}
+        style={{
+          width: '100%',
+          border: `1px solid ${colors.border}`,
+          borderRadius: radius.sm,
+          padding: spacing.sm,
+          fontSize: 13.5,
+          fontFamily: 'inherit',
+          resize: 'vertical',
+          marginBottom: spacing.sm,
+        }}
+      />
+      {error && <p style={{ color: colors.danger, fontSize: 12.5, marginBottom: spacing.sm }}>{error}</p>}
+      <Button label={t('anando.submitRating')} onClick={handleSubmit} loading={submitting} />
+    </div>
+  );
+}
+
 export function AnandoRideDetailPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -31,6 +130,8 @@ export function AnandoRideDetailPage() {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [joining, setJoining] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [modifySeats, setModifySeats] = useState('1');
@@ -91,6 +192,32 @@ export function AnandoRideDetailPage() {
     }
   };
 
+  const handleStart = async () => {
+    setStarting(true);
+    setError(null);
+    try {
+      await startAnandoRide(ride.id);
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    setCompleting(true);
+    setError(null);
+    try {
+      await completeAnandoRide(ride.id);
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setCompleting(false);
+    }
+  };
+
   const myBooking = ride.my_booking;
   const maxModifySeats = myBooking ? ride.available_seats + myBooking.seats_booked : 0;
   const canModify = myBooking != null && Number(modifySeats) > 0 && Number(modifySeats) <= maxModifySeats;
@@ -145,6 +272,11 @@ export function AnandoRideDetailPage() {
         <p style={sectionTitleStyle}>{t('anando.poster')}</p>
         <p style={{ fontSize: 17, color: colors.text, margin: 0 }}>{ride.poster.name}</p>
         <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>{ride.poster.phone}</p>
+        {ride.poster.anando_ratings_count > 0 && (
+          <p style={{ fontSize: 13, color: colors.textMuted, margin: '4px 0 0' }}>
+            ★ {ride.poster.anando_rating?.toFixed(1)} ({ride.poster.anando_ratings_count})
+          </p>
+        )}
         {ride.vehicle_info && <p style={{ fontSize: 14, color: colors.textMuted, margin: '4px 0 0' }}>🚗 {ride.vehicle_info}</p>}
       </div>
 
@@ -175,11 +307,25 @@ export function AnandoRideDetailPage() {
                 <p style={{ fontSize: 13.5, color: colors.textMuted, margin: '2px 0 0' }}>
                   {booking.user.phone} · {t('anando.seatsBooked', { count: booking.seats_booked })}
                 </p>
+                {ride.status === 'completed' && booking.status === 'confirmed' && (
+                  <RatingBox
+                    rideId={ride.id}
+                    rateeId={booking.user.id}
+                    existing={ride.my_ratings_given?.find((r) => r.ratee_id === booking.user.id)}
+                    onSubmitted={load}
+                  />
+                )}
               </div>
             ))
           )}
           {['open', 'full'].includes(ride.status) && (
-            <Button label={t('anando.cancelRide')} onClick={handleCancel} loading={cancelling} variant="danger" style={{ marginTop: spacing.sm }} />
+            <>
+              <Button label={t('anando.startTrip')} onClick={handleStart} loading={starting} style={{ marginBottom: spacing.sm }} />
+              <Button label={t('anando.cancelRide')} onClick={handleCancel} loading={cancelling} variant="danger" />
+            </>
+          )}
+          {ride.status === 'in_progress' && (
+            <Button label={t('anando.completeTrip')} onClick={handleComplete} loading={completing} />
           )}
         </>
       ) : myBooking ? (
@@ -194,7 +340,7 @@ export function AnandoRideDetailPage() {
             </p>
           </div>
 
-          {ride.status !== 'cancelled' && (
+          {!['cancelled', 'in_progress', 'completed'].includes(ride.status) && (
             <>
               <p style={sectionTitleStyle}>{t('anando.modifyBooking')}</p>
               <TextField
@@ -218,6 +364,18 @@ export function AnandoRideDetailPage() {
               />
               <Button label={t('anando.cancelBooking')} onClick={handleCancelBooking} loading={cancellingBooking} variant="danger" />
             </>
+          )}
+
+          {ride.status === 'completed' && myBooking.status === 'confirmed' && (
+            <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md, padding: spacing.md }}>
+              <p style={sectionTitleStyle}>{t('anando.rateSectionTitle')}</p>
+              <RatingBox
+                rideId={ride.id}
+                rateeId={ride.poster.id}
+                existing={ride.my_ratings_given?.find((r) => r.ratee_id === ride.poster.id)}
+                onSubmitted={load}
+              />
+            </div>
           )}
         </>
       ) : (

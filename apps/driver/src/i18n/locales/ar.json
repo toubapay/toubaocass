@@ -308,11 +308,21 @@
     "status": {
       "open": "متاحة",
       "full": "مكتملة",
+      "in_progress": "جارية",
       "cancelled": "ملغاة",
       "completed": "منتهية"
     },
     "postSuccessTitle": "تم نشر الرحلة!",
-    "postSuccessBody": "تم نشر رحلتك في أناندو بنجاح."
+    "postSuccessBody": "تم نشر رحلتك في أناندو بنجاح.",
+    "startTrip": "بدء الرحلة",
+    "completeTrip": "إنهاء الرحلة",
+    "rateSectionTitle": "التقييمات",
+    "leaveReview": "ترك تقييم",
+    "editReview": "تعديل",
+    "yourRating": "تقييمك",
+    "commentPlaceholder": "تعليق (اختياري)",
+    "submitRating": "إرسال التقييم",
+    "alreadyRated": "لقد قيّمت: {{score}} ★"
   },
   "deliveries": {
     "title": "التوصيلات",
