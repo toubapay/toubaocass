@@ -15,11 +15,13 @@ interface Props {
 }
 
 /**
- * Read-only preview map for an in-progress Anando ride: the poster's last
- * reported position, plus a line to the destination city if we know its
+ * Preview map for an in-progress Anando ride: the poster's last reported
+ * position, plus a line to the destination city if we know its
  * coordinates. Position comes from polling (see useAnandoLiveLocation), not
- * a live socket, so this re-centers on prop change rather than animating a
- * continuous track.
+ * a live socket, so the camera re-centers on the marker on prop change
+ * (keeping whatever zoom level the rider/driver has chosen) rather than
+ * animating a continuous track. The map itself stays pinch-zoomable/
+ * pannable so the viewer can inspect the surrounding area.
  */
 export function AnandoLiveMap({
   currentLatitude,
@@ -31,13 +33,15 @@ export function AnandoLiveMap({
 }: Props) {
   const { t } = useTranslation();
   const mapRef = useRef<MapView>(null);
+  const isFirstRender = useRef(true);
   const hasDestination = destinationLatitude != null && destinationLongitude != null;
 
   useEffect(() => {
-    mapRef.current?.animateToRegion(
-      { latitude: currentLatitude, longitude: currentLongitude, latitudeDelta: 0.05, longitudeDelta: 0.05 },
-      500,
-    );
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    mapRef.current?.animateCamera({ center: { latitude: currentLatitude, longitude: currentLongitude } }, { duration: 500 });
   }, [currentLatitude, currentLongitude]);
 
   return (
@@ -47,10 +51,9 @@ export function AnandoLiveMap({
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={{ latitude: currentLatitude, longitude: currentLongitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
-        scrollEnabled={false}
-        zoomEnabled={false}
+        scrollEnabled
+        zoomEnabled
         rotateEnabled={false}
-        pointerEvents="none"
       >
         {hasDestination && (
           <Polyline
