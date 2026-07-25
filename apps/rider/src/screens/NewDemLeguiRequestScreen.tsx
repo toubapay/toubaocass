@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { fetchCities } from '../api/cities';
-import { createDemLeguiRequest, quoteDemLeguiRequest } from '../api/demLegui';
+import { createDemLeguiRequest, fetchMyActiveDemLeguiRequest, quoteDemLeguiRequest } from '../api/demLegui';
 import { City, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AddressMapPicker } from '../components/AddressMapPicker';
@@ -34,6 +34,32 @@ export function NewDemLeguiRequestScreen({ navigation }: Props) {
   const [quote, setQuote] = useState<{ distance_km: number; fare_total: number } | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [checkingActive, setCheckingActive] = useState(true);
+
+  // A rider may only have one active Dem Légui request at a time — if they
+  // already have one (still searching, or matched to a trip that hasn't
+  // finished), send them straight back to it instead of showing the form,
+  // so navigating away and back (or re-opening the module) never strands
+  // them without a way to find their ride again.
+  useEffect(() => {
+    let cancelled = false;
+    fetchMyActiveDemLeguiRequest()
+      .then((active) => {
+        if (cancelled) return;
+        if (active) {
+          navigation.replace('DemLeguiRequestDetail', { requestId: active.id });
+        } else {
+          setCheckingActive(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCheckingActive(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetchCities().then(setCities);
@@ -86,6 +112,14 @@ export function NewDemLeguiRequestScreen({ navigation }: Props) {
       setSubmitting(false);
     }
   };
+
+  if (checkingActive) {
+    return (
+      <Screen style={styles.center}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
@@ -153,6 +187,7 @@ export function NewDemLeguiRequestScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 25, fontWeight: '700', color: colors.text, marginBottom: 2 },
   subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.md },
   sectionTitle: {

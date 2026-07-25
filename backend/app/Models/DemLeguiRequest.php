@@ -6,6 +6,7 @@ use Database\Factories\DemLeguiRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Support\Geo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -75,6 +76,24 @@ class DemLeguiRequest extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Still searching, or matched to a trip that hasn't finished yet — i.e.
+     * a request that counts against the rider's one-active-request-at-a-time
+     * limit and should keep surfacing on their "find my ride" entry points.
+     */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where(function (Builder $q) {
+            $q->where('status', self::STATUS_PENDING)
+                ->orWhere(function (Builder $matched) {
+                    $matched->where('status', self::STATUS_MATCHED)
+                        ->whereHas('trip', function (Builder $trip) {
+                            $trip->whereIn('status', [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS]);
+                        });
+                });
+        });
     }
 
     /**

@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { fetchCities } from '../api/cities';
-import { createDemLeguiRequest, quoteDemLeguiRequest } from '../api/demLegui';
+import { createDemLeguiRequest, fetchMyActiveDemLeguiRequest, quoteDemLeguiRequest } from '../api/demLegui';
 import { extractErrorMessage } from '../api/client';
 import type { City, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AddressMapPicker } from '../components/AddressMapPicker';
 import { Button } from '../components/Button';
+import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
@@ -39,6 +40,31 @@ export function NewDemLeguiRequestPage() {
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingActive, setCheckingActive] = useState(true);
+
+  // A rider may only have one active Dem Légui request at a time — if they
+  // already have one (still searching, or matched to a trip that hasn't
+  // finished), send them straight back to it instead of showing the form,
+  // so navigating away and back (or re-opening the module) never strands
+  // them without a way to find their ride again.
+  useEffect(() => {
+    let cancelled = false;
+    fetchMyActiveDemLeguiRequest()
+      .then((active) => {
+        if (cancelled) return;
+        if (active) {
+          navigate(`/services/dem-legui/${active.id}`, { replace: true });
+        } else {
+          setCheckingActive(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCheckingActive(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   useEffect(() => {
     fetchCities().then(setCities);
@@ -92,6 +118,10 @@ export function NewDemLeguiRequestPage() {
       setSubmitting(false);
     }
   };
+
+  if (checkingActive) {
+    return <CenteredSpinner />;
+  }
 
   return (
     <div>

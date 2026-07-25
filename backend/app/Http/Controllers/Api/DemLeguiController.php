@@ -45,6 +45,12 @@ class DemLeguiController extends Controller
 
     public function store(StoreDemLeguiRequestRequest $request, DemLeguiPricingService $pricing)
     {
+        if ($request->user()->demLeguiRequests()->active()->exists()) {
+            throw ValidationException::withMessages([
+                'dem_legui_request' => ["Vous avez déjà une demande Dem Légui en cours. Terminez-la ou annulez-la avant d'en soumettre une nouvelle."],
+            ]);
+        }
+
         $data = $request->validated();
         $seats = (int) ($data['seats_requested'] ?? 1);
         $destination = City::findOrFail($data['destination_city_id']);
@@ -85,15 +91,7 @@ class DemLeguiController extends Controller
     public function myActiveRequest(Request $request)
     {
         $activeRequest = $request->user()->demLeguiRequests()
-            ->where(function ($query) {
-                $query->where('status', DemLeguiRequest::STATUS_PENDING)
-                    ->orWhere(function ($matched) {
-                        $matched->where('status', DemLeguiRequest::STATUS_MATCHED)
-                            ->whereHas('trip', function ($trip) {
-                                $trip->whereIn('status', [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS]);
-                            });
-                    });
-            })
+            ->active()
             ->latest()
             ->with(['rider', 'destinationCity', 'trip.driver.driverProfile'])
             ->first();

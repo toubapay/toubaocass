@@ -447,6 +447,77 @@ class DemLeguiRequestTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_rider_cannot_create_a_second_request_while_one_is_pending(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($rider, 'sanctum')->postJson('/api/dem-legui/requests', [
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+            'destination_city_id' => $destination->id,
+        ])->assertStatus(422);
+
+        $this->assertEquals(1, DemLeguiRequest::where('rider_id', $rider->id)->count());
+    }
+
+    public function test_rider_cannot_create_a_second_request_while_matched_to_an_unfinished_trip(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $this->actingAs($rider, 'sanctum')->postJson('/api/dem-legui/requests', [
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+            'destination_city_id' => $destination->id,
+        ])->assertStatus(422);
+    }
+
+    public function test_rider_can_create_a_new_request_after_cancelling_the_previous_one(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($rider, 'sanctum')->deleteJson("/api/dem-legui/requests/{$request->id}")->assertOk();
+
+        $this->actingAs($rider, 'sanctum')->postJson('/api/dem-legui/requests', [
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+            'destination_city_id' => $destination->id,
+        ])->assertCreated();
+    }
+
+    public function test_rider_can_create_a_new_request_after_previous_trip_completed(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+        $tripId = $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->json('id');
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$tripId}/start")->assertOk();
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$tripId}/complete")->assertOk();
+
+        $this->actingAs($rider, 'sanctum')->postJson('/api/dem-legui/requests', [
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+            'destination_city_id' => $destination->id,
+        ])->assertCreated();
+    }
+
     public function test_my_active_request_is_null_when_rider_has_none(): void
     {
         $rider = User::factory()->create();
