@@ -68,6 +68,8 @@
       "deliveryDetail": "Détails de la livraison",
       "anando": "Anando",
       "anandoRideDetail": "Détails du trajet Anando",
+      "demLegui": "Dem Légui",
+      "demLeguiRequestDetail": "Détails de la demande",
       "profile": "Mon profil",
       "settings": "Paramètres"
     }
@@ -261,6 +263,10 @@
     "comingSoon": "🚧 Bientôt disponible — ce service arrive prochainement.",
     "comingSoonTitle": "Bientôt disponible",
     "comingSoonBody": "{{label}} arrive prochainement.",
+    "dem_legui": {
+      "label": "Dem Légui",
+      "description": "Demandez une course maintenant, comme un taxi à la demande"
+    },
     "anando": {
       "label": "Anando",
       "description": "Partagez ou trouvez un trajet instantané, comme du covoiturage"
@@ -281,6 +287,32 @@
       "label": "Location",
       "description": "Location de véhicules avec ou sans chauffeur"
     }
+  },
+  "demLegui": {
+    "title": "Dem Légui",
+    "subtitle": "Indiquez où vous êtes et où vous allez — un conducteur en ligne à proximité accepte votre demande.",
+    "pickup": "Point de ramassage",
+    "destination": "Destination",
+    "seats": "Places",
+    "estimatedFare": "Prix estimé",
+    "calculating": "Calcul en cours…",
+    "placePickupAndDestinationPrompt": "Indiquez le point de ramassage et la destination pour voir le prix.",
+    "submit": "Demander une course",
+    "submitWithFare": "Demander — {{amount}} FCFA",
+    "tripToLabel": "Vers {{city}}",
+    "status": {
+      "pending": "Recherche d'un conducteur…",
+      "matched": "Conducteur trouvé",
+      "cancelled": "Annulée",
+      "expired": "Expirée"
+    },
+    "searchingForDriver": "Recherche d'un conducteur en ligne à proximité…",
+    "searchingHint": "Cela ne prend généralement que quelques instants.",
+    "yourDriver": "Votre conducteur",
+    "fare": "Prix",
+    "cancelRequest": "Annuler la demande",
+    "cancelConfirm": "Voulez-vous vraiment annuler cette demande ?",
+    "liveMapWaiting": "En attente de la position du conducteur…"
   },
   "anando": {
     "title": "Anando",

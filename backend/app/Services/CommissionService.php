@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Delivery;
+use App\Models\DemLeguiRequest;
 use App\Models\InsurancePolicy;
 
 class CommissionService
@@ -11,6 +12,8 @@ class CommissionService
     const RATE_KEY_TRIP = 'commission_rate_trip';
 
     const RATE_KEY_DELIVERY = 'commission_rate_delivery';
+
+    const RATE_KEY_DEM_LEGUI = 'commission_rate_dem_legui';
 
     const DEFAULT_RATE = '15.00';
 
@@ -24,6 +27,11 @@ class CommissionService
     public function deliveryRate(): float
     {
         return (float) $this->settings->get(self::RATE_KEY_DELIVERY, self::DEFAULT_RATE);
+    }
+
+    public function demLeguiRate(): float
+    {
+        return (float) $this->settings->get(self::RATE_KEY_DEM_LEGUI, self::DEFAULT_RATE);
     }
 
     /**
@@ -64,6 +72,18 @@ class CommissionService
         ]);
 
         return $delivery->fresh();
+    }
+
+    public function applyToDemLeguiRequest(DemLeguiRequest $request): DemLeguiRequest
+    {
+        $result = $this->calculate($request->fare_total, $this->demLeguiRate());
+
+        $request->update([
+            'commission_rate' => $result['rate'],
+            'commission_amount' => $result['amount'],
+        ]);
+
+        return $request->fresh();
     }
 
     /**

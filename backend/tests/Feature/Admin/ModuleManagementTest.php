@@ -193,6 +193,21 @@ class ModuleManagementTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_disabling_dem_legui_module_blocks_creating_a_request(): void
+    {
+        $admin = AdminUser::factory()->create();
+        $module = Module::where('key', 'dem_legui')->first();
+        $rider = User::factory()->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/modules/{$module->id}/status", ['is_enabled' => false])
+            ->assertOk();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson('/api/dem-legui/requests', [])
+            ->assertForbidden();
+    }
+
     public function test_deleting_a_module_fails_open_and_stops_gating_its_route(): void
     {
         $admin = AdminUser::factory()->create();

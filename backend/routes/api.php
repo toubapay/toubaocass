@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DemLeguiController;
+use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
@@ -93,12 +95,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('deliveries', [DeliveryController::class, 'store'])->middleware('module:livraison');
         Route::get('deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy']);
+
+        // Dem Légui — on-demand ride request (rider-initiated, dispatched to
+        // online drivers).
+        Route::post('dem-legui/requests/quote', [DemLeguiController::class, 'quote']);
+        Route::post('dem-legui/requests', [DemLeguiController::class, 'store'])->middleware('module:dem_legui');
+        Route::delete('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'cancel']);
     });
+
+    // Dem Légui show endpoints sit outside the role:rider/role:driver groups
+    // since both a request's rider and its matched trip's driver/riders
+    // need to poll them — mirrors anando-rides/{id} below.
+    Route::get('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'show']);
+    Route::get('dem-legui/trips/{demLeguiTrip}', [DemLeguiController::class, 'showTrip']);
 
     // Driver-facing KYC, fleet, and trip management.
     Route::prefix('driver')->middleware('role:driver')->group(function () {
         Route::get('kyc', [DriverController::class, 'showKyc']);
         Route::post('kyc', [DriverController::class, 'submitKyc']);
+
+        // Online/offline availability toggle — going online is required to
+        // be dispatched Dem Légui ride requests.
+        Route::put('availability', [DriverAvailabilityController::class, 'update']);
+        Route::post('location', [DriverAvailabilityController::class, 'updateLocation']);
 
         Route::get('cars', [CarController::class, 'index']);
         Route::post('cars', [CarController::class, 'store']);
@@ -121,6 +140,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('deliveries/{delivery}/accept', [DeliveryController::class, 'accept']);
         Route::post('deliveries/{delivery}/pickup', [DeliveryController::class, 'pickup']);
         Route::post('deliveries/{delivery}/deliver', [DeliveryController::class, 'deliver']);
+
+        // Dem Légui — browsing/accepting nearby ride requests and managing
+        // the resulting shared trip.
+        Route::get('dem-legui/requests', [DemLeguiController::class, 'availableIndex']);
+        Route::post('dem-legui/requests/{demLeguiRequest}/accept', [DemLeguiController::class, 'accept']);
+        Route::get('dem-legui/trips/mine', [DemLeguiController::class, 'myTrips']);
+        Route::post('dem-legui/trips/{demLeguiTrip}/start', [DemLeguiController::class, 'startTrip']);
+        Route::post('dem-legui/trips/{demLeguiTrip}/complete', [DemLeguiController::class, 'completeTrip']);
+        Route::post('dem-legui/trips/{demLeguiTrip}/location', [DemLeguiController::class, 'updateTripLocation']);
 
         // Assurance (vehicle insurance comparison & purchase).
         Route::get('insurance/providers', [InsuranceController::class, 'providers']);

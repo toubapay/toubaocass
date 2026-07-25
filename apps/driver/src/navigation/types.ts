@@ -15,6 +15,8 @@ export type TripsStackParamList = {
   Wallet: undefined;
   Anando: undefined;
   AnandoRideDetail: { rideId: number };
+  DemLeguiRequests: undefined;
+  DemLeguiTripDetail: { tripId: number };
 };
 
 export type FleetStackParamList = {

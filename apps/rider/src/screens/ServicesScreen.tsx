@@ -12,6 +12,7 @@ import { colors, radius, spacing } from '../theme';
 type Props = NativeStackScreenProps<ServicesStackParamList, 'Services'>;
 
 const SERVICES: { key: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: 'dem_legui', icon: 'car-sport-outline' },
   { key: 'anando', icon: 'car-outline' },
   { key: 'livraison', icon: 'cube-outline' },
   { key: 'cargaison', icon: 'boat-outline' },
@@ -22,6 +23,7 @@ const SERVICES: { key: string; icon: keyof typeof Ionicons.glyphMap }[] = [
 const LINKED_SERVICES: Record<string, keyof ServicesStackParamList> = {
   livraison: 'NewDelivery',
   anando: 'Anando',
+  dem_legui: 'NewDemLeguiRequest',
 };
 
 export function ServicesScreen({ navigation }: Props) {
@@ -36,7 +38,7 @@ export function ServicesScreen({ navigation }: Props) {
           style={styles.card}
           onPress={() =>
             LINKED_SERVICES[service.key]
-              ? navigation.navigate(LINKED_SERVICES[service.key] as 'NewDelivery' | 'Anando')
+              ? navigation.navigate(LINKED_SERVICES[service.key] as 'NewDelivery' | 'Anando' | 'NewDemLeguiRequest')
               : Alert.alert(t('services.comingSoonTitle'), t('services.comingSoonBody', { label: t(`services.${service.key}.label`) }))
           }
         >

@@ -249,6 +249,36 @@
       "actionFailedTitle": "Échec de l'action"
     }
   },
+  "demLegui": {
+    "driverCardTitle": "Demandes Dem Légui",
+    "driverCardSubtitle": "Acceptez des courses à la demande près de vous",
+    "driverTitle": "Demandes Dem Légui",
+    "youAreOnline": "Vous êtes en ligne",
+    "youAreOffline": "Vous êtes hors ligne",
+    "onlineHint": "Vous recevez les demandes de course à proximité.",
+    "offlineHint": "Passez en ligne pour recevoir des demandes de course.",
+    "goOnline": "Passer en ligne",
+    "goOffline": "Passer hors ligne",
+    "goOnlineToSeeRequests": "Passez en ligne pour voir les demandes de course à proximité.",
+    "locationPermissionDenied": "L'autorisation de localisation est requise pour passer en ligne.",
+    "availabilityUpdateFailed": "Impossible de mettre à jour votre statut. Réessayez.",
+    "noRequestsNearby": "Aucune demande à proximité pour le moment.",
+    "chooseCarTitle": "Choisissez le véhicule",
+    "acceptRequest": "Accepter",
+    "tripToLabel": "Vers {{city}}",
+    "tripStatus": {
+      "open": "Ouvert",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "seatsRemaining": "{{available}}/{{total}} places restantes",
+    "passengers_one": "Passager ({{count}})",
+    "passengers_other": "Passagers ({{count}})",
+    "noPassengersYet": "Aucun passager pour l'instant.",
+    "findMorePassengers": "Trouver d'autres passagers",
+    "liveMapWaiting": "En attente de votre position…"
+  },
   "anando": {
     "title": "Anando",
     "subtitle": "Partagez un trajet instantané ou rejoignez celui de quelqu'un d'autre — comme du covoiturage.",

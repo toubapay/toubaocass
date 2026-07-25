@@ -6,6 +6,7 @@ import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
 
 const SERVICES = [
+  { key: 'dem_legui', icon: '🚕' },
   { key: 'anando', icon: '🚗' },
   { key: 'livraison', icon: '📦' },
   { key: 'cargaison', icon: '🛳️' },
@@ -16,6 +17,7 @@ const SERVICES = [
 const LINKED_SERVICES: Record<string, string> = {
   livraison: '/services/livraison',
   anando: '/services/anando',
+  dem_legui: '/services/dem-legui',
 };
 
 export function ServicesPage() {

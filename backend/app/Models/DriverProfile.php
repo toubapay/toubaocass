@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id', 'license_number', 'license_expiry', 'national_id_number',
     'id_document_path', 'license_document_path', 'selfie_path',
     'kyc_status', 'kyc_rejection_reason', 'rating', 'approved_at',
+    'is_online', 'last_seen_at', 'current_latitude', 'current_longitude',
 ])]
 class DriverProfile extends Model
 {
@@ -32,11 +33,20 @@ class DriverProfile extends Model
             'license_expiry' => 'date',
             'approved_at' => 'datetime',
             'rating' => 'decimal:2',
+            'is_online' => 'boolean',
+            'last_seen_at' => 'datetime',
+            'current_latitude' => 'float',
+            'current_longitude' => 'float',
         ];
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isAvailableForDispatch(): bool
+    {
+        return $this->is_online && $this->kyc_status === self::STATUS_APPROVED;
     }
 }

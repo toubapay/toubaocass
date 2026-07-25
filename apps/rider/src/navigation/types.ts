@@ -30,6 +30,8 @@ export type ServicesStackParamList = {
   DeliveryDetail: { deliveryId: number };
   Anando: undefined;
   AnandoRideDetail: { rideId: number };
+  NewDemLeguiRequest: undefined;
+  DemLeguiRequestDetail: { requestId: number };
 };
 
 export type ProfileStackParamList = {

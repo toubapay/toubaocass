@@ -15,6 +15,7 @@ import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { AnandoRideDetailScreen } from '../screens/AnandoRideDetailScreen';
 import { AnandoScreen } from '../screens/AnandoScreen';
 import { ChatScreen } from '../screens/ChatScreen';
+import { DemLeguiRequestDetailScreen } from '../screens/DemLeguiRequestDetailScreen';
 import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { InstantDeparturesScreen } from '../screens/InstantDeparturesScreen';
@@ -22,6 +23,7 @@ import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { MyDeliveriesScreen } from '../screens/MyDeliveriesScreen';
 import { NewDeliveryScreen } from '../screens/NewDeliveryScreen';
+import { NewDemLeguiRequestScreen } from '../screens/NewDemLeguiRequestScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ServicesScreen } from '../screens/ServicesScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -114,6 +116,8 @@ function ServicesNavigator() {
       <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
       <ServicesStackNav.Screen name="Anando" component={AnandoScreen} options={{ title: t('nav.screenTitles.anando') }} />
       <ServicesStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
+      <ServicesStackNav.Screen name="NewDemLeguiRequest" component={NewDemLeguiRequestScreen} options={{ title: t('nav.screenTitles.demLegui') }} />
+      <ServicesStackNav.Screen name="DemLeguiRequestDetail" component={DemLeguiRequestDetailScreen} options={{ title: t('nav.screenTitles.demLeguiRequestDetail') }} />
     </ServicesStackNav.Navigator>
   );
 }

@@ -221,6 +221,10 @@
   "services": {
     "title": "الخدمات",
     "comingSoon": "🚧 قريباً — هذه الخدمة قادمة قريباً.",
+    "dem_legui": {
+      "label": "Dem Légui",
+      "description": "اطلب رحلة الآن، مثل سيارة أجرة عند الطلب"
+    },
     "anando": {
       "label": "أناندو",
       "description": "شارك أو ابحث عن رحلة فورية، مثل التشارك في السيارة"
@@ -241,6 +245,32 @@
       "label": "الإيجار",
       "description": "استئجار مركبات مع أو بدون سائق"
     }
+  },
+  "demLegui": {
+    "title": "Dem Légui",
+    "subtitle": "أخبرنا بموقعك ووجهتك — سيقبل سائق متصل قريب طلبك.",
+    "pickup": "نقطة الانطلاق",
+    "destination": "الوجهة",
+    "seats": "المقاعد",
+    "estimatedFare": "السعر المقدر",
+    "calculating": "جارٍ الحساب…",
+    "placePickupAndDestinationPrompt": "حدد نقطة الانطلاق والوجهة لمعرفة السعر.",
+    "submit": "اطلب رحلة",
+    "submitWithFare": "اطلب — {{amount}} FCFA",
+    "tripToLabel": "إلى {{city}}",
+    "status": {
+      "pending": "جارٍ البحث عن سائق…",
+      "matched": "تم العثور على سائق",
+      "cancelled": "ملغاة",
+      "expired": "منتهية الصلاحية"
+    },
+    "searchingForDriver": "جارٍ البحث عن سائق متصل قريب…",
+    "searchingHint": "عادة ما يستغرق هذا لحظات فقط.",
+    "yourDriver": "سائقك",
+    "fare": "السعر",
+    "cancelRequest": "إلغاء الطلب",
+    "cancelConfirm": "هل تريد حقاً إلغاء هذا الطلب؟",
+    "liveMapWaiting": "في انتظار موقع السائق…"
   },
   "anando": {
     "title": "أناندو",

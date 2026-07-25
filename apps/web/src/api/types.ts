@@ -18,6 +18,8 @@ export interface DriverProfile {
   kyc_rejection_reason: string | null;
   rating: number;
   approved_at: string | null;
+  is_online: boolean;
+  last_seen_at: string | null;
 }
 
 export interface User {
@@ -231,6 +233,53 @@ export interface AnandoRideBooking {
   payment_method: PaymentMethod;
   status: BookingStatus;
   created_at: string;
+}
+
+export type DemLeguiRequestStatus = 'pending' | 'matched' | 'cancelled' | 'expired';
+
+export type DemLeguiTripStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface DemLeguiRequest {
+  id: number;
+  rider: {
+    id: number;
+    name: string | null;
+    phone: string;
+  };
+  pickup_latitude: number;
+  pickup_longitude: number;
+  pickup_address: string | null;
+  destination_city: City | null;
+  destination_address: string | null;
+  seats_requested: number;
+  fare_total: number;
+  payment_method: PaymentMethod;
+  status: DemLeguiRequestStatus;
+  dem_legui_trip_id: number | null;
+  created_at: string;
+}
+
+export interface DemLeguiTrip {
+  id: number;
+  driver: {
+    id: number;
+    name: string | null;
+    phone: string;
+    rating: number;
+  };
+  car: Car | null;
+  destination_city: City | null;
+  total_seats: number;
+  available_seats: number;
+  price_per_seat: number;
+  status: DemLeguiTripStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  current_latitude: number | null;
+  current_longitude: number | null;
+  current_location_updated_at: string | null;
+  created_at: string;
+  requests?: DemLeguiRequest[];
 }
 
 export interface Paginated<T> {

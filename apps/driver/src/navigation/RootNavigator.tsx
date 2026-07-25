@@ -16,6 +16,8 @@ import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { AnandoRideDetailScreen } from '../screens/trips/AnandoRideDetailScreen';
 import { AnandoScreen } from '../screens/trips/AnandoScreen';
+import { DemLeguiRequestsScreen } from '../screens/trips/DemLeguiRequestsScreen';
+import { DemLeguiTripDetailScreen } from '../screens/trips/DemLeguiTripDetailScreen';
 import { DeliveryDetailScreen } from '../screens/deliveries/DeliveryDetailScreen';
 import { DeliveriesListScreen } from '../screens/deliveries/DeliveriesListScreen';
 import { AddCarScreen } from '../screens/fleet/AddCarScreen';
@@ -83,6 +85,8 @@ function TripsNavigator() {
       <TripsStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
       <TripsStackNav.Screen name="Anando" component={AnandoScreen} options={{ title: t('nav.screenTitles.anando') }} />
       <TripsStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
+      <TripsStackNav.Screen name="DemLeguiRequests" component={DemLeguiRequestsScreen} options={{ title: t('nav.screenTitles.demLegui') }} />
+      <TripsStackNav.Screen name="DemLeguiTripDetail" component={DemLeguiTripDetailScreen} options={{ title: t('nav.screenTitles.demLeguiTripDetail') }} />
     </TripsStackNav.Navigator>
   );
 }

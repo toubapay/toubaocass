@@ -6,6 +6,7 @@ import { fetchMyTrips } from '../api/trips';
 import type { Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { Button } from '../components/Button';
+import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle';
 import { CenteredSpinner } from '../components/Spinner';
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
@@ -40,6 +41,33 @@ export function TripsListPage() {
     <div>
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
       <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('trips.listTitle')}</h1>
+
+      {isModuleEnabled('dem_legui') && <DriverAvailabilityToggle />}
+
+      {isModuleEnabled('dem_legui') && (
+        <button
+          onClick={() => navigate('/dem-legui')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: spacing.sm,
+            width: '100%',
+            border: `1px solid ${colors.border}`,
+            borderRadius: radius.md,
+            backgroundColor: colors.surface,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <span style={{ fontSize: 24 }}>🚕</span>
+          <span>
+            <span style={{ display: 'block', fontSize: 16, fontWeight: 700, color: colors.text }}>{t('demLegui.driverCardTitle')}</span>
+            <span style={{ display: 'block', fontSize: 14, color: colors.textMuted, marginTop: 2 }}>{t('demLegui.driverCardSubtitle')}</span>
+          </span>
+        </button>
+      )}
 
       {isModuleEnabled('instant_trips') && (
         <button

@@ -19,6 +19,8 @@ class DriverProfileResource extends JsonResource
                 'kyc_rejection_reason' => null,
                 'rating' => 5.0,
                 'approved_at' => null,
+                'is_online' => false,
+                'last_seen_at' => null,
             ];
         }
 
@@ -30,6 +32,8 @@ class DriverProfileResource extends JsonResource
             'kyc_rejection_reason' => $this->kyc_rejection_reason,
             'rating' => (float) $this->rating,
             'approved_at' => $this->approved_at,
+            'is_online' => (bool) $this->is_online,
+            'last_seen_at' => $this->last_seen_at,
         ];
     }
 }

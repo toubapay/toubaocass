@@ -13,11 +13,11 @@ class Geo
      * Bindings must be supplied in this order wherever the expression is
      * used: [$lat, $lng, $lat].
      */
-    public static function distanceExpression(): string
+    public static function distanceExpression(string $latColumn = 'departure_latitude', string $lngColumn = 'departure_longitude'): string
     {
         return '(6371 * acos(least(1, greatest(-1, '
-            .'cos(radians(?)) * cos(radians(departure_latitude)) * cos(radians(departure_longitude) - radians(?))'
-            .' + sin(radians(?)) * sin(radians(departure_latitude))'
+            ."cos(radians(?)) * cos(radians({$latColumn})) * cos(radians({$lngColumn}) - radians(?))"
+            ." + sin(radians(?)) * sin(radians({$latColumn}))"
             .'))))';
     }
 

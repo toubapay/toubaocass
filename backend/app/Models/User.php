@@ -102,6 +102,16 @@ class User extends Authenticatable
         return $this->hasMany(Rating::class, 'ratee_id');
     }
 
+    public function demLeguiRequests(): HasMany
+    {
+        return $this->hasMany(DemLeguiRequest::class, 'rider_id');
+    }
+
+    public function demLeguiTrips(): HasMany
+    {
+        return $this->hasMany(DemLeguiTrip::class, 'driver_id');
+    }
+
     public function isDriver(): bool
     {
         return $this->role === self::ROLE_DRIVER;

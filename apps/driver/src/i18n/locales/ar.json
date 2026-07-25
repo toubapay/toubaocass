@@ -85,6 +85,8 @@
       "kycForm": "تقديم المستندات",
       "anando": "أناندو",
       "anandoRideDetail": "تفاصيل رحلة أناندو",
+      "demLegui": "طلبات Dem Légui",
+      "demLeguiTripDetail": "تفاصيل الرحلة",
       "profile": "ملفي الشخصي",
       "settings": "الإعدادات"
     }
@@ -244,6 +246,34 @@
       "cancelConfirmYes": "نعم، إلغاء الرحلة",
       "actionFailedTitle": "فشل الإجراء"
     }
+  },
+  "demLegui": {
+    "driverCardTitle": "طلبات Dem Légui",
+    "driverCardSubtitle": "اقبل طلبات الرحلات الفورية بالقرب منك",
+    "driverTitle": "طلبات Dem Légui",
+    "youAreOnline": "أنت متصل",
+    "youAreOffline": "أنت غير متصل",
+    "onlineHint": "أنت تتلقى طلبات الرحلات القريبة.",
+    "offlineHint": "اتصل لتلقي طلبات الرحلات.",
+    "goOnlineToSeeRequests": "اتصل لرؤية طلبات الرحلات القريبة.",
+    "locationPermissionDenied": "إذن الموقع مطلوب للاتصال.",
+    "availabilityUpdateFailed": "تعذر تحديث حالتك. حاول مرة أخرى.",
+    "noRequestsNearby": "لا توجد طلبات قريبة حالياً.",
+    "chooseCarTitle": "اختر المركبة",
+    "acceptRequest": "قبول",
+    "tripToLabel": "إلى {{city}}",
+    "tripStatus": {
+      "open": "مفتوحة",
+      "in_progress": "جارية",
+      "completed": "منتهية",
+      "cancelled": "ملغاة"
+    },
+    "seatsRemaining": "{{available}}/{{total}} مقاعد متبقية",
+    "passengers_one": "راكب ({{count}})",
+    "passengers_other": "ركاب ({{count}})",
+    "noPassengersYet": "لا يوجد ركاب بعد.",
+    "findMorePassengers": "ابحث عن ركاب آخرين",
+    "liveMapWaiting": "في انتظار موقعك…"
   },
   "anando": {
     "title": "أناندو",

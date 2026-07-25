@@ -8,6 +8,7 @@ import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { AnandoAvailableToast } from '../../components/AnandoAvailableToast';
 import { Button } from '../../components/Button';
+import { DriverAvailabilityToggle } from '../../components/DriverAvailabilityToggle';
 import { Screen } from '../../components/Screen';
 import { useModuleStatus } from '../../context/ModuleStatusContext';
 import { TripsStackParamList } from '../../navigation/types';
@@ -50,6 +51,18 @@ export function TripsListScreen({ navigation }: Props) {
     <Screen>
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
       <Text style={styles.title}>{t('trips.listTitle')}</Text>
+
+      {isModuleEnabled('dem_legui') && <DriverAvailabilityToggle />}
+
+      {isModuleEnabled('dem_legui') && (
+        <Pressable style={styles.demLeguiCard} onPress={() => navigation.navigate('DemLeguiRequests')}>
+          <Text style={styles.mapCardIcon}>🚕</Text>
+          <View style={styles.mapCardText}>
+            <Text style={styles.demLeguiCardTitle}>{t('demLegui.driverCardTitle')}</Text>
+            <Text style={styles.demLeguiCardSubtitle}>{t('demLegui.driverCardSubtitle')}</Text>
+          </View>
+        </Pressable>
+      )}
 
       {isModuleEnabled('instant_trips') && (
         <Pressable style={styles.instantCard} onPress={() => navigation.navigate('PostInstantTrip')}>
@@ -153,6 +166,19 @@ const styles = StyleSheet.create({
   },
   anandoCardTitle: { fontSize: 16.0, fontWeight: '700', color: '#fff' },
   anandoCardSubtitle: { fontSize: 14.0, color: '#fff', opacity: 0.85, marginTop: 2 },
+  demLeguiCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  demLeguiCardTitle: { fontSize: 16.0, fontWeight: '700', color: colors.text },
+  demLeguiCardSubtitle: { fontSize: 14.0, color: colors.textMuted, marginTop: 2 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
