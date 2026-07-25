@@ -10,6 +10,7 @@ import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { Screen } from '../components/Screen';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
@@ -143,7 +144,15 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
           )
         ) : null}
 
-        <Text style={styles.title}>{t('demLegui.tripToLabel', { city: request.destination_city?.name })}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{t('demLegui.tripToLabel', { city: request.destination_city?.name })}</Text>
+          {request.status === 'pending' ? (
+            <View style={styles.searchingBadge}>
+              <SearchingCarIndicator size={26} />
+              <Text style={styles.searchingBadgeText}>{t('demLegui.searchingBadge')}</Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={styles.subtitle}>{t(`demLegui.status.${request.status}`)}</Text>
 
         {request.status === 'pending' && (
@@ -200,8 +209,11 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: '800', color: colors.text, marginBottom: 2 },
-  subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.md },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { fontSize: 24, fontWeight: '800', color: colors.text, flexShrink: 1 },
+  searchingBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 0 },
+  searchingBadgeText: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  subtitle: { fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
   card: {
     backgroundColor: colors.surface,

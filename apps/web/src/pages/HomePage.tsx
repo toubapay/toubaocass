@@ -6,6 +6,7 @@ import { searchTrips } from '../api/trips';
 import type { City, Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { AnandoMiniList } from '../components/AnandoMiniList';
+import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
@@ -109,6 +110,8 @@ export function HomePage() {
 
   return (
     <div>
+      {isModuleEnabled('dem_legui') && <DemLeguiStatusWidget />}
+
       <h1 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.sm }}>
         {t('home.title')}
       </h1>

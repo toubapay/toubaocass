@@ -77,6 +77,33 @@ class DemLeguiController extends Controller
     }
 
     /**
+     * Rider-facing: the rider's currently active request (still searching,
+     * or matched to a trip that hasn't finished yet), if any — powers a
+     * persistent status widget shown elsewhere in the app (e.g. the Home
+     * screen) without the caller needing to already know a request id.
+     */
+    public function myActiveRequest(Request $request)
+    {
+        $activeRequest = $request->user()->demLeguiRequests()
+            ->where(function ($query) {
+                $query->where('status', DemLeguiRequest::STATUS_PENDING)
+                    ->orWhere(function ($matched) {
+                        $matched->where('status', DemLeguiRequest::STATUS_MATCHED)
+                            ->whereHas('trip', function ($trip) {
+                                $trip->whereIn('status', [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS]);
+                            });
+                    });
+            })
+            ->latest()
+            ->with(['rider', 'destinationCity', 'trip.driver.driverProfile'])
+            ->first();
+
+        return response()->json([
+            'data' => $activeRequest ? new DemLeguiRequestResource($activeRequest) : null,
+        ]);
+    }
+
+    /**
      * Rider-facing: anonymized positions of online drivers near the pickup
      * point, used to render a "searching for a driver…" map while the
      * request is still pending — no name/phone exposed since none of these

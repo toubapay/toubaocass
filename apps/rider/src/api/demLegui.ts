@@ -39,6 +39,11 @@ export async function fetchDemLeguiRequest(requestId: number): Promise<DemLeguiR
   return data;
 }
 
+export async function fetchMyActiveDemLeguiRequest(): Promise<DemLeguiRequest | null> {
+  const { data } = await apiClient.get('/dem-legui/requests/mine/active');
+  return data.data;
+}
+
 export async function cancelDemLeguiRequest(requestId: number): Promise<void> {
   await apiClient.delete(`/dem-legui/requests/${requestId}`);
 }

@@ -9,6 +9,7 @@ import type { NearbyDriver } from '../api/demLegui';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { colors, radius, spacing } from '../theme';
 
 const POLL_INTERVAL_MS = 8000;
@@ -162,10 +163,18 @@ export function DemLeguiRequestDetailPage() {
         )
       )}
 
-      <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, marginBottom: 2 }}>
-        {t('demLegui.tripToLabel', { city: request.destination_city?.name })}
-      </h1>
-      <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 0, marginBottom: spacing.md }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>
+          {t('demLegui.tripToLabel', { city: request.destination_city?.name })}
+        </h1>
+        {request.status === 'pending' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs, flexShrink: 0 }}>
+            <SearchingCarIndicator size={28} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: colors.primary }}>{t('demLegui.searchingBadge')}</span>
+          </div>
+        )}
+      </div>
+      <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md }}>
         {t(`demLegui.status.${request.status}`)}
       </p>
 

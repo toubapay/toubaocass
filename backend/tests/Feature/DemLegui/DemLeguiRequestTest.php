@@ -447,6 +447,63 @@ class DemLeguiRequestTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_my_active_request_is_null_when_rider_has_none(): void
+    {
+        $rider = User::factory()->create();
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data', null);
+    }
+
+    public function test_my_active_request_returns_pending_request(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data.id', $request->id)
+            ->assertJsonPath('data.status', 'pending');
+    }
+
+    public function test_my_active_request_returns_matched_request_with_eta_and_ignores_completed_trips(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver(['current_latitude' => 14.70, 'current_longitude' => -17.43]);
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+        ]);
+
+        $tripId = $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->json('id');
+
+        $response = $this->actingAs($rider, 'sanctum')
+            ->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk();
+
+        $this->assertEquals($request->id, $response->json('data.id'));
+        $this->assertIsInt($response->json('data.eta_minutes'));
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$tripId}/start")->assertOk();
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$tripId}/complete")->assertOk();
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data', null);
+    }
+
     public function test_rider_and_matched_driver_can_chat_but_a_stranger_cannot(): void
     {
         $rider = User::factory()->create();

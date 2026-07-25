@@ -317,7 +317,10 @@
     "matchedBannerSubtitle": "{{name}} في طريقه لاصطحابك.",
     "call": "اتصال",
     "chat": "محادثة",
-    "etaMinutes": "الوصول خلال {{minutes}} د"
+    "etaMinutes": "الوصول خلال {{minutes}} د",
+    "searchingBadge": "جارٍ البحث…",
+    "waitingForDriverBadge": "في انتظار سائق",
+    "driverArrivingBadge": "السائق في الطريق"
   },
   "anando": {
     "title": "أناندو",

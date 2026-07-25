@@ -317,7 +317,10 @@
     "matchedBannerSubtitle": "{{name}} arrive pour vous récupérer.",
     "call": "Appeler",
     "chat": "Discuter",
-    "etaMinutes": "Arrivée dans {{minutes}} min"
+    "etaMinutes": "Arrivée dans {{minutes}} min",
+    "searchingBadge": "Recherche…",
+    "waitingForDriverBadge": "En attente d'un conducteur",
+    "driverArrivingBadge": "Conducteur en route"
   },
   "anando": {
     "title": "Anando",

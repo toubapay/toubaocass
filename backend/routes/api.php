@@ -101,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // online drivers).
         Route::post('dem-legui/requests/quote', [DemLeguiController::class, 'quote']);
         Route::post('dem-legui/requests', [DemLeguiController::class, 'store'])->middleware('module:dem_legui');
+        Route::get('dem-legui/requests/mine/active', [DemLeguiController::class, 'myActiveRequest']);
         Route::delete('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'cancel']);
         Route::get('dem-legui/requests/{demLeguiRequest}/nearby-drivers', [DemLeguiController::class, 'nearbyDrivers']);
     });
