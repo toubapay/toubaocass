@@ -43,8 +43,6 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.meta}>{t('profile.rating', { value: (user?.driver_profile?.rating ?? 5).toFixed(1) })}</Text>
       </View>
 
-      <ProfileDashboard />
-
       <Pressable style={styles.walletCard} onPress={() => navigation.navigate('Wallet')}>
         <View style={styles.walletLeft}>
           <Ionicons name="wallet" size={26} color="#fff" />
@@ -55,6 +53,8 @@ export function ProfileScreen({ navigation }: Props) {
         </View>
         <Text style={styles.walletArrow}>→</Text>
       </Pressable>
+
+      <ProfileDashboard />
 
       <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Settings')}>
         <Text style={styles.settingsLabel}>{t('profile.settings')}</Text>

@@ -54,8 +54,6 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         {user?.email && <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{user.email}</p>}
       </div>
 
-      <ProfileDashboard />
-
       <button
         onClick={() => navigate('/wallet')}
         style={{
@@ -84,6 +82,8 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         </span>
         <span style={{ fontSize: 21 }}>→</span>
       </button>
+
+      <ProfileDashboard />
 
       <button
         onClick={() => navigate('/settings')}
