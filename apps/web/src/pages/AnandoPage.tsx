@@ -8,6 +8,7 @@ import { fetchCities } from '../api/cities';
 import type { AnandoRide, AnandoRideBooking, City } from '../api/types';
 import { Button } from '../components/Button';
 import { CityPicker } from '../components/CityPicker';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SuccessModal } from '../components/SuccessModal';
 import { TextField } from '../components/TextField';
 import { colors, radius, spacing } from '../theme';
@@ -268,7 +269,10 @@ export function AnandoPage() {
       {tab === 'available' ? (
         <>
           {loading ? (
-            <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: spacing.sm, padding: '40px 0' }}>
+              <SearchingCarIndicator size={40} icon="🚗" />
+              <p style={{ color: colors.textMuted, margin: 0 }}>{t('anando.loading')}</p>
+            </div>
           ) : rides.length === 0 ? (
             <p style={{ color: colors.textMuted, fontSize: 14 }}>{t('anando.empty')}</p>
           ) : (

@@ -10,6 +10,7 @@ import { AnandoRide, AnandoRideBooking, City } from '../api/types';
 import { Button } from '../components/Button';
 import { CityPicker } from '../components/CityPicker';
 import { Screen } from '../components/Screen';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TextField } from '../components/TextField';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -170,7 +171,10 @@ export function AnandoScreen({ navigation, route }: Props) {
 
         {tab === 'available' ? (
           loading ? (
-            <Text style={styles.meta}>{t('anando.loading')}</Text>
+            <View style={styles.loadingContainer}>
+              <SearchingCarIndicator size={40} icon="🚗" />
+              <Text style={styles.meta}>{t('anando.loading')}</Text>
+            </View>
           ) : rides.length === 0 ? (
             <Text style={styles.empty}>{t('anando.empty')}</Text>
           ) : (
@@ -201,6 +205,7 @@ export function AnandoScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 2 },
   subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.lg },
   postCard: {

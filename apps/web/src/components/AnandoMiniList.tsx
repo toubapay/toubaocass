@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchAnandoRides } from '../api/anando';
 import type { AnandoRide } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { SearchingCarIndicator } from './SearchingCarIndicator';
 
 const MAX_RIDES = 2;
 const POLL_INTERVAL_MS = 20000;
@@ -54,8 +55,11 @@ export function AnandoMiniList() {
   return (
     <div style={{ marginTop: spacing.md, marginBottom: spacing.sm }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase' }}>
-          {t('home.anandoMiniTitle')}
+        <span style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+          <SearchingCarIndicator size={20} icon="🚗" />
+          <span style={{ fontSize: 13, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase' }}>
+            {t('home.anandoMiniTitle')}
+          </span>
         </span>
         <button
           onClick={() => navigate('/services/anando')}

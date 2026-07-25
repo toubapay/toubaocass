@@ -13,6 +13,7 @@ import { DateField } from '../components/DateField';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { Screen } from '../components/Screen';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
 import { TripsMapView } from '../components/TripsMapView';
 import { useModuleStatus } from '../context/ModuleStatusContext';
@@ -154,7 +155,7 @@ export function HomeScreen({ navigation }: Props) {
 
       {loading && trips.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} size="large" />
+          <SearchingCarIndicator size={48} icon="🚗" />
         </View>
       ) : (
         <FlatList

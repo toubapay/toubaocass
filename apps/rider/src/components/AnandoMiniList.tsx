@@ -9,6 +9,7 @@ import { fetchAnandoRides } from '../api/anando';
 import { AnandoRide } from '../api/types';
 import { HomeStackParamList, MainTabParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { SearchingCarIndicator } from './SearchingCarIndicator';
 
 type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList>,
@@ -70,7 +71,10 @@ export function AnandoMiniList() {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{t('home.anandoMiniTitle')}</Text>
+        <View style={styles.titleRow}>
+          <SearchingCarIndicator size={20} icon="🚗" />
+          <Text style={styles.title}>{t('home.anandoMiniTitle')}</Text>
+        </View>
         <Pressable onPress={() => navigation.navigate('ServicesTab', { screen: 'Anando' })}>
           <Text style={styles.viewAll}>{t('home.anandoMiniViewAll')}</Text>
         </Pressable>
@@ -98,6 +102,7 @@ export function AnandoMiniList() {
 const styles = StyleSheet.create({
   container: { marginTop: spacing.md, marginBottom: spacing.sm },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   title: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase' },
   viewAll: { fontSize: 13, fontWeight: '700', color: colors.primary },
   card: {

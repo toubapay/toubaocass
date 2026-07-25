@@ -7,11 +7,9 @@ interface Props {
 
 /**
  * A small icon-in-a-circle badge with two staggered "radar ping" rings
- * expanding outward, looping forever — a lightweight stand-in for a
- * dispatch/live animation. Originally built for "searching for a Dem Légui
- * driver", now also reused as a generic "live/trending" accent (e.g. next
- * to the Anando mini-list). Purely decorative/local state (no data behind
- * it), so it's safe to drop next to any "searching…"/"live" label.
+ * expanding outward, looping forever — a lightweight "live/trending" accent
+ * (e.g. next to the Anando available-rides listing). Purely decorative/
+ * local state (no data behind it), so it's safe to drop anywhere.
  */
 export function SearchingCarIndicator({ size = 30, icon = '🚕' }: Props) {
   const ringStyle = (delay: string) =>

@@ -7,9 +7,9 @@ import type { City, Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { AnandoMiniList } from '../components/AnandoMiniList';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
-import { CenteredSpinner } from '../components/Spinner';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
+import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
 import { useModuleStatus } from '../context/ModuleStatusContext';
@@ -243,7 +243,9 @@ export function HomePage() {
 
       <div style={{ marginTop: spacing.md }}>
         {loading && trips.length === 0 ? (
-          <CenteredSpinner />
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+            <SearchingCarIndicator size={48} icon="🚗" />
+          </div>
         ) : (
           <>
             {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.sm }}>{error}</p>}

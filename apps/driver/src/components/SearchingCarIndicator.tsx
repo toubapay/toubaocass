@@ -33,10 +33,8 @@ function useRingAnimation(delayMs: number) {
 
 /**
  * A small icon-in-a-circle badge with two staggered "radar ping" rings
- * expanding outward, looping forever — a lightweight stand-in for a
- * dispatch/live animation. Originally built for "searching for a Dem Légui
- * driver", now also reused as a generic "live/trending" accent (e.g. next
- * to the Anando mini-list).
+ * expanding outward, looping forever — a lightweight "live/trending" accent
+ * (e.g. next to the Anando available-rides listing).
  */
 export function SearchingCarIndicator({ size = 30, icon = '🚕' }: Props) {
   const ring1 = useRingAnimation(0);
