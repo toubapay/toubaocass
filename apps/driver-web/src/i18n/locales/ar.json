@@ -277,7 +277,8 @@
     "passengers_other": "ركاب ({{count}})",
     "noPassengersYet": "لا يوجد ركاب بعد.",
     "findMorePassengers": "ابحث عن ركاب آخرين",
-    "liveMapWaiting": "في انتظار موقعك…"
+    "liveMapWaiting": "في انتظار موقعك…",
+    "chat": "محادثة"
   },
   "anando": {
     "title": "أناندو",

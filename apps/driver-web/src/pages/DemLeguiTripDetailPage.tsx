@@ -140,6 +140,22 @@ export function DemLeguiTripDetailPage() {
                 {r.rider.phone} · 📍 {r.pickup_address}
               </p>
               <p style={{ fontSize: 13.5, color: colors.textMuted, margin: '2px 0 0' }}>{t('anando.seatsBooked', { count: r.seats_requested })}</p>
+              <button
+                onClick={() => navigate(`/dem-legui/requests/${r.id}/chat`)}
+                style={{
+                  marginTop: spacing.xs,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: radius.sm,
+                  padding: `4px ${spacing.sm}px`,
+                  backgroundColor: colors.surface,
+                  color: colors.text,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                💬 {t('demLegui.chat')}
+              </button>
             </div>
           ))
         )}

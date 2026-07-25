@@ -1,13 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip } from '../api/demLegui';
+import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers, NearbyDriver } from '../api/demLegui';
 import { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { Screen } from '../components/Screen';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -15,15 +16,19 @@ import { colors, radius, spacing } from '../theme';
 type Props = NativeStackScreenProps<ServicesStackParamList, 'DemLeguiRequestDetail'>;
 
 const POLL_INTERVAL_MS = 8000;
+const NEARBY_DRIVERS_POLL_INTERVAL_MS = 5000;
 
-export function DemLeguiRequestDetailScreen({ route }: Props) {
+export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
   const { requestId } = route.params;
 
   const [request, setRequest] = useState<DemLeguiRequest | null>(null);
   const [trip, setTrip] = useState<DemLeguiTrip | null>(null);
+  const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [justMatched, setJustMatched] = useState(false);
+  const hadTripRef = useRef(false);
 
   const load = () => {
     fetchDemLeguiRequest(requestId)
@@ -48,6 +53,23 @@ export function DemLeguiRequestDetailScreen({ route }: Props) {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.status, trip?.status, requestId]);
+
+  useEffect(() => {
+    if (trip && !hadTripRef.current) {
+      hadTripRef.current = true;
+      setJustMatched(true);
+      const timeout = setTimeout(() => setJustMatched(false), 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [trip]);
+
+  useEffect(() => {
+    if (request?.status !== 'pending') return;
+    const loadNearby = () => fetchNearbyDemLeguiDrivers(requestId).then(setNearbyDrivers).catch(() => {});
+    loadNearby();
+    const interval = setInterval(loadNearby, NEARBY_DRIVERS_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [requestId, request?.status]);
 
   if (loading || !request) {
     return (
@@ -80,22 +102,46 @@ export function DemLeguiRequestDetailScreen({ route }: Props) {
     ]);
   };
 
+  const driverPosition = trip
+    ? trip.status === 'in_progress'
+      ? { lat: trip.current_latitude, lng: trip.current_longitude, updatedAt: trip.current_location_updated_at }
+      : { lat: trip.driver.current_latitude, lng: trip.driver.current_longitude, updatedAt: trip.driver.last_seen_at }
+    : null;
+
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {trip?.status === 'in_progress' &&
-          (trip.current_latitude != null && trip.current_longitude != null ? (
+        {justMatched && (
+          <View style={styles.matchedBanner}>
+            <Text style={styles.matchedBannerTitle}>{t('demLegui.matchedBannerTitle')}</Text>
+            <Text style={styles.matchedBannerSubtitle}>
+              {t('demLegui.matchedBannerSubtitle', { name: trip?.driver.name })}
+            </Text>
+          </View>
+        )}
+
+        {request.status === 'pending' && (
+          <NearbyDriversMap
+            pickupLatitude={request.pickup_latitude}
+            pickupLongitude={request.pickup_longitude}
+            drivers={nearbyDrivers}
+          />
+        )}
+
+        {trip && driverPosition ? (
+          driverPosition.lat != null && driverPosition.lng != null ? (
             <AnandoLiveMap
-              currentLatitude={trip.current_latitude}
-              currentLongitude={trip.current_longitude}
-              destinationLatitude={request.destination_city?.latitude}
-              destinationLongitude={request.destination_city?.longitude}
-              destinationName={request.destination_city?.name}
-              updatedAt={trip.current_location_updated_at}
+              currentLatitude={driverPosition.lat}
+              currentLongitude={driverPosition.lng}
+              destinationLatitude={trip.status === 'in_progress' ? request.destination_city?.latitude : request.pickup_latitude}
+              destinationLongitude={trip.status === 'in_progress' ? request.destination_city?.longitude : request.pickup_longitude}
+              destinationName={trip.status === 'in_progress' ? request.destination_city?.name : request.pickup_address}
+              updatedAt={driverPosition.updatedAt}
             />
           ) : (
             <Text style={styles.liveMapWaiting}>{t('demLegui.liveMapWaiting')}</Text>
-          ))}
+          )
+        ) : null}
 
         <Text style={styles.title}>{t('demLegui.tripToLabel', { city: request.destination_city?.name })}</Text>
         <Text style={styles.subtitle}>{t(`demLegui.status.${request.status}`)}</Text>
@@ -118,6 +164,21 @@ export function DemLeguiRequestDetailScreen({ route }: Props) {
                 🚗 {trip.car.make} {trip.car.model} · {trip.car.plate_number}
               </Text>
             ) : null}
+            {request.eta_minutes != null ? (
+              <Text style={styles.eta}>⏱ {t('demLegui.etaMinutes', { minutes: request.eta_minutes })}</Text>
+            ) : null}
+
+            <View style={styles.contactRow}>
+              <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${trip.driver.phone}`)}>
+                <Text style={styles.contactButtonText}>📞 {t('demLegui.call')}</Text>
+              </Pressable>
+              <Pressable
+                style={styles.contactButton}
+                onPress={() => navigation.navigate('DemLeguiChat', { requestId: request.id })}
+              >
+                <Text style={styles.contactButtonText}>💬 {t('demLegui.chat')}</Text>
+              </Pressable>
+            </View>
           </View>
         ) : null}
 
@@ -152,6 +213,25 @@ const styles = StyleSheet.create({
   },
   line: { fontSize: 17, fontWeight: '700', color: colors.text },
   lineMuted: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  eta: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  matchedBanner: {
+    backgroundColor: colors.success,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  matchedBannerTitle: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  matchedBannerSubtitle: { fontSize: 13.5, color: 'rgba(255,255,255,0.9)', marginTop: 2 },
+  contactRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  contactButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
 });

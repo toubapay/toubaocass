@@ -8,6 +8,7 @@ import { usePushNotifications } from './hooks/usePushNotifications';
 import { AnandoPage } from './pages/AnandoPage';
 import { AnandoRideDetailPage } from './pages/AnandoRideDetailPage';
 import { ChatPage } from './pages/ChatPage';
+import { DemLeguiChatPage } from './pages/DemLeguiChatPage';
 import { DemLeguiRequestDetailPage } from './pages/DemLeguiRequestDetailPage';
 import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/services/anando/:id" element={<AnandoRideDetailPage />} />
         <Route path="/services/dem-legui" element={<NewDemLeguiRequestPage />} />
         <Route path="/services/dem-legui/:id" element={<DemLeguiRequestDetailPage />} />
+        <Route path="/services/dem-legui/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<MyDeliveriesPage />} />
         <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />

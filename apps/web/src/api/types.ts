@@ -130,7 +130,8 @@ export interface Address {
 
 export interface Message {
   id: number;
-  booking_id: number;
+  booking_id: number | null;
+  dem_legui_request_id: number | null;
   body: string;
   sender_id: number;
   sender_name: string | null;
@@ -256,6 +257,7 @@ export interface DemLeguiRequest {
   payment_method: PaymentMethod;
   status: DemLeguiRequestStatus;
   dem_legui_trip_id: number | null;
+  eta_minutes?: number | null;
   created_at: string;
 }
 
@@ -266,6 +268,9 @@ export interface DemLeguiTrip {
     name: string | null;
     phone: string;
     rating: number;
+    current_latitude: number | null;
+    current_longitude: number | null;
+    last_seen_at: string | null;
   };
   car: Car | null;
   destination_city: City | null;

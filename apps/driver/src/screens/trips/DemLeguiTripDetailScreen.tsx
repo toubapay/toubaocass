@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
@@ -139,6 +139,9 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
                   {r.rider.phone} · 📍 {r.pickup_address}
                 </Text>
                 <Text style={styles.lineMuted}>{t('anando.seatsBooked', { count: r.seats_requested })}</Text>
+                <Pressable style={styles.chatButton} onPress={() => navigation.navigate('DemLeguiChat', { requestId: r.id })}>
+                  <Text style={styles.chatButtonText}>💬 {t('demLegui.chat')}</Text>
+                </Pressable>
               </View>
             ))
           )}
@@ -175,6 +178,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   passengerRow: { marginBottom: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+  chatButton: {
+    marginTop: spacing.xs,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  chatButtonText: { color: colors.text, fontWeight: '700', fontSize: 13 },
   line: { fontSize: 16, fontWeight: '700', color: colors.text },
   lineMuted: { fontSize: 13.5, color: colors.textMuted, marginTop: 2 },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },

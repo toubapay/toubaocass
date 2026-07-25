@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DemLeguiController;
+use App\Http\Controllers\Api\DemLeguiMessageController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\InsuranceController;
@@ -101,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('dem-legui/requests/quote', [DemLeguiController::class, 'quote']);
         Route::post('dem-legui/requests', [DemLeguiController::class, 'store'])->middleware('module:dem_legui');
         Route::delete('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'cancel']);
+        Route::get('dem-legui/requests/{demLeguiRequest}/nearby-drivers', [DemLeguiController::class, 'nearbyDrivers']);
     });
 
     // Dem Légui show endpoints sit outside the role:rider/role:driver groups
@@ -108,6 +110,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // need to poll them — mirrors anando-rides/{id} below.
     Route::get('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'show']);
     Route::get('dem-legui/trips/{demLeguiTrip}', [DemLeguiController::class, 'showTrip']);
+
+    // Chat on a Dem Légui request — shared between its rider and the driver
+    // of the trip it's matched to (authorized per-request via policy, same
+    // shape as bookings/{booking}/messages above).
+    Route::get('dem-legui/requests/{demLeguiRequest}/messages', [DemLeguiMessageController::class, 'index']);
+    Route::post('dem-legui/requests/{demLeguiRequest}/messages', [DemLeguiMessageController::class, 'store']);
 
     // Driver-facing KYC, fleet, and trip management.
     Route::prefix('driver')->middleware('role:driver')->group(function () {

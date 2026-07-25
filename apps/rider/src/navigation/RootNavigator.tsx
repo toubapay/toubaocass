@@ -15,6 +15,7 @@ import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { AnandoRideDetailScreen } from '../screens/AnandoRideDetailScreen';
 import { AnandoScreen } from '../screens/AnandoScreen';
 import { ChatScreen } from '../screens/ChatScreen';
+import { DemLeguiChatScreen } from '../screens/DemLeguiChatScreen';
 import { DemLeguiRequestDetailScreen } from '../screens/DemLeguiRequestDetailScreen';
 import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -118,6 +119,7 @@ function ServicesNavigator() {
       <ServicesStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
       <ServicesStackNav.Screen name="NewDemLeguiRequest" component={NewDemLeguiRequestScreen} options={{ title: t('nav.screenTitles.demLegui') }} />
       <ServicesStackNav.Screen name="DemLeguiRequestDetail" component={DemLeguiRequestDetailScreen} options={{ title: t('nav.screenTitles.demLeguiRequestDetail') }} />
+      <ServicesStackNav.Screen name="DemLeguiChat" component={DemLeguiChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
     </ServicesStackNav.Navigator>
   );
 }

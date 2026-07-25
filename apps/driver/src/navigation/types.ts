@@ -17,6 +17,7 @@ export type TripsStackParamList = {
   AnandoRideDetail: { rideId: number };
   DemLeguiRequests: undefined;
   DemLeguiTripDetail: { tripId: number };
+  DemLeguiChat: { requestId: number };
 };
 
 export type FleetStackParamList = {

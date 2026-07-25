@@ -273,7 +273,8 @@
     "passengers_other": "Passagers ({{count}})",
     "noPassengersYet": "Aucun passager pour l'instant.",
     "findMorePassengers": "Trouver d'autres passagers",
-    "liveMapWaiting": "En attente de votre position…"
+    "liveMapWaiting": "En attente de votre position…",
+    "chat": "Discuter"
   },
   "anando": {
     "title": "Anando",

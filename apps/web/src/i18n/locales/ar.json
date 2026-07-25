@@ -270,7 +270,12 @@
     "fare": "السعر",
     "cancelRequest": "إلغاء الطلب",
     "cancelConfirm": "هل تريد حقاً إلغاء هذا الطلب؟",
-    "liveMapWaiting": "في انتظار موقع السائق…"
+    "liveMapWaiting": "في انتظار موقع السائق…",
+    "matchedBannerTitle": "تم العثور على سائق!",
+    "matchedBannerSubtitle": "{{name}} في طريقه لاصطحابك.",
+    "call": "اتصال",
+    "chat": "محادثة",
+    "etaMinutes": "الوصول خلال {{minutes}} د"
   },
   "anando": {
     "title": "أناندو",

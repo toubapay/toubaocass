@@ -377,4 +377,112 @@ class DemLeguiRequestTest extends TestCase
             ->getJson("/api/dem-legui/requests/{$request->id}")
             ->assertNotFound();
     }
+
+    public function test_pending_request_has_no_eta_and_matched_request_does(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver(['current_latitude' => 14.70, 'current_longitude' => -17.43]);
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+        ]);
+
+        $this->actingAs($rider, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}")
+            ->assertOk()
+            ->assertJsonPath('eta_minutes', null);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $response = $this->actingAs($rider, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}")
+            ->assertOk();
+
+        $this->assertIsInt($response->json('eta_minutes'));
+        $this->assertGreaterThan(0, $response->json('eta_minutes'));
+    }
+
+    public function test_nearby_drivers_endpoint_is_anonymized_and_radius_filtered(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'pickup_latitude' => 14.6928,
+            'pickup_longitude' => -17.4467,
+        ]);
+
+        $this->onlineDriver(['current_latitude' => 14.70, 'current_longitude' => -17.43]);
+        $this->onlineDriver(['current_latitude' => 16.50, 'current_longitude' => -16.50]);
+
+        $response = $this->actingAs($rider, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}/nearby-drivers")
+            ->assertOk();
+
+        $drivers = $response->json('drivers');
+        $this->assertCount(1, $drivers);
+        $this->assertArrayHasKey('latitude', $drivers[0]);
+        $this->assertArrayNotHasKey('name', $drivers[0]);
+        $this->assertArrayNotHasKey('phone', $drivers[0]);
+    }
+
+    public function test_stranger_cannot_view_nearby_drivers_for_someone_elses_request(): void
+    {
+        $rider = User::factory()->create();
+        $stranger = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($stranger, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}/nearby-drivers")
+            ->assertNotFound();
+    }
+
+    public function test_rider_and_matched_driver_can_chat_but_a_stranger_cannot(): void
+    {
+        $rider = User::factory()->create();
+        $stranger = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/dem-legui/requests/{$request->id}/messages", ['body' => 'Bonjour'])
+            ->assertForbidden();
+
+        // Before a match, the driver has no relation to the request yet.
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/dem-legui/requests/{$request->id}/messages", ['body' => 'Bonjour'])
+            ->assertForbidden();
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson("/api/dem-legui/requests/{$request->id}/messages", ['body' => 'Je suis en bas.'])
+            ->assertCreated()
+            ->assertJsonPath('body', 'Je suis en bas.');
+
+        $response = $this->actingAs($driver, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}/messages")
+            ->assertOk();
+
+        $this->assertCount(1, $response->json());
+
+        $this->actingAs($stranger, 'sanctum')
+            ->getJson("/api/dem-legui/requests/{$request->id}/messages")
+            ->assertForbidden();
+    }
 }

@@ -31,6 +31,7 @@ class NewMessageNotification extends Notification
             'data' => [
                 'type' => 'new_message',
                 'booking_id' => $this->message->booking_id,
+                'dem_legui_request_id' => $this->message->dem_legui_request_id,
             ],
         ];
     }

@@ -5,8 +5,10 @@ namespace App\Models;
 use Database\Factories\DemLeguiRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Support\Geo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'rider_id', 'pickup_latitude', 'pickup_longitude', 'pickup_address',
@@ -39,6 +41,14 @@ class DemLeguiRequest extends Model
      */
     const NEARBY_RADIUS_KM = 15;
 
+    /**
+     * Assumed average approach speed (km/h) used to turn the driver's
+     * distance to this pickup point into a rough ETA in minutes — slower
+     * than CityDistanceService's 60 km/h intercity estimate since this is
+     * local/urban approach driving, not a highway leg.
+     */
+    const APPROACH_SPEED_KMH = 30.0;
+
     protected function casts(): array
     {
         return [
@@ -60,5 +70,35 @@ class DemLeguiRequest extends Model
     public function trip(): BelongsTo
     {
         return $this->belongsTo(DemLeguiTrip::class, 'dem_legui_trip_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Rough time-until-arrival for the rider, based on the driver's last
+     * reported position — the trip's own live position while under way,
+     * falling back to the driver's continuous online-status ping while
+     * still en route to pick everyone up. Null once there's no usable
+     * driver position or the trip isn't in a "driver is approaching" state.
+     */
+    public function etaMinutes(): ?int
+    {
+        if ($this->trip === null || ! in_array($this->trip->status, [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS], true)) {
+            return null;
+        }
+
+        $driverLat = $this->trip->current_latitude ?? $this->trip->driver?->driverProfile?->current_latitude;
+        $driverLng = $this->trip->current_longitude ?? $this->trip->driver?->driverProfile?->current_longitude;
+
+        if ($driverLat === null || $driverLng === null) {
+            return null;
+        }
+
+        $distanceKm = Geo::haversineKm($driverLat, $driverLng, $this->pickup_latitude, $this->pickup_longitude);
+
+        return max(1, (int) ceil($distanceKm / self::APPROACH_SPEED_KMH * 60));
     }
 }

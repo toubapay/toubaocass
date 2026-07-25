@@ -16,6 +16,7 @@ import { ProfileSetupScreen } from '../screens/auth/ProfileSetupScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { AnandoRideDetailScreen } from '../screens/trips/AnandoRideDetailScreen';
 import { AnandoScreen } from '../screens/trips/AnandoScreen';
+import { DemLeguiChatScreen } from '../screens/trips/DemLeguiChatScreen';
 import { DemLeguiRequestsScreen } from '../screens/trips/DemLeguiRequestsScreen';
 import { DemLeguiTripDetailScreen } from '../screens/trips/DemLeguiTripDetailScreen';
 import { DeliveryDetailScreen } from '../screens/deliveries/DeliveryDetailScreen';
@@ -87,6 +88,7 @@ function TripsNavigator() {
       <TripsStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
       <TripsStackNav.Screen name="DemLeguiRequests" component={DemLeguiRequestsScreen} options={{ title: t('nav.screenTitles.demLegui') }} />
       <TripsStackNav.Screen name="DemLeguiTripDetail" component={DemLeguiTripDetailScreen} options={{ title: t('nav.screenTitles.demLeguiTripDetail') }} />
+      <TripsStackNav.Screen name="DemLeguiChat" component={DemLeguiChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
     </TripsStackNav.Navigator>
   );
 }

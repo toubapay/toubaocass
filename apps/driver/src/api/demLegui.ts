@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { DemLeguiRequest, DemLeguiTrip, DriverProfile, Paginated } from './types';
+import type { DemLeguiRequest, DemLeguiTrip, DriverProfile, Message, Paginated } from './types';
 
 export interface UpdateDriverAvailabilityInput {
   is_online: boolean;
@@ -48,4 +48,14 @@ export async function completeDemLeguiTrip(tripId: number): Promise<DemLeguiTrip
 
 export async function updateDemLeguiTripLocation(tripId: number, latitude: number, longitude: number): Promise<void> {
   await apiClient.post(`/driver/dem-legui/trips/${tripId}/location`, { latitude, longitude });
+}
+
+export async function fetchDemLeguiMessages(requestId: number): Promise<Message[]> {
+  const { data } = await apiClient.get(`/dem-legui/requests/${requestId}/messages`);
+  return data;
+}
+
+export async function sendDemLeguiMessage(requestId: number, body: string): Promise<Message> {
+  const { data } = await apiClient.post(`/dem-legui/requests/${requestId}/messages`, { body });
+  return data;
 }

@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { DemLeguiRequest, DemLeguiTrip, PaymentMethod } from './types';
+import type { DemLeguiRequest, DemLeguiTrip, Message, PaymentMethod } from './types';
 
 export interface QuoteDemLeguiParams {
   pickup_latitude: number;
@@ -45,5 +45,25 @@ export async function cancelDemLeguiRequest(requestId: number): Promise<void> {
 
 export async function fetchDemLeguiTrip(tripId: number): Promise<DemLeguiTrip> {
   const { data } = await apiClient.get(`/dem-legui/trips/${tripId}`);
+  return data;
+}
+
+export interface NearbyDriver {
+  latitude: number;
+  longitude: number;
+}
+
+export async function fetchNearbyDemLeguiDrivers(requestId: number): Promise<NearbyDriver[]> {
+  const { data } = await apiClient.get(`/dem-legui/requests/${requestId}/nearby-drivers`);
+  return data.drivers;
+}
+
+export async function fetchDemLeguiMessages(requestId: number): Promise<Message[]> {
+  const { data } = await apiClient.get(`/dem-legui/requests/${requestId}/messages`);
+  return data;
+}
+
+export async function sendDemLeguiMessage(requestId: number, body: string): Promise<Message> {
+  const { data } = await apiClient.post(`/dem-legui/requests/${requestId}/messages`, { body });
   return data;
 }

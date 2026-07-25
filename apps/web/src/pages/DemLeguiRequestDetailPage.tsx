@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip } from '../api/demLegui';
+import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers } from '../api/demLegui';
 import { extractErrorMessage } from '../api/client';
 import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
+import type { NearbyDriver } from '../api/demLegui';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { colors, radius, spacing } from '../theme';
 
 const POLL_INTERVAL_MS = 8000;
+const NEARBY_DRIVERS_POLL_INTERVAL_MS = 5000;
 
 const sectionTitleStyle = {
   fontSize: 13,
@@ -34,9 +37,12 @@ export function DemLeguiRequestDetailPage() {
 
   const [request, setRequest] = useState<DemLeguiRequest | null>(null);
   const [trip, setTrip] = useState<DemLeguiTrip | null>(null);
+  const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [justMatched, setJustMatched] = useState(false);
+  const hadTripRef = useRef(false);
 
   const load = () => {
     if (!id) return;
@@ -63,6 +69,24 @@ export function DemLeguiRequestDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.status, trip?.status, id]);
 
+  useEffect(() => {
+    if (!trip && hadTripRef.current === false) return;
+    if (trip && !hadTripRef.current) {
+      hadTripRef.current = true;
+      setJustMatched(true);
+      const timeout = setTimeout(() => setJustMatched(false), 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [trip]);
+
+  useEffect(() => {
+    if (!id || request?.status !== 'pending') return;
+    const loadNearby = () => fetchNearbyDemLeguiDrivers(Number(id)).then(setNearbyDrivers).catch(() => {});
+    loadNearby();
+    const interval = setInterval(loadNearby, NEARBY_DRIVERS_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [id, request?.status]);
+
   if (loading || !request) {
     return <p style={{ color: colors.textMuted }}>{t('anando.loading')}</p>;
   }
@@ -83,6 +107,12 @@ export function DemLeguiRequestDetailPage() {
     }
   };
 
+  const driverPosition = trip
+    ? trip.status === 'in_progress'
+      ? { lat: trip.current_latitude, lng: trip.current_longitude, updatedAt: trip.current_location_updated_at }
+      : { lat: trip.driver.current_latitude, lng: trip.driver.current_longitude, updatedAt: trip.driver.last_seen_at }
+    : null;
+
   return (
     <div>
       <button
@@ -92,15 +122,40 @@ export function DemLeguiRequestDetailPage() {
         ←
       </button>
 
-      {trip?.status === 'in_progress' && (
-        trip.current_latitude != null && trip.current_longitude != null ? (
+      {justMatched && (
+        <div
+          style={{
+            backgroundColor: colors.success,
+            color: '#fff',
+            borderRadius: radius.md,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+          }}
+        >
+          <p style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>{t('demLegui.matchedBannerTitle')}</p>
+          <p style={{ fontSize: 13.5, margin: '2px 0 0', opacity: 0.9 }}>
+            {t('demLegui.matchedBannerSubtitle', { name: trip?.driver.name })}
+          </p>
+        </div>
+      )}
+
+      {request.status === 'pending' && (
+        <NearbyDriversMap
+          pickupLatitude={request.pickup_latitude}
+          pickupLongitude={request.pickup_longitude}
+          drivers={nearbyDrivers}
+        />
+      )}
+
+      {trip && driverPosition && (
+        driverPosition.lat != null && driverPosition.lng != null ? (
           <AnandoLiveMap
-            currentLatitude={trip.current_latitude}
-            currentLongitude={trip.current_longitude}
-            destinationLatitude={request.destination_city?.latitude}
-            destinationLongitude={request.destination_city?.longitude}
-            destinationName={request.destination_city?.name}
-            updatedAt={trip.current_location_updated_at}
+            currentLatitude={driverPosition.lat}
+            currentLongitude={driverPosition.lng}
+            destinationLatitude={trip.status === 'in_progress' ? request.destination_city?.latitude : request.pickup_latitude}
+            destinationLongitude={trip.status === 'in_progress' ? request.destination_city?.longitude : request.pickup_longitude}
+            destinationName={trip.status === 'in_progress' ? request.destination_city?.name : request.pickup_address}
+            updatedAt={driverPosition.updatedAt}
           />
         ) : (
           <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('demLegui.liveMapWaiting')}</p>
@@ -132,6 +187,47 @@ export function DemLeguiRequestDetailPage() {
               🚗 {trip.car.make} {trip.car.model} · {trip.car.plate_number}
             </p>
           )}
+          {request.eta_minutes != null && (
+            <p style={{ fontSize: 15, fontWeight: 700, color: colors.primary, margin: '8px 0 0' }}>
+              ⏱ {t('demLegui.etaMinutes', { minutes: request.eta_minutes })}
+            </p>
+          )}
+
+          <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.md }}>
+            <a
+              href={`tel:${trip.driver.phone}`}
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                textDecoration: 'none',
+                border: 'none',
+                borderRadius: radius.sm,
+                padding: `${spacing.sm}px ${spacing.md}px`,
+                backgroundColor: colors.primary,
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: 14,
+              }}
+            >
+              📞 {t('demLegui.call')}
+            </a>
+            <button
+              onClick={() => navigate(`/services/dem-legui/${request.id}/chat`)}
+              style={{
+                flex: 1,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.sm,
+                padding: `${spacing.sm}px ${spacing.md}px`,
+                backgroundColor: colors.surface,
+                color: colors.text,
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              💬 {t('demLegui.chat')}
+            </button>
+          </div>
         </div>
       )}
 

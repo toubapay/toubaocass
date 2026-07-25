@@ -26,6 +26,7 @@ class DemLeguiRequestResource extends JsonResource
             'payment_method' => $this->payment_method,
             'status' => $this->status,
             'dem_legui_trip_id' => $this->dem_legui_trip_id,
+            'eta_minutes' => $this->when($this->relationLoaded('trip'), fn () => $this->etaMinutes()),
             'created_at' => $this->created_at,
         ];
     }

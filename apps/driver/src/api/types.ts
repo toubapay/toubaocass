@@ -127,7 +127,8 @@ export interface Address {
 
 export interface Message {
   id: number;
-  booking_id: number;
+  booking_id: number | null;
+  dem_legui_request_id: number | null;
   body: string;
   sender_id: number;
   sender_name: string | null;

@@ -32,6 +32,7 @@ export type ServicesStackParamList = {
   AnandoRideDetail: { rideId: number };
   NewDemLeguiRequest: undefined;
   DemLeguiRequestDetail: { requestId: number };
+  DemLeguiChat: { requestId: number };
 };
 
 export type ProfileStackParamList = {

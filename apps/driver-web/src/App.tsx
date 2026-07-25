@@ -15,6 +15,7 @@ import { CarsListPage } from './pages/CarsListPage';
 import { ChatPage } from './pages/ChatPage';
 import { DeliveriesListPage } from './pages/DeliveriesListPage';
 import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
+import { DemLeguiChatPage } from './pages/DemLeguiChatPage';
 import { DemLeguiRequestsPage } from './pages/DemLeguiRequestsPage';
 import { DemLeguiTripDetailPage } from './pages/DemLeguiTripDetailPage';
 import { InsuranceComparePage } from './pages/InsuranceComparePage';
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="/anando/:id" element={<AnandoRideDetailPage />} />
         <Route path="/dem-legui" element={<DemLeguiRequestsPage />} />
         <Route path="/dem-legui/trips/:id" element={<DemLeguiTripDetailPage />} />
+        <Route path="/dem-legui/requests/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<DeliveriesListPage />} />
         <Route path="/deliveries/:deliveryId" element={<DeliveryDetailPage />} />
         <Route path="/fleet" element={<CarsListPage />} />

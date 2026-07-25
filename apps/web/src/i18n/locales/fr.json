@@ -270,7 +270,12 @@
     "fare": "Prix",
     "cancelRequest": "Annuler la demande",
     "cancelConfirm": "Voulez-vous vraiment annuler cette demande ?",
-    "liveMapWaiting": "En attente de la position du conducteur…"
+    "liveMapWaiting": "En attente de la position du conducteur…",
+    "matchedBannerTitle": "Conducteur trouvé !",
+    "matchedBannerSubtitle": "{{name}} arrive pour vous récupérer.",
+    "call": "Appeler",
+    "chat": "Discuter",
+    "etaMinutes": "Arrivée dans {{minutes}} min"
   },
   "anando": {
     "title": "Anando",

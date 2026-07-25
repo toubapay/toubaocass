@@ -73,7 +73,34 @@ class DemLeguiController extends Controller
     {
         abort_unless($demLeguiRequest->rider_id === $request->user()->id, 404);
 
-        return new DemLeguiRequestResource($demLeguiRequest->load(['rider', 'destinationCity']));
+        return new DemLeguiRequestResource($demLeguiRequest->load(['rider', 'destinationCity', 'trip.driver.driverProfile']));
+    }
+
+    /**
+     * Rider-facing: anonymized positions of online drivers near the pickup
+     * point, used to render a "searching for a driver…" map while the
+     * request is still pending — no name/phone exposed since none of these
+     * drivers have accepted anything yet.
+     */
+    public function nearbyDrivers(Request $request, DemLeguiRequest $demLeguiRequest)
+    {
+        abort_unless($demLeguiRequest->rider_id === $request->user()->id, 404);
+
+        $drivers = DriverProfile::query()
+            ->where('is_online', true)
+            ->whereNotNull('current_latitude')
+            ->whereRaw(Geo::distanceExpression('current_latitude', 'current_longitude').' <= ?', [
+                $demLeguiRequest->pickup_latitude, $demLeguiRequest->pickup_longitude, $demLeguiRequest->pickup_latitude,
+                DemLeguiRequest::NEARBY_RADIUS_KM,
+            ])
+            ->get(['current_latitude', 'current_longitude']);
+
+        return response()->json([
+            'drivers' => $drivers->map(fn (DriverProfile $driver) => [
+                'latitude' => $driver->current_latitude,
+                'longitude' => $driver->current_longitude,
+            ]),
+        ]);
     }
 
     public function cancel(Request $request, DemLeguiRequest $demLeguiRequest, WalletService $walletService)
