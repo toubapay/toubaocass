@@ -86,7 +86,22 @@
     "language": "اللغة",
     "languageFrench": "Français",
     "languageArabic": "العربية",
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "dashboard": {
+      "trips": "الرحلات",
+      "bookings": "الحجوزات",
+      "myRides": "رحلاتي في Anando",
+      "clients": "عملاء Anando",
+      "earnings": "الأرباح",
+      "activeBooking": "حجز نشط",
+      "noActiveBooking": "لا يوجد حجز نشط",
+      "lastTrip": "آخر رحلة",
+      "noLastTrip": "لم تقم بأي رحلة بعد",
+      "myPosition": "موقعي",
+      "locating": "جارٍ تحديد الموقع…",
+      "showPosition": "عرض على الخريطة",
+      "hidePosition": "إخفاء الخريطة"
+    }
   },
   "settings": {
     "title": "الإعدادات",

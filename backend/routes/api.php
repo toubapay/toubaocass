@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
+use App\Http\Controllers\Api\ProfileStatsController;
 use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // self-service; they're credited by an admin (see the wallet:top-up
     // Artisan command), so there's no top-up endpoint here.
     Route::get('wallet', [WalletController::class, 'show']);
+
+    // Profile dashboard stats — same role-agnostic shape for every user.
+    Route::get('profile/stats', [ProfileStatsController::class, 'index']);
 
     // Saved addresses — available to both riders and drivers.
     Route::get('addresses', [AddressController::class, 'index']);

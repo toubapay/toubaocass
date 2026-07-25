@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { fetchMyAnandoBookings, fetchMyAnandoRides, fetchAnandoRides, postAnandoRide } from '../api/anando';
@@ -114,11 +114,17 @@ function BookingCard({ booking, onClick }: { booking: AnandoRideBooking; onClick
 
 type Tab = 'available' | 'mine';
 
+interface AnandoLocationState {
+  initialTab?: Tab;
+}
+
 export function AnandoPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialTab = (location.state as AnandoLocationState | null)?.initialTab;
 
-  const [tab, setTab] = useState<Tab>('available');
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'available');
   const [cities, setCities] = useState<City[]>([]);
   const [rides, setRides] = useState<AnandoRide[]>([]);
   const [myRides, setMyRides] = useState<AnandoRide[]>([]);

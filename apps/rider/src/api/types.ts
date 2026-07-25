@@ -285,6 +285,25 @@ export interface DemLeguiTrip {
   requests?: DemLeguiRequest[];
 }
 
+export interface ProfileTripSummary {
+  id: number;
+  origin_city: string | null;
+  destination_city: string | null;
+  departure_date: string;
+  departure_time: string;
+  status: TripStatus;
+}
+
+export interface ProfileStats {
+  trips_count: number;
+  bookings_count: number;
+  anando_rides_count: number;
+  anando_clients_count: number;
+  earnings_total: number;
+  active_booking: ProfileTripSummary | null;
+  last_trip: ProfileTripSummary | null;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta?: { current_page: number; last_page: number; total: number };

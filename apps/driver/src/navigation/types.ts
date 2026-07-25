@@ -13,7 +13,7 @@ export type TripsStackParamList = {
   TripDetail: { tripId: number };
   Chat: ChatParams;
   Wallet: undefined;
-  Anando: undefined;
+  Anando: { initialTab?: 'available' | 'mine' } | undefined;
   AnandoRideDetail: { rideId: number };
   DemLeguiRequests: undefined;
   DemLeguiTripDetail: { tripId: number };

@@ -170,7 +170,22 @@
     "language": "Langue",
     "languageFrench": "Français",
     "languageArabic": "العربية",
-    "signOut": "Déconnexion"
+    "signOut": "Déconnexion",
+    "dashboard": {
+      "trips": "Trajets",
+      "bookings": "Réservations",
+      "myRides": "Mes trajets Anando",
+      "clients": "Clients Anando",
+      "earnings": "Revenus",
+      "activeBooking": "Réservation active",
+      "noActiveBooking": "Aucune réservation active",
+      "lastTrip": "Dernier trajet",
+      "noLastTrip": "Aucun trajet effectué",
+      "myPosition": "Ma position",
+      "locating": "Localisation…",
+      "showPosition": "Voir sur la carte",
+      "hidePosition": "Masquer la carte"
+    }
   },
   "settings": {
     "title": "Paramètres",

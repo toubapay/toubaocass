@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { fetchWallet } from '../api/wallet';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
+import { ProfileDashboard } from '../components/ProfileDashboard';
 import { Screen } from '../components/Screen';
 import { setStoredLanguage, type SupportedLanguage } from '../i18n/i18n';
 import { ProfileStackParamList } from '../navigation/types';
@@ -29,6 +30,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <Screen>
+      <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>{t('profile.title')}</Text>
 
       <View style={styles.card}>
@@ -36,6 +38,8 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.meta}>{user?.phone}</Text>
         {user?.email ? <Text style={styles.meta}>{user.email}</Text> : null}
       </View>
+
+      <ProfileDashboard />
 
       <Pressable style={styles.walletCard} onPress={() => navigation.navigate('Wallet')}>
         <View style={styles.walletLeft}>
@@ -76,6 +80,7 @@ export function ProfileScreen({ navigation }: Props) {
       </View>
 
       <Button label={t('profile.signOut')} onPress={signOut} variant="outline" />
+      </ScrollView>
     </Screen>
   );
 }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
+import { ProfileDashboard } from '../components/ProfileDashboard';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
 import type { UsePushNotifications } from '../hooks/usePushNotifications';
@@ -51,6 +52,8 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         </p>
         <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{t('profile.rating', { value: rating.toFixed(1) })}</p>
       </div>
+
+      <ProfileDashboard />
 
       <button
         onClick={() => navigate('/wallet')}

@@ -57,10 +57,10 @@ function BookingCard({ booking, onPress }: { booking: AnandoRideBooking; onPress
   );
 }
 
-export function AnandoScreen({ navigation }: Props) {
+export function AnandoScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
 
-  const [tab, setTab] = useState<Tab>('available');
+  const [tab, setTab] = useState<Tab>(route.params?.initialTab ?? 'available');
   const [cities, setCities] = useState<City[]>([]);
   const [rides, setRides] = useState<AnandoRide[]>([]);
   const [myRides, setMyRides] = useState<AnandoRide[]>([]);

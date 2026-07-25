@@ -28,7 +28,7 @@ export type ServicesStackParamList = {
   NewDelivery: undefined;
   MyDeliveries: undefined;
   DeliveryDetail: { deliveryId: number };
-  Anando: undefined;
+  Anando: { initialTab?: 'available' | 'mine' } | undefined;
   AnandoRideDetail: { rideId: number };
   NewDemLeguiRequest: undefined;
   DemLeguiRequestDetail: { requestId: number };
