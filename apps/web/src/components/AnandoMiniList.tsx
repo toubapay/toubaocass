@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchAnandoRides } from '../api/anando';
 import type { AnandoRide } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { isAnandoRideStale } from '../utils/anando';
 import { SearchingCarIndicator } from './SearchingCarIndicator';
 
 const MAX_RIDES = 2;
@@ -28,7 +29,7 @@ export function AnandoMiniList() {
     const load = () => {
       fetchAnandoRides()
         .then((res) => {
-          if (!cancelled) setRides(res.data.slice(0, MAX_RIDES));
+          if (!cancelled) setRides(res.data.filter((ride) => !isAnandoRideStale(ride)).slice(0, MAX_RIDES));
         })
         .catch(() => {});
     };

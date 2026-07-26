@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('backup:run')->daily()->at('02:00');
 Schedule::command('backup:clean')->daily()->at('02:30');
 Schedule::command('trips:finish-stale')->hourly();
+Schedule::command('anando:terminate-stale')->everyThirtyMinutes();

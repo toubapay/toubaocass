@@ -33,6 +33,16 @@ class AnandoRide extends Model
 
     const STATUS_COMPLETED = 'completed';
 
+    /**
+     * An Anando ride is only ever "active" for this long after posting —
+     * unlike a scheduled Trip, there's no separate departure instant to
+     * anchor against, so a poster who never explicitly completes/cancels
+     * still has their ride auto-terminated a fixed window after they
+     * created it (see AnandoRideController::index() and the
+     * anando:terminate-stale command).
+     */
+    const ACTIVE_WINDOW_HOURS = 5;
+
     protected function casts(): array
     {
         return [

@@ -21,6 +21,7 @@ import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TextField } from '../components/TextField';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { isAnandoRideStale } from '../utils/anando';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'Anando'>;
 type Tab = 'available' | 'mine';
@@ -86,12 +87,12 @@ export function AnandoScreen({ navigation, route }: Props) {
   const [error, setError] = useState<string | undefined>();
   const [rideActionLoading, setRideActionLoading] = useState(false);
 
-  const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status));
+  const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status) && !isAnandoRideStale(ride));
 
   const load = () => {
     Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
       .then(([available, mine, bookings]) => {
-        setRides(available.data);
+        setRides(available.data.filter((ride) => !isAnandoRideStale(ride)));
         setMyRides(mine.data);
         setMyBookings(bookings.data);
       })

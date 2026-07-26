@@ -112,10 +112,11 @@ in the `jobs` table.
 ## 5. Scheduler service
 
 `routes/console.php` registers `Schedule::command(...)` entries (backups,
-and `trips:finish-stale` which auto-completes trips left open more than a
-day past their departure) — none of these ever fire on their own. Laravel's
-scheduler needs something to actually call `schedule:run` every minute, and
-Railway doesn't run cron for you.
+`trips:finish-stale` which auto-completes trips left open more than a day
+past their departure, and `anando:terminate-stale` which does the same for
+Anando rides more than 5 hours past posting) — none of these ever fire on
+their own. Laravel's scheduler needs something to actually call
+`schedule:run` every minute, and Railway doesn't run cron for you.
 
 1. In the same Railway project, add a **third service** from the same
    GitHub repo/branch (same as the queue worker above).

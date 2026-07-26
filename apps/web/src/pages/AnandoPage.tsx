@@ -19,6 +19,7 @@ import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SuccessModal } from '../components/SuccessModal';
 import { TextField } from '../components/TextField';
 import { colors, radius, spacing } from '../theme';
+import { isAnandoRideStale } from '../utils/anando';
 
 const sectionTitleStyle = {
   fontSize: 13,
@@ -151,12 +152,12 @@ export function AnandoPage() {
   const [postedRideId, setPostedRideId] = useState<number | null>(null);
   const [rideActionLoading, setRideActionLoading] = useState(false);
 
-  const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status));
+  const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status) && !isAnandoRideStale(ride));
 
   const load = () => {
     Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
       .then(([available, mine, bookings]) => {
-        setRides(available.data);
+        setRides(available.data.filter((ride) => !isAnandoRideStale(ride)));
         setMyRides(mine.data);
         setMyBookings(bookings.data);
       })
