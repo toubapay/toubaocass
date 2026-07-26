@@ -79,6 +79,35 @@ class AnandoRideTest extends TestCase
         Notification::assertNotSentTo($noToken, AnandoRidePostedNotification::class);
     }
 
+    public function test_a_user_cannot_post_a_new_ride_while_one_is_already_open_full_or_in_progress(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([AnandoRide::STATUS_OPEN, AnandoRide::STATUS_FULL, AnandoRide::STATUS_IN_PROGRESS] as $status) {
+            AnandoRide::query()->delete();
+            AnandoRide::factory()->create(['user_id' => $user->id, 'status' => $status]);
+
+            $this->actingAs($user, 'sanctum')
+                ->postJson('/api/anando-rides', $this->payload())
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors('anando_ride');
+        }
+    }
+
+    public function test_a_user_can_post_a_new_ride_after_their_previous_one_is_cancelled_or_completed(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([AnandoRide::STATUS_CANCELLED, AnandoRide::STATUS_COMPLETED] as $status) {
+            AnandoRide::query()->delete();
+            AnandoRide::factory()->create(['user_id' => $user->id, 'status' => $status]);
+
+            $this->actingAs($user, 'sanctum')
+                ->postJson('/api/anando-rides', $this->payload())
+                ->assertCreated();
+        }
+    }
+
     public function test_index_lists_open_rides_excluding_the_current_users_own_rides(): void
     {
         $user = User::factory()->create();

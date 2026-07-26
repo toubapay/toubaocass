@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
 
 #[Fillable([
     'user_id', 'origin_city_id', 'destination_city_id', 'departure_point',
@@ -50,6 +51,15 @@ class AnandoRide extends Model
     public function isJoinable(): bool
     {
         return $this->status === self::STATUS_OPEN && $this->available_seats > 0;
+    }
+
+    /**
+     * Not yet cancelled/completed — a poster may only have one of these at
+     * a time (enforced in AnandoRideController::store()).
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereIn('status', [self::STATUS_OPEN, self::STATUS_FULL, self::STATUS_IN_PROGRESS]);
     }
 
     public function poster(): BelongsTo

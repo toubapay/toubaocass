@@ -3,7 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { fetchAnandoRides, fetchMyAnandoBookings, fetchMyAnandoRides, postAnandoRide } from '../api/anando';
+import {
+  completeAnandoRide,
+  fetchAnandoRides,
+  fetchMyAnandoBookings,
+  fetchMyAnandoRides,
+  postAnandoRide,
+  startAnandoRide,
+} from '../api/anando';
 import { extractErrorMessage } from '../api/client';
 import { fetchCities } from '../api/cities';
 import { AnandoRide, AnandoRideBooking, City } from '../api/types';
@@ -17,6 +24,8 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'Anando'>;
 type Tab = 'available' | 'mine';
+
+const ACTIVE_RIDE_STATUSES = ['open', 'full', 'in_progress'];
 
 function RideCard({ ride, onPress }: { ride: AnandoRide; onPress: () => void }) {
   const { t } = useTranslation();
@@ -75,6 +84,9 @@ export function AnandoScreen({ navigation, route }: Props) {
   const [seats, setSeats] = useState('3');
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [rideActionLoading, setRideActionLoading] = useState(false);
+
+  const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status));
 
   const load = () => {
     Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
@@ -124,39 +136,106 @@ export function AnandoScreen({ navigation, route }: Props) {
     }
   };
 
+  const handleStartActiveRide = async () => {
+    if (!activeRide) return;
+    setRideActionLoading(true);
+    setError(undefined);
+    try {
+      await startAnandoRide(activeRide.id);
+      load();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setRideActionLoading(false);
+    }
+  };
+
+  const handleCompleteActiveRide = async () => {
+    if (!activeRide) return;
+    setRideActionLoading(true);
+    setError(undefined);
+    try {
+      await completeAnandoRide(activeRide.id);
+      load();
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setRideActionLoading(false);
+    }
+  };
+
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>{t('anando.title')}</Text>
         <Text style={styles.subtitle}>{t('anando.subtitle')}</Text>
 
-        <View style={styles.postCard}>
-          <Text style={styles.sectionTitle}>{t('anando.postTitle')}</Text>
-          <CityPicker label={t('anando.origin')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('anando.originPlaceholder')} />
-          <CityPicker
-            label={t('anando.destination')}
-            cities={cities}
-            value={destination}
-            onChange={setDestination}
-            placeholder={t('anando.destinationPlaceholder')}
-          />
-          <TextField
-            label={t('anando.departurePoint')}
-            value={departurePoint}
-            onChangeText={setDeparturePoint}
-            placeholder={t('anando.departurePointPlaceholder')}
-          />
-          <View style={styles.rowFields}>
-            <View style={{ flex: 1 }}>
-              <TextField label={t('anando.pricePerSeat')} keyboardType="number-pad" value={pricePerSeat} onChangeText={setPricePerSeat} placeholder="1500" />
+        {activeRide ? (
+          <View style={styles.activeRideCard}>
+            <Text style={styles.sectionTitle}>{t('anando.activeRideTitle')}</Text>
+            <View style={styles.rowBetween}>
+              <Text style={styles.route}>
+                {activeRide.origin_city?.name} → {activeRide.destination_city?.name}
+              </Text>
+              <Text style={[styles.badge, activeRide.status === 'open' ? styles.badgeOpen : styles.badgeOther]}>
+                {t(`anando.status.${activeRide.status}`)}
+              </Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <TextField label={t('anando.seats')} keyboardType="number-pad" value={seats} onChangeText={setSeats} />
+            <Text style={styles.meta}>
+              {t('anando.seatsProgress', { booked: activeRide.total_seats - activeRide.available_seats, total: activeRide.total_seats })}
+              {' · '}
+              {t('anando.seatsAvailable', { count: activeRide.available_seats })}
+            </Text>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <View style={styles.rowFields}>
+              {['open', 'full'].includes(activeRide.status) && (
+                <View style={{ flex: 1 }}>
+                  <Button label={t('anando.startTrip')} onPress={handleStartActiveRide} loading={rideActionLoading} />
+                </View>
+              )}
+              {activeRide.status === 'in_progress' && (
+                <View style={{ flex: 1 }}>
+                  <Button label={t('anando.completeTrip')} onPress={handleCompleteActiveRide} loading={rideActionLoading} />
+                </View>
+              )}
+              <View style={{ flex: 1 }}>
+                <Button
+                  label={t('anando.viewDetails')}
+                  onPress={() => navigation.navigate('AnandoRideDetail', { rideId: activeRide.id })}
+                  variant="outline"
+                />
+              </View>
             </View>
           </View>
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button label={t('anando.postSubmit')} onPress={handleSubmit} loading={posting} disabled={!canSubmit} />
-        </View>
+        ) : (
+          <View style={styles.postCard}>
+            <Text style={styles.sectionTitle}>{t('anando.postTitle')}</Text>
+            <CityPicker label={t('anando.origin')} cities={cities} value={origin} onChange={setOrigin} placeholder={t('anando.originPlaceholder')} />
+            <CityPicker
+              label={t('anando.destination')}
+              cities={cities}
+              value={destination}
+              onChange={setDestination}
+              placeholder={t('anando.destinationPlaceholder')}
+            />
+            <TextField
+              label={t('anando.departurePoint')}
+              value={departurePoint}
+              onChangeText={setDeparturePoint}
+              placeholder={t('anando.departurePointPlaceholder')}
+            />
+            <View style={styles.rowFields}>
+              <View style={{ flex: 1 }}>
+                <TextField label={t('anando.pricePerSeat')} keyboardType="number-pad" value={pricePerSeat} onChangeText={setPricePerSeat} placeholder="1500" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <TextField label={t('anando.seats')} keyboardType="number-pad" value={seats} onChangeText={setSeats} />
+              </View>
+            </View>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <Button label={t('anando.postSubmit')} onPress={handleSubmit} loading={posting} disabled={!canSubmit} />
+          </View>
+        )}
 
         <View style={styles.tabRow}>
           <Pressable style={styles.tabButton} onPress={() => setTab('available')}>
@@ -212,6 +291,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  activeRideCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.primary,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.xl,

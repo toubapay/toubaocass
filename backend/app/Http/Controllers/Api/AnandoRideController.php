@@ -55,10 +55,18 @@ class AnandoRideController extends Controller
 
     public function store(StoreAnandoRideRequest $request)
     {
+        $user = $request->user();
+
+        if ($user->anandoRides()->active()->exists()) {
+            throw ValidationException::withMessages([
+                'anando_ride' => ["Vous avez déjà un trajet Anando en cours. Terminez-le ou annulez-le avant d'en publier un nouveau."],
+            ]);
+        }
+
         $data = $request->validated();
         $seats = (int) $data['total_seats'];
 
-        $ride = $request->user()->anandoRides()->create([
+        $ride = $user->anandoRides()->create([
             ...$data,
             'departure_at' => $data['departure_at'] ?? now(),
             'total_seats' => $seats,
