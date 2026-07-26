@@ -8,6 +8,7 @@ import type { Booking, Trip } from '../api/types';
 import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
+import { hasDeparted } from '../utils/trip';
 
 export function MyBookingsPage() {
   const { t } = useTranslation();
@@ -110,24 +111,28 @@ export function MyBookingsPage() {
                 >
                   {t('myBookings.chat')}
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setModifyingBookingId(item.id);
-                  }}
-                  style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
-                >
-                  {t('myBookings.modify')}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCancel(item);
-                  }}
-                  style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
-                >
-                  {t('myBookings.cancel')}
-                </button>
+                {!hasDeparted(item.trip) && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setModifyingBookingId(item.id);
+                      }}
+                      style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
+                    >
+                      {t('myBookings.modify')}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancel(item);
+                      }}
+                      style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 15 }}
+                    >
+                      {t('myBookings.cancel')}
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

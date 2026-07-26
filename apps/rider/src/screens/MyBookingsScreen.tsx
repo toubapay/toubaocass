@@ -11,6 +11,7 @@ import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { Screen } from '../components/Screen';
 import { BookingsStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { hasDeparted } from '../utils/trip';
 
 type Props = NativeStackScreenProps<BookingsStackParamList, 'MyBookings'>;
 
@@ -112,12 +113,16 @@ export function MyBookingsScreen({ navigation }: Props) {
                 >
                   <Text style={styles.modifyText}>{t('myBookings.chat')}</Text>
                 </Pressable>
-                <Pressable onPress={() => setModifyingBookingId(item.id)}>
-                  <Text style={styles.modifyText}>{t('myBookings.modify')}</Text>
-                </Pressable>
-                <Pressable onPress={() => handleCancel(item)}>
-                  <Text style={styles.cancelText}>{t('myBookings.cancel')}</Text>
-                </Pressable>
+                {!hasDeparted(item.trip) && (
+                  <>
+                    <Pressable onPress={() => setModifyingBookingId(item.id)}>
+                      <Text style={styles.modifyText}>{t('myBookings.modify')}</Text>
+                    </Pressable>
+                    <Pressable onPress={() => handleCancel(item)}>
+                      <Text style={styles.cancelText}>{t('myBookings.cancel')}</Text>
+                    </Pressable>
+                  </>
+                )}
               </View>
             )}
           </Pressable>

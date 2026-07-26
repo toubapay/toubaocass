@@ -109,20 +109,46 @@ in the `jobs` table.
    (Railway lets you reference a shared variable group, or just duplicate
    them).
 
-## 5. Health check
+## 5. Scheduler service
 
-`backend/railway.json` doesn't set a `healthcheckPath` — both the web and
-queue-worker services share this config file (same repo/root directory), and
-a queue worker never serves HTTP, so a shared health check would always fail
-for it. Railway falls back to considering a deployment healthy once the
-container stays up. Laravel does still serve `/up` if you want to wire up an
-external uptime monitor against the web service specifically.
+`routes/console.php` registers `Schedule::command(...)` entries (backups,
+and `trips:cancel-stale` which auto-cancels trips left open more than a day
+past their departure) — none of these ever fire on their own. Laravel's
+scheduler needs something to actually call `schedule:run` every minute, and
+Railway doesn't run cron for you.
 
-## 6. First deploy checklist
+1. In the same Railway project, add a **third service** from the same
+   GitHub repo/branch (same as the queue worker above).
+2. Set its Root Directory to `backend` too (same image/Dockerfile).
+3. Override its **Start Command** to:
+   ```
+   php artisan schedule:work
+   ```
+   This is a long-running process (not a one-shot cron invocation) that
+   sleeps and calls any due scheduled command every minute — the shared
+   `docker/entrypoint.sh` `exec`s it in place of the Octane server for this
+   service only, same mechanism as the queue worker.
+4. Copy the same environment variables from the web service onto this one.
+
+Without this service, scheduled commands are silently never invoked — the
+code runs correctly once triggered, but nothing ever triggers it.
+
+## 6. Health check
+
+`backend/railway.json` doesn't set a `healthcheckPath` — the web,
+queue-worker, and scheduler services all share this config file (same
+repo/root directory), and neither the queue worker nor the scheduler serve
+HTTP, so a shared health check would always fail for them. Railway falls
+back to considering a deployment healthy once the container stays up.
+Laravel does still serve `/up` if you want to wire up an external uptime
+monitor against the web service specifically.
+
+## 7. First deploy checklist
 
 - [ ] `APP_KEY` generated and set (once — don't regenerate after real data exists)
 - [ ] Postgres plugin attached, `DB_URL` set, migrations run automatically on boot
 - [ ] S3/R2 buckets created, `FILESYSTEM_DISK=s3` / `KYC_FILESYSTEM_DISK=kyc` set
 - [ ] Queue worker service added with the overridden start command
+- [ ] Scheduler service added with the `schedule:work` start command
 - [ ] `APP_DEBUG=false`, `APP_ENV=production`
 - [ ] Mobile apps' `API_BASE_URL` (`apps/rider/.env`, `apps/driver/.env`) point at the Railway domain
