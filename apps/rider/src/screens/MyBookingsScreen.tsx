@@ -11,7 +11,14 @@ import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { Screen } from '../components/Screen';
 import { BookingsStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
-import { hasDeparted, hasDepartedMoreThanADayAgo } from '../utils/trip';
+import { bookingStage, bookingStageLabel, hasDeparted, hasDepartedMoreThanADayAgo } from '../utils/trip';
+
+const STAGE_COLOR: Record<string, string> = {
+  confirmed: colors.success,
+  in_progress: colors.accent,
+  completed: colors.primary,
+  cancelled: colors.danger,
+};
 
 type Props = NativeStackScreenProps<BookingsStackParamList, 'MyBookings'>;
 
@@ -91,8 +98,8 @@ export function MyBookingsScreen({ navigation }: Props) {
               <Text style={styles.route}>
                 {item.trip.origin_city?.name} → {item.trip.destination_city?.name}
               </Text>
-              <Text style={[styles.status, item.status === 'cancelled' && styles.statusCancelled]}>
-                {item.status === 'cancelled' ? t('myBookings.statusCancelled') : t('myBookings.statusConfirmed')}
+              <Text style={[styles.status, { color: STAGE_COLOR[bookingStage(item)] }]}>
+                {bookingStageLabel(t, bookingStage(item))}
               </Text>
             </View>
             <Text style={styles.meta}>
@@ -170,8 +177,7 @@ const styles = StyleSheet.create({
   },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   route: { fontSize: 18, fontWeight: '700', color: colors.text, flexShrink: 1 },
-  status: { fontSize: 13, fontWeight: '700', color: colors.success },
-  statusCancelled: { color: colors.danger },
+  status: { fontSize: 13, fontWeight: '700' },
   meta: { fontSize: 14, color: colors.textMuted, marginTop: spacing.xs },
   fare: { fontSize: 16, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   actionsRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },

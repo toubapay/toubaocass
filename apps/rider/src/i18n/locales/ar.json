@@ -192,6 +192,8 @@
     "empty": "ليس لديك أي حجز بعد. ابحث عن رحلة للبدء.",
     "statusConfirmed": "مؤكد",
     "statusCancelled": "ملغى",
+    "statusInProgress": "جارية",
+    "statusCompleted": "منتهية",
     "departureAt": "{{date}} في {{time}} · {{seats}} مقعد/مقاعد",
     "chat": "💬 محادثة",
     "modify": "تعديل",

@@ -8,7 +8,14 @@ import type { Booking, Trip } from '../api/types';
 import { BookingQuickActionModal } from '../components/BookingQuickActionModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
-import { hasDeparted, hasDepartedMoreThanADayAgo } from '../utils/trip';
+import { bookingStage, bookingStageLabel, hasDeparted, hasDepartedMoreThanADayAgo } from '../utils/trip';
+
+const STAGE_COLOR: Record<string, string> = {
+  confirmed: colors.success,
+  in_progress: colors.accent,
+  completed: colors.primary,
+  cancelled: colors.danger,
+};
 
 export function MyBookingsPage() {
   const { t } = useTranslation();
@@ -84,8 +91,8 @@ export function MyBookingsPage() {
               <span style={{ fontSize: 18, fontWeight: 700, color: colors.text }}>
                 {item.trip.origin_city?.name} → {item.trip.destination_city?.name}
               </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: item.status === 'cancelled' ? colors.danger : colors.success }}>
-                {item.status === 'cancelled' ? t('myBookings.statusCancelled') : t('myBookings.statusConfirmed')}
+              <span style={{ fontSize: 13, fontWeight: 700, color: STAGE_COLOR[bookingStage(item)] }}>
+                {bookingStageLabel(t, bookingStage(item))}
               </span>
             </div>
             <p style={{ fontSize: 14, color: colors.textMuted, marginTop: spacing.xs, marginBottom: 0 }}>

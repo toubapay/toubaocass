@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import type { Trip } from '../api/types';
+import type { Booking, Trip } from '../api/types';
 
 const DEPARTING_SOON_HOURS = 3;
 
@@ -60,4 +60,30 @@ export function formatDuration(minutes: number): string {
  */
 export function isUrgent(trip: Trip): boolean {
   return trip.status === 'scheduled' && trip.available_seats === 1;
+}
+
+/**
+ * A rider's booking follows the trip it's on through its own lifecycle —
+ * confirmed (scheduled/full) → in progress (driver departed) → completed
+ * (arrived) — collapsing to cancelled the moment either the booking or its
+ * trip is cancelled, regardless of the trip's own status.
+ */
+export type BookingStage = 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+
+export function bookingStage(booking: Booking): BookingStage {
+  if (booking.status === 'cancelled' || booking.trip.status === 'cancelled') return 'cancelled';
+  if (booking.trip.status === 'completed') return 'completed';
+  if (booking.trip.status === 'in_progress') return 'in_progress';
+  return 'confirmed';
+}
+
+const BOOKING_STAGE_KEYS: Record<BookingStage, string> = {
+  confirmed: 'myBookings.statusConfirmed',
+  in_progress: 'myBookings.statusInProgress',
+  completed: 'myBookings.statusCompleted',
+  cancelled: 'myBookings.statusCancelled',
+};
+
+export function bookingStageLabel(t: TFunction, stage: BookingStage): string {
+  return t(BOOKING_STAGE_KEYS[stage]);
 }

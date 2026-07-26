@@ -192,6 +192,8 @@
     "empty": "Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.",
     "statusConfirmed": "Confirmée",
     "statusCancelled": "Annulée",
+    "statusInProgress": "En cours",
+    "statusCompleted": "Terminée",
     "departureAt": "{{date}} à {{time}} · {{seats}} place(s)",
     "chat": "💬 Discuter",
     "modify": "Modifier",
