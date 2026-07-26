@@ -13,6 +13,15 @@ export function hasDeparted(trip: Trip): boolean {
   return hoursUntilDeparture(trip) < 0;
 }
 
+/**
+ * Matches the backend's trips:cancel-stale grace window — a trip this far
+ * past its departure gets auto-cancelled server-side, so manual cancellation
+ * stops being offered at the same point rather than sooner.
+ */
+export function hasDepartedMoreThanADayAgo(trip: Trip): boolean {
+  return hoursUntilDeparture(trip) < -24;
+}
+
 export function isDepartingSoon(trip: Trip): boolean {
   const hours = hoursUntilDeparture(trip);
   return trip.status === 'scheduled' && hours >= 0 && hours <= DEPARTING_SOON_HOURS;
