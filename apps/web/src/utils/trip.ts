@@ -14,8 +14,8 @@ export function hasDeparted(trip: Trip): boolean {
 }
 
 /**
- * Matches the backend's trips:cancel-stale grace window — a trip this far
- * past its departure gets auto-cancelled server-side, so manual cancellation
+ * Matches the backend's trips:finish-stale grace window — a trip this far
+ * past its departure gets auto-completed server-side, so manual cancellation
  * stops being offered at the same point rather than sooner.
  */
 export function hasDepartedMoreThanADayAgo(trip: Trip): boolean {
@@ -66,7 +66,12 @@ export function isUrgent(trip: Trip): boolean {
  * A rider's booking follows the trip it's on through its own lifecycle —
  * confirmed (scheduled/full) → in progress (driver departed) → completed
  * (arrived) — collapsing to cancelled the moment either the booking or its
- * trip is cancelled, regardless of the trip's own status.
+ * trip is cancelled, regardless of the trip's own status. A trip stuck in
+ * "scheduled"/"full" more than a day past its departure reads as completed
+ * even before the backend's trips:finish-stale job has actually run —
+ * that job runs on a schedule and can lag, but there's no reason to show a
+ * stale "Confirmée" in the meantime when the same date math already tells
+ * us the ride is long over.
  */
 export type BookingStage = 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
 
@@ -74,6 +79,7 @@ export function bookingStage(booking: Booking): BookingStage {
   if (booking.status === 'cancelled' || booking.trip.status === 'cancelled') return 'cancelled';
   if (booking.trip.status === 'completed') return 'completed';
   if (booking.trip.status === 'in_progress') return 'in_progress';
+  if (hasDepartedMoreThanADayAgo(booking.trip)) return 'completed';
   return 'confirmed';
 }
 
