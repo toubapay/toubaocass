@@ -112,8 +112,8 @@ in the `jobs` table.
 ## 5. Scheduler service
 
 `routes/console.php` registers `Schedule::command(...)` entries (backups,
-and `trips:cancel-stale` which auto-cancels trips left open more than a day
-past their departure) — none of these ever fire on their own. Laravel's
+and `trips:finish-stale` which auto-completes trips left open more than a
+day past their departure) — none of these ever fire on their own. Laravel's
 scheduler needs something to actually call `schedule:run` every minute, and
 Railway doesn't run cron for you.
 
