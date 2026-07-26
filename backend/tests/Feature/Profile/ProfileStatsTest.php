@@ -58,6 +58,57 @@ class ProfileStatsTest extends TestCase
         $this->assertEquals($upcomingTrip->id, $response->json('active_booking.id'));
     }
 
+    public function test_a_scheduled_trip_whose_departure_time_has_already_passed_is_not_shown_as_the_active_booking(): void
+    {
+        $rider = User::factory()->create();
+
+        // Never explicitly started/completed/cancelled by the driver, but its
+        // departure datetime is in the past — a past trip in every practical
+        // sense, even though its status column still says "scheduled".
+        $staleTrip = Trip::factory()->create([
+            'status' => Trip::STATUS_SCHEDULED,
+            'departure_date' => now()->subDay()->toDateString(),
+            'departure_time' => '08:00',
+        ]);
+        Booking::factory()->create(['rider_id' => $rider->id, 'trip_id' => $staleTrip->id, 'status' => Booking::STATUS_CONFIRMED]);
+
+        $response = $this->actingAs($rider, 'sanctum')->getJson('/api/profile/stats')->assertOk();
+
+        $this->assertNull($response->json('active_booking'));
+    }
+
+    public function test_a_genuinely_upcoming_scheduled_trip_still_counts_as_the_active_booking(): void
+    {
+        $rider = User::factory()->create();
+
+        $upcomingTrip = Trip::factory()->create([
+            'status' => Trip::STATUS_SCHEDULED,
+            'departure_date' => now()->addDay()->toDateString(),
+            'departure_time' => '08:00',
+        ]);
+        Booking::factory()->create(['rider_id' => $rider->id, 'trip_id' => $upcomingTrip->id, 'status' => Booking::STATUS_CONFIRMED]);
+
+        $response = $this->actingAs($rider, 'sanctum')->getJson('/api/profile/stats')->assertOk();
+
+        $this->assertEquals($upcomingTrip->id, $response->json('active_booking.id'));
+    }
+
+    public function test_an_in_progress_trip_still_counts_as_active_even_if_its_scheduled_departure_time_has_passed(): void
+    {
+        $rider = User::factory()->create();
+
+        $trip = Trip::factory()->create([
+            'status' => Trip::STATUS_IN_PROGRESS,
+            'departure_date' => now()->subDay()->toDateString(),
+            'departure_time' => '08:00',
+        ]);
+        Booking::factory()->create(['rider_id' => $rider->id, 'trip_id' => $trip->id, 'status' => Booking::STATUS_CONFIRMED]);
+
+        $response = $this->actingAs($rider, 'sanctum')->getJson('/api/profile/stats')->assertOk();
+
+        $this->assertEquals($trip->id, $response->json('active_booking.id'));
+    }
+
     public function test_driver_trips_and_bookings_counts(): void
     {
         $driver = User::factory()->driver()->create();
@@ -75,6 +126,22 @@ class ProfileStatsTest extends TestCase
         $this->assertEquals(3, $response->json('bookings_count'));
         $this->assertEquals($tripA->id, $response->json('last_trip.id'));
         $this->assertEquals($tripB->id, $response->json('active_booking.id'));
+    }
+
+    public function test_a_drivers_stale_scheduled_trip_past_its_departure_time_is_not_shown_as_the_active_booking(): void
+    {
+        $driver = User::factory()->driver()->create();
+
+        $staleTrip = Trip::factory()->create([
+            'driver_id' => $driver->id,
+            'status' => Trip::STATUS_SCHEDULED,
+            'departure_date' => now()->subDay()->toDateString(),
+            'departure_time' => '08:00',
+        ]);
+
+        $response = $this->actingAs($driver, 'sanctum')->getJson('/api/profile/stats')->assertOk();
+
+        $this->assertNull($response->json('active_booking'));
     }
 
     public function test_anando_rides_and_clients_counts(): void

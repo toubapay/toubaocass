@@ -77,6 +77,17 @@ class ProfileStatsController extends Controller
             ->count('user_id');
     }
 
+    /**
+     * A trip stuck in "scheduled"/"full" past its own departure time (never
+     * explicitly started/completed/cancelled by the driver) is a past trip
+     * in every practical sense and must not be surfaced as the user's
+     * current active one — only "in_progress" is exempt from this check,
+     * since it's legitimately still under way regardless of how long ago it
+     * was due to leave. Candidates are fetched ordered by departure and
+     * filtered in PHP with Trip::hasDeparted() rather than in SQL, since
+     * that's the single source of truth this app already uses everywhere
+     * else a trip's departure needs to be checked against "now".
+     */
     private function activeBooking(User $user): ?array
     {
         $activeStatuses = [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL, Trip::STATUS_IN_PROGRESS];
@@ -87,7 +98,8 @@ class ProfileStatsController extends Controller
                 ->with(['originCity', 'destinationCity'])
                 ->orderBy('departure_date')
                 ->orderBy('departure_time')
-                ->first();
+                ->get()
+                ->first(fn (Trip $t) => $t->status === Trip::STATUS_IN_PROGRESS || ! $t->hasDeparted());
 
             return $trip ? $this->tripSummary($trip) : null;
         }
@@ -104,7 +116,8 @@ class ProfileStatsController extends Controller
             ->orderBy('trips.departure_time')
             ->select('bookings.*')
             ->with(['trip.originCity', 'trip.destinationCity'])
-            ->first();
+            ->get()
+            ->first(fn (Booking $b) => $b->trip->status === Trip::STATUS_IN_PROGRESS || ! $b->trip->hasDeparted());
 
         return $booking ? $this->tripSummary($booking->trip) : null;
     }
