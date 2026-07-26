@@ -88,6 +88,11 @@ class Trip extends Model
         return $this->hasOne(Booking::class);
     }
 
+    public function departureDateTime(): Carbon
+    {
+        return Carbon::parse($this->departure_date->toDateString().' '.$this->departure_time);
+    }
+
     /**
      * True once the scheduled departure instant (date + time) is in the
      * past — regardless of whether the driver ever marked the trip
@@ -96,7 +101,7 @@ class Trip extends Model
      */
     public function hasDeparted(): bool
     {
-        return Carbon::parse($this->departure_date->toDateString().' '.$this->departure_time)->isPast();
+        return $this->departureDateTime()->isPast();
     }
 
     public function isBookable(): bool
