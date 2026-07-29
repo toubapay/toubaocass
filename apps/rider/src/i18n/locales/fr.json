@@ -249,7 +249,8 @@
     "cancelConfirmNo": "Non",
     "cancelConfirmYes": "Oui, annuler",
     "actionFailedTitle": "Action impossible",
-    "liveMapWaiting": "En attente de la position du livreur…"
+    "liveMapWaiting": "En attente de la position du livreur…",
+    "editDelivery": "Modifier la livraison"
   },
   "myDeliveries": {
     "title": "Mes livraisons",
@@ -278,7 +279,10 @@
     "submitFailedTitle": "Envoi impossible",
     "senderTabHint": "Vos informations et le lieu de ramassage.",
     "receiverTabHint": "Les informations du destinataire et le type de colis.",
-    "nextStep": "Suivant : Destinataire"
+    "nextStep": "Suivant : Destinataire",
+    "editTitle": "Modifier la livraison",
+    "saveChanges": "Enregistrer les modifications",
+    "editNotAllowed": "Cette livraison ne peut plus être modifiée."
   },
   "services": {
     "title": "Services",

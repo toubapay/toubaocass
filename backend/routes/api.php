@@ -117,6 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('deliveries', [DeliveryController::class, 'index']);
         Route::post('deliveries', [DeliveryController::class, 'store'])->middleware('module:livraison');
         Route::get('deliveries/{delivery}', [DeliveryController::class, 'show']);
+        Route::put('deliveries/{delivery}', [DeliveryController::class, 'update']);
         Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy']);
 
         // Dem Légui — on-demand ride request (rider-initiated, dispatched to

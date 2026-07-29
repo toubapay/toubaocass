@@ -47,6 +47,11 @@ export async function fetchDelivery(deliveryId: number): Promise<Delivery> {
   return data;
 }
 
+export async function updateDelivery(deliveryId: number, input: CreateDeliveryInput): Promise<Delivery> {
+  const { data } = await apiClient.put(`/deliveries/${deliveryId}`, input);
+  return data;
+}
+
 export async function cancelDelivery(deliveryId: number): Promise<void> {
   await apiClient.delete(`/deliveries/${deliveryId}`);
 }

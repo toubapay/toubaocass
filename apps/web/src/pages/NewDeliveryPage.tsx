@@ -1,14 +1,15 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { createDelivery, quoteDelivery } from '../api/deliveries';
+import { createDelivery, fetchDelivery, quoteDelivery, updateDelivery } from '../api/deliveries';
 import { extractErrorMessage } from '../api/client';
 import type { PackageType, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AddressAutocompleteField } from '../components/AddressAutocompleteField';
 import { Button } from '../components/Button';
+import { CenteredSpinner } from '../components/Spinner';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
@@ -30,8 +31,12 @@ export function NewDeliveryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id } = useParams<{ id: string }>();
+  const isEditing = id != null;
 
   const [tab, setTab] = useState<Tab>('sender');
+  const [loadingExisting, setLoadingExisting] = useState(isEditing);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [pickupAddressLine, setPickupAddressLine] = useState('');
   const [pickupLat, setPickupLat] = useState<number | null>(null);
@@ -56,6 +61,31 @@ export function NewDeliveryPage() {
   useEffect(() => {
     fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
   }, []);
+
+  useEffect(() => {
+    if (!isEditing || !id) return;
+    fetchDelivery(Number(id))
+      .then((delivery) => {
+        if (delivery.status !== 'pending') {
+          setLoadError(t('newDelivery.editNotAllowed'));
+          return;
+        }
+        setPickupAddressLine(delivery.pickup_address_line);
+        setPickupLat(delivery.pickup_latitude);
+        setPickupLng(delivery.pickup_longitude);
+        setReceiverName(delivery.receiver_name);
+        setReceiverPhone(delivery.receiver_phone);
+        setReceiverAddressLine(delivery.receiver_address_line);
+        setReceiverLat(delivery.receiver_latitude);
+        setReceiverLng(delivery.receiver_longitude);
+        setPackageType(delivery.package_type);
+        setNotes(delivery.notes ?? '');
+        setPaymentMethod(delivery.payment_method);
+      })
+      .catch((err) => setLoadError(extractErrorMessage(err)))
+      .finally(() => setLoadingExisting(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, id]);
 
   useEffect(() => {
     if (pickupLat == null || pickupLng == null || receiverLat == null || receiverLng == null) {
@@ -90,20 +120,21 @@ export function NewDeliveryPage() {
     if (!canSubmit || pickupLat == null || pickupLng == null || receiverLat == null || receiverLng == null) return;
     setSubmitting(true);
     setError(null);
+    const payload = {
+      receiver_name: receiverName,
+      receiver_phone: receiverPhone,
+      receiver_address_line: receiverAddressLine,
+      receiver_latitude: receiverLat,
+      receiver_longitude: receiverLng,
+      pickup_address_line: pickupAddressLine,
+      pickup_latitude: pickupLat,
+      pickup_longitude: pickupLng,
+      package_type: packageType,
+      notes: notes || undefined,
+      payment_method: paymentMethod,
+    };
     try {
-      const delivery = await createDelivery({
-        receiver_name: receiverName,
-        receiver_phone: receiverPhone,
-        receiver_address_line: receiverAddressLine,
-        receiver_latitude: receiverLat,
-        receiver_longitude: receiverLng,
-        pickup_address_line: pickupAddressLine,
-        pickup_latitude: pickupLat,
-        pickup_longitude: pickupLng,
-        package_type: packageType,
-        notes: notes || undefined,
-        payment_method: paymentMethod,
-      });
+      const delivery = isEditing && id ? await updateDelivery(Number(id), payload) : await createDelivery(payload);
       navigate(`/deliveries/${delivery.id}`);
     } catch (err) {
       setError(extractErrorMessage(err));
@@ -128,6 +159,24 @@ export function NewDeliveryPage() {
     cursor: 'pointer',
   });
 
+  if (loadingExisting) {
+    return <CenteredSpinner />;
+  }
+
+  if (loadError) {
+    return (
+      <div>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
+        >
+          ←
+        </button>
+        <p style={{ color: colors.danger, fontSize: 15 }}>{loadError}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <button
@@ -137,7 +186,9 @@ export function NewDeliveryPage() {
         ←
       </button>
 
-      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('newDelivery.title')}</h1>
+      <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>
+        {isEditing ? t('newDelivery.editTitle') : t('newDelivery.title')}
+      </h1>
 
       <div style={{ display: 'flex', borderBottom: `1px solid ${colors.border}`, marginBottom: spacing.lg }}>
         <button onClick={() => setTab('sender')} style={tabButtonStyle(tab === 'sender')}>
@@ -332,7 +383,13 @@ export function NewDeliveryPage() {
       {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
 
       <Button
-        label={quote ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() }) : t('newDelivery.submit')}
+        label={
+          isEditing
+            ? t('newDelivery.saveChanges')
+            : quote
+              ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() })
+              : t('newDelivery.submit')
+        }
         onClick={handleSubmit}
         loading={submitting}
         disabled={!canSubmit || insufficientWalletFunds}

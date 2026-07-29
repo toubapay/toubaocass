@@ -25,7 +25,7 @@ export type BookingsStackParamList = {
 
 export type ServicesStackParamList = {
   Services: undefined;
-  NewDelivery: undefined;
+  NewDelivery: { deliveryId?: number } | undefined;
   MyDeliveries: undefined;
   DeliveryDetail: { deliveryId: number };
   Anando: { initialTab?: 'available' | 'mine' } | undefined;

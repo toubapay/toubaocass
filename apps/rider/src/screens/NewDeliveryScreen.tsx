@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { createDelivery, quoteDelivery } from '../api/deliveries';
+import { createDelivery, fetchDelivery, quoteDelivery, updateDelivery } from '../api/deliveries';
 import { PackageType, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AddressAutocompleteField } from '../components/AddressAutocompleteField';
@@ -22,11 +22,15 @@ type Tab = 'sender' | 'receiver';
 
 const PACKAGE_TYPES: PackageType[] = ['document', 'colis_leger', 'colis_moyen', 'colis_volumineux'];
 
-export function NewDeliveryScreen({ navigation }: Props) {
+export function NewDeliveryScreen({ navigation, route }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const deliveryId = route.params?.deliveryId;
+  const isEditing = deliveryId != null;
 
   const [tab, setTab] = useState<Tab>('sender');
+  const [loadingExisting, setLoadingExisting] = useState(isEditing);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [pickupAddressLine, setPickupAddressLine] = useState('');
   const [pickupLat, setPickupLat] = useState<number | null>(null);
@@ -50,6 +54,31 @@ export function NewDeliveryScreen({ navigation }: Props) {
   useEffect(() => {
     fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
   }, []);
+
+  useEffect(() => {
+    if (!isEditing || deliveryId == null) return;
+    fetchDelivery(deliveryId)
+      .then((delivery) => {
+        if (delivery.status !== 'pending') {
+          setLoadError(t('newDelivery.editNotAllowed'));
+          return;
+        }
+        setPickupAddressLine(delivery.pickup_address_line);
+        setPickupLat(delivery.pickup_latitude);
+        setPickupLng(delivery.pickup_longitude);
+        setReceiverName(delivery.receiver_name);
+        setReceiverPhone(delivery.receiver_phone);
+        setReceiverAddressLine(delivery.receiver_address_line);
+        setReceiverLat(delivery.receiver_latitude);
+        setReceiverLng(delivery.receiver_longitude);
+        setPackageType(delivery.package_type);
+        setNotes(delivery.notes ?? '');
+        setPaymentMethod(delivery.payment_method);
+      })
+      .catch((e) => setLoadError(extractErrorMessage(e)))
+      .finally(() => setLoadingExisting(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, deliveryId]);
 
   useEffect(() => {
     if (pickupLat == null || pickupLng == null || receiverLat == null || receiverLng == null) {
@@ -83,20 +112,21 @@ export function NewDeliveryScreen({ navigation }: Props) {
   const handleSubmit = async () => {
     if (!canSubmit || pickupLat == null || pickupLng == null || receiverLat == null || receiverLng == null) return;
     setSubmitting(true);
+    const payload = {
+      receiver_name: receiverName,
+      receiver_phone: receiverPhone,
+      receiver_address_line: receiverAddressLine,
+      receiver_latitude: receiverLat,
+      receiver_longitude: receiverLng,
+      pickup_address_line: pickupAddressLine,
+      pickup_latitude: pickupLat,
+      pickup_longitude: pickupLng,
+      package_type: packageType,
+      notes: notes || undefined,
+      payment_method: paymentMethod,
+    };
     try {
-      const delivery = await createDelivery({
-        receiver_name: receiverName,
-        receiver_phone: receiverPhone,
-        receiver_address_line: receiverAddressLine,
-        receiver_latitude: receiverLat,
-        receiver_longitude: receiverLng,
-        pickup_address_line: pickupAddressLine,
-        pickup_latitude: pickupLat,
-        pickup_longitude: pickupLng,
-        package_type: packageType,
-        notes: notes || undefined,
-        payment_method: paymentMethod,
-      });
+      const delivery = isEditing && deliveryId != null ? await updateDelivery(deliveryId, payload) : await createDelivery(payload);
       navigation.replace('DeliveryDetail', { deliveryId: delivery.id });
     } catch (e) {
       Alert.alert(t('newDelivery.submitFailedTitle'), extractErrorMessage(e));
@@ -105,10 +135,26 @@ export function NewDeliveryScreen({ navigation }: Props) {
     }
   };
 
+  if (loadingExisting) {
+    return (
+      <Screen style={styles.center}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </Screen>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Screen>
+        <Text style={styles.errorText}>{loadError}</Text>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>{t('newDelivery.title')}</Text>
+        <Text style={styles.title}>{isEditing ? t('newDelivery.editTitle') : t('newDelivery.title')}</Text>
 
         <View style={styles.tabRow}>
           <Pressable onPress={() => setTab('sender')} style={[styles.tabButton, tab === 'sender' && styles.tabButtonActive]}>
@@ -229,7 +275,13 @@ export function NewDeliveryScreen({ navigation }: Props) {
         {insufficientWalletFunds && <Text style={styles.warning}>{t('common.insufficientFunds')}</Text>}
 
         <Button
-          label={quote ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() }) : t('newDelivery.submit')}
+          label={
+            isEditing
+              ? t('newDelivery.saveChanges')
+              : quote
+                ? t('newDelivery.submitWithFee', { amount: quote.fee.toLocaleString() })
+                : t('newDelivery.submit')
+          }
           onPress={handleSubmit}
           loading={submitting}
           disabled={!canSubmit || insufficientWalletFunds}
@@ -240,6 +292,8 @@ export function NewDeliveryScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  center: { alignItems: 'center', justifyContent: 'center' },
+  errorText: { color: colors.danger, fontSize: 15 },
   title: { fontSize: 25, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
   tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: spacing.md },
   tabButton: {

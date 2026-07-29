@@ -249,7 +249,8 @@
     "cancelConfirmNo": "لا",
     "cancelConfirmYes": "نعم، إلغاء",
     "actionFailedTitle": "تعذر تنفيذ الإجراء",
-    "liveMapWaiting": "في انتظار موقع عامل التوصيل…"
+    "liveMapWaiting": "في انتظار موقع عامل التوصيل…",
+    "editDelivery": "تعديل التوصيل"
   },
   "myDeliveries": {
     "title": "توصيلاتي",
@@ -278,7 +279,10 @@
     "submitFailedTitle": "تعذر الإرسال",
     "senderTabHint": "معلوماتك ومكان الاستلام.",
     "receiverTabHint": "معلومات المستلم ونوع الطرد.",
-    "nextStep": "التالي: المستلم"
+    "nextStep": "التالي: المستلم",
+    "editTitle": "تعديل التوصيل",
+    "saveChanges": "حفظ التعديلات",
+    "editNotAllowed": "لم يعد بالإمكان تعديل هذا التوصيل."
   },
   "services": {
     "title": "الخدمات",

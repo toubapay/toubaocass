@@ -210,7 +210,8 @@
     "courier": "عامل التوصيل",
     "cancelDelivery": "إلغاء التوصيل",
     "cancelConfirm": "هل تريد فعلاً إلغاء هذا التوصيل؟",
-    "liveMapWaiting": "في انتظار موقع عامل التوصيل…"
+    "liveMapWaiting": "في انتظار موقع عامل التوصيل…",
+    "editDelivery": "تعديل التوصيل"
   },
   "myDeliveries": {
     "title": "توصيلاتي",
@@ -238,7 +239,10 @@
     "submitWithFee": "إرسال الطلب — {{amount}} فرنك",
     "senderTabHint": "معلوماتك ومكان الاستلام.",
     "receiverTabHint": "معلومات المستلم ونوع الطرد.",
-    "nextStep": "التالي: المستلم"
+    "nextStep": "التالي: المستلم",
+    "editTitle": "تعديل التوصيل",
+    "saveChanges": "حفظ التعديلات",
+    "editNotAllowed": "لم يعد بالإمكان تعديل هذا التوصيل."
   },
   "services": {
     "title": "الخدمات",

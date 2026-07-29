@@ -10,6 +10,7 @@ use App\Events\DeliveryRequested;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rider\QuoteDeliveryRequest;
 use App\Http\Requests\Rider\StoreDeliveryRequest;
+use App\Http\Requests\Rider\UpdateDeliveryRequest;
 use App\Http\Requests\UpdateDeliveryLocationRequest;
 use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
@@ -77,6 +78,39 @@ class DeliveryController extends Controller
         abort_unless($delivery->sender_id === $request->user()->id, 404);
 
         return new DeliveryResource($delivery->load(['sender', 'driver.driverProfile']));
+    }
+
+    /**
+     * Lets the sender edit a delivery's details while it's still pending —
+     * no driver assigned yet, so nothing to conflict with. Recomputes
+     * distance/fee the same way store() does, since the addresses (and
+     * therefore the route) may have changed.
+     */
+    public function update(UpdateDeliveryRequest $request, Delivery $delivery, DeliveryPricingService $pricing)
+    {
+        abort_unless($delivery->sender_id === $request->user()->id, 404);
+
+        if ($delivery->status !== Delivery::STATUS_PENDING) {
+            return response()->json(['message' => 'Seule une livraison en attente peut être modifiée.'], 422);
+        }
+
+        $data = $request->validated();
+
+        $quote = $pricing->quote(
+            (float) $data['pickup_latitude'],
+            (float) $data['pickup_longitude'],
+            (float) $data['receiver_latitude'],
+            (float) $data['receiver_longitude'],
+        );
+
+        $delivery->update([
+            ...$data,
+            'payment_method' => $data['payment_method'] ?? $delivery->payment_method,
+            'distance_km' => $quote['distance_km'],
+            'fee' => $quote['fee'],
+        ]);
+
+        return new DeliveryResource($delivery->fresh(['sender', 'driver.driverProfile']));
     }
 
     /**

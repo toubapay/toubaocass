@@ -216,6 +216,12 @@ export function DeliveryDetailPage() {
         </div>
       )}
 
+      {delivery.status === 'pending' && (
+        <div style={{ marginBottom: spacing.sm }}>
+          <Button label={t('deliveryDetail.editDelivery')} onClick={() => navigate(`/deliveries/${delivery.id}/edit`)} variant="outline" />
+        </div>
+      )}
+
       {isCancellable && (
         <Button label={t('deliveryDetail.cancelDelivery')} onClick={handleCancel} loading={cancelling} variant="danger" />
       )}

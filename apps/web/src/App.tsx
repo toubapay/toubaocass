@@ -86,6 +86,7 @@ function AppRoutes() {
         <Route path="/services/dem-legui/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<MyDeliveriesPage />} />
         <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
+        <Route path="/deliveries/:id/edit" element={<NewDeliveryPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />

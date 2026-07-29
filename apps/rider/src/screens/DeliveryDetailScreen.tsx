@@ -25,7 +25,7 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: colors.danger,
 };
 
-export function DeliveryDetailScreen({ route }: Props) {
+export function DeliveryDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
   const { deliveryId } = route.params;
   const [delivery, setDelivery] = useState<Delivery | null>(null);
@@ -181,6 +181,16 @@ export function DeliveryDetailScreen({ route }: Props) {
           </View>
         )}
 
+        {delivery.status === 'pending' && (
+          <View style={styles.editButtonWrap}>
+            <Button
+              label={t('deliveryDetail.editDelivery')}
+              onPress={() => navigation.navigate('NewDelivery', { deliveryId: delivery.id })}
+              variant="outline"
+            />
+          </View>
+        )}
+
         {isCancellable && (
           <Button label={t('deliveryDetail.cancelDelivery')} onPress={handleCancel} loading={cancelling} variant="danger" />
         )}
@@ -219,4 +229,5 @@ const styles = StyleSheet.create({
   contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
   sosButtonWrap: { marginBottom: spacing.md },
+  editButtonWrap: { marginBottom: spacing.sm },
 });
