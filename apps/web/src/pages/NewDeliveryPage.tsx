@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,12 +7,14 @@ import { createDelivery, quoteDelivery } from '../api/deliveries';
 import { extractErrorMessage } from '../api/client';
 import type { PackageType, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
-import { AddressMapPicker } from '../components/AddressMapPicker';
+import { AddressAutocompleteField } from '../components/AddressAutocompleteField';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
+
+type Tab = 'sender' | 'receiver';
 
 const PACKAGE_TYPES: PackageType[] = ['document', 'colis_leger', 'colis_moyen', 'colis_volumineux'];
 
@@ -27,6 +30,8 @@ export function NewDeliveryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [tab, setTab] = useState<Tab>('sender');
 
   const [pickupAddressLine, setPickupAddressLine] = useState('');
   const [pickupLat, setPickupLat] = useState<number | null>(null);
@@ -72,16 +77,11 @@ export function NewDeliveryPage() {
     return () => clearTimeout(timeout);
   }, [pickupLat, pickupLng, receiverLat, receiverLng]);
 
-  const canSubmit =
-    pickupAddressLine.trim() !== '' &&
-    pickupLat != null &&
-    pickupLng != null &&
-    receiverName.trim() !== '' &&
-    receiverPhone.trim() !== '' &&
-    receiverAddressLine.trim() !== '' &&
-    receiverLat != null &&
-    receiverLng != null &&
-    quote != null;
+  const senderComplete = pickupAddressLine.trim() !== '' && pickupLat != null && pickupLng != null;
+  const receiverComplete =
+    receiverName.trim() !== '' && receiverPhone.trim() !== '' && receiverAddressLine.trim() !== '' && receiverLat != null && receiverLng != null;
+
+  const canSubmit = senderComplete && receiverComplete && quote != null;
 
   const insufficientWalletFunds =
     paymentMethod === 'wallet' && walletBalance !== null && quote !== null && walletBalance < quote.fee;
@@ -112,6 +112,22 @@ export function NewDeliveryPage() {
     }
   };
 
+  const tabButtonStyle = (isActive: boolean): CSSProperties => ({
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    border: 'none',
+    borderBottom: `3px solid ${isActive ? colors.primary : 'transparent'}`,
+    background: 'none',
+    padding: `${spacing.sm}px ${spacing.xs}px`,
+    fontSize: 15,
+    fontWeight: 700,
+    color: isActive ? colors.primary : colors.textMuted,
+    cursor: 'pointer',
+  });
+
   return (
     <div>
       <button
@@ -123,87 +139,107 @@ export function NewDeliveryPage() {
 
       <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('newDelivery.title')}</h1>
 
-      <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>{t('newDelivery.sender')}</p>
-        <div
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.md,
-            padding: spacing.md,
-            border: `1px solid ${colors.border}`,
-          }}
-        >
-          <p style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: 0 }}>{user?.name}</p>
-          <p style={{ fontSize: 15, color: colors.textMuted, margin: '2px 0 0' }}>{user?.phone}</p>
+      <div style={{ display: 'flex', borderBottom: `1px solid ${colors.border}`, marginBottom: spacing.lg }}>
+        <button onClick={() => setTab('sender')} style={tabButtonStyle(tab === 'sender')}>
+          {senderComplete && '✓ '}
+          {t('newDelivery.sender')}
+        </button>
+        <button onClick={() => setTab('receiver')} style={tabButtonStyle(tab === 'receiver')}>
+          {receiverComplete && '✓ '}
+          {t('newDelivery.receiver')}
+        </button>
+      </div>
+
+      {tab === 'sender' ? (
+        <div style={{ marginBottom: spacing.lg }}>
+          <p style={{ fontSize: 13.5, color: colors.textMuted, marginTop: 0, marginBottom: spacing.md }}>{t('newDelivery.senderTabHint')}</p>
+
+          <p style={sectionTitleStyle}>{t('newDelivery.sender')}</p>
+          <div
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.md,
+              padding: spacing.md,
+              border: `1px solid ${colors.border}`,
+              marginBottom: spacing.lg,
+            }}
+          >
+            <p style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: 0 }}>{user?.name}</p>
+            <p style={{ fontSize: 15, color: colors.textMuted, margin: '2px 0 0' }}>{user?.phone}</p>
+          </div>
+
+          <p style={sectionTitleStyle}>{t('newDelivery.pickupAddress')}</p>
+          <AddressAutocompleteField
+            addressLine={pickupAddressLine}
+            onAddressLineChange={setPickupAddressLine}
+            latitude={pickupLat}
+            longitude={pickupLng}
+            onLocationChange={(lat, lng) => {
+              setPickupLat(lat);
+              setPickupLng(lng);
+            }}
+          />
+
+          <div style={{ marginTop: spacing.lg }}>
+            <Button label={t('newDelivery.nextStep')} onClick={() => setTab('receiver')} variant="outline" />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={{ marginBottom: spacing.lg }}>
+          <p style={{ fontSize: 13.5, color: colors.textMuted, marginTop: 0, marginBottom: spacing.md }}>{t('newDelivery.receiverTabHint')}</p>
 
-      <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>{t('newDelivery.pickupAddress')}</p>
-        <AddressMapPicker
-          addressLine={pickupAddressLine}
-          onAddressLineChange={setPickupAddressLine}
-          latitude={pickupLat}
-          longitude={pickupLng}
-          onLocationChange={(lat, lng) => {
-            setPickupLat(lat);
-            setPickupLng(lng);
-          }}
-        />
-      </div>
+          <p style={sectionTitleStyle}>{t('newDelivery.receiver')}</p>
+          <TextField
+            label={t('newDelivery.receiverName')}
+            value={receiverName}
+            onChange={(e) => setReceiverName(e.target.value)}
+            placeholder={t('newDelivery.receiverNamePlaceholder')}
+          />
+          <TextField
+            label={t('newDelivery.receiverPhone')}
+            value={receiverPhone}
+            onChange={(e) => setReceiverPhone(e.target.value)}
+            placeholder={t('newDelivery.receiverPhonePlaceholder')}
+          />
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
+            {t('newDelivery.deliveryAddress')}
+          </label>
+          <AddressAutocompleteField
+            addressLine={receiverAddressLine}
+            onAddressLineChange={setReceiverAddressLine}
+            latitude={receiverLat}
+            longitude={receiverLng}
+            onLocationChange={(lat, lng) => {
+              setReceiverLat(lat);
+              setReceiverLng(lng);
+            }}
+          />
 
-      <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>{t('newDelivery.receiver')}</p>
-        <TextField
-          label={t('newDelivery.receiverName')}
-          value={receiverName}
-          onChange={(e) => setReceiverName(e.target.value)}
-          placeholder={t('newDelivery.receiverNamePlaceholder')}
-        />
-        <TextField
-          label={t('newDelivery.receiverPhone')}
-          value={receiverPhone}
-          onChange={(e) => setReceiverPhone(e.target.value)}
-          placeholder={t('newDelivery.receiverPhonePlaceholder')}
-        />
-        <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-          {t('newDelivery.deliveryAddress')}
-        </label>
-        <AddressMapPicker
-          addressLine={receiverAddressLine}
-          onAddressLineChange={setReceiverAddressLine}
-          latitude={receiverLat}
-          longitude={receiverLng}
-          onLocationChange={(lat, lng) => {
-            setReceiverLat(lat);
-            setReceiverLng(lng);
-          }}
-        />
-      </div>
-
-      <div style={{ marginBottom: spacing.lg }}>
-        <p style={sectionTitleStyle}>{t('newDelivery.packageType')}</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm }}>
-          {PACKAGE_TYPES.map((pt) => (
-            <button
-              key={pt}
-              onClick={() => setPackageType(pt)}
-              style={{
-                border: `1.5px solid ${packageType === pt ? colors.primary : colors.border}`,
-                borderRadius: radius.md,
-                padding: `${spacing.sm}px ${spacing.md}px`,
-                backgroundColor: packageType === pt ? colors.accentSoft : colors.surface,
-                color: packageType === pt ? colors.primary : colors.textMuted,
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
-            >
-              {t(`common.packageType.${pt}`)}
-            </button>
-          ))}
+          <div style={{ marginTop: spacing.lg, marginBottom: spacing.lg }}>
+            <p style={sectionTitleStyle}>{t('newDelivery.packageType')}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm }}>
+              {PACKAGE_TYPES.map((pt) => (
+                <button
+                  key={pt}
+                  onClick={() => setPackageType(pt)}
+                  style={{
+                    border: `1.5px solid ${packageType === pt ? colors.primary : colors.border}`,
+                    borderRadius: radius.md,
+                    padding: `${spacing.sm}px ${spacing.md}px`,
+                    backgroundColor: packageType === pt ? colors.accentSoft : colors.surface,
+                    color: packageType === pt ? colors.primary : colors.textMuted,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t(`common.packageType.${pt}`)}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       <TextField
         label={t('newDelivery.notes')}

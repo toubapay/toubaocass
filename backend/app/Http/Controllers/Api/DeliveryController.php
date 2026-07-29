@@ -10,6 +10,7 @@ use App\Events\DeliveryRequested;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rider\QuoteDeliveryRequest;
 use App\Http\Requests\Rider\StoreDeliveryRequest;
+use App\Http\Requests\UpdateDeliveryLocationRequest;
 use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
 use App\Models\DriverProfile;
@@ -190,6 +191,28 @@ class DeliveryController extends Controller
         DeliveryPickedUp::dispatch($delivery->fresh());
 
         return new DeliveryResource($delivery->fresh(['sender', 'driver.driverProfile']));
+    }
+
+    /**
+     * Courier reports its live position while a delivery is in transit —
+     * mirrors Trip/Anando/DemLeguiTrip's updateLocation() shape exactly, so
+     * the rider's delivery detail page can show a live moving dot.
+     */
+    public function updateLocation(UpdateDeliveryLocationRequest $request, Delivery $delivery)
+    {
+        $this->authorize('update', $delivery);
+
+        if ($delivery->status !== Delivery::STATUS_PICKED_UP) {
+            return response()->json(['message' => 'Cette livraison doit être en cours de transport pour partager la position.'], 422);
+        }
+
+        $delivery->update([
+            'current_latitude' => $request->validated('latitude'),
+            'current_longitude' => $request->validated('longitude'),
+            'current_location_updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Position mise à jour.']);
     }
 
     public function deliver(Request $request, Delivery $delivery, CommissionService $commission)

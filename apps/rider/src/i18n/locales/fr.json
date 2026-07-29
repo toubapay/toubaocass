@@ -248,7 +248,8 @@
     "cancelConfirm": "Voulez-vous vraiment annuler cette livraison ?",
     "cancelConfirmNo": "Non",
     "cancelConfirmYes": "Oui, annuler",
-    "actionFailedTitle": "Action impossible"
+    "actionFailedTitle": "Action impossible",
+    "liveMapWaiting": "En attente de la position du livreur…"
   },
   "myDeliveries": {
     "title": "Mes livraisons",
@@ -274,7 +275,10 @@
     "walletWithBalance": "Portefeuille {{balance}}",
     "submit": "Envoyer la demande",
     "submitWithFee": "Envoyer la demande — {{amount}} FCFA",
-    "submitFailedTitle": "Envoi impossible"
+    "submitFailedTitle": "Envoi impossible",
+    "senderTabHint": "Vos informations et le lieu de ramassage.",
+    "receiverTabHint": "Les informations du destinataire et le type de colis.",
+    "nextStep": "Suivant : Destinataire"
   },
   "services": {
     "title": "Services",

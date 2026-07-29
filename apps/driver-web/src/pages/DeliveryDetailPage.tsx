@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp } from '../api/deliveries';
+import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp, updateDeliveryLocation } from '../api/deliveries';
 import { extractErrorMessage } from '../api/client';
 import type { Delivery } from '../api/types';
 import { Button } from '../components/Button';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function DeliveryDetailPage() {
   const { t } = useTranslation();
@@ -27,6 +29,28 @@ export function DeliveryDetailPage() {
   }, [deliveryId]);
 
   useEffect(load, [load]);
+
+  // Foreground-only, best-effort position ping while the courier has the
+  // package — same "recent position on an interval" pattern already used
+  // for Anando/Dem Légui, no background tracking.
+  useEffect(() => {
+    if (delivery?.status !== 'picked_up' || !('geolocation' in navigator)) return;
+    const id = delivery.id;
+
+    const report = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateDeliveryLocation(id, position.coords.latitude, position.coords.longitude).catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 10000 },
+      );
+    };
+
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [delivery?.status, delivery?.id]);
 
   const runAction = async (action: () => Promise<unknown>) => {
     setActionError(undefined);

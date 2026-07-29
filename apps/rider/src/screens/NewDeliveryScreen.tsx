@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { createDelivery, quoteDelivery } from '../api/deliveries';
 import { PackageType, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
-import { AddressMapPicker } from '../components/AddressMapPicker';
+import { AddressAutocompleteField } from '../components/AddressAutocompleteField';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
@@ -18,11 +18,15 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'NewDelivery'>;
 
+type Tab = 'sender' | 'receiver';
+
 const PACKAGE_TYPES: PackageType[] = ['document', 'colis_leger', 'colis_moyen', 'colis_volumineux'];
 
 export function NewDeliveryScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
+
+  const [tab, setTab] = useState<Tab>('sender');
 
   const [pickupAddressLine, setPickupAddressLine] = useState('');
   const [pickupLat, setPickupLat] = useState<number | null>(null);
@@ -67,16 +71,11 @@ export function NewDeliveryScreen({ navigation }: Props) {
     return () => clearTimeout(timeout);
   }, [pickupLat, pickupLng, receiverLat, receiverLng]);
 
-  const canSubmit =
-    pickupAddressLine.trim() !== '' &&
-    pickupLat != null &&
-    pickupLng != null &&
-    receiverName.trim() !== '' &&
-    receiverPhone.trim() !== '' &&
-    receiverAddressLine.trim() !== '' &&
-    receiverLat != null &&
-    receiverLng != null &&
-    quote != null;
+  const senderComplete = pickupAddressLine.trim() !== '' && pickupLat != null && pickupLng != null;
+  const receiverComplete =
+    receiverName.trim() !== '' && receiverPhone.trim() !== '' && receiverAddressLine.trim() !== '' && receiverLat != null && receiverLng != null;
+
+  const canSubmit = senderComplete && receiverComplete && quote != null;
 
   const insufficientWalletFunds =
     paymentMethod === 'wallet' && walletBalance !== null && quote !== null && walletBalance < quote.fee;
@@ -111,57 +110,84 @@ export function NewDeliveryScreen({ navigation }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>{t('newDelivery.title')}</Text>
 
-        <Text style={styles.sectionTitle}>{t('newDelivery.sender')}</Text>
-        <View style={styles.card}>
-          <Text style={styles.line}>{user?.name}</Text>
-          <Text style={styles.lineMuted}>{user?.phone}</Text>
-        </View>
-
-        <Text style={styles.sectionTitle}>{t('newDelivery.pickupAddress')}</Text>
-        <AddressMapPicker
-          addressLine={pickupAddressLine}
-          onAddressLineChange={setPickupAddressLine}
-          latitude={pickupLat}
-          longitude={pickupLng}
-          onLocationChange={({ latitude, longitude }) => {
-            setPickupLat(latitude);
-            setPickupLng(longitude);
-          }}
-        />
-
-        <Text style={styles.sectionTitle}>{t('newDelivery.receiver')}</Text>
-        <TextField label={t('newDelivery.receiverName')} value={receiverName} onChangeText={setReceiverName} placeholder={t('newDelivery.receiverNamePlaceholder')} />
-        <TextField
-          label={t('newDelivery.receiverPhone')}
-          value={receiverPhone}
-          onChangeText={setReceiverPhone}
-          placeholder={t('newDelivery.receiverPhonePlaceholder')}
-          keyboardType="phone-pad"
-        />
-        <Text style={styles.fieldLabel}>{t('newDelivery.deliveryAddress')}</Text>
-        <AddressMapPicker
-          addressLine={receiverAddressLine}
-          onAddressLineChange={setReceiverAddressLine}
-          latitude={receiverLat}
-          longitude={receiverLng}
-          onLocationChange={({ latitude, longitude }) => {
-            setReceiverLat(latitude);
-            setReceiverLng(longitude);
-          }}
-        />
-
-        <Text style={styles.sectionTitle}>{t('newDelivery.packageType')}</Text>
-        <View style={styles.chipRow}>
-          {PACKAGE_TYPES.map((pt) => (
-            <Text
-              key={pt}
-              onPress={() => setPackageType(pt)}
-              style={[styles.chip, packageType === pt && styles.chipActive]}
-            >
-              {t(`common.packageType.${pt}`)}
+        <View style={styles.tabRow}>
+          <Pressable onPress={() => setTab('sender')} style={[styles.tabButton, tab === 'sender' && styles.tabButtonActive]}>
+            <Text style={[styles.tabButtonText, tab === 'sender' && styles.tabButtonTextActive]}>
+              {senderComplete ? '✓ ' : ''}
+              {t('newDelivery.sender')}
             </Text>
-          ))}
+          </Pressable>
+          <Pressable onPress={() => setTab('receiver')} style={[styles.tabButton, tab === 'receiver' && styles.tabButtonActive]}>
+            <Text style={[styles.tabButtonText, tab === 'receiver' && styles.tabButtonTextActive]}>
+              {receiverComplete ? '✓ ' : ''}
+              {t('newDelivery.receiver')}
+            </Text>
+          </Pressable>
         </View>
+
+        {tab === 'sender' ? (
+          <>
+            <Text style={styles.tabHint}>{t('newDelivery.senderTabHint')}</Text>
+
+            <Text style={styles.sectionTitle}>{t('newDelivery.sender')}</Text>
+            <View style={styles.card}>
+              <Text style={styles.line}>{user?.name}</Text>
+              <Text style={styles.lineMuted}>{user?.phone}</Text>
+            </View>
+
+            <Text style={styles.sectionTitle}>{t('newDelivery.pickupAddress')}</Text>
+            <AddressAutocompleteField
+              addressLine={pickupAddressLine}
+              onAddressLineChange={setPickupAddressLine}
+              latitude={pickupLat}
+              longitude={pickupLng}
+              onLocationChange={({ latitude, longitude }) => {
+                setPickupLat(latitude);
+                setPickupLng(longitude);
+              }}
+            />
+
+            <Button label={t('newDelivery.nextStep')} onPress={() => setTab('receiver')} variant="outline" />
+          </>
+        ) : (
+          <>
+            <Text style={styles.tabHint}>{t('newDelivery.receiverTabHint')}</Text>
+
+            <Text style={styles.sectionTitle}>{t('newDelivery.receiver')}</Text>
+            <TextField label={t('newDelivery.receiverName')} value={receiverName} onChangeText={setReceiverName} placeholder={t('newDelivery.receiverNamePlaceholder')} />
+            <TextField
+              label={t('newDelivery.receiverPhone')}
+              value={receiverPhone}
+              onChangeText={setReceiverPhone}
+              placeholder={t('newDelivery.receiverPhonePlaceholder')}
+              keyboardType="phone-pad"
+            />
+            <Text style={styles.fieldLabel}>{t('newDelivery.deliveryAddress')}</Text>
+            <AddressAutocompleteField
+              addressLine={receiverAddressLine}
+              onAddressLineChange={setReceiverAddressLine}
+              latitude={receiverLat}
+              longitude={receiverLng}
+              onLocationChange={({ latitude, longitude }) => {
+                setReceiverLat(latitude);
+                setReceiverLng(longitude);
+              }}
+            />
+
+            <Text style={styles.sectionTitle}>{t('newDelivery.packageType')}</Text>
+            <View style={styles.chipRow}>
+              {PACKAGE_TYPES.map((pt) => (
+                <Text
+                  key={pt}
+                  onPress={() => setPackageType(pt)}
+                  style={[styles.chip, packageType === pt && styles.chipActive]}
+                >
+                  {t(`common.packageType.${pt}`)}
+                </Text>
+              ))}
+            </View>
+          </>
+        )}
 
         <TextField
           label={t('newDelivery.notes')}
@@ -215,6 +241,18 @@ export function NewDeliveryScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   title: { fontSize: 25, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  tabRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: spacing.md },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
+  tabButtonActive: { borderBottomColor: colors.primary },
+  tabButtonText: { fontSize: 15, fontWeight: '700', color: colors.textMuted },
+  tabButtonTextActive: { color: colors.primary },
+  tabHint: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '700',
@@ -230,6 +268,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
+    marginBottom: spacing.md,
   },
   line: { fontSize: 18, fontWeight: '700', color: colors.text },
   lineMuted: { fontSize: 14, color: colors.textMuted, marginTop: 2 },

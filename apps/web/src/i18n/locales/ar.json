@@ -209,7 +209,8 @@
     "distanceAndPayment": "{{distance}} كم · {{payment}}",
     "courier": "عامل التوصيل",
     "cancelDelivery": "إلغاء التوصيل",
-    "cancelConfirm": "هل تريد فعلاً إلغاء هذا التوصيل؟"
+    "cancelConfirm": "هل تريد فعلاً إلغاء هذا التوصيل؟",
+    "liveMapWaiting": "في انتظار موقع عامل التوصيل…"
   },
   "myDeliveries": {
     "title": "توصيلاتي",
@@ -234,7 +235,10 @@
     "paymentMethod": "طريقة الدفع",
     "walletWithBalance": "المحفظة {{balance}}",
     "submit": "إرسال الطلب",
-    "submitWithFee": "إرسال الطلب — {{amount}} فرنك"
+    "submitWithFee": "إرسال الطلب — {{amount}} فرنك",
+    "senderTabHint": "معلوماتك ومكان الاستلام.",
+    "receiverTabHint": "معلومات المستلم ونوع الطرد.",
+    "nextStep": "التالي: المستلم"
   },
   "services": {
     "title": "الخدمات",

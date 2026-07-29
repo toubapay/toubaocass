@@ -50,3 +50,7 @@ export async function fetchDelivery(deliveryId: number): Promise<Delivery> {
 export async function cancelDelivery(deliveryId: number): Promise<void> {
   await apiClient.delete(`/deliveries/${deliveryId}`);
 }
+
+export async function updateDeliveryLocation(deliveryId: number, latitude: number, longitude: number): Promise<void> {
+  await apiClient.post(`/driver/deliveries/${deliveryId}/location`, { latitude, longitude });
+}

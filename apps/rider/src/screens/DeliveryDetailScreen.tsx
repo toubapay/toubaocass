@@ -6,12 +6,15 @@ import { useTranslation } from 'react-i18next';
 import { extractErrorMessage } from '../api/client';
 import { cancelDelivery, fetchDelivery } from '../api/deliveries';
 import { Delivery } from '../api/types';
+import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ServicesStackParamList, 'DeliveryDetail'>;
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
@@ -36,6 +39,16 @@ export function DeliveryDetailScreen({ route }: Props) {
   };
 
   useEffect(load, [deliveryId]);
+
+  // While the courier has the package (in transit), poll for their latest
+  // reported position rather than holding a live connection — same
+  // "recent position on an interval" honesty as the other live maps.
+  useEffect(() => {
+    if (delivery?.status !== 'picked_up') return;
+    const interval = setInterval(load, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delivery?.status, deliveryId]);
 
   const handleCancel = () => {
     if (!delivery) return;
@@ -72,6 +85,20 @@ export function DeliveryDetailScreen({ route }: Props) {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {delivery.status === 'picked_up' &&
+          (delivery.current_latitude != null && delivery.current_longitude != null ? (
+            <AnandoLiveMap
+              currentLatitude={delivery.current_latitude}
+              currentLongitude={delivery.current_longitude}
+              destinationLatitude={delivery.receiver_latitude}
+              destinationLongitude={delivery.receiver_longitude}
+              destinationName={delivery.receiver_address_line}
+              updatedAt={delivery.current_location_updated_at}
+            />
+          ) : (
+            <Text style={styles.liveMapWaiting}>{t('deliveryDetail.liveMapWaiting')}</Text>
+          ))}
+
         <View style={styles.headerRow}>
           <Text style={styles.title}>{t('deliveryDetail.titleWithId', { id: delivery.id })}</Text>
           <Text style={[styles.status, { color: STATUS_COLOR[delivery.status] }]}>{t(`common.deliveryStatus.${delivery.status}`)}</Text>
@@ -173,4 +200,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
+  liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
 });

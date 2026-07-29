@@ -153,6 +153,9 @@ export interface Delivery {
   pickup_address_line: string;
   pickup_latitude: number;
   pickup_longitude: number;
+  current_latitude: number | null;
+  current_longitude: number | null;
+  current_location_updated_at: string | null;
   package_type: PackageType;
   notes: string | null;
   distance_km: number;

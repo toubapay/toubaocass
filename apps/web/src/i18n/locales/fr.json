@@ -209,7 +209,8 @@
     "distanceAndPayment": "{{distance}} km · {{payment}}",
     "courier": "Livreur",
     "cancelDelivery": "Annuler la livraison",
-    "cancelConfirm": "Voulez-vous vraiment annuler cette livraison ?"
+    "cancelConfirm": "Voulez-vous vraiment annuler cette livraison ?",
+    "liveMapWaiting": "En attente de la position du livreur…"
   },
   "myDeliveries": {
     "title": "Mes livraisons",
@@ -234,7 +235,10 @@
     "paymentMethod": "Mode de paiement",
     "walletWithBalance": "Portefeuille {{balance}}",
     "submit": "Envoyer la demande",
-    "submitWithFee": "Envoyer la demande — {{amount}} FCFA"
+    "submitWithFee": "Envoyer la demande — {{amount}} FCFA",
+    "senderTabHint": "Vos informations et le lieu de ramassage.",
+    "receiverTabHint": "Les informations du destinataire et le type de colis.",
+    "nextStep": "Suivant : Destinataire"
   },
   "services": {
     "title": "Services",

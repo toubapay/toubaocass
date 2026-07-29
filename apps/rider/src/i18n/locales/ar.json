@@ -248,7 +248,8 @@
     "cancelConfirm": "هل تريد فعلاً إلغاء هذا التوصيل؟",
     "cancelConfirmNo": "لا",
     "cancelConfirmYes": "نعم، إلغاء",
-    "actionFailedTitle": "تعذر تنفيذ الإجراء"
+    "actionFailedTitle": "تعذر تنفيذ الإجراء",
+    "liveMapWaiting": "في انتظار موقع عامل التوصيل…"
   },
   "myDeliveries": {
     "title": "توصيلاتي",
@@ -274,7 +275,10 @@
     "walletWithBalance": "المحفظة {{balance}}",
     "submit": "إرسال الطلب",
     "submitWithFee": "إرسال الطلب — {{amount}} فرنك",
-    "submitFailedTitle": "تعذر الإرسال"
+    "submitFailedTitle": "تعذر الإرسال",
+    "senderTabHint": "معلوماتك ومكان الاستلام.",
+    "receiverTabHint": "معلومات المستلم ونوع الطرد.",
+    "nextStep": "التالي: المستلم"
   },
   "services": {
     "title": "الخدمات",

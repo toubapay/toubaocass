@@ -167,6 +167,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('deliveries/{delivery}/accept', [DeliveryController::class, 'accept']);
         Route::post('deliveries/{delivery}/pickup', [DeliveryController::class, 'pickup']);
         Route::post('deliveries/{delivery}/deliver', [DeliveryController::class, 'deliver']);
+        Route::post('deliveries/{delivery}/location', [DeliveryController::class, 'updateLocation']);
 
         // Dem Légui — browsing/accepting nearby ride requests and managing
         // the resulting shared trip.

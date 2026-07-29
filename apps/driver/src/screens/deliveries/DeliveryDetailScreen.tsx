@@ -1,10 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import * as Location from 'expo-location';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp } from '../../api/deliveries';
+import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp, updateDeliveryLocation } from '../../api/deliveries';
 import { extractErrorMessage } from '../../api/client';
 import { Delivery } from '../../api/types';
 import { Button } from '../../components/Button';
@@ -13,6 +14,8 @@ import { DeliveriesStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<DeliveriesStackParamList, 'DeliveryDetail'>;
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function DeliveryDetailScreen({ route }: Props) {
   const { t } = useTranslation();
@@ -29,6 +32,33 @@ export function DeliveryDetailScreen({ route }: Props) {
   }, [deliveryId]);
 
   useFocusEffect(load);
+
+  // Foreground-only, best-effort position ping while the courier has the
+  // package — same "recent position on an interval" pattern already used
+  // for Anando/Dem Légui, no background tracking.
+  useEffect(() => {
+    if (delivery?.status !== 'picked_up') return;
+    let cancelled = false;
+
+    const report = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted' || cancelled) return;
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (cancelled) return;
+        await updateDeliveryLocation(deliveryId, position.coords.latitude, position.coords.longitude);
+      } catch {
+        // best-effort; skip this tick on failure
+      }
+    };
+
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [delivery?.status, deliveryId]);
 
   const runAction = async (action: () => Promise<unknown>) => {
     setActionLoading(true);

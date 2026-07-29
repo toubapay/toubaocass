@@ -30,3 +30,7 @@ export async function markDelivered(deliveryId: number): Promise<Delivery> {
   const { data } = await apiClient.post(`/driver/deliveries/${deliveryId}/deliver`);
   return data;
 }
+
+export async function updateDeliveryLocation(deliveryId: number, latitude: number, longitude: number): Promise<void> {
+  await apiClient.post(`/driver/deliveries/${deliveryId}/location`, { latitude, longitude });
+}
