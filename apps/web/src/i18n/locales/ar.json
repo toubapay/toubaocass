@@ -74,7 +74,8 @@
     "totalTrips": "{{count}} رحلة إجمالاً",
     "anandoMiniTitle": "⚡ أناندو",
     "anandoMiniViewAll": "عرض الكل ←",
-    "anandoMiniFlash": "⚡ مغادرة فورية"
+    "anandoMiniFlash": "⚡ مغادرة فورية",
+    "myAnandoRideTitle": "رحلتك في أناندو"
   },
   "profile": {
     "title": "ملفي الشخصي",

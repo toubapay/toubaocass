@@ -101,7 +101,8 @@
     "totalTrips": "{{count}} trajet(s) au total",
     "anandoMiniTitle": "⚡ Anando",
     "anandoMiniViewAll": "Voir tout →",
-    "anandoMiniFlash": "⚡ Départ immédiat"
+    "anandoMiniFlash": "⚡ Départ immédiat",
+    "myAnandoRideTitle": "Votre trajet Anando"
   },
   "profile": {
     "title": "Mon profil",

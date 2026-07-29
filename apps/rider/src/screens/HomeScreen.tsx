@@ -12,6 +12,7 @@ import { CityPicker } from '../components/CityPicker';
 import { DateField } from '../components/DateField';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
+import { MyAnandoRideCard } from '../components/MyAnandoRideCard';
 import { Screen } from '../components/Screen';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
@@ -105,6 +106,7 @@ export function HomeScreen({ navigation }: Props) {
     <Screen>
       {isModuleEnabled('dem_legui') && <DemLeguiStatusWidget />}
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
+      {isModuleEnabled('anando') && <MyAnandoRideCard />}
       <View style={styles.filters}>
         {isModuleEnabled('instant_trips') && <InstantDeparturesBanner />}
 

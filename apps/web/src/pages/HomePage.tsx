@@ -9,6 +9,7 @@ import { AnandoMiniList } from '../components/AnandoMiniList';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
+import { MyAnandoRideCard } from '../components/MyAnandoRideCard';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
@@ -117,6 +118,7 @@ export function HomePage() {
       </h1>
 
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
+      {isModuleEnabled('anando') && <MyAnandoRideCard />}
       {isModuleEnabled('instant_trips') && <InstantDeparturesBanner />}
 
       <button
