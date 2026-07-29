@@ -470,5 +470,18 @@
       "emailPlaceholder": "awa@example.com",
       "finish": "إنهاء"
     }
+  },
+  "tracking": {
+    "title": "التتبع المباشر",
+    "subtitleTrackable": "{{name}} في الطريق إلى {{destination}}.",
+    "notInProgress": "هذه الرحلة ليست جارية حالياً.",
+    "linkInvalid": "رابط التتبع هذا غير صالح أو منتهي الصلاحية.",
+    "sosButton": "مشاركة موقعي",
+    "sosSheetTitle": "مشاركة موقعي المباشر",
+    "sosSheetSubtitle": "أرسل هذا الرابط لعائلتك ليتمكنوا من تتبع رحلتك مباشرة لمدة 24 ساعة.",
+    "sosWhatsapp": "مشاركة عبر واتساب",
+    "sosSms": "مشاركة عبر رسالة نصية",
+    "sosMessage": "تابع رحلتي مباشرة على Intercity: {{url}}",
+    "sosError": "تعذر إنشاء رابط التتبع."
   }
 }

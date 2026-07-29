@@ -9,12 +9,14 @@ use App\Http\Requests\Driver\StoreInstantTripRequest;
 use App\Http\Requests\Driver\StoreTripRequest;
 use App\Http\Requests\Driver\UpdateTripRequest;
 use App\Http\Requests\Rider\SearchTripsRequest;
+use App\Http\Requests\UpdateTripLocationRequest;
 use App\Http\Resources\TripResource;
 use App\Models\Booking;
 use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
 use App\Services\CommissionService;
+use App\Services\TrackingLinkService;
 use App\Support\Geo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +117,22 @@ class TripController extends Controller
             'driver.driverProfile', 'car', 'originCity', 'destinationCity',
             'riderBooking' => fn ($q) => $q->where('rider_id', $request->user()->id)->where('status', Booking::STATUS_CONFIRMED),
         ]));
+    }
+
+    /**
+     * SOS "share my live position" link, available to the driver and any
+     * rider with a confirmed seat — anyone actually on the trip may want to
+     * let their own family follow along, not just the driver.
+     */
+    public function shareLink(Request $request, Trip $trip, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $trip->driver_id === $user->id
+            || Booking::where('trip_id', $trip->id)->where('rider_id', $user->id)->where('status', Booking::STATUS_CONFIRMED)->exists();
+
+        abort_unless($isParticipant, 404);
+
+        return response()->json(['url' => $trackingLinks->generateUrl('trip', $trip->id)]);
     }
 
     /**
@@ -240,6 +258,28 @@ class TripController extends Controller
         });
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * Driver-reported position while the trip is under way — polled by
+     * riders via show(), same "recent position on an interval" honesty as
+     * Anando/Dem Légui's own live tracking, not a persistent connection.
+     */
+    public function updateLocation(UpdateTripLocationRequest $request, Trip $trip)
+    {
+        $this->authorize('update', $trip);
+
+        if ($trip->status !== Trip::STATUS_IN_PROGRESS) {
+            return response()->json(['message' => 'Ce trajet doit être en cours pour partager la position.'], 422);
+        }
+
+        $trip->update([
+            'current_latitude' => $request->validated('latitude'),
+            'current_longitude' => $request->validated('longitude'),
+            'current_location_updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Position mise à jour.']);
     }
 
     public function cancel(Request $request, Trip $trip)

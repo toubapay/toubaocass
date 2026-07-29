@@ -18,6 +18,7 @@ import type { AnandoRide, PaymentMethod } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { SosShareModal } from '../components/SosShareModal';
 import { TextField } from '../components/TextField';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
@@ -142,6 +143,7 @@ export function AnandoRideDetailPage() {
   const [modifySeats, setModifySeats] = useState('1');
   const [modifying, setModifying] = useState(false);
   const [cancellingBooking, setCancellingBooking] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = () => {
     if (!id) return;
@@ -312,6 +314,13 @@ export function AnandoRideDetailPage() {
           <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('anando.liveMapWaiting')}</p>
         )
       )}
+
+      {ride.status === 'in_progress' && (
+        <div style={{ marginBottom: spacing.md }}>
+          <Button label={`🆘 ${t('tracking.sosButton')}`} onClick={() => setShowSos(true)} variant="outline" />
+        </div>
+      )}
+      {showSos && <SosShareModal kind="anando-rides" rideId={ride.id} onClose={() => setShowSos(false)} />}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginBottom: 2 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>

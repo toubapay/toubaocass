@@ -10,6 +10,7 @@ import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
+import { SosShareModal } from '../components/SosShareModal';
 import { colors, radius, spacing } from '../theme';
 
 const POLL_INTERVAL_MS = 8000;
@@ -43,6 +44,7 @@ export function DemLeguiRequestDetailPage() {
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justMatched, setJustMatched] = useState(false);
+  const [showSos, setShowSos] = useState(false);
   const hadTripRef = useRef(false);
 
   const load = () => {
@@ -162,6 +164,13 @@ export function DemLeguiRequestDetailPage() {
           <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('demLegui.liveMapWaiting')}</p>
         )
       )}
+
+      {trip?.status === 'in_progress' && (
+        <div style={{ marginBottom: spacing.md }}>
+          <Button label={`🆘 ${t('tracking.sosButton')}`} onClick={() => setShowSos(true)} variant="outline" />
+        </div>
+      )}
+      {showSos && trip && <SosShareModal kind="dem-legui/trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>

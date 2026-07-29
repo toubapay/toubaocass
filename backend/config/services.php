@@ -18,6 +18,18 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    /*
+    | Public base URL of the rider-facing web app (apps/web) — used to build
+    | the human-facing SOS/share-tracking link handed to family members over
+    | WhatsApp/SMS. The signature/expiry query params are computed against
+    | this same backend's own signed-route mechanism (see
+    | TrackingLinkService), just rehosted under this frontend origin so the
+    | link opens a real page instead of raw JSON.
+    */
+    'web_frontend' => [
+        'url' => env('WEB_FRONTEND_URL', 'http://localhost:5173'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

@@ -9,6 +9,7 @@ import { cancelTrip, completeTrip, fetchMyTrip, startTrip } from '../../api/trip
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { SosShareModal } from '../../components/SosShareModal';
 import { TripUrgencyBadge } from '../../components/TripUrgencyBadge';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
@@ -21,6 +22,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -80,6 +82,13 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {trip.departure_date} à {trip.departure_time} · {t(`common.tripStatus.${trip.status}`)}
         </Text>
         <TripUrgencyBadge trip={trip} />
+
+        {trip.status === 'in_progress' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        <SosShareModal kind="trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>{t('trips.detail.tripSection')}</Text>
@@ -167,6 +176,7 @@ const styles = StyleSheet.create({
   city: { fontSize: 24, fontWeight: '800', color: colors.text },
   arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 20 },
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg, textTransform: 'capitalize' },
+  sosButtonWrap: { marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

@@ -474,5 +474,14 @@
       "submittedBody": "سنراجع مستنداتك قريباً.",
       "submitFailedTitle": "تعذر الإرسال"
     }
+  },
+  "tracking": {
+    "sosButton": "مشاركة موقعي",
+    "sosSheetTitle": "مشاركة موقعي المباشر",
+    "sosSheetSubtitle": "أرسل هذا الرابط لعائلتك ليتمكنوا من تتبع رحلتك مباشرة لمدة 24 ساعة.",
+    "sosWhatsapp": "مشاركة عبر واتساب",
+    "sosSms": "مشاركة عبر رسالة نصية",
+    "sosMessage": "تابع رحلتي مباشرة على Intercity: {{url}}",
+    "sosError": "تعذر إنشاء رابط التتبع."
   }
 }

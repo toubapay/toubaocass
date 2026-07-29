@@ -21,6 +21,7 @@ import { fetchWallet } from '../../api/wallet';
 import { AnandoLiveMap } from '../../components/AnandoLiveMap';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { SosShareModal } from '../../components/SosShareModal';
 import { TextField } from '../../components/TextField';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
@@ -120,6 +121,7 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
   const [modifySeats, setModifySeats] = useState('1');
   const [modifying, setModifying] = useState(false);
   const [cancellingBooking, setCancellingBooking] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -318,6 +320,12 @@ export function AnandoRideDetailScreen({ route, navigation }: Props) {
           ) : (
             <Text style={styles.liveMapWaiting}>{t('anando.liveMapWaiting')}</Text>
           ))}
+        {ride.status === 'in_progress' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        <SosShareModal kind="anando-rides" rideId={ride.id} visible={showSos} onClose={() => setShowSos(false)} />
         <Text style={styles.title}>
           {ride.origin_city?.name} → {ride.destination_city?.name}
         </Text>
@@ -482,6 +490,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
   subtitle: { fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  sosButtonWrap: { marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

@@ -17,6 +17,7 @@ use App\Models\AnandoRideBooking;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Services\RatingService;
+use App\Services\TrackingLinkService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -171,6 +172,21 @@ class AnandoRideController extends Controller
         ]);
 
         return response()->json(['message' => 'Position mise à jour.']);
+    }
+
+    /**
+     * SOS "share my live position" link, available to the poster and any
+     * rider with a confirmed seat.
+     */
+    public function shareLink(Request $request, AnandoRide $anandoRide, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $anandoRide->user_id === $user->id
+            || AnandoRideBooking::where('anando_ride_id', $anandoRide->id)->where('user_id', $user->id)->where('status', AnandoRideBooking::STATUS_CONFIRMED)->exists();
+
+        abort_unless($isParticipant, 404);
+
+        return response()->json(['url' => $trackingLinks->generateUrl('anando', $anandoRide->id)]);
     }
 
     /**

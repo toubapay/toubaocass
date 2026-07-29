@@ -9,6 +9,7 @@ import type { PaymentMethod, Trip } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
 import { RouteMap } from '../components/RouteMap';
+import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { WalletIcon } from '../components/WalletIcon';
@@ -25,6 +26,7 @@ export function TripDetailPage() {
   const [booking, setBooking] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [showSos, setShowSos] = useState(false);
 
   useEffect(() => {
     fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
@@ -141,6 +143,13 @@ export function TripDetailPage() {
           </button>
         )}
       </div>
+      {editing && trip.status === 'in_progress' && (
+        <div style={{ marginBottom: spacing.md }}>
+          <Button label={`🆘 ${t('tracking.sosButton')}`} onClick={() => setShowSos(true)} variant="outline" />
+        </div>
+      )}
+      {showSos && <SosShareModal kind="trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
+
       {editing && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: colors.success, margin: 0 }}>

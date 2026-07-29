@@ -11,6 +11,7 @@ import { Button } from '../components/Button';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { Screen } from '../components/Screen';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
+import { SosShareModal } from '../components/SosShareModal';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
@@ -29,6 +30,7 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [justMatched, setJustMatched] = useState(false);
+  const [showSos, setShowSos] = useState(false);
   const hadTripRef = useRef(false);
 
   const load = () => {
@@ -144,6 +146,13 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
           )
         ) : null}
 
+        {trip?.status === 'in_progress' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        {trip && <SosShareModal kind="dem-legui/trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />}
+
         <View style={styles.titleRow}>
           <Text style={styles.title}>{t('demLegui.tripToLabel', { city: request.destination_city?.name })}</Text>
           {request.status === 'pending' ? (
@@ -228,6 +237,7 @@ const styles = StyleSheet.create({
   eta: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  sosButtonWrap: { marginBottom: spacing.md },
   matchedBanner: {
     backgroundColor: colors.success,
     borderRadius: radius.md,

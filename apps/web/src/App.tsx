@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
 import { CenteredSpinner } from './components/Spinner';
@@ -22,6 +22,7 @@ import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { PublicTrackingPage } from './pages/PublicTrackingPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TripDetailPage } from './pages/TripDetailPage';
@@ -33,6 +34,18 @@ function AppRoutes() {
   // itself) so the foreground onMessage() listener that displays incoming
   // pushes stays active no matter which page is open when one arrives.
   const pushNotifications = usePushNotifications();
+  const location = useLocation();
+
+  // The SOS "share my live position" link is opened by family members over
+  // WhatsApp/SMS who very likely have no account at all — it must bypass
+  // login entirely, unlike every other route in this app.
+  if (location.pathname.startsWith('/track/')) {
+    return (
+      <Routes>
+        <Route path="/track/:type/:id" element={<PublicTrackingPage />} />
+      </Routes>
+    );
+  }
 
   if (isLoading) {
     return <CenteredSpinner />;

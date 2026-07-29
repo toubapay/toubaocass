@@ -6,6 +6,7 @@ import { extractErrorMessage } from '../api/client';
 import { cancelTrip, completeTrip, fetchMyTrip, startTrip } from '../api/trips';
 import type { Trip } from '../api/types';
 import { Button } from '../components/Button';
+import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { colors, radius, spacing } from '../theme';
@@ -18,6 +19,7 @@ export function TripDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>();
+  const [showSos, setShowSos] = useState(false);
 
   const load = useCallback(() => {
     if (!tripId) return;
@@ -73,6 +75,13 @@ export function TripDetailPage() {
         {trip.departure_date} à {trip.departure_time} · {t(`common.tripStatus.${trip.status}`)}
       </p>
       <TripUrgencyBadge trip={trip} />
+
+      {trip.status === 'in_progress' && (
+        <div style={{ marginBottom: spacing.md }}>
+          <Button label={`🆘 ${t('tracking.sosButton')}`} onClick={() => setShowSos(true)} variant="outline" />
+        </div>
+      )}
+      {showSos && <SosShareModal kind="trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
       <div
         style={{

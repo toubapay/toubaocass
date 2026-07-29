@@ -15,6 +15,7 @@ import { DemLeguiTrip } from '../../api/types';
 import { AnandoLiveMap } from '../../components/AnandoLiveMap';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
+import { SosShareModal } from '../../components/SosShareModal';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
@@ -30,6 +31,7 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = () => {
     fetchDemLeguiTrip(tripId)
@@ -122,6 +124,13 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
             <Text style={styles.liveMapWaiting}>{t('demLegui.liveMapWaiting')}</Text>
           ))}
 
+        {trip.status === 'in_progress' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        <SosShareModal kind="dem-legui/trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />
+
         <Text style={styles.title}>{t('demLegui.tripToLabel', { city: trip.destination_city?.name })}</Text>
         <Text style={styles.subtitle}>
           {t(`demLegui.tripStatus.${trip.status}`)} · {t('demLegui.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
@@ -191,5 +200,6 @@ const styles = StyleSheet.create({
   line: { fontSize: 16, fontWeight: '700', color: colors.text },
   lineMuted: { fontSize: 13.5, color: colors.textMuted, marginTop: 2 },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  sosButtonWrap: { marginBottom: spacing.md },
   button: { marginBottom: spacing.sm },
 });

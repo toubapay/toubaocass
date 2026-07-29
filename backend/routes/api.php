@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
 use App\Http\Controllers\Api\ProfileStatsController;
+use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,11 @@ Route::prefix('auth')->group(function () {
 
 Route::get('cities', [CityController::class, 'index']);
 Route::get('modules/status', [ModuleStatusController::class, 'index']);
+
+// SOS "share my live position" link — public, no login, signature-gated.
+Route::get('track/{type}/{id}', [TrackingController::class, 'show'])
+    ->name('public.track')
+    ->middleware('signed');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
@@ -83,6 +89,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('anando-rides/{anandoRide}/rate', [AnandoRideController::class, 'rate']);
     Route::put('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'updateBooking']);
     Route::delete('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'cancelBooking']);
+    Route::post('anando-rides/{anandoRide}/share-link', [AnandoRideController::class, 'shareLink']);
+
+    // SOS "share my live position" links for Trip and Dem Légui — sit
+    // outside the role:rider/role:driver groups since either side of the
+    // ride (driver or a confirmed rider) may want to generate their own.
+    Route::post('trips/{trip}/share-link', [TripController::class, 'shareLink']);
+    Route::post('dem-legui/trips/{demLeguiTrip}/share-link', [DemLeguiController::class, 'shareLink']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
@@ -144,6 +157,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('trips/{trip}', [TripController::class, 'update']);
         Route::post('trips/{trip}/start', [TripController::class, 'start']);
         Route::post('trips/{trip}/complete', [TripController::class, 'complete']);
+        Route::post('trips/{trip}/location', [TripController::class, 'updateLocation']);
         Route::delete('trips/{trip}', [TripController::class, 'cancel']);
 
         // Livraison (package delivery) browsing & fulfillment.

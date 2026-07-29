@@ -457,5 +457,18 @@
       "emailPlaceholder": "awa@example.com",
       "finish": "Terminer"
     }
+  },
+  "tracking": {
+    "title": "Suivi en direct",
+    "subtitleTrackable": "{{name}} est en route vers {{destination}}.",
+    "notInProgress": "Ce trajet n'est pas en cours pour le moment.",
+    "linkInvalid": "Ce lien de suivi est invalide ou a expiré.",
+    "sosButton": "Partager ma position",
+    "sosSheetTitle": "Partager ma position en direct",
+    "sosSheetSubtitle": "Envoyez ce lien à votre famille pour qu'elle puisse suivre votre trajet en direct pendant 24 heures.",
+    "sosWhatsapp": "Partager via WhatsApp",
+    "sosSms": "Partager via SMS",
+    "sosMessage": "Suivez mon trajet en direct sur Intercity : {{url}}",
+    "sosError": "Impossible de générer le lien de suivi."
   }
 }

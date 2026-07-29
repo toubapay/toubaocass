@@ -13,6 +13,7 @@ import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
 import { RouteMap } from '../components/RouteMap';
 import { Screen } from '../components/Screen';
+import { SosShareModal } from '../components/SosShareModal';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
@@ -29,6 +30,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
   const [booking, setBooking] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [showSos, setShowSos] = useState(false);
 
   useEffect(() => {
     fetchWallet()
@@ -113,6 +115,12 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {t('tripDetail.departureAt', { date: trip.departure_date, time: trip.departure_time })}
         </Text>
         <TripUrgencyBadge trip={trip} />
+        {editing && trip.status === 'in_progress' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        <SosShareModal kind="trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />
         {editing && (
           <View style={styles.bookedRow}>
             <Text style={styles.bookedNotice}>{t('tripDetail.bookedSeats', { count: trip.my_booking!.seats_booked })}</Text>
@@ -279,6 +287,7 @@ const styles = StyleSheet.create({
   city: { fontSize: 24, fontWeight: '800', color: colors.text },
   arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 20 },
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg },
+  sosButtonWrap: { marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

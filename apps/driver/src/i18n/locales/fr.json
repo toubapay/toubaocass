@@ -464,5 +464,14 @@
       "submittedBody": "Nous examinerons vos documents sous peu.",
       "submitFailedTitle": "Envoi impossible"
     }
+  },
+  "tracking": {
+    "sosButton": "Partager ma position",
+    "sosSheetTitle": "Partager ma position en direct",
+    "sosSheetSubtitle": "Envoyez ce lien à votre famille pour qu'elle puisse suivre votre trajet en direct pendant 24 heures.",
+    "sosWhatsapp": "Partager via WhatsApp",
+    "sosSms": "Partager via SMS",
+    "sosMessage": "Suivez mon trajet en direct sur Intercity : {{url}}",
+    "sosError": "Impossible de générer le lien de suivi."
   }
 }

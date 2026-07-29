@@ -19,6 +19,7 @@ use App\Models\DriverProfile;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DemLeguiPricingService;
+use App\Services\TrackingLinkService;
 use App\Services\WalletService;
 use App\Support\Geo;
 use Illuminate\Http\Request;
@@ -338,5 +339,20 @@ class DemLeguiController extends Controller
         ]);
 
         return response()->json(['message' => 'Position mise à jour.']);
+    }
+
+    /**
+     * SOS "share my live position" link, available to the driver and any
+     * rider whose request is attached to this trip.
+     */
+    public function shareLink(Request $request, DemLeguiTrip $demLeguiTrip, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $demLeguiTrip->driver_id === $user->id
+            || $demLeguiTrip->requests()->where('rider_id', $user->id)->exists();
+
+        abort_unless($isParticipant, 404);
+
+        return response()->json(['url' => $trackingLinks->generateUrl('dem-legui', $demLeguiTrip->id)]);
     }
 }
