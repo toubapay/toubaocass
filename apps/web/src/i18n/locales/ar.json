@@ -101,6 +101,13 @@
       "noLastTrip": "لم تقم بأي رحلة بعد",
       "myAnandoTrip": "رحلتي في Anando",
       "noActiveAnandoTrip": "لا توجد رحلة Anando نشطة",
+      "anandoCustomersBooked_zero": "لا يوجد عملاء حجزوا بعد",
+      "anandoCustomersBooked_one": "عميل واحد حجز",
+      "anandoCustomersBooked_two": "عميلان حجزا",
+      "anandoCustomersBooked_few": "{{count}} عملاء حجزوا",
+      "anandoCustomersBooked_many": "{{count}} عميلاً حجزوا",
+      "anandoCustomersBooked_other": "{{count}} عميل حجزوا",
+      "anandoDeparted": "انطلقت الرحلة",
       "myDemLeguiTrip": "رحلتي في Dem Légui",
       "noActiveDemLeguiTrip": "لا يوجد طلب Dem Légui نشط",
       "myPosition": "موقعي",
@@ -310,6 +317,7 @@
     "searchingBadge": "جارٍ البحث…",
     "waitingForDriverBadge": "في انتظار سائق",
     "driverArrivingBadge": "السائق في الطريق",
+    "inProgressBadge": "الرحلة جارية",
     "myTripNav": "🚕 رحلتي"
   },
   "anando": {

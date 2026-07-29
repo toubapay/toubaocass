@@ -128,6 +128,9 @@
       "noLastTrip": "Aucun trajet effectué",
       "myAnandoTrip": "Mon trajet Anando",
       "noActiveAnandoTrip": "Aucun trajet Anando actif",
+      "anandoCustomersBooked_one": "{{count}} client a réservé",
+      "anandoCustomersBooked_other": "{{count}} clients ont réservé",
+      "anandoDeparted": "Trajet démarré",
       "myDemLeguiTrip": "Ma course Dem Légui",
       "noActiveDemLeguiTrip": "Aucune course Dem Légui active",
       "myPosition": "Ma position",
@@ -351,7 +354,8 @@
     "etaMinutes": "Arrivée dans {{minutes}} min",
     "searchingBadge": "Recherche…",
     "waitingForDriverBadge": "En attente d'un conducteur",
-    "driverArrivingBadge": "Conducteur en route"
+    "driverArrivingBadge": "Conducteur en route",
+    "inProgressBadge": "Course en cours"
   },
   "anando": {
     "title": "Anando",

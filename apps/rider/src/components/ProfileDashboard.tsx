@@ -3,16 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { fetchMyAnandoRides } from '../api/anando';
-import { fetchMyActiveDemLeguiRequest } from '../api/demLegui';
 import { fetchProfileStats } from '../api/profile';
-import { AnandoRide, DemLeguiRequest, ProfileStats, ProfileTripSummary } from '../api/types';
+import { ProfileStats, ProfileTripSummary } from '../api/types';
 import { Coordinates, useMyLocation } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
-import { isAnandoRideStale } from '../utils/anando';
 import { AnandoLiveMap } from './AnandoLiveMap';
-
-const ANANDO_ACTIVE_RIDE_STATUSES = ['open', 'full', 'in_progress'];
+import { ProfileAnandoStatusCard } from './ProfileAnandoStatusCard';
+import { ProfileDemLeguiStatusCard } from './ProfileDemLeguiStatusCard';
 
 function StatTile({ icon, label, value, onPress }: { icon: string; label: string; value: string | number; onPress?: () => void }) {
   return (
@@ -54,57 +51,16 @@ function TripRow({
   );
 }
 
-function ModuleTripRow({
-  icon,
-  label,
-  routeText,
-  statusText,
-  emptyLabel,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  routeText: string | null;
-  statusText: string | null;
-  emptyLabel: string;
-  onPress?: () => void;
-}) {
-  const hasTrip = routeText != null;
-  return (
-    <Pressable style={[styles.tile, styles.tripRow]} onPress={hasTrip ? onPress : undefined} disabled={!hasTrip}>
-      <Text style={styles.tileIcon}>{icon}</Text>
-      <View style={styles.tripRowText}>
-        <Text style={styles.tileLabel}>{label}</Text>
-        {hasTrip ? (
-          <Text style={styles.tripRowValue} numberOfLines={1}>
-            {routeText} · {statusText}
-          </Text>
-        ) : (
-          <Text style={styles.tripRowEmpty}>{emptyLabel}</Text>
-        )}
-      </View>
-    </Pressable>
-  );
-}
-
 export function ProfileDashboard() {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const [stats, setStats] = useState<ProfileStats | null>(null);
-  const [anandoActiveRide, setAnandoActiveRide] = useState<AnandoRide | null>(null);
-  const [demLeguiActiveRequest, setDemLeguiActiveRequest] = useState<DemLeguiRequest | null>(null);
   const [position, setPosition] = useState<Coordinates | null>(null);
   const [showPosition, setShowPosition] = useState(false);
   const { loading: locating, error: locationError, requestLocation } = useMyLocation();
 
   useEffect(() => {
     fetchProfileStats().then(setStats).catch(() => setStats(null));
-    fetchMyAnandoRides()
-      .then((res) => setAnandoActiveRide(res.data.find((ride) => ANANDO_ACTIVE_RIDE_STATUSES.includes(ride.status) && !isAnandoRideStale(ride)) ?? null))
-      .catch(() => setAnandoActiveRide(null));
-    fetchMyActiveDemLeguiRequest()
-      .then(setDemLeguiActiveRequest)
-      .catch(() => setDemLeguiActiveRequest(null));
   }, []);
 
   const handleShowPosition = async () => {
@@ -156,29 +112,6 @@ export function ProfileDashboard() {
           }
         />
 
-        <ModuleTripRow
-          icon="🚗"
-          label={t('profile.dashboard.myAnandoTrip')}
-          routeText={anandoActiveRide ? `${anandoActiveRide.origin_city?.name} → ${anandoActiveRide.destination_city?.name}` : null}
-          statusText={anandoActiveRide ? t(`anando.status.${anandoActiveRide.status}`) : null}
-          emptyLabel={t('profile.dashboard.noActiveAnandoTrip')}
-          onPress={() =>
-            anandoActiveRide &&
-            navigation.navigate('ServicesTab', { screen: 'AnandoRideDetail', params: { rideId: anandoActiveRide.id } })
-          }
-        />
-        <ModuleTripRow
-          icon="🚕"
-          label={t('profile.dashboard.myDemLeguiTrip')}
-          routeText={demLeguiActiveRequest ? t('demLegui.tripToLabel', { city: demLeguiActiveRequest.destination_city?.name ?? '—' }) : null}
-          statusText={demLeguiActiveRequest ? t(`demLegui.status.${demLeguiActiveRequest.status}`) : null}
-          emptyLabel={t('profile.dashboard.noActiveDemLeguiTrip')}
-          onPress={() =>
-            demLeguiActiveRequest &&
-            navigation.navigate('ServicesTab', { screen: 'DemLeguiRequestDetail', params: { requestId: demLeguiActiveRequest.id } })
-          }
-        />
-
         <Pressable style={[styles.tile, styles.tripRow]} onPress={handleShowPosition}>
           <Text style={styles.tileIcon}>📍</Text>
           <View style={styles.tripRowText}>
@@ -201,6 +134,11 @@ export function ProfileDashboard() {
           <AnandoLiveMap currentLatitude={position.latitude} currentLongitude={position.longitude} />
         </View>
       ) : null}
+
+      <View style={styles.mapWrapper}>
+        <ProfileAnandoStatusCard />
+        <ProfileDemLeguiStatusCard />
+      </View>
     </View>
   );
 }
