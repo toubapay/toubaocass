@@ -78,6 +78,8 @@ export type KycReviewMode = 'automatic' | 'manual';
 export interface FareSettings {
   delivery_base_fee: number;
   delivery_fee_per_km: number;
+  dem_legui_base_fare: number;
+  dem_legui_fare_per_km: number;
   commission_rate_trip: number;
   commission_rate_delivery: number;
 }

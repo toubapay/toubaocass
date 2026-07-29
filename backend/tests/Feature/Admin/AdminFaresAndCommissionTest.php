@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\AdminUser;
 use App\Models\Booking;
+use App\Models\City;
 use App\Models\Delivery;
 use App\Models\Trip;
 use App\Models\User;
@@ -86,6 +87,36 @@ class AdminFaresAndCommissionTest extends TestCase
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
 
         $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'commission_amount' => 200]);
+    }
+
+    public function test_admin_can_configure_dem_legui_base_fare_and_per_km_rate(): void
+    {
+        $admin = AdminUser::factory()->role(AdminUser::ROLE_ACCOUNTANT)->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/settings/fares')
+            ->assertOk()
+            ->assertJsonPath('dem_legui_base_fare', 300)
+            ->assertJsonPath('dem_legui_fare_per_km', 150);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/admin/settings/fares', ['dem_legui_base_fare' => 500, 'dem_legui_fare_per_km' => 200])
+            ->assertOk()
+            ->assertJsonPath('dem_legui_base_fare', 500)
+            ->assertJsonPath('dem_legui_fare_per_km', 200);
+
+        $city = City::factory()->create(['latitude' => 14.7167, 'longitude' => -17.4677]);
+        $rider = User::factory()->create();
+
+        $response = $this->actingAs($rider, 'sanctum')->postJson('/api/dem-legui/requests/quote', [
+            'pickup_latitude' => 14.7167,
+            'pickup_longitude' => -17.4677,
+            'destination_city_id' => $city->id,
+            'seats_requested' => 1,
+        ])->assertOk();
+
+        // Same point as destination -> distance 0, so fare is just the new base fare.
+        $response->assertJsonPath('fare_total', 500);
     }
 
     public function test_support_cannot_manage_fares(): void

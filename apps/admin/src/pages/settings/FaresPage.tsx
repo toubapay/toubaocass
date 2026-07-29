@@ -17,6 +17,8 @@ interface FieldConfig {
 const FIELDS: FieldConfig[] = [
   { key: 'delivery_base_fee', label: 'Frais de base (livraison)', hint: 'Montant fixe appliqué à chaque livraison.', suffix: 'FCFA' },
   { key: 'delivery_fee_per_km', label: 'Frais par km (livraison)', hint: 'Ajouté au frais de base selon la distance.', suffix: 'FCFA/km' },
+  { key: 'dem_legui_base_fare', label: 'Frais de base (Dem Légui)', hint: 'Montant fixe appliqué à chaque course Dem Légui.', suffix: 'FCFA' },
+  { key: 'dem_legui_fare_per_km', label: 'Frais par km (Dem Légui)', hint: 'Ajouté au frais de base selon la distance du trajet.', suffix: 'FCFA/km' },
   { key: 'commission_rate_trip', label: 'Commission sur les trajets', hint: 'Part prélevée par la plateforme sur chaque réservation.', suffix: '%' },
   { key: 'commission_rate_delivery', label: 'Commission sur les livraisons', hint: 'Part prélevée par la plateforme sur chaque livraison.', suffix: '%' },
 ];
