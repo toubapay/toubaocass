@@ -39,6 +39,9 @@ export type ProfileStackParamList = {
   Profile: undefined;
   Wallet: undefined;
   Settings: undefined;
+  MyDeliveries: undefined;
+  DeliveryDetail: { deliveryId: number };
+  NewDelivery: { deliveryId?: number } | undefined;
 };
 
 export type MainTabParamList = {

@@ -80,6 +80,7 @@
   "profile": {
     "title": "Mon profil",
     "wallet": "Mon portefeuille",
+    "myDeliveries": "📦 Mes livraisons",
     "settings": "⚙️ Paramètres",
     "notificationsEnabled": "🔔 Notifications activées",
     "notificationsBlocked": "Notifications bloquées. Autorisez-les dans les réglages de votre navigateur pour être prévenu(e) de vos réservations.",

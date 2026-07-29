@@ -131,6 +131,9 @@ function ProfileNavigator() {
       <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.screenTitles.profile') }} />
       <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
       <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: t('nav.screenTitles.settings') }} />
+      <ProfileStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
+      <ProfileStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
+      <ProfileStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
     </ProfileStackNav.Navigator>
   );
 }

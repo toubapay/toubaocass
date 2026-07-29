@@ -107,6 +107,7 @@
   "profile": {
     "title": "ملفي الشخصي",
     "wallet": "محفظتي",
+    "myDeliveries": "📦 طلبيات توصيلي",
     "settings": "⚙️ الإعدادات",
     "notificationsEnabled": "🔔 الإشعارات مفعّلة",
     "notificationsBlocked": "الإشعارات محظورة. فعّلها من إعدادات متصفحك لتصلك تنبيهات حجوزاتك.",
