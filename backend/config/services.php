@@ -25,9 +25,14 @@ return [
     | this same backend's own signed-route mechanism (see
     | TrackingLinkService), just rehosted under this frontend origin so the
     | link opens a real page instead of raw JSON.
+    |
+    | Always set WEB_FRONTEND_URL explicitly per environment (local dev
+    | should point at http://localhost:5173). The fallback below is only a
+    | safety net for production so a missing env var never leaks a
+    | localhost link into a real SMS/WhatsApp message.
     */
     'web_frontend' => [
-        'url' => env('WEB_FRONTEND_URL', 'http://localhost:5173'),
+        'url' => env('WEB_FRONTEND_URL', 'https://adaptable-perception-production-7432.up.railway.app'),
     ],
 
     'resend' => [
