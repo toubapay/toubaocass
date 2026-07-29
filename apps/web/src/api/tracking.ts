@@ -15,7 +15,10 @@ export async function fetchPublicTracking(type: string, id: string, query: strin
   return data;
 }
 
-export async function fetchShareLink(kind: 'trips' | 'anando-rides' | 'dem-legui/trips', id: number | string): Promise<string> {
+export async function fetchShareLink(
+  kind: 'trips' | 'anando-rides' | 'dem-legui/trips' | 'deliveries',
+  id: number | string,
+): Promise<string> {
   const { data } = await apiClient.post(`/${kind}/${id}/share-link`);
   return data.url;
 }

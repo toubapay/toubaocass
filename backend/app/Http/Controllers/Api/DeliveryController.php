@@ -17,6 +17,7 @@ use App\Models\DriverProfile;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DeliveryPricingService;
+use App\Services\TrackingLinkService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +77,21 @@ class DeliveryController extends Controller
         abort_unless($delivery->sender_id === $request->user()->id, 404);
 
         return new DeliveryResource($delivery->load(['sender', 'driver.driverProfile']));
+    }
+
+    /**
+     * SOS-style "share this delivery's live position" link — either the
+     * sender or the courier may want to hand it to the receiver over
+     * WhatsApp/SMS. Mirrors Trip/Anando/DemLeguiTrip::shareLink() exactly.
+     */
+    public function shareLink(Request $request, Delivery $delivery, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $delivery->sender_id === $user->id || $delivery->driver_id === $user->id;
+
+        abort_unless($isParticipant, 404);
+
+        return response()->json(['url' => $trackingLinks->generateUrl('delivery', $delivery->id)]);
     }
 
     public function destroy(Request $request, Delivery $delivery, WalletService $walletService)

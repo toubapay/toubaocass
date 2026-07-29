@@ -7,6 +7,7 @@ import { cancelDelivery, fetchDelivery } from '../api/deliveries';
 import type { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
 
@@ -43,6 +44,7 @@ export function DeliveryDetailPage() {
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = () => {
     if (!id) return;
@@ -105,6 +107,22 @@ export function DeliveryDetailPage() {
         ) : (
           <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('deliveryDetail.liveMapWaiting')}</p>
         )
+      )}
+
+      {delivery.status === 'picked_up' && (
+        <div style={{ marginBottom: spacing.md }}>
+          <Button label={`📦 ${t('tracking.deliverySosButton')}`} onClick={() => setShowSos(true)} variant="outline" />
+        </div>
+      )}
+      {showSos && (
+        <SosShareModal
+          kind="deliveries"
+          rideId={delivery.id}
+          onClose={() => setShowSos(false)}
+          titleKey="tracking.deliverySosSheetTitle"
+          subtitleKey="tracking.deliverySosSheetSubtitle"
+          messageKey="tracking.deliverySosMessage"
+        />
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md }}>

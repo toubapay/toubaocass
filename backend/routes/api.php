@@ -97,6 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('trips/{trip}/share-link', [TripController::class, 'shareLink']);
     Route::post('dem-legui/trips/{demLeguiTrip}/share-link', [DemLeguiController::class, 'shareLink']);
 
+    // Livraison "share package tracking" link — either the sender or the
+    // courier may want to generate it, so it sits outside the role groups
+    // just like the ride share-links above.
+    Route::post('deliveries/{delivery}/share-link', [DeliveryController::class, 'shareLink']);
+
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
         Route::get('trips', [TripController::class, 'search']);

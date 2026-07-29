@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnandoRide;
+use App\Models\Delivery;
 use App\Models\DemLeguiTrip;
 use App\Models\Trip;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class TrackingController extends Controller
             'trip' => Trip::with(['driver', 'originCity', 'destinationCity'])->find($id),
             'anando' => AnandoRide::with(['poster', 'originCity', 'destinationCity'])->find($id),
             'dem-legui' => DemLeguiTrip::with(['driver', 'destinationCity'])->find($id),
+            'delivery' => Delivery::with(['driver'])->find($id),
             default => null,
         };
 
@@ -35,6 +37,7 @@ class TrackingController extends Controller
             'trip' => $ride->status === Trip::STATUS_IN_PROGRESS,
             'anando' => $ride->status === AnandoRide::STATUS_IN_PROGRESS,
             'dem-legui' => $ride->status === DemLeguiTrip::STATUS_IN_PROGRESS,
+            'delivery' => $ride->status === Delivery::STATUS_PICKED_UP,
         };
 
         if (! $isInProgress) {
@@ -50,13 +53,18 @@ class TrackingController extends Controller
         }
 
         $personName = $type === 'anando' ? $ride->poster->name : $ride->driver->name;
-        $originCity = $type === 'dem-legui' ? null : $ride->originCity?->name;
+        $originCity = match ($type) {
+            'dem-legui' => null,
+            'delivery' => $ride->pickup_address_line,
+            default => $ride->originCity?->name,
+        };
+        $destinationCity = $type === 'delivery' ? $ride->receiver_address_line : $ride->destinationCity?->name;
 
         return response()->json([
             'trackable' => true,
             'person_name' => $personName,
             'origin_city' => $originCity,
-            'destination_city' => $ride->destinationCity?->name,
+            'destination_city' => $destinationCity,
             'current_latitude' => $ride->current_latitude,
             'current_longitude' => $ride->current_longitude,
             'current_location_updated_at' => $ride->current_location_updated_at,

@@ -9,6 +9,7 @@ import { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
+import { SosShareModal } from '../components/SosShareModal';
 import { ServicesStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 
@@ -30,6 +31,7 @@ export function DeliveryDetailScreen({ route }: Props) {
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showSos, setShowSos] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -98,6 +100,21 @@ export function DeliveryDetailScreen({ route }: Props) {
           ) : (
             <Text style={styles.liveMapWaiting}>{t('deliveryDetail.liveMapWaiting')}</Text>
           ))}
+
+        {delivery.status === 'picked_up' && (
+          <View style={styles.sosButtonWrap}>
+            <Button label={`📦 ${t('tracking.deliverySosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
+          </View>
+        )}
+        <SosShareModal
+          kind="deliveries"
+          rideId={delivery.id}
+          visible={showSos}
+          onClose={() => setShowSos(false)}
+          titleKey="tracking.deliverySosSheetTitle"
+          subtitleKey="tracking.deliverySosSheetSubtitle"
+          messageKey="tracking.deliverySosMessage"
+        />
 
         <View style={styles.headerRow}>
           <Text style={styles.title}>{t('deliveryDetail.titleWithId', { id: delivery.id })}</Text>
@@ -201,4 +218,5 @@ const styles = StyleSheet.create({
   },
   contactButtonText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  sosButtonWrap: { marginBottom: spacing.md },
 });

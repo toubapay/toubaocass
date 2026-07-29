@@ -9,6 +9,7 @@ use App\Models\Car;
 use App\Models\City;
 use App\Models\DemLeguiRequest;
 use App\Models\DemLeguiTrip;
+use App\Models\Delivery;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,6 +116,34 @@ class ShareLinkTest extends TestCase
 
         $this->actingAs($stranger, 'sanctum')
             ->postJson("/api/dem-legui/trips/{$trip->id}/share-link")
+            ->assertNotFound();
+    }
+
+    public function test_a_deliverys_sender_and_courier_can_generate_a_share_link(): void
+    {
+        $driver = User::factory()->driver()->create();
+        $delivery = Delivery::factory()->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_PICKED_UP]);
+
+        $this->actingAs($delivery->sender, 'sanctum')
+            ->postJson("/api/deliveries/{$delivery->id}/share-link")
+            ->assertOk();
+
+        $response = $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/deliveries/{$delivery->id}/share-link")
+            ->assertOk();
+
+        $this->assertStringContainsString("/track/delivery/{$delivery->id}", $response->json('url'));
+        $this->assertStringContainsString('signature=', $response->json('url'));
+    }
+
+    public function test_a_stranger_cannot_generate_a_deliverys_share_link(): void
+    {
+        $driver = User::factory()->driver()->create();
+        $delivery = Delivery::factory()->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_PICKED_UP]);
+        $stranger = User::factory()->create();
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/deliveries/{$delivery->id}/share-link")
             ->assertNotFound();
     }
 }

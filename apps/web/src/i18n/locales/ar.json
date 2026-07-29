@@ -486,6 +486,10 @@
     "sosWhatsapp": "مشاركة عبر واتساب",
     "sosSms": "مشاركة عبر رسالة نصية",
     "sosMessage": "تابع رحلتي مباشرة على Intercity: {{url}}",
-    "sosError": "تعذر إنشاء رابط التتبع."
+    "sosError": "تعذر إنشاء رابط التتبع.",
+    "deliverySosButton": "تتبع التوصيل",
+    "deliverySosSheetTitle": "مشاركة تتبع التوصيل",
+    "deliverySosSheetSubtitle": "أرسل هذا الرابط للمستلم ليتمكن من تتبع الطرد مباشرة لمدة 24 ساعة.",
+    "deliverySosMessage": "تابع توصيلي مباشرة على Intercity: {{url}}"
   }
 }

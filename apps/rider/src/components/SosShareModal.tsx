@@ -21,11 +21,17 @@ export function SosShareModal({
   rideId,
   visible,
   onClose,
+  titleKey = 'tracking.sosSheetTitle',
+  subtitleKey = 'tracking.sosSheetSubtitle',
+  messageKey = 'tracking.sosMessage',
 }: {
   kind: ShareableRideKind;
   rideId: number | string;
   visible: boolean;
   onClose: () => void;
+  titleKey?: string;
+  subtitleKey?: string;
+  messageKey?: string;
 }) {
   const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
@@ -48,14 +54,14 @@ export function SosShareModal({
     };
   }, [visible, kind, rideId]);
 
-  const message = url ? t('tracking.sosMessage', { url }) : '';
+  const message = url ? t(messageKey, { url }) : '';
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>{t('tracking.sosSheetTitle')}</Text>
-          <Text style={styles.subtitle}>{t('tracking.sosSheetSubtitle')}</Text>
+          <Text style={styles.title}>{t(titleKey)}</Text>
+          <Text style={styles.subtitle}>{t(subtitleKey)}</Text>
 
           {!url && !error && <ActivityIndicator color={colors.primary} style={styles.spinner} />}
           {error && <Text style={styles.error}>{error}</Text>}

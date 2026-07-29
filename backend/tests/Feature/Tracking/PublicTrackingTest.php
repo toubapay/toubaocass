@@ -6,6 +6,7 @@ use App\Models\AnandoRide;
 use App\Models\Car;
 use App\Models\City;
 use App\Models\DemLeguiTrip;
+use App\Models\Delivery;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -120,6 +121,40 @@ class PublicTrackingTest extends TestCase
             'person_name' => $driver->name,
             'origin_city' => null,
             'destination_city' => $trip->destinationCity->name,
+        ]);
+    }
+
+    public function test_a_picked_up_delivery_is_trackable_with_address_lines_as_the_route(): void
+    {
+        $driver = User::factory()->driver()->create();
+        $delivery = Delivery::factory()->create([
+            'driver_id' => $driver->id,
+            'status' => Delivery::STATUS_PICKED_UP,
+            'current_latitude' => 14.68,
+            'current_longitude' => -17.45,
+        ]);
+
+        $url = URL::temporarySignedRoute('public.track', now()->addHours(24), ['type' => 'delivery', 'id' => $delivery->id]);
+
+        $this->getJson($url)->assertOk()->assertJson([
+            'trackable' => true,
+            'person_name' => $driver->name,
+            'origin_city' => $delivery->pickup_address_line,
+            'destination_city' => $delivery->receiver_address_line,
+            'current_latitude' => 14.68,
+            'current_longitude' => -17.45,
+        ]);
+    }
+
+    public function test_a_delivery_not_yet_picked_up_is_not_trackable(): void
+    {
+        $delivery = Delivery::factory()->create(['status' => Delivery::STATUS_ACCEPTED]);
+
+        $url = URL::temporarySignedRoute('public.track', now()->addHours(24), ['type' => 'delivery', 'id' => $delivery->id]);
+
+        $this->getJson($url)->assertOk()->assertJson([
+            'trackable' => false,
+            'person_name' => null,
         ]);
     }
 }

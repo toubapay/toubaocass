@@ -473,6 +473,10 @@
     "sosWhatsapp": "Partager via WhatsApp",
     "sosSms": "Partager via SMS",
     "sosMessage": "Suivez mon trajet en direct sur Intercity : {{url}}",
-    "sosError": "Impossible de générer le lien de suivi."
+    "sosError": "Impossible de générer le lien de suivi.",
+    "deliverySosButton": "Suivre la livraison",
+    "deliverySosSheetTitle": "Partager le suivi de la livraison",
+    "deliverySosSheetSubtitle": "Envoyez ce lien au destinataire pour qu'il puisse suivre le colis en direct pendant 24 heures.",
+    "deliverySosMessage": "Suivez ma livraison en direct sur Intercity : {{url}}"
   }
 }
