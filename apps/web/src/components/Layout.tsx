@@ -13,22 +13,35 @@ const NAV_ITEMS = [
   { to: '/profile', labelKey: 'nav.profile', icon: '👤', end: false },
 ];
 
-const DELIVERIES_NAV_ITEM = { to: '/deliveries', labelKey: 'myDeliveries.title', icon: '📦', end: false };
+type NavItem = (typeof NAV_ITEMS)[number] & { state?: Record<string, unknown> };
 
-function isInLivraisonModule(pathname: string): boolean {
-  return (
-    pathname.startsWith('/services/livraison') ||
-    pathname.startsWith('/deliveries')
-  );
+// Swaps the "Bookings" tab for a module-specific "my trip(s)" link while the
+// user is browsing that module — first matching prefix wins.
+const MODULE_NAV_OVERRIDES: Array<{ matches: (pathname: string) => boolean; item: NavItem }> = [
+  {
+    matches: (p) => p.startsWith('/services/livraison') || p.startsWith('/deliveries'),
+    item: { to: '/deliveries', labelKey: 'myDeliveries.title', icon: '📦', end: false },
+  },
+  {
+    matches: (p) => p.startsWith('/services/anando'),
+    item: { to: '/services/anando', labelKey: 'anando.myTripNav', icon: '🚗', end: false, state: { initialTab: 'mine' } },
+  },
+  {
+    matches: (p) => p.startsWith('/services/dem-legui'),
+    item: { to: '/services/dem-legui', labelKey: 'demLegui.myTripNav', icon: '🚕', end: false },
+  },
+];
+
+function moduleNavOverride(pathname: string): NavItem | null {
+  return MODULE_NAV_OVERRIDES.find((override) => override.matches(pathname))?.item ?? null;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
 
-  const navItems = isInLivraisonModule(location.pathname)
-    ? NAV_ITEMS.map((item) => (item.to === '/bookings' ? DELIVERIES_NAV_ITEM : item))
-    : NAV_ITEMS;
+  const override = moduleNavOverride(location.pathname);
+  const navItems: NavItem[] = override ? NAV_ITEMS.map((item) => (item.to === '/bookings' ? override : item)) : NAV_ITEMS;
 
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -131,6 +144,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               key={item.to}
               to={item.to}
               end={item.end}
+              state={item.state}
               style={({ isActive }) => ({
                 flex: 1,
                 display: 'flex',

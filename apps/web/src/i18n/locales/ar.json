@@ -99,6 +99,10 @@
       "noActiveBooking": "لا يوجد حجز نشط",
       "lastTrip": "آخر رحلة",
       "noLastTrip": "لم تقم بأي رحلة بعد",
+      "myAnandoTrip": "رحلتي في Anando",
+      "noActiveAnandoTrip": "لا توجد رحلة Anando نشطة",
+      "myDemLeguiTrip": "رحلتي في Dem Légui",
+      "noActiveDemLeguiTrip": "لا يوجد طلب Dem Légui نشط",
       "myPosition": "موقعي",
       "locating": "جارٍ تحديد الموقع…",
       "showPosition": "عرض على الخريطة",
@@ -305,10 +309,12 @@
     "etaMinutes": "الوصول خلال {{minutes}} د",
     "searchingBadge": "جارٍ البحث…",
     "waitingForDriverBadge": "في انتظار سائق",
-    "driverArrivingBadge": "السائق في الطريق"
+    "driverArrivingBadge": "السائق في الطريق",
+    "myTripNav": "🚕 رحلتي"
   },
   "anando": {
     "title": "أناندو",
+    "myTripNav": "🚗 رحلتي",
     "subtitle": "شارك رحلة فورية أو انضم إلى رحلة شخص آخر — مثل التشارك في السيارة.",
     "postTitle": "نشر رحلة أناندو",
     "origin": "الانطلاق",

@@ -99,6 +99,10 @@
       "noActiveBooking": "Aucune réservation active",
       "lastTrip": "Dernier trajet",
       "noLastTrip": "Aucun trajet effectué",
+      "myAnandoTrip": "Mon trajet Anando",
+      "noActiveAnandoTrip": "Aucun trajet Anando actif",
+      "myDemLeguiTrip": "Ma course Dem Légui",
+      "noActiveDemLeguiTrip": "Aucune course Dem Légui active",
       "myPosition": "Ma position",
       "locating": "Localisation…",
       "showPosition": "Voir sur la carte",
@@ -305,10 +309,12 @@
     "etaMinutes": "Arrivée dans {{minutes}} min",
     "searchingBadge": "Recherche…",
     "waitingForDriverBadge": "En attente d'un conducteur",
-    "driverArrivingBadge": "Conducteur en route"
+    "driverArrivingBadge": "Conducteur en route",
+    "myTripNav": "🚕 Mon trajet"
   },
   "anando": {
     "title": "Anando",
+    "myTripNav": "🚗 Mon trajet",
     "subtitle": "Partagez un trajet instantané ou rejoignez celui de quelqu'un d'autre — comme du covoiturage.",
     "postTitle": "Publier un trajet Anando",
     "origin": "Départ",
