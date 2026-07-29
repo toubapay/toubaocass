@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
@@ -13,8 +13,22 @@ const NAV_ITEMS = [
   { to: '/profile', labelKey: 'nav.profile', icon: '👤', end: false },
 ];
 
+const DELIVERIES_NAV_ITEM = { to: '/deliveries', labelKey: 'myDeliveries.title', icon: '📦', end: false };
+
+function isInLivraisonModule(pathname: string): boolean {
+  return (
+    pathname.startsWith('/services/livraison') ||
+    pathname.startsWith('/deliveries')
+  );
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
+  const location = useLocation();
+
+  const navItems = isInLivraisonModule(location.pathname)
+    ? NAV_ITEMS.map((item) => (item.to === '/bookings' ? DELIVERIES_NAV_ITEM : item))
+    : NAV_ITEMS;
 
   return (
     <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -112,7 +126,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             gap: 2,
           }}
         >
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
