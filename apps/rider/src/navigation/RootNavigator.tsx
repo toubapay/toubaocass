@@ -113,7 +113,18 @@ function ServicesNavigator() {
           ),
         })}
       />
-      <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
+      <ServicesStackNav.Screen
+        name="NewDelivery"
+        component={NewDeliveryScreen}
+        options={({ navigation }) => ({
+          title: t('nav.screenTitles.newDelivery'),
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate('MyDeliveries')}>
+              <Ionicons name="receipt-outline" size={22} color={colors.accent} />
+            </Pressable>
+          ),
+        })}
+      />
       <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
       <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
       <ServicesStackNav.Screen

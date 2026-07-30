@@ -237,6 +237,7 @@
   },
   "newDelivery": {
     "title": "Nouvelle livraison",
+    "myDeliveriesLink": "Mes livraisons",
     "sender": "Expéditeur",
     "pickupAddress": "Adresse de ramassage",
     "receiver": "Destinataire",

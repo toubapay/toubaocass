@@ -241,6 +241,7 @@
   },
   "newDelivery": {
     "title": "توصيل جديد",
+    "myDeliveriesLink": "طلباتي",
     "sender": "المرسل",
     "pickupAddress": "عنوان الاستلام",
     "receiver": "المستلم",
