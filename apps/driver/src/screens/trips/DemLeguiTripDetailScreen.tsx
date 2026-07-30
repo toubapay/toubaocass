@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
 import {
+  arriveAtDemLeguiPickup,
   completeDemLeguiTrip,
   fetchDemLeguiTrip,
   startDemLeguiTrip,
@@ -31,6 +32,7 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [arriving, setArriving] = useState(false);
   const [showSos, setShowSos] = useState(false);
 
   const load = () => {
@@ -95,6 +97,18 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
     }
   };
 
+  const handleArrive = async () => {
+    setArriving(true);
+    try {
+      const updated = await arriveAtDemLeguiPickup(trip.id);
+      setTrip(updated);
+    } catch (e) {
+      Alert.alert(t('deliveryDetail.actionFailedTitle'), extractErrorMessage(e));
+    } finally {
+      setArriving(false);
+    }
+  };
+
   const handleComplete = async () => {
     setCompleting(true);
     try {
@@ -136,6 +150,10 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
           {t(`demLegui.tripStatus.${trip.status}`)} · {t('demLegui.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
         </Text>
 
+        {trip.arrived_at != null && trip.status === 'open' && (
+          <Text style={styles.arrivedBadge}>🚩 {t('trips.detail.arrivedBadge')}</Text>
+        )}
+
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>{t('demLegui.passengers', { count: trip.requests?.length ?? 0 })}</Text>
           {(trip.requests ?? []).length === 0 ? (
@@ -164,6 +182,15 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
           />
         )}
 
+        {trip.status === 'open' && trip.arrived_at == null && (
+          <Button
+            label={`🚩 ${t('trips.detail.markArrived')}`}
+            onPress={handleArrive}
+            loading={arriving}
+            variant="outline"
+            style={styles.button}
+          />
+        )}
         {trip.status === 'open' && <Button label={t('anando.startTrip')} onPress={handleStart} loading={starting} style={styles.button} />}
         {trip.status === 'in_progress' && (
           <Button label={t('anando.completeTrip')} onPress={handleComplete} loading={completing} style={styles.button} />
@@ -177,6 +204,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: '800', color: colors.text, marginBottom: 2 },
   subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: spacing.md },
+  arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginBottom: spacing.md },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
   card: {
     backgroundColor: colors.surface,

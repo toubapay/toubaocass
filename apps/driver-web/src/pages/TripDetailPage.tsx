@@ -3,13 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { cancelTrip, completeTrip, fetchMyTrip, startTrip } from '../api/trips';
+import { arriveTrip, cancelTrip, completeTrip, fetchMyTrip, startTrip, updateTripLocation } from '../api/trips';
 import type { Trip } from '../api/types';
 import { Button } from '../components/Button';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { colors, radius, spacing } from '../theme';
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function TripDetailPage() {
   const { t } = useTranslation();
@@ -30,6 +32,28 @@ export function TripDetailPage() {
   }, [tripId]);
 
   useEffect(load, [load]);
+
+  // Foreground-only, best-effort position ping while the trip is under way
+  // — same "recent position on an interval" pattern already used for
+  // Anando/Dem Légui/Delivery, no background tracking.
+  useEffect(() => {
+    if (trip?.status !== 'in_progress' || !('geolocation' in navigator)) return;
+    const id = trip.id;
+
+    const report = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateTripLocation(id, position.coords.latitude, position.coords.longitude).catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 10000 },
+      );
+    };
+
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [trip?.status, trip?.id]);
 
   const runAction = async (action: () => Promise<unknown>) => {
     setActionError(undefined);
@@ -75,6 +99,12 @@ export function TripDetailPage() {
         {trip.departure_date} à {trip.departure_time} · {t(`common.tripStatus.${trip.status}`)}
       </p>
       <TripUrgencyBadge trip={trip} />
+
+      {trip.arrived_at != null && ['scheduled', 'full'].includes(trip.status) && (
+        <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.primary, marginBottom: spacing.sm }}>
+          🚩 {t('trips.detail.arrivedBadge')}
+        </p>
+      )}
 
       {trip.status === 'in_progress' && (
         <div style={{ marginBottom: spacing.md }}>
@@ -202,6 +232,9 @@ export function TripDetailPage() {
       {actionError && <p style={{ fontSize: 14, color: colors.danger, marginBottom: spacing.sm }}>{actionError}</p>}
 
       <div style={{ marginTop: spacing.lg, display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+        {['scheduled', 'full'].includes(trip.status) && trip.arrived_at == null && (
+          <Button label={`🚩 ${t('trips.detail.markArrived')}`} onClick={() => runAction(() => arriveTrip(Number(tripId)))} loading={actionLoading} variant="outline" />
+        )}
         {['scheduled', 'full'].includes(trip.status) && (
           <Button label={t('trips.detail.startTrip')} onClick={() => runAction(() => startTrip(Number(tripId)))} loading={actionLoading} />
         )}

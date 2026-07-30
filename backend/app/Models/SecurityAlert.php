@@ -18,6 +18,8 @@ class SecurityAlert extends Model
 
     const TYPE_KYC_REJECTED = 'kyc_rejected';
 
+    const TYPE_RIDER_SOS = 'rider_sos';
+
     const SEVERITY_LOW = 'low';
 
     const SEVERITY_MEDIUM = 'medium';

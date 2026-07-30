@@ -58,6 +58,11 @@ export async function cancelTrip(tripId: number): Promise<void> {
   await apiClient.delete(`/driver/trips/${tripId}`);
 }
 
+export async function arriveTrip(tripId: number): Promise<Trip> {
+  const { data } = await apiClient.post(`/driver/trips/${tripId}/arrived`);
+  return data;
+}
+
 export async function startTrip(tripId: number): Promise<Trip> {
   const { data } = await apiClient.post(`/driver/trips/${tripId}/start`);
   return data;
@@ -66,4 +71,8 @@ export async function startTrip(tripId: number): Promise<Trip> {
 export async function completeTrip(tripId: number): Promise<Trip> {
   const { data } = await apiClient.post(`/driver/trips/${tripId}/complete`);
   return data;
+}
+
+export async function updateTripLocation(tripId: number, latitude: number, longitude: number): Promise<void> {
+  await apiClient.post(`/driver/trips/${tripId}/location`, { latitude, longitude });
 }

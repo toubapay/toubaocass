@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { DemLeguiRequest, DemLeguiTrip, Message, PaymentMethod } from './types';
+import type { DemLeguiRequest, DemLeguiTrip, Message, PaymentMethod, Paginated } from './types';
 
 export interface QuoteDemLeguiParams {
   pickup_latitude: number;
@@ -42,6 +42,11 @@ export async function fetchDemLeguiRequest(requestId: number): Promise<DemLeguiR
 export async function fetchMyActiveDemLeguiRequest(): Promise<DemLeguiRequest | null> {
   const { data } = await apiClient.get('/dem-legui/requests/mine/active');
   return data.data;
+}
+
+export async function fetchMyDemLeguiRequests(): Promise<Paginated<DemLeguiRequest>> {
+  const { data } = await apiClient.get('/dem-legui/requests/mine');
+  return data;
 }
 
 export async function cancelDemLeguiRequest(requestId: number): Promise<void> {

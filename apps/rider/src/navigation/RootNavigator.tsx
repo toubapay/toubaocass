@@ -23,6 +23,7 @@ import { InstantDeparturesScreen } from '../screens/InstantDeparturesScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { MyDeliveriesScreen } from '../screens/MyDeliveriesScreen';
+import { MyRideBookingsScreen } from '../screens/MyRideBookingsScreen';
 import { NewDeliveryScreen } from '../screens/NewDeliveryScreen';
 import { NewDemLeguiRequestScreen } from '../screens/NewDemLeguiRequestScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -115,11 +116,34 @@ function ServicesNavigator() {
       <ServicesStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
       <ServicesStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
       <ServicesStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
-      <ServicesStackNav.Screen name="Anando" component={AnandoScreen} options={{ title: t('nav.screenTitles.anando') }} />
+      <ServicesStackNav.Screen
+        name="Anando"
+        component={AnandoScreen}
+        options={({ navigation }) => ({
+          title: t('nav.screenTitles.anando'),
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate('MyRideBookings')}>
+              <Ionicons name="receipt-outline" size={22} color={colors.accent} />
+            </Pressable>
+          ),
+        })}
+      />
       <ServicesStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
-      <ServicesStackNav.Screen name="NewDemLeguiRequest" component={NewDemLeguiRequestScreen} options={{ title: t('nav.screenTitles.demLegui') }} />
+      <ServicesStackNav.Screen
+        name="NewDemLeguiRequest"
+        component={NewDemLeguiRequestScreen}
+        options={({ navigation }) => ({
+          title: t('nav.screenTitles.demLegui'),
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate('MyRideBookings')}>
+              <Ionicons name="receipt-outline" size={22} color={colors.accent} />
+            </Pressable>
+          ),
+        })}
+      />
       <ServicesStackNav.Screen name="DemLeguiRequestDetail" component={DemLeguiRequestDetailScreen} options={{ title: t('nav.screenTitles.demLeguiRequestDetail') }} />
       <ServicesStackNav.Screen name="DemLeguiChat" component={DemLeguiChatScreen} options={{ title: t('nav.screenTitles.chat') }} />
+      <ServicesStackNav.Screen name="MyRideBookings" component={MyRideBookingsScreen} options={{ title: t('nav.screenTitles.myRideBookings') }} />
     </ServicesStackNav.Navigator>
   );
 }
@@ -134,6 +158,9 @@ function ProfileNavigator() {
       <ProfileStackNav.Screen name="MyDeliveries" component={MyDeliveriesScreen} options={{ title: t('nav.screenTitles.myDeliveries') }} />
       <ProfileStackNav.Screen name="DeliveryDetail" component={DeliveryDetailScreen} options={{ title: t('nav.screenTitles.deliveryDetail') }} />
       <ProfileStackNav.Screen name="NewDelivery" component={NewDeliveryScreen} options={{ title: t('nav.screenTitles.newDelivery') }} />
+      <ProfileStackNav.Screen name="MyRideBookings" component={MyRideBookingsScreen} options={{ title: t('nav.screenTitles.myRideBookings') }} />
+      <ProfileStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
+      <ProfileStackNav.Screen name="DemLeguiRequestDetail" component={DemLeguiRequestDetailScreen} options={{ title: t('nav.screenTitles.demLeguiRequestDetail') }} />
     </ProfileStackNav.Navigator>
   );
 }

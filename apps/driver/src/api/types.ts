@@ -83,6 +83,10 @@ export interface Trip {
   created_at: string;
   bookings?: Booking[];
   bookings_count?: number;
+  current_latitude: number | null;
+  current_longitude: number | null;
+  current_location_updated_at: string | null;
+  arrived_at: string | null;
 }
 
 export interface Booking {
@@ -279,6 +283,7 @@ export interface DemLeguiTrip {
   current_latitude: number | null;
   current_longitude: number | null;
   current_location_updated_at: string | null;
+  arrived_at: string | null;
   created_at: string;
   requests?: DemLeguiRequest[];
 }

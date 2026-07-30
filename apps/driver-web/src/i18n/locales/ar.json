@@ -254,6 +254,8 @@
       "tripSection": "الرحلة",
       "seatsAvailable": "{{available}} مقعد متاح من أصل {{total}}",
       "chat": "💬 محادثة",
+      "markArrived": "لقد وصلت",
+      "arrivedBadge": "لقد أبلغت عن وصولك إلى نقطة اللقاء",
       "startTrip": "بدء الرحلة",
       "completeTrip": "إنهاء الرحلة",
       "cancelTrip": "إلغاء الرحلة",
@@ -486,6 +488,9 @@
     "sosWhatsapp": "مشاركة عبر واتساب",
     "sosSms": "مشاركة عبر رسالة نصية",
     "sosMessage": "تابع رحلتي مباشرة على Intercity: {{url}}",
-    "sosError": "تعذر إنشاء رابط التتبع."
+    "sosError": "تعذر إنشاء رابط التتبع.",
+    "sosAlertAdmin": "إرسال تنبيه SOS إلى المسؤول",
+    "sosAlertConfirm": "هل تريد إرسال تنبيه SOS إلى فريق الأمان؟ استخدم هذا فقط في حالة طوارئ حقيقية.",
+    "sosAlertSent": "تم إرسال تنبيه SOS. تم إخطار فريقنا."
   }
 }

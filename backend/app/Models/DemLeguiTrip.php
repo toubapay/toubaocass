@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'driver_id', 'car_id', 'destination_city_id', 'total_seats', 'available_seats',
     'price_per_seat', 'status', 'started_at', 'completed_at',
     'current_latitude', 'current_longitude', 'current_location_updated_at',
+    'arrived_at',
 ])]
 class DemLeguiTrip extends Model
 {
@@ -30,6 +31,7 @@ class DemLeguiTrip extends Model
             'current_latitude' => 'float',
             'current_longitude' => 'float',
             'current_location_updated_at' => 'datetime',
+            'arrived_at' => 'datetime',
         ];
     }
 

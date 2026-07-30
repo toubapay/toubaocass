@@ -70,6 +70,7 @@
       "anandoRideDetail": "Détails du trajet Anando",
       "demLegui": "Dem Légui",
       "demLeguiRequestDetail": "Détails de la demande",
+      "myRideBookings": "Mes réservations",
       "profile": "Mon profil",
       "settings": "Paramètres"
     }
@@ -108,6 +109,7 @@
     "title": "Mon profil",
     "wallet": "Mon portefeuille",
     "myDeliveries": "📦 Mes livraisons",
+    "myRideBookings": "🧾 Mes réservations",
     "settings": "⚙️ Paramètres",
     "notificationsEnabled": "🔔 Notifications activées",
     "notificationsBlocked": "Notifications bloquées. Autorisez-les dans les réglages de votre navigateur pour être prévenu(e) de vos réservations.",
@@ -165,6 +167,8 @@
     "reserveButton": "⚡ Réserver — {{amount}} FCFA",
     "bookedSeats": "✓ Vous avez réservé {{count}} place(s) sur ce trajet",
     "chatWithDriver": "💬 Discuter avec le conducteur",
+    "driverArrivedBadge": "Le conducteur est arrivé au point de rendez-vous",
+    "liveMapWaiting": "En attente de la position du conducteur…",
     "itinerary": "Itinéraire",
     "drivingDuration": " · ~{{duration}} de route",
     "departurePoint": "Point de départ",
@@ -264,6 +268,13 @@
     "title": "Mes livraisons",
     "empty": "Vous n'avez pas encore de livraison."
   },
+  "myRideBookings": {
+    "title": "Mes réservations",
+    "anandoSection": "Anando",
+    "anandoEmpty": "Vous n'avez réservé aucun trajet Anando.",
+    "demLeguiSection": "Dem Légui",
+    "demLeguiEmpty": "Vous n'avez aucune course Dem Légui."
+  },
   "newDelivery": {
     "title": "Nouvelle livraison",
     "sender": "Expéditeur",
@@ -355,6 +366,7 @@
     "searchingBadge": "Recherche…",
     "waitingForDriverBadge": "En attente d'un conducteur",
     "driverArrivingBadge": "Conducteur en route",
+    "driverArrivedBadge": "Le conducteur est arrivé",
     "inProgressBadge": "Course en cours"
   },
   "anando": {
@@ -529,6 +541,9 @@
     "sosSms": "Partager via SMS",
     "sosMessage": "Suivez mon trajet en direct sur Intercity : {{url}}",
     "sosError": "Impossible de générer le lien de suivi.",
+    "sosAlertAdmin": "Alerte SOS à l'administrateur",
+    "sosAlertConfirm": "Envoyer une alerte SOS à l'équipe de sécurité ? Utilisez ceci uniquement en cas d'urgence réelle.",
+    "sosAlertSent": "Alerte SOS envoyée. Notre équipe a été prévenue.",
     "deliverySosButton": "Suivre la livraison",
     "deliverySosSheetTitle": "Partager le suivi de la livraison",
     "deliverySosSheetSubtitle": "Envoyez ce lien au destinataire pour qu'il puisse suivre le colis en direct pendant 24 heures.",

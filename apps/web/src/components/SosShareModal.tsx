@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { fetchShareLink } from '../api/tracking';
+import { fetchShareLink, sendSosAlert } from '../api/tracking';
 import { colors, radius, spacing } from '../theme';
 import { Button } from './Button';
 import { CenteredSpinner } from './Spinner';
@@ -38,6 +38,8 @@ export function SosShareModal({
   const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertSent, setAlertSent] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +56,26 @@ export function SosShareModal({
   }, [kind, rideId]);
 
   const message = url ? t(messageKey, { url }) : '';
+
+  const handleSendAlert = () => {
+    if (!window.confirm(t('tracking.sosAlertConfirm') as string)) return;
+    setSendingAlert(true);
+    const send = (latitude?: number, longitude?: number) =>
+      sendSosAlert(kind, rideId, latitude, longitude)
+        .then(() => setAlertSent(true))
+        .catch((err) => setError(extractErrorMessage(err)))
+        .finally(() => setSendingAlert(false));
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => send(position.coords.latitude, position.coords.longitude),
+        () => send(),
+        { enableHighAccuracy: false, timeout: 5000 },
+      );
+    } else {
+      send();
+    }
+  };
 
   return createPortal(
     <div
@@ -88,6 +110,22 @@ export function SosShareModal({
 
         {!url && !error && <CenteredSpinner />}
         {error && <p style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.md }}>{error}</p>}
+
+        {alertSent && (
+          <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.success, marginBottom: spacing.md }}>
+            ✓ {t('tracking.sosAlertSent')}
+          </p>
+        )}
+
+        <div style={{ marginBottom: spacing.md }}>
+          <Button
+            label={`🆘 ${t('tracking.sosAlertAdmin')}`}
+            onClick={handleSendAlert}
+            loading={sendingAlert}
+            disabled={alertSent}
+            variant="danger"
+          />
+        </div>
 
         {url && (
           <>

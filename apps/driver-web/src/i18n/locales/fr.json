@@ -254,6 +254,8 @@
       "tripSection": "Trajet",
       "seatsAvailable": "{{available}} place(s) disponible(s) sur {{total}}",
       "chat": "💬 Discuter",
+      "markArrived": "Je suis arrivé",
+      "arrivedBadge": "Vous avez signalé votre arrivée au point de rendez-vous",
       "startTrip": "Démarrer le trajet",
       "completeTrip": "Terminer le trajet",
       "cancelTrip": "Annuler le trajet",
@@ -476,6 +478,9 @@
     "sosWhatsapp": "Partager via WhatsApp",
     "sosSms": "Partager via SMS",
     "sosMessage": "Suivez mon trajet en direct sur Intercity : {{url}}",
-    "sosError": "Impossible de générer le lien de suivi."
+    "sosError": "Impossible de générer le lien de suivi.",
+    "sosAlertAdmin": "Alerte SOS à l'administrateur",
+    "sosAlertConfirm": "Envoyer une alerte SOS à l'équipe de sécurité ? Utilisez ceci uniquement en cas d'urgence réelle.",
+    "sosAlertSent": "Alerte SOS envoyée. Notre équipe a été prévenue."
   }
 }

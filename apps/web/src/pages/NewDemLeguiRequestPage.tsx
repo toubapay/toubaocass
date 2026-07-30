@@ -125,12 +125,20 @@ export function NewDemLeguiRequestPage() {
 
   return (
     <div>
-      <button
-        onClick={() => navigate(-1)}
-        style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
-      >
-        ←
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0 }}
+        >
+          ←
+        </button>
+        <button
+          onClick={() => navigate('/ride-bookings')}
+          style={{ border: 'none', background: 'none', color: colors.primary, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', padding: 0 }}
+        >
+          🧾 {t('demLegui.myBookingsLink')}
+        </button>
+      </div>
 
       <h1 style={{ fontSize: 25, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('demLegui.title')}</h1>
       <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 0, marginBottom: spacing.lg }}>{t('demLegui.subtitle')}</p>

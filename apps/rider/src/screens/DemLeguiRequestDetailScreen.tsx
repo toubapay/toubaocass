@@ -164,6 +164,10 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
         </View>
         <Text style={styles.subtitle}>{t(`demLegui.status.${request.status}`)}</Text>
 
+        {trip?.arrived_at != null && trip.status === 'open' && (
+          <Text style={styles.arrivedBadge}>🚩 {t('demLegui.driverArrivedBadge')}</Text>
+        )}
+
         {request.status === 'pending' && (
           <View style={styles.card}>
             <Text style={styles.line}>{t('demLegui.searchingForDriver')}</Text>
@@ -223,6 +227,7 @@ const styles = StyleSheet.create({
   searchingBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 0 },
   searchingBadgeText: { fontSize: 11, fontWeight: '700', color: colors.primary },
   subtitle: { fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: spacing.md },
+  arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginTop: -8, marginBottom: spacing.md },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
   card: {
     backgroundColor: colors.surface,

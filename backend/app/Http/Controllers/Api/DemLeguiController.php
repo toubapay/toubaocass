@@ -16,9 +16,11 @@ use App\Models\City;
 use App\Models\DemLeguiRequest;
 use App\Models\DemLeguiTrip;
 use App\Models\DriverProfile;
+use App\Models\SecurityAlert;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DemLeguiPricingService;
+use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Services\WalletService;
 use App\Support\Geo;
@@ -100,6 +102,21 @@ class DemLeguiController extends Controller
         return response()->json([
             'data' => $activeRequest ? new DemLeguiRequestResource($activeRequest) : null,
         ]);
+    }
+
+    /**
+     * Rider-facing: full history (past + active) of the rider's own Dem
+     * Légui requests — powers a "my bookings" list, unlike
+     * myActiveRequest() above which only ever returns at most one row.
+     */
+    public function myRequests(Request $request)
+    {
+        $requests = $request->user()->demLeguiRequests()
+            ->with(['rider', 'destinationCity', 'trip.driver.driverProfile'])
+            ->latest()
+            ->paginate(20);
+
+        return DemLeguiRequestResource::collection($requests);
     }
 
     /**
@@ -287,6 +304,24 @@ class DemLeguiController extends Controller
         return DemLeguiTripResource::collection($trips);
     }
 
+    /**
+     * Driver marks having reached the rider's pickup point — an
+     * informational checkpoint distinct from startTrip() (which actually
+     * gets the ride moving), so it's only meaningful while still en route.
+     */
+    public function arrivedAtPickup(Request $request, DemLeguiTrip $demLeguiTrip)
+    {
+        abort_unless($demLeguiTrip->driver_id === $request->user()->id, 404);
+
+        if ($demLeguiTrip->status !== DemLeguiTrip::STATUS_OPEN) {
+            return response()->json(['message' => "Ce trajet Dem Légui n'est plus en attente de prise en charge."], 422);
+        }
+
+        $demLeguiTrip->update(['arrived_at' => now()]);
+
+        return new DemLeguiTripResource($demLeguiTrip->load(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
+    }
+
     public function startTrip(Request $request, DemLeguiTrip $demLeguiTrip)
     {
         abort_unless($demLeguiTrip->driver_id === $request->user()->id, 404);
@@ -354,5 +389,40 @@ class DemLeguiController extends Controller
         abort_unless($isParticipant, 404);
 
         return response()->json(['url' => $trackingLinks->generateUrl('dem-legui', $demLeguiTrip->id)]);
+    }
+
+    /**
+     * Panic button: the driver or any attached rider signals an emergency,
+     * raising a high-severity SecurityAlert the admin team sees on their
+     * alerts dashboard.
+     */
+    public function sos(Request $request, DemLeguiTrip $demLeguiTrip, SecurityAlertService $alerts, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $demLeguiTrip->driver_id === $user->id
+            || $demLeguiTrip->requests()->where('rider_id', $user->id)->exists();
+
+        abort_unless($isParticipant, 404);
+
+        $data = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        $alerts->record(
+            SecurityAlert::TYPE_RIDER_SOS,
+            SecurityAlert::SEVERITY_HIGH,
+            "Alerte SOS déclenchée par {$user->name} sur la course Dem Légui #{$demLeguiTrip->id} (→ {$demLeguiTrip->destinationCity?->name}).",
+            $user,
+            [
+                'kind' => 'dem-legui',
+                'ride_id' => $demLeguiTrip->id,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'tracking_url' => $trackingLinks->generateUrl('dem-legui', $demLeguiTrip->id),
+            ],
+        );
+
+        return response()->json(['message' => 'Alerte SOS envoyée.']);
     }
 }

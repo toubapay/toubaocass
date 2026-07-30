@@ -1,9 +1,10 @@
+import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { fetchShareLink, type ShareableRideKind } from '../api/tracking';
+import { fetchShareLink, sendSosAlert, type ShareableRideKind } from '../api/tracking';
 import { colors, radius, spacing } from '../theme';
 import { Button } from './Button';
 
@@ -30,12 +31,15 @@ export function SosShareModal({
   const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertSent, setAlertSent] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
     let cancelled = false;
     setUrl(null);
     setError(null);
+    setAlertSent(false);
     fetchShareLink(kind, rideId)
       .then((link) => {
         if (!cancelled) setUrl(link);
@@ -50,6 +54,39 @@ export function SosShareModal({
 
   const message = url ? t('tracking.sosMessage', { url }) : '';
 
+  const handleSendAlert = () => {
+    Alert.alert(t('tracking.sosAlertAdmin'), t('tracking.sosAlertConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.ok'),
+        style: 'destructive',
+        onPress: async () => {
+          setSendingAlert(true);
+          try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            let latitude: number | undefined;
+            let longitude: number | undefined;
+            if (status === 'granted') {
+              try {
+                const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+              } catch {
+                // best-effort
+              }
+            }
+            await sendSosAlert(kind, rideId, latitude, longitude);
+            setAlertSent(true);
+          } catch (e) {
+            setError(extractErrorMessage(e));
+          } finally {
+            setSendingAlert(false);
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
@@ -59,6 +96,17 @@ export function SosShareModal({
 
           {!url && !error && <ActivityIndicator color={colors.primary} style={styles.spinner} />}
           {error && <Text style={styles.error}>{error}</Text>}
+          {alertSent && <Text style={styles.alertSent}>✓ {t('tracking.sosAlertSent')}</Text>}
+
+          <View style={styles.buttonSpacing}>
+            <Button
+              label={`🆘 ${t('tracking.sosAlertAdmin')}`}
+              onPress={handleSendAlert}
+              loading={sendingAlert}
+              disabled={alertSent}
+              variant="danger"
+            />
+          </View>
 
           {url && (
             <>
@@ -114,6 +162,12 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 13,
     color: colors.danger,
+    marginBottom: spacing.md,
+  },
+  alertSent: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: colors.success,
     marginBottom: spacing.md,
   },
   buttonSpacing: {

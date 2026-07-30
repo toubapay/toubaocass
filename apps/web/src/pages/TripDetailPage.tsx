@@ -7,6 +7,7 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import type { PaymentMethod, Trip } from '../api/types';
 import { fetchWallet } from '../api/wallet';
+import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { RouteMap } from '../components/RouteMap';
 import { SosShareModal } from '../components/SosShareModal';
@@ -15,6 +16,8 @@ import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
 import { formatDuration, hasDeparted } from '../utils/trip';
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function TripDetailPage() {
   const { t } = useTranslation();
@@ -44,6 +47,16 @@ export function TripDetailPage() {
   };
 
   useEffect(load, [id]);
+
+  // While the trip is under way, poll for the driver's latest reported
+  // position rather than holding a live connection — same "recent position
+  // on an interval" honesty as the other live maps (Anando/Dem Légui/Delivery).
+  useEffect(() => {
+    if (trip?.status !== 'in_progress') return;
+    const interval = setInterval(load, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip?.status, id]);
 
   const editing = trip?.my_booking != null;
 
@@ -120,6 +133,11 @@ export function TripDetailPage() {
       <p style={{ color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg }}>
         {t('tripDetail.departureAt', { date: trip.departure_date, time: trip.departure_time })}
       </p>
+      {editing && trip.arrived_at != null && ['scheduled', 'full'].includes(trip.status) && (
+        <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>
+          🚩 {t('tripDetail.driverArrivedBadge')}
+        </p>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>
         <TripUrgencyBadge trip={trip} />
         {!editing && !isUnavailable && (
@@ -149,6 +167,21 @@ export function TripDetailPage() {
         </div>
       )}
       {showSos && <SosShareModal kind="trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
+
+      {editing && trip.status === 'in_progress' && (
+        trip.current_latitude != null && trip.current_longitude != null ? (
+          <AnandoLiveMap
+            currentLatitude={trip.current_latitude}
+            currentLongitude={trip.current_longitude}
+            destinationLatitude={trip.destination_city?.latitude}
+            destinationLongitude={trip.destination_city?.longitude}
+            destinationName={trip.destination_city?.name}
+            updatedAt={trip.current_location_updated_at}
+          />
+        ) : (
+          <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('tripDetail.liveMapWaiting')}</p>
+        )
+      )}
 
       {editing && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: spacing.sm }}>

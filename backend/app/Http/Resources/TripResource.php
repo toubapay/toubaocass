@@ -32,6 +32,7 @@ class TripResource extends JsonResource
             'current_latitude' => $this->current_latitude,
             'current_longitude' => $this->current_longitude,
             'current_location_updated_at' => $this->current_location_updated_at,
+            'arrived_at' => $this->arrived_at,
             'fare' => $this->fare,
             'ride_type' => $this->ride_type,
             'total_seats' => $this->total_seats,

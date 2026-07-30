@@ -15,9 +15,11 @@ use App\Http\Requests\UpdateDeliveryLocationRequest;
 use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
 use App\Models\DriverProfile;
+use App\Models\SecurityAlert;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DeliveryPricingService;
+use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -126,6 +128,40 @@ class DeliveryController extends Controller
         abort_unless($isParticipant, 404);
 
         return response()->json(['url' => $trackingLinks->generateUrl('delivery', $delivery->id)]);
+    }
+
+    /**
+     * Panic button: the sender or the courier signals an emergency, raising
+     * a high-severity SecurityAlert the admin team sees on their alerts
+     * dashboard.
+     */
+    public function sos(Request $request, Delivery $delivery, SecurityAlertService $alerts, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $delivery->sender_id === $user->id || $delivery->driver_id === $user->id;
+
+        abort_unless($isParticipant, 404);
+
+        $data = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        $alerts->record(
+            SecurityAlert::TYPE_RIDER_SOS,
+            SecurityAlert::SEVERITY_HIGH,
+            "Alerte SOS déclenchée par {$user->name} sur la livraison #{$delivery->id}.",
+            $user,
+            [
+                'kind' => 'delivery',
+                'ride_id' => $delivery->id,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'tracking_url' => $trackingLinks->generateUrl('delivery', $delivery->id),
+            ],
+        );
+
+        return response()->json(['message' => 'Alerte SOS envoyée.']);
     }
 
     public function destroy(Request $request, Delivery $delivery, WalletService $walletService)

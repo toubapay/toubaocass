@@ -15,7 +15,9 @@ use App\Models\Booking;
 use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
+use App\Models\SecurityAlert;
 use App\Services\CommissionService;
+use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Support\Geo;
 use Illuminate\Http\Request;
@@ -136,6 +138,41 @@ class TripController extends Controller
     }
 
     /**
+     * Panic button: the driver or any confirmed rider on this trip signals
+     * an emergency, raising a high-severity SecurityAlert the admin team
+     * sees on their alerts dashboard.
+     */
+    public function sos(Request $request, Trip $trip, SecurityAlertService $alerts, TrackingLinkService $trackingLinks)
+    {
+        $user = $request->user();
+        $isParticipant = $trip->driver_id === $user->id
+            || Booking::where('trip_id', $trip->id)->where('rider_id', $user->id)->where('status', Booking::STATUS_CONFIRMED)->exists();
+
+        abort_unless($isParticipant, 404);
+
+        $data = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        $alerts->record(
+            SecurityAlert::TYPE_RIDER_SOS,
+            SecurityAlert::SEVERITY_HIGH,
+            "Alerte SOS déclenchée par {$user->name} sur le trajet #{$trip->id} ({$trip->originCity?->name} → {$trip->destinationCity?->name}).",
+            $user,
+            [
+                'kind' => 'trip',
+                'ride_id' => $trip->id,
+                'latitude' => $data['latitude'] ?? null,
+                'longitude' => $data['longitude'] ?? null,
+                'tracking_url' => $trackingLinks->generateUrl('trip', $trip->id),
+            ],
+        );
+
+        return response()->json(['message' => 'Alerte SOS envoyée.']);
+    }
+
+    /**
      * Driver-facing list of their own posted trips.
      */
     public function driverIndex(Request $request)
@@ -237,6 +274,24 @@ class TripController extends Controller
         }
 
         $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+
+        return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * Driver marks having reached the meeting point — an informational
+     * checkpoint distinct from start() (which actually gets passengers
+     * moving), so it's only meaningful before the trip is under way.
+     */
+    public function arrived(Request $request, Trip $trip)
+    {
+        $this->authorize('update', $trip);
+
+        if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
+            return response()->json(['message' => 'Seul un trajet programmé peut être marqué comme "arrivé".'], 422);
+        }
+
+        $trip->update(['arrived_at' => now()]);
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }

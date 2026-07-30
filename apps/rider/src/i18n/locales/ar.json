@@ -70,6 +70,7 @@
       "anandoRideDetail": "تفاصيل رحلة أناندو",
       "demLegui": "Dem Légui",
       "demLeguiRequestDetail": "تفاصيل الطلب",
+      "myRideBookings": "حجوزاتي",
       "profile": "ملفي الشخصي",
       "settings": "الإعدادات"
     }
@@ -108,6 +109,7 @@
     "title": "ملفي الشخصي",
     "wallet": "محفظتي",
     "myDeliveries": "📦 طلبيات توصيلي",
+    "myRideBookings": "🧾 حجوزاتي",
     "settings": "⚙️ الإعدادات",
     "notificationsEnabled": "🔔 الإشعارات مفعّلة",
     "notificationsBlocked": "الإشعارات محظورة. فعّلها من إعدادات متصفحك لتصلك تنبيهات حجوزاتك.",
@@ -169,6 +171,8 @@
     "reserveButton": "⚡ حجز — {{amount}} فرنك",
     "bookedSeats": "✓ لقد حجزت {{count}} مقعد/مقاعد في هذه الرحلة",
     "chatWithDriver": "💬 التحدث مع السائق",
+    "driverArrivedBadge": "وصل السائق إلى نقطة الالتقاء",
+    "liveMapWaiting": "في انتظار موقع السائق…",
     "itinerary": "المسار",
     "drivingDuration": " · ~{{duration}} من القيادة",
     "departurePoint": "نقطة الانطلاق",
@@ -268,6 +272,13 @@
     "title": "توصيلاتي",
     "empty": "ليس لديك أي توصيل بعد."
   },
+  "myRideBookings": {
+    "title": "حجوزاتي",
+    "anandoSection": "Anando",
+    "anandoEmpty": "لم تحجز أي رحلة Anando بعد.",
+    "demLeguiSection": "Dem Légui",
+    "demLeguiEmpty": "ليس لديك أي طلب Dem Légui."
+  },
   "newDelivery": {
     "title": "توصيل جديد",
     "sender": "المرسل",
@@ -359,6 +370,7 @@
     "searchingBadge": "جارٍ البحث…",
     "waitingForDriverBadge": "في انتظار سائق",
     "driverArrivingBadge": "السائق في الطريق",
+    "driverArrivedBadge": "وصل السائق",
     "inProgressBadge": "الرحلة جارية"
   },
   "anando": {
@@ -546,6 +558,9 @@
     "sosSms": "مشاركة عبر رسالة نصية",
     "sosMessage": "تابع رحلتي مباشرة على Intercity: {{url}}",
     "sosError": "تعذر إنشاء رابط التتبع.",
+    "sosAlertAdmin": "إرسال تنبيه SOS إلى المسؤول",
+    "sosAlertConfirm": "هل تريد إرسال تنبيه SOS إلى فريق الأمان؟ استخدم هذا فقط في حالة طوارئ حقيقية.",
+    "sosAlertSent": "تم إرسال تنبيه SOS. تم إخطار فريقنا.",
     "deliverySosButton": "تتبع التوصيل",
     "deliverySosSheetTitle": "مشاركة تتبع التوصيل",
     "deliverySosSheetSubtitle": "أرسل هذا الرابط للمستلم ليتمكن من تتبع الطرد مباشرة لمدة 24 ساعة.",

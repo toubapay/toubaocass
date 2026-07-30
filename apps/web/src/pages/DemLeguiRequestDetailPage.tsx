@@ -187,6 +187,12 @@ export function DemLeguiRequestDetailPage() {
         {t(`demLegui.status.${request.status}`)}
       </p>
 
+      {trip?.arrived_at != null && trip.status === 'open' && (
+        <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.primary, marginTop: -4, marginBottom: spacing.md }}>
+          🚩 {t('demLegui.driverArrivedBadge')}
+        </p>
+      )}
+
       {request.status === 'pending' && (
         <div style={cardStyle}>
           <p style={{ fontSize: 16, color: colors.text, margin: 0, fontWeight: 600 }}>{t('demLegui.searchingForDriver')}</p>

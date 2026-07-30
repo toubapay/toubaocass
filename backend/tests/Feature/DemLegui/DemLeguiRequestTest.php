@@ -613,4 +613,108 @@ class DemLeguiRequestTest extends TestCase
             ->getJson("/api/dem-legui/requests/{$request->id}/messages")
             ->assertForbidden();
     }
+
+    public function test_rider_can_list_their_own_request_history(): void
+    {
+        $rider = User::factory()->create();
+        $stranger = User::factory()->create();
+        $destination = City::factory()->create();
+
+        DemLeguiRequest::factory()->count(2)->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'status' => DemLeguiRequest::STATUS_CANCELLED,
+        ]);
+        DemLeguiRequest::factory()->create([
+            'rider_id' => $stranger->id,
+            'destination_city_id' => $destination->id,
+        ]);
+
+        $response = $this->actingAs($rider, 'sanctum')
+            ->getJson('/api/dem-legui/requests/mine')
+            ->assertOk();
+
+        $this->assertCount(2, $response->json('data'));
+    }
+
+    public function test_driver_can_mark_arrived_at_pickup_while_trip_is_open(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'status' => DemLeguiRequest::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $trip = DemLeguiTrip::where('driver_id', $driver->id)->firstOrFail();
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/trips/{$trip->id}/arrived")
+            ->assertOk()
+            ->assertJsonPath('id', $trip->id);
+
+        $trip->refresh();
+        $this->assertNotNull($trip->arrived_at);
+    }
+
+    public function test_only_the_owning_driver_can_mark_arrived_at_pickup(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+        $stranger = $this->onlineDriver();
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'status' => DemLeguiRequest::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $trip = DemLeguiTrip::where('driver_id', $driver->id)->firstOrFail();
+
+        $this->actingAs($stranger, 'sanctum')
+            ->postJson("/api/driver/dem-legui/trips/{$trip->id}/arrived")
+            ->assertNotFound();
+    }
+
+    public function test_arrived_at_pickup_cannot_be_marked_once_trip_is_in_progress(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'destination_city_id' => $destination->id,
+            'status' => DemLeguiRequest::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk();
+
+        $trip = DemLeguiTrip::where('driver_id', $driver->id)->firstOrFail();
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/trips/{$trip->id}/start")
+            ->assertOk();
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/trips/{$trip->id}/arrived")
+            ->assertUnprocessable();
+    }
 }

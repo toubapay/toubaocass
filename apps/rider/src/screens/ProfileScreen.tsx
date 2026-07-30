@@ -57,6 +57,11 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.settingsArrow}>→</Text>
       </Pressable>
 
+      <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('MyRideBookings')}>
+        <Text style={styles.settingsLabel}>{t('profile.myRideBookings')}</Text>
+        <Text style={styles.settingsArrow}>→</Text>
+      </Pressable>
+
       <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Settings')}>
         <Text style={styles.settingsLabel}>{t('profile.settings')}</Text>
         <Text style={styles.settingsArrow}>→</Text>

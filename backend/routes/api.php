@@ -90,17 +90,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'updateBooking']);
     Route::delete('anando-ride-bookings/{anandoRideBooking}', [AnandoRideController::class, 'cancelBooking']);
     Route::post('anando-rides/{anandoRide}/share-link', [AnandoRideController::class, 'shareLink']);
+    Route::post('anando-rides/{anandoRide}/sos', [AnandoRideController::class, 'sos']);
 
     // SOS "share my live position" links for Trip and Dem Légui — sit
     // outside the role:rider/role:driver groups since either side of the
     // ride (driver or a confirmed rider) may want to generate their own.
     Route::post('trips/{trip}/share-link', [TripController::class, 'shareLink']);
+    Route::post('trips/{trip}/sos', [TripController::class, 'sos']);
     Route::post('dem-legui/trips/{demLeguiTrip}/share-link', [DemLeguiController::class, 'shareLink']);
+    Route::post('dem-legui/trips/{demLeguiTrip}/sos', [DemLeguiController::class, 'sos']);
 
     // Livraison "share package tracking" link — either the sender or the
     // courier may want to generate it, so it sits outside the role groups
     // just like the ride share-links above.
     Route::post('deliveries/{delivery}/share-link', [DeliveryController::class, 'shareLink']);
+    Route::post('deliveries/{delivery}/sos', [DeliveryController::class, 'sos']);
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
@@ -125,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('dem-legui/requests/quote', [DemLeguiController::class, 'quote']);
         Route::post('dem-legui/requests', [DemLeguiController::class, 'store'])->middleware('module:dem_legui');
         Route::get('dem-legui/requests/mine/active', [DemLeguiController::class, 'myActiveRequest']);
+        Route::get('dem-legui/requests/mine', [DemLeguiController::class, 'myRequests']);
         Route::delete('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'cancel']);
         Route::get('dem-legui/requests/{demLeguiRequest}/nearby-drivers', [DemLeguiController::class, 'nearbyDrivers']);
     });
@@ -162,6 +167,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('trips/{trip}', [TripController::class, 'driverShow']);
         Route::put('trips/{trip}', [TripController::class, 'update']);
         Route::post('trips/{trip}/start', [TripController::class, 'start']);
+        Route::post('trips/{trip}/arrived', [TripController::class, 'arrived']);
         Route::post('trips/{trip}/complete', [TripController::class, 'complete']);
         Route::post('trips/{trip}/location', [TripController::class, 'updateLocation']);
         Route::delete('trips/{trip}', [TripController::class, 'cancel']);
@@ -180,6 +186,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('dem-legui/requests', [DemLeguiController::class, 'availableIndex']);
         Route::post('dem-legui/requests/{demLeguiRequest}/accept', [DemLeguiController::class, 'accept']);
         Route::get('dem-legui/trips/mine', [DemLeguiController::class, 'myTrips']);
+        Route::post('dem-legui/trips/{demLeguiTrip}/arrived', [DemLeguiController::class, 'arrivedAtPickup']);
         Route::post('dem-legui/trips/{demLeguiTrip}/start', [DemLeguiController::class, 'startTrip']);
         Route::post('dem-legui/trips/{demLeguiTrip}/complete', [DemLeguiController::class, 'completeTrip']);
         Route::post('dem-legui/trips/{demLeguiTrip}/location', [DemLeguiController::class, 'updateTripLocation']);

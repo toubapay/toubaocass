@@ -28,6 +28,7 @@ class DemLeguiTripResource extends JsonResource
             'status' => $this->status,
             'started_at' => $this->started_at,
             'completed_at' => $this->completed_at,
+            'arrived_at' => $this->arrived_at,
             'current_latitude' => $this->current_latitude,
             'current_longitude' => $this->current_longitude,
             'current_location_updated_at' => $this->current_location_updated_at,

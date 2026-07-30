@@ -22,3 +22,12 @@ export async function fetchShareLink(
   const { data } = await apiClient.post(`/${kind}/${id}/share-link`);
   return data.url;
 }
+
+export async function sendSosAlert(
+  kind: 'trips' | 'anando-rides' | 'dem-legui/trips' | 'deliveries',
+  id: number | string,
+  latitude?: number,
+  longitude?: number,
+): Promise<void> {
+  await apiClient.post(`/${kind}/${id}/sos`, { latitude, longitude });
+}

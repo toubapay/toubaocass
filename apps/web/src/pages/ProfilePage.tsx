@@ -107,6 +107,27 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
       </button>
 
       <button
+        onClick={() => navigate('/ride-bookings')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          border: `1px solid ${colors.border}`,
+          borderRadius: radius.md,
+          padding: spacing.lg,
+          marginBottom: spacing.md,
+          backgroundColor: colors.surface,
+          color: colors.text,
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ fontSize: 18, fontWeight: 600 }}>{t('profile.myRideBookings')}</span>
+        <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
+      </button>
+
+      <button
         onClick={() => navigate('/settings')}
         style={{
           display: 'flex',

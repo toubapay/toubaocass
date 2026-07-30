@@ -33,6 +33,7 @@ export type ServicesStackParamList = {
   NewDemLeguiRequest: undefined;
   DemLeguiRequestDetail: { requestId: number };
   DemLeguiChat: { requestId: number };
+  MyRideBookings: undefined;
 };
 
 export type ProfileStackParamList = {
@@ -42,6 +43,9 @@ export type ProfileStackParamList = {
   MyDeliveries: undefined;
   DeliveryDetail: { deliveryId: number };
   NewDelivery: { deliveryId?: number } | undefined;
+  MyRideBookings: undefined;
+  AnandoRideDetail: { rideId: number };
+  DemLeguiRequestDetail: { requestId: number };
 };
 
 export type MainTabParamList = {

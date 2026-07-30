@@ -16,6 +16,7 @@ import { InstantDeparturesPage } from './pages/InstantDeparturesPage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
 import { MyDeliveriesPage } from './pages/MyDeliveriesPage';
+import { MyRideBookingsPage } from './pages/MyRideBookingsPage';
 import { NewDeliveryPage } from './pages/NewDeliveryPage';
 import { NewDemLeguiRequestPage } from './pages/NewDemLeguiRequestPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
@@ -89,6 +90,7 @@ function AppRoutes() {
         <Route path="/deliveries/:id/edit" element={<NewDeliveryPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
+        <Route path="/ride-bookings" element={<MyRideBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/settings" element={<SettingsPage />} />

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { completeDemLeguiTrip, fetchDemLeguiTrip, startDemLeguiTrip, updateDemLeguiTripLocation } from '../api/demLegui';
+import { arriveAtDemLeguiPickup, completeDemLeguiTrip, fetchDemLeguiTrip, startDemLeguiTrip, updateDemLeguiTripLocation } from '../api/demLegui';
 import type { DemLeguiTrip } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
@@ -30,6 +30,7 @@ export function DemLeguiTripDetailPage() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [arriving, setArriving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSos, setShowSos] = useState(false);
 
@@ -87,6 +88,18 @@ export function DemLeguiTripDetailPage() {
     }
   };
 
+  const handleArrive = async () => {
+    setArriving(true);
+    setError(null);
+    try {
+      setTrip(await arriveAtDemLeguiPickup(trip.id));
+    } catch (e) {
+      setError(extractErrorMessage(e));
+    } finally {
+      setArriving(false);
+    }
+  };
+
   const handleComplete = async () => {
     setCompleting(true);
     setError(null);
@@ -137,6 +150,12 @@ export function DemLeguiTripDetailPage() {
         {t(`demLegui.tripStatus.${trip.status}`)} · {t('demLegui.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
       </p>
 
+      {trip.arrived_at != null && trip.status === 'open' && (
+        <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.primary, marginTop: 0, marginBottom: spacing.md }}>
+          🚩 {t('trips.detail.arrivedBadge')}
+        </p>
+      )}
+
       <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.md }}>
         <p style={sectionTitleStyle}>{t('demLegui.passengers', { count: trip.requests?.length ?? 0 })}</p>
         {(trip.requests ?? []).length === 0 ? (
@@ -174,6 +193,9 @@ export function DemLeguiTripDetailPage() {
 
       {trip.status === 'open' && (
         <Button label={t('demLegui.findMorePassengers')} onClick={() => navigate('/dem-legui')} style={{ marginBottom: spacing.sm }} />
+      )}
+      {trip.status === 'open' && trip.arrived_at == null && (
+        <Button label={`🚩 ${t('trips.detail.markArrived')}`} onClick={handleArrive} loading={arriving} variant="outline" style={{ marginBottom: spacing.sm }} />
       )}
       {trip.status === 'open' && <Button label={t('anando.startTrip')} onClick={handleStart} loading={starting} style={{ marginBottom: spacing.sm }} />}
       {trip.status === 'in_progress' && <Button label={t('anando.completeTrip')} onClick={handleComplete} loading={completing} />}

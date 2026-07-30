@@ -1,11 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import * as Location from 'expo-location';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../../api/client';
-import { cancelTrip, completeTrip, fetchMyTrip, startTrip } from '../../api/trips';
+import { arriveTrip, cancelTrip, completeTrip, fetchMyTrip, startTrip, updateTripLocation } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
 import { Screen } from '../../components/Screen';
@@ -15,6 +16,8 @@ import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'TripDetail'>;
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function TripDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
@@ -32,6 +35,33 @@ export function TripDetailScreen({ route, navigation }: Props) {
   }, [tripId]);
 
   useFocusEffect(load);
+
+  // Foreground-only, best-effort position ping while the trip is under way
+  // — same "recent position on an interval" pattern already used for
+  // Anando/Dem Légui/Delivery, no background tracking.
+  useEffect(() => {
+    if (trip?.status !== 'in_progress') return;
+    let cancelled = false;
+
+    const report = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted' || cancelled) return;
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        if (cancelled) return;
+        await updateTripLocation(tripId, position.coords.latitude, position.coords.longitude);
+      } catch {
+        // best-effort; skip this tick on failure
+      }
+    };
+
+    report();
+    const interval = setInterval(report, LIVE_LOCATION_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [trip?.status, tripId]);
 
   const runAction = async (action: () => Promise<unknown>) => {
     setActionLoading(true);
@@ -82,6 +112,10 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {trip.departure_date} à {trip.departure_time} · {t(`common.tripStatus.${trip.status}`)}
         </Text>
         <TripUrgencyBadge trip={trip} />
+
+        {trip.arrived_at != null && ['scheduled', 'full'].includes(trip.status) && (
+          <Text style={styles.arrivedBadge}>🚩 {t('trips.detail.arrivedBadge')}</Text>
+        )}
 
         {trip.status === 'in_progress' && (
           <View style={styles.sosButtonWrap}>
@@ -145,6 +179,15 @@ export function TripDetailScreen({ route, navigation }: Props) {
         )}
 
         <View style={styles.actions}>
+          {['scheduled', 'full'].includes(trip.status) && trip.arrived_at == null && (
+            <Button
+              label={`🚩 ${t('trips.detail.markArrived')}`}
+              onPress={() => runAction(() => arriveTrip(tripId))}
+              loading={actionLoading}
+              variant="outline"
+              style={styles.actionButton}
+            />
+          )}
           {['scheduled', 'full'].includes(trip.status) && (
             <Button
               label={t('trips.detail.startTrip')}
@@ -177,6 +220,7 @@ const styles = StyleSheet.create({
   arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 20 },
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg, textTransform: 'capitalize' },
   sosButtonWrap: { marginBottom: spacing.md },
+  arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginBottom: spacing.sm },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

@@ -9,6 +9,7 @@ import { extractErrorMessage } from '../api/client';
 import { fetchTrip } from '../api/trips';
 import { PaymentMethod, Trip } from '../api/types';
 import { fetchWallet } from '../api/wallet';
+import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
 import { RouteMap } from '../components/RouteMap';
@@ -20,6 +21,8 @@ import { colors, radius, spacing } from '../theme';
 import { formatDuration, hasDeparted } from '../utils/trip';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
+
+const LIVE_LOCATION_INTERVAL_MS = 12000;
 
 export function TripDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
@@ -49,6 +52,16 @@ export function TripDetailScreen({ route, navigation }: Props) {
   };
 
   useEffect(load, [tripId]);
+
+  // While the trip is under way, poll for the driver's latest reported
+  // position rather than holding a live connection — same "recent position
+  // on an interval" honesty as the other live maps (Anando/Dem Légui/Delivery).
+  useEffect(() => {
+    if (trip?.status !== 'in_progress') return;
+    const interval = setInterval(load, LIVE_LOCATION_INTERVAL_MS);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip?.status, tripId]);
 
   const editing = trip?.my_booking != null;
 
@@ -115,12 +128,29 @@ export function TripDetailScreen({ route, navigation }: Props) {
           {t('tripDetail.departureAt', { date: trip.departure_date, time: trip.departure_time })}
         </Text>
         <TripUrgencyBadge trip={trip} />
+        {editing && trip.arrived_at != null && ['scheduled', 'full'].includes(trip.status) && (
+          <Text style={styles.arrivedBadge}>🚩 {t('tripDetail.driverArrivedBadge')}</Text>
+        )}
         {editing && trip.status === 'in_progress' && (
           <View style={styles.sosButtonWrap}>
             <Button label={`🆘 ${t('tracking.sosButton')}`} onPress={() => setShowSos(true)} variant="outline" />
           </View>
         )}
         <SosShareModal kind="trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />
+        {editing && trip.status === 'in_progress' && (
+          trip.current_latitude != null && trip.current_longitude != null ? (
+            <AnandoLiveMap
+              currentLatitude={trip.current_latitude}
+              currentLongitude={trip.current_longitude}
+              destinationLatitude={trip.destination_city?.latitude}
+              destinationLongitude={trip.destination_city?.longitude}
+              destinationName={trip.destination_city?.name}
+              updatedAt={trip.current_location_updated_at}
+            />
+          ) : (
+            <Text style={styles.liveMapWaiting}>{t('tripDetail.liveMapWaiting')}</Text>
+          )
+        )}
         {editing && (
           <View style={styles.bookedRow}>
             <Text style={styles.bookedNotice}>{t('tripDetail.bookedSeats', { count: trip.my_booking!.seats_booked })}</Text>
@@ -288,6 +318,8 @@ const styles = StyleSheet.create({
   arrow: { marginHorizontal: spacing.sm, color: colors.textMuted, fontSize: 20 },
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg },
   sosButtonWrap: { marginBottom: spacing.md },
+  arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginBottom: spacing.sm },
+  liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

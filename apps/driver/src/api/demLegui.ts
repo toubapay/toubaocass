@@ -36,6 +36,11 @@ export async function fetchDemLeguiTrip(tripId: number): Promise<DemLeguiTrip> {
   return data;
 }
 
+export async function arriveAtDemLeguiPickup(tripId: number): Promise<DemLeguiTrip> {
+  const { data } = await apiClient.post(`/driver/dem-legui/trips/${tripId}/arrived`);
+  return data;
+}
+
 export async function startDemLeguiTrip(tripId: number): Promise<DemLeguiTrip> {
   const { data } = await apiClient.post(`/driver/dem-legui/trips/${tripId}/start`);
   return data;

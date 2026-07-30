@@ -68,7 +68,9 @@ export function ProfileDemLeguiStatusCard() {
                   ? t('demLegui.searchingBadge')
                   : trip?.status === 'in_progress'
                     ? t('demLegui.inProgressBadge')
-                    : t('demLegui.driverArrivingBadge')}
+                    : trip?.arrived_at != null
+                      ? t('demLegui.driverArrivedBadge')
+                      : t('demLegui.driverArrivingBadge')}
               </span>
             </span>
           </div>
