@@ -16,7 +16,10 @@
 
 databases:
   - name: intercity-db
-    plan: starter
+    # No plan pinned here — Render will prompt for a database plan when the
+    # Blueprint is applied, so you can pick whatever tier fits your traffic
+    # (free/dev tier included) instead of being locked into what this file
+    # says.
     databaseName: toubaocass
     user: toubaocass
 

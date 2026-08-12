@@ -18,7 +18,9 @@ that creates all three in one shot.
 1. Render dashboard → **New** → **Blueprint** → connect this GitHub repo →
    pick the branch.
 2. Render reads `render.yaml` and shows a plan: 2 web services +
-   1 Postgres database. Click **Apply**.
+   1 Postgres database. The database has no `plan` pinned in the file, so
+   Render prompts you to pick one at this step (pick whatever tier fits
+   your traffic/budget — free tier included). Click **Apply**.
 3. Every `sync: false` env var (Firebase keys, `APP_KEY`, SMS/push
    credentials, etc.) is created empty — go to each service's
    **Environment** tab and fill them in (see the tables below). The
