@@ -171,6 +171,7 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "Déconnexion",
+    "assuranceLink": "🛡️ Assurance",
     "dashboard": {
       "trips": "Trajets",
       "bookings": "Réservations",
@@ -425,6 +426,40 @@
     }
   },
   "insurance": {
+    "landingTitle": "Souscrire une assurance automobile et moto",
+    "landingSubtitle": "Couverture rapide. Meilleur prix.",
+    "getQuote": "Obtenir un devis",
+    "selectTypeTitle": "Sélectionnez le type de véhicule",
+    "vehicleCategory": {
+      "car": "Voiture",
+      "motorcycle": "Moto"
+    },
+    "scanFrontTitle": "Photographiez votre carte grise",
+    "scanBackTitle": "Photographiez le dos de votre carte grise",
+    "scanHint": "Placez le document bien à plat, dans un endroit lumineux.",
+    "takePhoto": "Prendre une photo",
+    "enterManually": "Saisir manuellement",
+    "skipOldCard": "Passer, j'ai une ancienne carte",
+    "analyzingTitle": "Analyse en cours…",
+    "analyzingHint": "Veuillez patienter pendant que nous récupérons les informations de votre carte grise.",
+    "vehicleInfoTitle": "Informations du véhicule",
+    "make": "Marque",
+    "model": "Modèle",
+    "plateNumber": "Immatriculation",
+    "powerCv": "Puissance (chevaux)",
+    "seats": "# de places",
+    "vehicleAge": "Âge de votre véhicule",
+    "ageBracket": {
+      "under_5": "Moins de 5 ans",
+      "from_5_to_10": "5 à 10 ans",
+      "over_10": "Plus de 10 ans"
+    },
+    "vehicleUsage": "Usage du véhicule",
+    "usageType": {
+      "personal": "Personnel",
+      "professional": "Professionnel"
+    },
+    "next": "Suivant",
     "compareTitle": "Comparer les assurances",
     "chooseOffer": "Choisir cette offre",
     "perYear": "{{amount}} FCFA / an",

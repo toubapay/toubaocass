@@ -1,23 +1,12 @@
 import { apiClient } from './client';
-import type { InsuranceCoverageType, InsurancePolicy, InsuranceQuote, ScannedVehicleInfo, VehicleInsuranceInput } from './types';
-
-export async function quoteInsurance(carId: number, coverageType: InsuranceCoverageType): Promise<InsuranceQuote[]> {
-  const { data } = await apiClient.post('/driver/insurance/quotes', { car_id: carId, coverage_type: coverageType });
-  return data.quotes;
-}
-
-export async function purchaseInsurance(carId: number, quote: InsuranceQuote): Promise<InsurancePolicy> {
-  const { data } = await apiClient.post('/driver/insurance/policies', {
-    car_id: carId,
-    provider_id: quote.provider_id,
-    coverage_type: quote.coverage_type,
-    plan_name: quote.plan_name,
-    annual_premium: quote.annual_premium,
-  });
-  return data;
-}
-
-// --- Vehicle-attribute based (no existing fleet Car required) ---
+import type {
+  InsuranceCoverageType,
+  InsurancePolicy,
+  InsuranceQuote,
+  Paginated,
+  ScannedVehicleInfo,
+  VehicleInsuranceInput,
+} from './types';
 
 export async function scanVehicleDocument(front: File, back: File | null): Promise<ScannedVehicleInfo> {
   const form = new FormData();
@@ -49,10 +38,7 @@ export async function purchaseVehicleInsurance(vehicle: VehicleInsuranceInput, q
   return data;
 }
 
-// Superset of the driver-only /driver/insurance/policies — returns both
-// fleet-car-based and scanned-vehicle-based policies together, so this one
-// list is used everywhere "My policies" is shown (Fleet and Profile).
-export async function fetchMyPolicies(): Promise<InsurancePolicy[]> {
+export async function fetchMyInsurancePolicies(): Promise<Paginated<InsurancePolicy>> {
   const { data } = await apiClient.get('/insurance/my-policies');
-  return data.data;
+  return data;
 }

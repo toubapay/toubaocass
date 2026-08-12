@@ -106,6 +106,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('deliveries/{delivery}/share-link', [DeliveryController::class, 'shareLink']);
     Route::post('deliveries/{delivery}/sos', [DeliveryController::class, 'sos']);
 
+    // Assurance — vehicle-attribute based (no existing platform Car
+    // required), open to any authenticated user (rider or driver). Mirrors
+    // the car-based driver flow further below but decoupled from the
+    // Car/fleet system, per
+    // InsuranceComparisonService::compareForVehicle()/purchaseForVehicle().
+    Route::post('insurance/vehicles/scan', [InsuranceController::class, 'scanVehicleDocument']);
+    Route::post('insurance/vehicles/quotes', [InsuranceController::class, 'quoteForVehicle']);
+    Route::post('insurance/vehicles/policies', [InsuranceController::class, 'purchaseForVehicle'])->middleware('module:assurance');
+    Route::get('insurance/my-policies', [InsuranceController::class, 'myPolicies']);
+
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
         Route::get('trips', [TripController::class, 'search']);

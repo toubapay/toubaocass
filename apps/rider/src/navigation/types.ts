@@ -46,6 +46,8 @@ export type ProfileStackParamList = {
   MyRideBookings: undefined;
   AnandoRideDetail: { rideId: number };
   DemLeguiRequestDetail: { requestId: number };
+  Insurance: undefined;
+  MyInsurancePolicies: undefined;
 };
 
 export type MainTabParamList = {

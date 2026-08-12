@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { fetchMyInsurancePolicies } from '../api/insurance';
+import { fetchMyPolicies } from '../api/insurance';
 import type { InsurancePolicy } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
@@ -15,7 +15,7 @@ export function MyPoliciesPage() {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetchMyInsurancePolicies()
+    fetchMyPolicies()
       .then(setPolicies)
       .finally(() => setLoading(false));
   }, []);

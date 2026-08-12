@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 import { ProfileDashboard } from '../components/ProfileDashboard';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import type { UsePushNotifications } from '../hooks/usePushNotifications';
 import { getStoredLanguage, setStoredLanguage, type SupportedLanguage } from '../i18n/i18n';
 import { colors, radius, spacing } from '../theme';
@@ -23,6 +24,7 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { isModuleEnabled } = useModuleStatus();
   const { permission, loading, error, enable } = pushNotifications;
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [language, setLanguage] = useState<SupportedLanguage>(getStoredLanguage());
@@ -126,6 +128,29 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         <span style={{ fontSize: 18, fontWeight: 600 }}>{t('profile.myRideBookings')}</span>
         <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
       </button>
+
+      {isModuleEnabled('assurance') && (
+        <button
+          onClick={() => navigate('/insurance')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            border: `1px solid ${colors.border}`,
+            borderRadius: radius.md,
+            padding: spacing.lg,
+            marginBottom: spacing.md,
+            backgroundColor: colors.surface,
+            color: colors.text,
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <span style={{ fontSize: 18, fontWeight: 600 }}>🛡️ {t('profile.assuranceLink')}</span>
+          <span style={{ fontSize: 21, color: colors.textMuted }}>→</span>
+        </button>
+      )}
 
       <button
         onClick={() => navigate('/settings')}

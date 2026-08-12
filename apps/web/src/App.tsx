@@ -13,9 +13,11 @@ import { DemLeguiRequestDetailPage } from './pages/DemLeguiRequestDetailPage';
 import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
 import { InstantDeparturesPage } from './pages/InstantDeparturesPage';
+import { InsurancePage } from './pages/InsurancePage';
 import { MapPage } from './pages/MapPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
 import { MyDeliveriesPage } from './pages/MyDeliveriesPage';
+import { MyInsurancePoliciesPage } from './pages/MyInsurancePoliciesPage';
 import { MyRideBookingsPage } from './pages/MyRideBookingsPage';
 import { NewDeliveryPage } from './pages/NewDeliveryPage';
 import { NewDemLeguiRequestPage } from './pages/NewDemLeguiRequestPage';
@@ -93,6 +95,8 @@ function AppRoutes() {
         <Route path="/ride-bookings" element={<MyRideBookingsPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />
         <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/insurance" element={<InsurancePage />} />
+        <Route path="/insurance/my-policies" element={<MyInsurancePoliciesPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />

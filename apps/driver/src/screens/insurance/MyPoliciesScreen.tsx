@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { fetchMyInsurancePolicies } from '../../api/insurance';
+import { fetchMyPolicies } from '../../api/insurance';
 import { InsurancePolicy } from '../../api/types';
 import { Screen } from '../../components/Screen';
 import { colors, radius, spacing } from '../../theme';
@@ -15,7 +15,7 @@ export function MyPoliciesScreen() {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetchMyInsurancePolicies()
+    fetchMyPolicies()
       .then(setPolicies)
       .finally(() => setLoading(false));
   }, []);

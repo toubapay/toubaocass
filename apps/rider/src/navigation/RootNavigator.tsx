@@ -20,9 +20,11 @@ import { DemLeguiRequestDetailScreen } from '../screens/DemLeguiRequestDetailScr
 import { DeliveryDetailScreen } from '../screens/DeliveryDetailScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { InstantDeparturesScreen } from '../screens/InstantDeparturesScreen';
+import { InsuranceScreen } from '../screens/InsuranceScreen';
 import { MapScreen } from '../screens/MapScreen';
 import { MyBookingsScreen } from '../screens/MyBookingsScreen';
 import { MyDeliveriesScreen } from '../screens/MyDeliveriesScreen';
+import { MyInsurancePoliciesScreen } from '../screens/MyInsurancePoliciesScreen';
 import { MyRideBookingsScreen } from '../screens/MyRideBookingsScreen';
 import { NewDeliveryScreen } from '../screens/NewDeliveryScreen';
 import { NewDemLeguiRequestScreen } from '../screens/NewDemLeguiRequestScreen';
@@ -172,6 +174,8 @@ function ProfileNavigator() {
       <ProfileStackNav.Screen name="MyRideBookings" component={MyRideBookingsScreen} options={{ title: t('nav.screenTitles.myRideBookings') }} />
       <ProfileStackNav.Screen name="AnandoRideDetail" component={AnandoRideDetailScreen} options={{ title: t('nav.screenTitles.anandoRideDetail') }} />
       <ProfileStackNav.Screen name="DemLeguiRequestDetail" component={DemLeguiRequestDetailScreen} options={{ title: t('nav.screenTitles.demLeguiRequestDetail') }} />
+      <ProfileStackNav.Screen name="Insurance" component={InsuranceScreen} options={{ title: t('nav.screenTitles.insurance') }} />
+      <ProfileStackNav.Screen name="MyInsurancePolicies" component={MyInsurancePoliciesScreen} options={{ title: t('nav.screenTitles.myInsurancePolicies') }} />
     </ProfileStackNav.Navigator>
   );
 }

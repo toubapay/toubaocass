@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\DocumentOcrClient;
 use App\Contracts\PushGateway;
 use App\Contracts\SmsGateway;
 use App\Services\Geo\CityDistanceService;
+use App\Services\Ocr\SimulatedDocumentOcrClient;
 use App\Services\Push\FcmPushGateway;
 use App\Services\Push\LogPushGateway;
 use App\Services\Sms\LogSmsGateway;
@@ -55,6 +57,12 @@ class AppServiceProvider extends ServiceProvider
         // Singleton so its per-request memo cache actually avoids duplicate
         // city_distances lookups across the trips in one paginated listing.
         $this->app->singleton(CityDistanceService::class);
+
+        $this->app->singleton(DocumentOcrClient::class, function () {
+            // No other driver exists yet — adding a real vendor means a
+            // new branch here, same shape as SmsGateway above.
+            return new SimulatedDocumentOcrClient;
+        });
     }
 
     public function boot(): void

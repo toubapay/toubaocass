@@ -24,6 +24,7 @@ import { DeliveriesListScreen } from '../screens/deliveries/DeliveriesListScreen
 import { AddCarScreen } from '../screens/fleet/AddCarScreen';
 import { CarsListScreen } from '../screens/fleet/CarsListScreen';
 import { InsuranceCompareScreen } from '../screens/insurance/InsuranceCompareScreen';
+import { InsuranceScreen } from '../screens/insurance/InsuranceScreen';
 import { MyPoliciesScreen } from '../screens/insurance/MyPoliciesScreen';
 import { KycFormScreen } from '../screens/kyc/KycFormScreen';
 import { KycStatusScreen } from '../screens/kyc/KycStatusScreen';
@@ -132,6 +133,8 @@ function ProfileNavigator() {
       <ProfileStackNav.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.screenTitles.profile') }} />
       <ProfileStackNav.Screen name="Wallet" component={WalletScreen} options={{ title: t('nav.screenTitles.wallet') }} />
       <ProfileStackNav.Screen name="Settings" component={SettingsScreen} options={{ title: t('nav.screenTitles.settings') }} />
+      <ProfileStackNav.Screen name="Insurance" component={InsuranceScreen} options={{ title: t('nav.screenTitles.insurance') }} />
+      <ProfileStackNav.Screen name="MyPolicies" component={MyPoliciesScreen} options={{ title: t('nav.screenTitles.myPolicies') }} />
     </ProfileStackNav.Navigator>
   );
 }

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchWallet } from '../api/wallet';
 import { useAuth } from '../context/AuthContext';
+import { useModuleStatus } from '../context/ModuleStatusContext';
 import { Button } from '../components/Button';
 import { ProfileDashboard } from '../components/ProfileDashboard';
 import { Screen } from '../components/Screen';
@@ -18,6 +19,7 @@ type Props = NativeStackScreenProps<ProfileStackParamList, 'Profile'>;
 export function ProfileScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
+  const { isModuleEnabled } = useModuleStatus();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -61,6 +63,13 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.settingsLabel}>{t('profile.myRideBookings')}</Text>
         <Text style={styles.settingsArrow}>→</Text>
       </Pressable>
+
+      {isModuleEnabled('assurance') && (
+        <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Insurance')}>
+          <Text style={styles.settingsLabel}>🛡️ {t('profile.assuranceLink')}</Text>
+          <Text style={styles.settingsArrow}>→</Text>
+        </Pressable>
+      )}
 
       <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Settings')}>
         <Text style={styles.settingsLabel}>{t('profile.settings')}</Text>

@@ -13,7 +13,9 @@ class InsurancePolicyResource extends JsonResource
             'id' => $this->id,
             'driver_name' => $this->driver->name,
             'driver_phone' => $this->driver->phone,
-            'car' => trim("{$this->car->make} {$this->car->model} ({$this->car->plate_number})"),
+            'car' => $this->car
+                ? trim("{$this->car->make} {$this->car->model} ({$this->car->plate_number})")
+                : trim("{$this->vehicle_make} {$this->vehicle_model} ({$this->vehicle_plate_number})"),
             'provider_name' => $this->provider->name,
             'coverage_type' => $this->coverage_type,
             'plan_name' => $this->plan_name,

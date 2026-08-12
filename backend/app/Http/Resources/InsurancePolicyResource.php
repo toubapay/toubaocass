@@ -11,7 +11,18 @@ class InsurancePolicyResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'car' => new CarResource($this->whenLoaded('car')),
+            'car' => $this->car ? new CarResource($this->car) : [
+                'id' => null,
+                'type' => $this->vehicle_category,
+                'make' => $this->vehicle_make,
+                'model' => $this->vehicle_model,
+                'year' => null,
+                'color' => null,
+                'plate_number' => $this->vehicle_plate_number,
+                'seats' => $this->vehicle_seats,
+                'photo_url' => null,
+                'is_active' => null,
+            ],
             'provider' => [
                 'id' => $this->provider->id,
                 'name' => $this->provider->name,

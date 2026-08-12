@@ -171,6 +171,7 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "assuranceLink": "🛡️ التأمين",
     "dashboard": {
       "trips": "الرحلات",
       "bookings": "الحجوزات",
@@ -435,6 +436,40 @@
     }
   },
   "insurance": {
+    "landingTitle": "اشترك في تأمين للسيارات والدراجات النارية",
+    "landingSubtitle": "تغطية سريعة. أفضل سعر.",
+    "getQuote": "احصل على عرض سعر",
+    "selectTypeTitle": "اختر نوع المركبة",
+    "vehicleCategory": {
+      "car": "سيارة",
+      "motorcycle": "دراجة نارية"
+    },
+    "scanFrontTitle": "صوّر بطاقتك الرمادية",
+    "scanBackTitle": "صوّر ظهر بطاقتك الرمادية",
+    "scanHint": "ضع الوثيقة بشكل مسطح في مكان جيد الإضاءة.",
+    "takePhoto": "التقط صورة",
+    "enterManually": "إدخال يدوي",
+    "skipOldCard": "تخطي، لدي بطاقة قديمة",
+    "analyzingTitle": "جارٍ التحليل…",
+    "analyzingHint": "يرجى الانتظار بينما نستخرج معلومات بطاقتك الرمادية.",
+    "vehicleInfoTitle": "معلومات المركبة",
+    "make": "الماركة",
+    "model": "الطراز",
+    "plateNumber": "رقم التسجيل",
+    "powerCv": "القوة (حصان)",
+    "seats": "عدد المقاعد",
+    "vehicleAge": "عمر مركبتك",
+    "ageBracket": {
+      "under_5": "أقل من 5 سنوات",
+      "from_5_to_10": "5 إلى 10 سنوات",
+      "over_10": "أكثر من 10 سنوات"
+    },
+    "vehicleUsage": "استخدام المركبة",
+    "usageType": {
+      "personal": "شخصي",
+      "professional": "مهني"
+    },
+    "next": "التالي",
     "compareTitle": "مقارنة التأمينات",
     "chooseOffer": "اختيار هذا العرض",
     "perYear": "{{amount}} FCFA / سنة",

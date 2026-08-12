@@ -320,6 +320,76 @@ export interface Paginated<T> {
   links?: unknown;
 }
 
+export type InsuranceCoverageType = 'tiers_simple' | 'tiers_collision' | 'tous_risques';
+
+export type VehicleCategory = 'car' | 'motorcycle';
+
+export type VehicleAgeBracket = 'under_5' | 'from_5_to_10' | 'over_10';
+
+export type VehicleUsageType = 'personal' | 'professional';
+
+export interface InsuranceQuote {
+  provider_id: number;
+  provider_name: string;
+  plan_name: string;
+  coverage_type: InsuranceCoverageType;
+  annual_premium: number;
+  monthly_premium: number;
+  highlights: string[];
+}
+
+export interface InsuredVehicleSummary {
+  id: number | null;
+  type: string | null;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  color: string | null;
+  plate_number: string | null;
+  seats: number | null;
+  photo_url: string | null;
+  is_active: boolean | null;
+}
+
+export interface InsurancePolicy {
+  id: number;
+  car: InsuredVehicleSummary;
+  provider: { id: number; name: string };
+  coverage_type: InsuranceCoverageType;
+  plan_name: string;
+  annual_premium: number;
+  policy_number: string;
+  starts_at: string;
+  ends_at: string;
+  status: 'active' | 'expired' | 'cancelled';
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ScannedVehicleInfo {
+  make: string | null;
+  model: string | null;
+  plate_number: string | null;
+  power_cv: number | null;
+  seats: number | null;
+  vehicle_age_bracket: VehicleAgeBracket | null;
+  carte_grise_front_path: string | null;
+  carte_grise_back_path: string | null;
+}
+
+export interface VehicleInsuranceInput {
+  vehicle_category: VehicleCategory;
+  make?: string | null;
+  model?: string | null;
+  plate_number?: string | null;
+  vehicle_power_cv?: number | null;
+  vehicle_seats?: number | null;
+  vehicle_age_bracket: VehicleAgeBracket;
+  vehicle_usage_type: VehicleUsageType;
+  carte_grise_front_path?: string | null;
+  carte_grise_back_path?: string | null;
+}
+
 export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;

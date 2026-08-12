@@ -77,6 +77,14 @@ return [
         ],
     ],
 
+    'ocr' => [
+        // Only 'simulated' exists today (no OCR/document-scanning vendor
+        // integrated yet) — see App\Services\Ocr\SimulatedDocumentOcrClient.
+        // Adding a real vendor means adding a driver value + a branch in
+        // AppServiceProvider, same as services.sms.driver above.
+        'driver' => env('OCR_DRIVER', 'simulated'),
+    ],
+
     'google_maps' => [
         // Server-side key for the Distance Matrix API — deliberately separate
         // from the client apps' GOOGLE_MAPS_API_KEY (that one is restricted

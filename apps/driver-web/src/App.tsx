@@ -19,6 +19,7 @@ import { DemLeguiChatPage } from './pages/DemLeguiChatPage';
 import { DemLeguiRequestsPage } from './pages/DemLeguiRequestsPage';
 import { DemLeguiTripDetailPage } from './pages/DemLeguiTripDetailPage';
 import { InsuranceComparePage } from './pages/InsuranceComparePage';
+import { InsurancePage } from './pages/InsurancePage';
 import { KycFormPage } from './pages/KycFormPage';
 import { KycStatusPage } from './pages/KycStatusPage';
 import { MyPoliciesPage } from './pages/MyPoliciesPage';
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="/fleet/add-car" element={<AddCarPage />} />
         <Route path="/fleet/insurance-compare" element={<InsuranceComparePage />} />
         <Route path="/fleet/my-policies" element={<MyPoliciesPage />} />
+        <Route path="/insurance" element={<InsurancePage />} />
         <Route path="/kyc" element={<KycStatusPage />} />
         <Route path="/kyc/form" element={<KycFormPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />

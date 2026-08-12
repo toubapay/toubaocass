@@ -313,6 +313,36 @@ export interface Paginated<T> {
   links?: unknown;
 }
 
+export type VehicleCategory = 'car' | 'motorcycle';
+
+export type VehicleAgeBracket = 'under_5' | 'from_5_to_10' | 'over_10';
+
+export type VehicleUsageType = 'personal' | 'professional';
+
+export interface ScannedVehicleInfo {
+  make: string | null;
+  model: string | null;
+  plate_number: string | null;
+  power_cv: number | null;
+  seats: number | null;
+  vehicle_age_bracket: VehicleAgeBracket | null;
+  carte_grise_front_path: string | null;
+  carte_grise_back_path: string | null;
+}
+
+export interface VehicleInsuranceInput {
+  vehicle_category: VehicleCategory;
+  make?: string | null;
+  model?: string | null;
+  plate_number?: string | null;
+  vehicle_power_cv?: number | null;
+  vehicle_seats?: number | null;
+  vehicle_age_bracket: VehicleAgeBracket;
+  vehicle_usage_type: VehicleUsageType;
+  carte_grise_front_path?: string | null;
+  carte_grise_back_path?: string | null;
+}
+
 export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
@@ -330,9 +360,22 @@ export interface InsuranceQuote {
   highlights: string[];
 }
 
+export interface InsuredVehicleSummary {
+  id: number | null;
+  type: string | null;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  color: string | null;
+  plate_number: string | null;
+  seats: number | null;
+  photo_url: string | null;
+  is_active: boolean | null;
+}
+
 export interface InsurancePolicy {
   id: number;
-  car: Car;
+  car: InsuredVehicleSummary;
   provider: { id: number; name: string };
   coverage_type: InsuranceCoverageType;
   plan_name: string;
