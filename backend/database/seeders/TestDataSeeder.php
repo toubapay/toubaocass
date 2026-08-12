@@ -37,6 +37,12 @@ use Illuminate\Support\Facades\Hash;
  * Requires DatabaseSeeder to have already run (cities + insurance
  * providers must exist).
  *
+ * Safe to rerun: the accounts (users/driver profiles/cars/wallets) are
+ * created with firstOrCreate(), and module data (trips, bookings, Anando
+ * rides, Dem Légui, deliveries, the insurance policy) is only seeded the
+ * first time — once the test accounts already exist, rerunning just
+ * reprints the credentials table instead of duplicating every record.
+ *
  * Login credentials:
  *   - Riders/drivers: phone number below + OTP "123456" (the
  *     OTP_BYPASS_CODE configured in .env for local/dev environments).
@@ -161,6 +167,20 @@ class TestDataSeeder extends Seeder
             ]);
         }
 
+        // Everything below (Trip/Anando/Dem Légui/Delivery/Insurance) is
+        // plain ::create(), not firstOrCreate() — only safe to run once.
+        // Gate it on whether rider1 was actually just created, so rerunning
+        // this seeder against a DB that already has the test accounts
+        // (e.g. to pick up a code change without a full migrate:fresh)
+        // skips straight to reprinting the credentials table instead of
+        // duplicating every trip/booking/delivery/etc.
+        if (! $rider1->wasRecentlyCreated) {
+            $this->command?->warn('Test accounts already exist — skipping module data, only printing credentials.');
+            $this->printAccountsTable();
+
+            return;
+        }
+
         // --- Trip (scheduled long-distance rides) -----------------------
 
         $tripScheduled = Trip::create([
@@ -185,7 +205,7 @@ class TestDataSeeder extends Seeder
             'status' => Booking::STATUS_CONFIRMED,
         ]);
 
-        Trip::create([
+        $tripFull = Trip::create([
             'driver_id' => $driver2->id,
             'car_id' => $car2->id,
             'origin_city_id' => $dakar->id,
@@ -198,6 +218,13 @@ class TestDataSeeder extends Seeder
             'available_seats' => 0,
             'status' => Trip::STATUS_FULL,
             'is_instant' => true,
+        ]);
+        Booking::create([
+            'trip_id' => $tripFull->id,
+            'rider_id' => $rider1->id,
+            'seats_booked' => 4,
+            'fare_total' => 8000,
+            'status' => Booking::STATUS_CONFIRMED,
         ]);
 
         $tripInProgress = Trip::create([
@@ -418,20 +445,24 @@ class TestDataSeeder extends Seeder
 
         $provider = InsuranceProvider::first();
         if ($provider) {
-            InsurancePolicy::create([
+            InsurancePolicy::firstOrCreate(['policy_number' => 'POL-TEST0001'], [
                 'car_id' => $car1->id,
                 'driver_id' => $driver1->id,
                 'insurance_provider_id' => $provider->id,
                 'coverage_type' => InsurancePolicy::COVERAGE_TIERS_COLLISION,
                 'plan_name' => 'Formule tiers collision',
                 'annual_premium' => 95000,
-                'policy_number' => 'POL-TEST0001',
                 'starts_at' => now()->subMonths(2)->toDateString(),
                 'ends_at' => now()->addMonths(10)->toDateString(),
                 'status' => InsurancePolicy::STATUS_ACTIVE,
             ]);
         }
 
+        $this->printAccountsTable();
+    }
+
+    private function printAccountsTable(): void
+    {
         $this->command?->info('Test accounts — phone + OTP "123456" (rider/driver), admin@test.sn / password (admin):');
         $this->command?->table(['Name', 'Role', 'Phone'], [
             ['Ibrahima Diop', 'driver (approved, online, has car)', '+221770000010'],
