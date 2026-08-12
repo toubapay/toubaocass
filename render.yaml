@@ -1,0 +1,130 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploys the whole platform as 3 instances total:
+#   1. intercity-frontends — one Docker web service serving all 3 static
+#      apps (user web, driver web, admin) path-routed behind one nginx
+#      container (see Dockerfile.frontends).
+#   2. intercity-backend   — one Docker web service running the Laravel API,
+#      queue worker, and scheduler together via supervisord
+#      (RUN_ALL_IN_ONE=true, see backend/docker/supervisord.conf).
+#   3. intercity-db        — a managed Postgres database.
+#
+# All domains below (app.example.com / api.example.com) are placeholders —
+# swap them for your real domains (or drop them and use each service's free
+# onrender.com URL) once you have DNS ready. See RENDER_DEPLOY.md for the
+# full first-deploy checklist.
+
+databases:
+  - name: intercity-db
+    plan: starter
+    databaseName: toubaocass
+    user: toubaocass
+
+services:
+  - type: web
+    name: intercity-frontends
+    runtime: docker
+    dockerfilePath: ./Dockerfile.frontends
+    dockerContext: .
+    plan: starter
+    envVars:
+      # Baked into the JS bundles at build time (Vite convention) — must
+      # point at the backend's public URL.
+      - key: VITE_API_BASE_URL
+        value: https://api.example.com
+      - key: VITE_ADMIN_API_BASE_URL
+        value: https://api.example.com
+      # Firebase web push config — same values used by apps/rider and
+      # apps/driver, fill in via the Render dashboard (Firebase console →
+      # Project settings → General → Your apps → Web app).
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+      - key: VITE_FIREBASE_VAPID_KEY
+        sync: false
+      - key: VITE_GOOGLE_MAPS_API_KEY
+        sync: false
+
+  - type: web
+    name: intercity-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /up
+    # Single instance only — Render disks can't attach to a service scaled
+    # to >1 instance, which is fine since this whole blueprint is built
+    # around exactly one backend instance. Keeps car photos/KYC/carte grise
+    # uploads on FILESYSTEM_DISK=public / KYC_FILESYSTEM_DISK=local (the
+    # app's own dev-mode defaults) actually persisting across deploys,
+    # unlike Railway's ephemeral filesystem — no S3 bucket required. See
+    # RENDER_DEPLOY.md if you outgrow one instance and need to switch to S3.
+    disk:
+      name: intercity-backend-storage
+      mountPath: /app/storage/app
+      sizeGB: 5
+    envVars:
+      - key: APP_NAME
+        value: Intercity
+      - key: APP_ENV
+        value: production
+      # Generate once with `php artisan key:generate --show`, paste the
+      # output in the Render dashboard — never regenerate after real data
+      # exists.
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://api.example.com
+      # Render's log tab only captures stdout/stderr, not files inside the
+      # container.
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: intercity-db
+          property: connectionString
+      # Runs Octane + queue:work + schedule:work together in this one
+      # instance via supervisord — see backend/docker/entrypoint.sh.
+      - key: RUN_ALL_IN_ONE
+        value: "true"
+      # Public URL of intercity-frontends (its domain root, where apps/web
+      # is served) — used to build the SOS/share-tracking link texted to
+      # riders' families.
+      - key: WEB_FRONTEND_URL
+        value: https://app.example.com
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: KYC_FILESYSTEM_DISK
+        value: local
+      - key: SMS_DRIVER
+        value: log
+      - key: PROMOBILE_TOKEN
+        sync: false
+      - key: PROMOBILE_FROM
+        sync: false
+      - key: PUSH_DRIVER
+        value: log
+      - key: FCM_PROJECT_ID
+        sync: false
+      - key: FCM_CREDENTIALS_JSON
+        sync: false
+      # Leave unset in production — only useful for demos.
+      - key: OTP_BYPASS_CODE
+        sync: false
+      - key: GOOGLE_MAPS_SERVER_KEY
+        sync: false
+      - key: OCR_DRIVER
+        value: simulated

@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0, flexShrink: 1 }}>
-          <img src="/favicon.svg" alt="" width={28} height={28} style={{ flexShrink: 0 }} />
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={28} height={28} style={{ flexShrink: 0 }} />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15, minWidth: 0 }}>
             <span style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>Intercity</span>
             <span

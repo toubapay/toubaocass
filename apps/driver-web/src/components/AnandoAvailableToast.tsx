@@ -11,7 +11,7 @@ const VISIBLE_DURATION_MS = 4000;
 const FADE_DURATION_MS = 350;
 
 function playBeep() {
-  new Audio('/sounds/anando_beep.wav').play().catch(() => {});
+  new Audio(`${import.meta.env.BASE_URL}sounds/anando_beep.wav`).play().catch(() => {});
 }
 
 /**

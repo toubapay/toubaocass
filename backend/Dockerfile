@@ -14,6 +14,13 @@ RUN install-php-extensions \
     zip \
     intl
 
+# supervisor: only used when RUN_ALL_IN_ONE=true (single-instance hosts like
+# Render), to run Octane + the queue worker + the scheduler as one process
+# group instead of as separate services. See docker/supervisord.conf.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
@@ -39,6 +46,7 @@ RUN cp vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php public/fra
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 
 ENV OCTANE_SERVER=frankenphp
 

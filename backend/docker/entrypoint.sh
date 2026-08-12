@@ -23,6 +23,15 @@ if [ "$#" -gt 0 ]; then
     exec "$@"
 fi
 
+# Single-instance hosts (Render) run the API, queue worker, and scheduler as
+# one process group via supervisord instead of as separate services — set
+# RUN_ALL_IN_ONE=true on that service only. Railway's existing separate
+# queue-worker/scheduler services pass their own start command above, so
+# they're unaffected by this branch.
+if [ "$RUN_ALL_IN_ONE" = "true" ]; then
+    exec supervisord -c /etc/supervisor/supervisord.conf
+fi
+
 exec php artisan octane:start \
     --server=frankenphp \
     --host=0.0.0.0 \

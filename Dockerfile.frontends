@@ -1,0 +1,85 @@
+# syntax=docker/dockerfile:1
+
+# Combines all 3 static frontends into ONE nginx container / one Render Web
+# Service instance, path-routed on a single domain:
+#   /         -> apps/web        (rider-facing web app)
+#   /driver/  -> apps/driver-web (driver-facing web app)
+#   /admin/   -> apps/admin      (staff back-office)
+#
+# Each app is still built independently (own package.json/lockfile, own Vite
+# config) — this just fans out three ordinary Vite builds into three stages
+# and layers their `dist/` output into one nginx image. apps/driver-web and
+# apps/admin have `base: '/driver/'` / `base: '/admin/'` set in their
+# vite.config.ts so their own asset URLs resolve under the right prefix;
+# apps/web is unchanged and owns the domain root.
+
+# --- apps/web (rider web) ---
+FROM node:22-slim AS web-build
+WORKDIR /app
+COPY apps/web/package.json apps/web/package-lock.json ./
+RUN npm ci
+COPY apps/web/. .
+ARG VITE_API_BASE_URL
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+ARG VITE_FIREBASE_VAPID_KEY
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY \
+    VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN \
+    VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID \
+    VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET \
+    VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID \
+    VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID \
+    VITE_FIREBASE_VAPID_KEY=$VITE_FIREBASE_VAPID_KEY \
+    VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+RUN npm run build
+
+# --- apps/driver-web ---
+FROM node:22-slim AS driver-web-build
+WORKDIR /app
+COPY apps/driver-web/package.json apps/driver-web/package-lock.json ./
+RUN npm ci
+COPY apps/driver-web/. .
+ARG VITE_API_BASE_URL
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+ARG VITE_FIREBASE_VAPID_KEY
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY \
+    VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN \
+    VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID \
+    VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET \
+    VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID \
+    VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID \
+    VITE_FIREBASE_VAPID_KEY=$VITE_FIREBASE_VAPID_KEY \
+    VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+RUN npm run build
+
+# --- apps/admin ---
+FROM node:22-slim AS admin-build
+WORKDIR /app
+COPY apps/admin/package.json apps/admin/package-lock.json ./
+RUN npm ci
+COPY apps/admin/. .
+ARG VITE_ADMIN_API_BASE_URL
+ENV VITE_ADMIN_API_BASE_URL=$VITE_ADMIN_API_BASE_URL
+RUN npm run build
+
+# --- combine into one nginx image ---
+FROM nginx:1.27-alpine
+COPY --from=web-build /app/dist /usr/share/nginx/html
+COPY --from=driver-web-build /app/dist /usr/share/nginx/html/driver
+COPY --from=admin-build /app/dist /usr/share/nginx/html/admin
+COPY nginx.frontends.conf.template /etc/nginx/templates/default.conf.template
+ENV PORT=8080
+EXPOSE 8080
