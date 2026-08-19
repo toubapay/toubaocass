@@ -28,6 +28,8 @@
 	<string>$(GOOGLE_MAPS_API_KEY)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Autorisez Intercity à utiliser l'appareil photo pour photographier votre carte grise.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Autorisez Intercity à utiliser votre position pour trouver des trajets qui partent près de vous.</string>
 	<key>NSMicrophoneUsageDescription</key>

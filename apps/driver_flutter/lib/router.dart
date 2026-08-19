@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'screens/anando/anando_ride_detail_screen.dart';
+import 'screens/anando/anando_screen.dart';
 import 'screens/auth/otp_verify_screen.dart';
 import 'screens/auth/phone_entry_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
 import 'screens/chat_screen.dart';
+import 'screens/dem_legui/dem_legui_requests_screen.dart';
+import 'screens/dem_legui/dem_legui_trip_detail_screen.dart';
+import 'screens/deliveries/deliveries_list_screen.dart';
+import 'screens/deliveries/delivery_detail_screen.dart';
 import 'screens/fleet/add_car_screen.dart';
 import 'screens/fleet/cars_list_screen.dart';
+import 'screens/insurance/insurance_screen.dart';
+import 'screens/insurance/my_policies_screen.dart';
 import 'screens/kyc/kyc_form_screen.dart';
 import 'screens/kyc/kyc_status_screen.dart';
 import 'screens/profile_screen.dart';
@@ -86,8 +94,53 @@ GoRouter buildRouter(AuthProvider auth) {
         },
       ),
       GoRoute(path: '/post-trip', builder: (context, state) => PostTripScreen(onCreated: () => context.pop())),
+      GoRoute(
+        path: '/anando',
+        builder: (context, state) => AnandoScreen(onOpenRide: (id) => context.push('/anando/$id')),
+      ),
+      GoRoute(
+        path: '/anando/:id',
+        builder: (context, state) => AnandoRideDetailScreen(rideId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/deliveries',
+        builder: (context, state) => DeliveriesListScreen(onOpenDelivery: (id) => context.push('/deliveries/$id')),
+      ),
+      GoRoute(
+        path: '/deliveries/:id',
+        builder: (context, state) => DeliveryDetailScreen(deliveryId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/dem-legui',
+        builder: (context, state) => DemLeguiRequestsScreen(onOpenTrip: (id) => context.push('/dem-legui/trips/$id')),
+      ),
+      GoRoute(
+        path: '/dem-legui/trips/:id',
+        builder: (context, state) => DemLeguiTripDetailScreen(
+          tripId: int.parse(state.pathParameters['id']!),
+          onFindMore: () => context.pop(),
+          onOpenChat: (requestId, title, subtitle) =>
+              context.push('/dem-legui/requests/$requestId/chat', extra: {'title': title, 'subtitle': subtitle}),
+        ),
+      ),
+      GoRoute(
+        path: '/dem-legui/requests/:requestId/chat',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return DemLeguiChatScreen(
+            requestId: int.parse(state.pathParameters['requestId']!),
+            title: extra?['title'] as String?,
+            subtitle: extra?['subtitle'] as String?,
+          );
+        },
+      ),
       GoRoute(path: '/add-car', builder: (context, state) => AddCarScreen(onSaved: () => context.pop())),
       GoRoute(path: '/kyc-form', builder: (context, state) => KycFormScreen(onSubmitted: () => context.pop())),
+      GoRoute(
+        path: '/insurance',
+        builder: (context, state) => InsuranceScreen(onPurchased: () => context.pushReplacement('/insurance/my-policies')),
+      ),
+      GoRoute(path: '/insurance/my-policies', builder: (context, state) => const MyPoliciesScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => _MainShell(navigationShell: navigationShell),
         branches: [
@@ -98,6 +151,9 @@ GoRouter buildRouter(AuthProvider auth) {
                 onOpenTrip: (id) => context.push('/trips/$id'),
                 onPostTrip: () => context.push('/post-trip'),
                 onOpenWallet: () => context.push('/wallet'),
+                onOpenDemLegui: () => context.push('/dem-legui'),
+                onOpenAnando: () => context.push('/anando'),
+                onOpenDeliveries: () => context.push('/deliveries'),
               ),
             ),
           ]),
@@ -116,6 +172,7 @@ GoRouter buildRouter(AuthProvider auth) {
                 builder: (context, state) => ProfileScreen(
                       onOpenWallet: () => context.push('/wallet'),
                       onOpenSettings: () => context.push('/settings'),
+                      onOpenInsurance: () => context.push('/insurance'),
                     )),
           ]),
         ],

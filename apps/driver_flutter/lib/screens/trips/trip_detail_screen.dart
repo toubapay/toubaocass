@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api/client.dart';
+import '../../api/tracking_api.dart';
 import '../../api/trips_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/sos_share_sheet.dart';
 import '../../widgets/trip_urgency_badge.dart';
 
 const _statusLabel = {
@@ -112,6 +114,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           const SizedBox(height: AppSpacing.xs),
           Text('${t.departureDate} à ${t.departureTime} · ${_statusLabel[t.status] ?? t.status}',
               style: const TextStyle(color: AppColors.textMuted)),
+          if (t.status == 'in_progress')
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.md),
+              child: OutlinedButton(
+                onPressed: () => showSosShareSheet(context, kind: ShareableRideKind.trips, rideId: t.id),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
+                child: const Text('🆘 Partager ma position'),
+              ),
+            ),
           const SizedBox(height: AppSpacing.sm),
           TripUrgencyBadge(trip: t),
           const SizedBox(height: AppSpacing.lg),

@@ -211,9 +211,11 @@ booking flow end-to-end.
 `apps/rider_flutter/` and `apps/driver_flutter/` are Flutter/Dart clients
 covering the same functionality as the Expo apps above — auth/OTP, profile
 setup, trip search/booking/history/maps (rider), KYC/fleet/trip-posting/
-management/maps (driver), and FCM push — against the exact same backend API.
-They run alongside the Expo apps rather than replacing them; nothing else in
-this repo changes because of their presence.
+management/maps (driver), Anando carpooling, Dem Légui on-demand rides,
+Livraison deliveries, Assurance (the scan-a-carte-grise vehicle insurance
+flow), SOS/live-location sharing, and FCM push — against the exact same
+backend API. They run alongside the Expo apps rather than replacing them;
+nothing else in this repo changes because of their presence.
 
 ```bash
 cd apps/rider_flutter   # or apps/driver_flutter

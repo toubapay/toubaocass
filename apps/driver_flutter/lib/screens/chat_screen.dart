@@ -3,16 +3,31 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../api/client.dart';
-import '../api/messages_api.dart';
+import '../api/messages_api.dart' as booking_messages;
 import '../models.dart';
 import '../theme.dart';
 
 const _pollInterval = Duration(seconds: 4);
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.bookingId, this.title, this.subtitle});
+  /// Booking chat (the common case) — pass [bookingId] and this hits
+  /// `/bookings/:id/messages` directly.
+  ChatScreen({super.key, required int bookingId, this.title, this.subtitle})
+      : fetchMessages = (() => booking_messages.fetchMessages(bookingId)),
+        sendMessage = ((body) => booking_messages.sendMessage(bookingId, body));
 
-  final int bookingId;
+  /// Generic form — any other message thread (e.g. a Dem Légui request)
+  /// just supplies its own fetch/send pair instead of a bookingId.
+  const ChatScreen.custom({
+    super.key,
+    required this.fetchMessages,
+    required this.sendMessage,
+    this.title,
+    this.subtitle,
+  });
+
+  final Future<List<Message>> Function() fetchMessages;
+  final Future<Message> Function(String body) sendMessage;
   final String? title;
   final String? subtitle;
 
@@ -47,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _load() async {
     try {
-      final result = await fetchMessages(widget.bookingId);
+      final result = await widget.fetchMessages();
       if (!mounted) return;
       setState(() => messages = result);
     } catch (_) {
@@ -78,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
       error = null;
     });
     try {
-      final message = await sendMessage(widget.bookingId, trimmed);
+      final message = await widget.sendMessage(trimmed);
       setState(() {
         messages = [...messages, message];
         _bodyController.clear();

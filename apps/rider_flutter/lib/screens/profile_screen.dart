@@ -3,13 +3,22 @@ import 'package:provider/provider.dart';
 
 import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
+import '../state/module_status_provider.dart';
 import '../theme.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.onOpenWallet, required this.onOpenSettings});
+  const ProfileScreen({
+    super.key,
+    required this.onOpenWallet,
+    required this.onOpenSettings,
+    required this.onOpenDeliveries,
+    required this.onOpenInsurance,
+  });
 
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenSettings;
+  final VoidCallback onOpenDeliveries;
+  final VoidCallback onOpenInsurance;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -28,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
+    final moduleStatus = context.watch<ModuleStatusProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
@@ -92,6 +102,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            InkWell(
+              onTap: widget.onOpenDeliveries,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text('📦 Mes livraisons', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
+                    Icon(Icons.arrow_forward, color: AppColors.textMuted),
+                  ],
+                ),
+              ),
+            ),
+            if (moduleStatus.isEnabled('assurance'))
+              InkWell(
+                onTap: widget.onOpenInsurance,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('🛡️ Assurance', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
+                      Icon(Icons.arrow_forward, color: AppColors.textMuted),
+                    ],
+                  ),
+                ),
+              ),
             InkWell(
               onTap: widget.onOpenSettings,
               borderRadius: BorderRadius.circular(AppRadius.md),

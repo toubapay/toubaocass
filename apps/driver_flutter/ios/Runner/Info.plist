@@ -32,6 +32,8 @@
 	<string>Autorisez Intercity à utiliser votre position pour définir votre point de départ.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Autorisez Intercity à accéder à vos photos pour envoyer vos documents de vérification.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Autorisez Intercity à utiliser l'appareil photo pour photographier votre carte grise.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'router.dart';
 import 'state/auth_provider.dart';
+import 'state/module_status_provider.dart';
 import 'theme.dart';
 
 void main() {
@@ -18,18 +19,23 @@ class IntercityRiderApp extends StatefulWidget {
 
 class _IntercityRiderAppState extends State<IntercityRiderApp> {
   final auth = AuthProvider();
+  final moduleStatus = ModuleStatusProvider();
   late final router = buildRouter(auth);
 
   @override
   void initState() {
     super.initState();
     auth.bootstrap();
+    moduleStatus.load();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: auth,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: auth),
+        ChangeNotifierProvider.value(value: moduleStatus),
+      ],
       child: MaterialApp.router(
         title: 'Intercity Rider',
         debugShowCheckedModeBanner: false,

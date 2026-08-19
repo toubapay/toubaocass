@@ -4,12 +4,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api/bookings_api.dart';
 import '../api/client.dart';
+import '../api/tracking_api.dart';
 import '../api/trips_api.dart';
 import '../api/wallet_api.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../utils/trip.dart' as trip_utils;
 import '../widgets/route_map.dart';
+import '../widgets/sos_share_sheet.dart';
 import '../widgets/trip_urgency_badge.dart';
 
 class TripDetailScreen extends StatefulWidget {
@@ -130,6 +132,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           Text('${t.departureDate} à ${t.departureTime}', style: const TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: AppSpacing.sm),
           TripUrgencyBadge(trip: t),
+          if (editing && t.status == 'in_progress')
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: OutlinedButton(
+                onPressed: () => showSosShareSheet(context, kind: ShareableRideKind.trips, rideId: t.id),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
+                child: const Text('🆘 Partager ma position'),
+              ),
+            ),
           if (editing)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
