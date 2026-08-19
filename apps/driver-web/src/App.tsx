@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
@@ -5,31 +6,34 @@ import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ModuleStatusProvider } from './context/ModuleStatusContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
-import { AddCarPage } from './pages/AddCarPage';
-import { AnandoPage } from './pages/AnandoPage';
-import { AnandoRideDetailPage } from './pages/AnandoRideDetailPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
-import { CarsListPage } from './pages/CarsListPage';
-import { ChatPage } from './pages/ChatPage';
-import { DeliveriesListPage } from './pages/DeliveriesListPage';
-import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
-import { DemLeguiChatPage } from './pages/DemLeguiChatPage';
-import { DemLeguiRequestsPage } from './pages/DemLeguiRequestsPage';
-import { DemLeguiTripDetailPage } from './pages/DemLeguiTripDetailPage';
-import { InsuranceComparePage } from './pages/InsuranceComparePage';
-import { InsurancePage } from './pages/InsurancePage';
-import { KycFormPage } from './pages/KycFormPage';
-import { KycStatusPage } from './pages/KycStatusPage';
-import { MyPoliciesPage } from './pages/MyPoliciesPage';
-import { PostInstantTripPage } from './pages/PostInstantTripPage';
-import { PostTripPage } from './pages/PostTripPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { SettingsPage } from './pages/SettingsPage';
-import { TripDetailPage } from './pages/TripDetailPage';
 import { TripsListPage } from './pages/TripsListPage';
-import { WalletPage } from './pages/WalletPage';
+
+// Lazy-loaded: everything below is only reachable after login/navigation,
+// so it doesn't need to sit in the initial bundle every visitor downloads.
+const AddCarPage = lazy(() => import('./pages/AddCarPage').then((m) => ({ default: m.AddCarPage })));
+const AnandoPage = lazy(() => import('./pages/AnandoPage').then((m) => ({ default: m.AnandoPage })));
+const AnandoRideDetailPage = lazy(() => import('./pages/AnandoRideDetailPage').then((m) => ({ default: m.AnandoRideDetailPage })));
+const CarsListPage = lazy(() => import('./pages/CarsListPage').then((m) => ({ default: m.CarsListPage })));
+const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })));
+const DeliveriesListPage = lazy(() => import('./pages/DeliveriesListPage').then((m) => ({ default: m.DeliveriesListPage })));
+const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then((m) => ({ default: m.DeliveryDetailPage })));
+const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) => ({ default: m.DemLeguiChatPage })));
+const DemLeguiRequestsPage = lazy(() => import('./pages/DemLeguiRequestsPage').then((m) => ({ default: m.DemLeguiRequestsPage })));
+const DemLeguiTripDetailPage = lazy(() => import('./pages/DemLeguiTripDetailPage').then((m) => ({ default: m.DemLeguiTripDetailPage })));
+const InsuranceComparePage = lazy(() => import('./pages/InsuranceComparePage').then((m) => ({ default: m.InsuranceComparePage })));
+const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
+const KycFormPage = lazy(() => import('./pages/KycFormPage').then((m) => ({ default: m.KycFormPage })));
+const KycStatusPage = lazy(() => import('./pages/KycStatusPage').then((m) => ({ default: m.KycStatusPage })));
+const MyPoliciesPage = lazy(() => import('./pages/MyPoliciesPage').then((m) => ({ default: m.MyPoliciesPage })));
+const PostInstantTripPage = lazy(() => import('./pages/PostInstantTripPage').then((m) => ({ default: m.PostInstantTripPage })));
+const PostTripPage = lazy(() => import('./pages/PostTripPage').then((m) => ({ default: m.PostTripPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const TripDetailPage = lazy(() => import('./pages/TripDetailPage').then((m) => ({ default: m.TripDetailPage })));
+const WalletPage = lazy(() => import('./pages/WalletPage').then((m) => ({ default: m.WalletPage })));
 
 function AppRoutes() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -61,6 +65,7 @@ function AppRoutes() {
 
   return (
     <Layout>
+      <Suspense fallback={<CenteredSpinner />}>
       <Routes>
         <Route path="/" element={<TripsListPage />} />
         <Route path="/post-trip" element={<PostTripPage />} />
@@ -86,6 +91,7 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </Layout>
   );
 }

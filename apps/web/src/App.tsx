@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
@@ -5,31 +6,34 @@ import { CenteredSpinner } from './components/Spinner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ModuleStatusProvider } from './context/ModuleStatusContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
-import { AnandoPage } from './pages/AnandoPage';
-import { AnandoRideDetailPage } from './pages/AnandoRideDetailPage';
-import { ChatPage } from './pages/ChatPage';
-import { DemLeguiChatPage } from './pages/DemLeguiChatPage';
-import { DemLeguiRequestDetailPage } from './pages/DemLeguiRequestDetailPage';
-import { DeliveryDetailPage } from './pages/DeliveryDetailPage';
 import { HomePage } from './pages/HomePage';
-import { InstantDeparturesPage } from './pages/InstantDeparturesPage';
-import { InsurancePage } from './pages/InsurancePage';
-import { MapPage } from './pages/MapPage';
-import { MyBookingsPage } from './pages/MyBookingsPage';
-import { MyDeliveriesPage } from './pages/MyDeliveriesPage';
-import { MyInsurancePoliciesPage } from './pages/MyInsurancePoliciesPage';
-import { MyRideBookingsPage } from './pages/MyRideBookingsPage';
-import { NewDeliveryPage } from './pages/NewDeliveryPage';
-import { NewDemLeguiRequestPage } from './pages/NewDemLeguiRequestPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { PublicTrackingPage } from './pages/PublicTrackingPage';
-import { ServicesPage } from './pages/ServicesPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { TripDetailPage } from './pages/TripDetailPage';
-import { WalletPage } from './pages/WalletPage';
+
+// Lazy-loaded: everything below is only reachable after login/navigation,
+// so it doesn't need to sit in the initial bundle every visitor downloads.
+const AnandoPage = lazy(() => import('./pages/AnandoPage').then((m) => ({ default: m.AnandoPage })));
+const AnandoRideDetailPage = lazy(() => import('./pages/AnandoRideDetailPage').then((m) => ({ default: m.AnandoRideDetailPage })));
+const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })));
+const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) => ({ default: m.DemLeguiChatPage })));
+const DemLeguiRequestDetailPage = lazy(() => import('./pages/DemLeguiRequestDetailPage').then((m) => ({ default: m.DemLeguiRequestDetailPage })));
+const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then((m) => ({ default: m.DeliveryDetailPage })));
+const InstantDeparturesPage = lazy(() => import('./pages/InstantDeparturesPage').then((m) => ({ default: m.InstantDeparturesPage })));
+const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
+const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
+const MyBookingsPage = lazy(() => import('./pages/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })));
+const MyDeliveriesPage = lazy(() => import('./pages/MyDeliveriesPage').then((m) => ({ default: m.MyDeliveriesPage })));
+const MyInsurancePoliciesPage = lazy(() => import('./pages/MyInsurancePoliciesPage').then((m) => ({ default: m.MyInsurancePoliciesPage })));
+const MyRideBookingsPage = lazy(() => import('./pages/MyRideBookingsPage').then((m) => ({ default: m.MyRideBookingsPage })));
+const NewDeliveryPage = lazy(() => import('./pages/NewDeliveryPage').then((m) => ({ default: m.NewDeliveryPage })));
+const NewDemLeguiRequestPage = lazy(() => import('./pages/NewDemLeguiRequestPage').then((m) => ({ default: m.NewDemLeguiRequestPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const PublicTrackingPage = lazy(() => import('./pages/PublicTrackingPage').then((m) => ({ default: m.PublicTrackingPage })));
+const ServicesPage = lazy(() => import('./pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const TripDetailPage = lazy(() => import('./pages/TripDetailPage').then((m) => ({ default: m.TripDetailPage })));
+const WalletPage = lazy(() => import('./pages/WalletPage').then((m) => ({ default: m.WalletPage })));
 
 function AppRoutes() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -44,9 +48,11 @@ function AppRoutes() {
   // login entirely, unlike every other route in this app.
   if (location.pathname.startsWith('/track/')) {
     return (
-      <Routes>
-        <Route path="/track/:type/:id" element={<PublicTrackingPage />} />
-      </Routes>
+      <Suspense fallback={<CenteredSpinner />}>
+        <Routes>
+          <Route path="/track/:type/:id" element={<PublicTrackingPage />} />
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -76,6 +82,7 @@ function AppRoutes() {
 
   return (
     <Layout>
+      <Suspense fallback={<CenteredSpinner />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/instant" element={<InstantDeparturesPage />} />
@@ -101,6 +108,7 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </Layout>
   );
 }
