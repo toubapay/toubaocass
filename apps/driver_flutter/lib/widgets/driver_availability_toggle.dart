@@ -24,6 +24,7 @@ class _DriverAvailabilityToggleState extends State<DriverAvailabilityToggle> {
   bool toggling = false;
   String? error;
   Timer? _pingTimer;
+  bool? _pingingFor;
 
   @override
   void dispose() {
@@ -40,9 +41,15 @@ class _DriverAvailabilityToggleState extends State<DriverAvailabilityToggle> {
     }
   }
 
-  void _startPinging() {
+  // Idempotent: starts/stops the ping timer to match [isOnline], regardless
+  // of how the driver ended up online (toggled here, already online when
+  // this widget first mounts, or changed elsewhere) — called after every
+  // build rather than only from the toggle handler.
+  void _syncPinging(bool isOnline) {
+    if (_pingingFor == isOnline) return;
+    _pingingFor = isOnline;
     _pingTimer?.cancel();
-    _pingTimer = Timer.periodic(_locationPingInterval, (_) => _report());
+    _pingTimer = isOnline ? Timer.periodic(_locationPingInterval, (_) => _report()) : null;
   }
 
   Future<void> _handleToggle(bool next) async {
@@ -57,12 +64,10 @@ class _DriverAvailabilityToggleState extends State<DriverAvailabilityToggle> {
         final profile = await updateDriverAvailability(isOnline: true, latitude: coords.latitude, longitude: coords.longitude);
         final user = auth.user;
         if (user != null) auth.setUser(user.copyWith(driverProfile: profile));
-        _startPinging();
       } else {
         final profile = await updateDriverAvailability(isOnline: false);
         final user = auth.user;
         if (user != null) auth.setUser(user.copyWith(driverProfile: profile));
-        _pingTimer?.cancel();
       }
     } on LocationRequestException catch (e) {
       setState(() => error = e.message);
@@ -76,6 +81,9 @@ class _DriverAvailabilityToggleState extends State<DriverAvailabilityToggle> {
   @override
   Widget build(BuildContext context) {
     final isOnline = context.watch<AuthProvider>().user?.driverProfile?.isOnline ?? false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncPinging(isOnline);
+    });
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),

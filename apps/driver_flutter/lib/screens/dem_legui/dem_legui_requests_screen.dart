@@ -24,6 +24,7 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
   List<Car> cars = [];
   bool loading = true;
   int? acceptingId;
+  bool? _wasOnline;
 
   bool get isOnline => context.read<AuthProvider>().user?.driverProfile?.isOnline ?? false;
 
@@ -88,6 +89,13 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
   Widget build(BuildContext context) {
     // Rebuild when the online flag flips.
     context.watch<AuthProvider>();
+    final nowOnline = isOnline;
+    if (_wasOnline == false && nowOnline) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load();
+      });
+    }
+    _wasOnline = nowOnline;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Demandes Dem Légui')),
