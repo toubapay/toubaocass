@@ -4,10 +4,13 @@ namespace Tests\Unit;
 
 use App\Services\DeliveryPricingService;
 use App\Support\Geo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DeliveryPricingServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_quote_matches_haversine_distance_and_configured_rate(): void
     {
         config(['services.delivery.fee_per_km' => 100, 'services.delivery.base_fee' => 300]);

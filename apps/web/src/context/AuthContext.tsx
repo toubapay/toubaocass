@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { fetchMe, logout as apiLogout, requestOtp, verifyOtp } from '../api/auth';
-import { getStoredToken, setAuthToken } from '../api/client';
+import { getStoredToken, setAuthToken, setUnauthorizedHandler } from '../api/client';
 import type { User } from '../api/types';
 
 interface AuthContextValue {
@@ -33,6 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setIsLoading(false);
     })();
+  }, []);
+
+  // A 401 from the API means the server no longer considers this token
+  // valid (expired/revoked) — client.ts already clears it from storage, so
+  // this just drops the signed-in user so the app falls back to sign-in
+  // instead of looping on now-unauthorized requests.
+  useEffect(() => {
+    setUnauthorizedHandler(() => setUserState(null));
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   const sendOtp = useCallback(async (phone: string) => {

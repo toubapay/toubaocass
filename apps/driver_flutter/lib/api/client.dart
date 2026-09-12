@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const _tokenKey = 'intercity_driver_flutter_token';
 
@@ -27,24 +27,24 @@ class ApiClient {
 
   static final ApiClient instance = ApiClient._internal();
 
+  static const _storage = FlutterSecureStorage();
+
   late final Dio _dio;
   String? _token;
 
   Dio get dio => _dio;
 
   Future<String?> loadStoredToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString(_tokenKey);
+    _token = await _storage.read(key: _tokenKey);
     return _token;
   }
 
   Future<void> setToken(String? token) async {
     _token = token;
-    final prefs = await SharedPreferences.getInstance();
     if (token != null) {
-      await prefs.setString(_tokenKey, token);
+      await _storage.write(key: _tokenKey, value: token);
     } else {
-      await prefs.remove(_tokenKey);
+      await _storage.delete(key: _tokenKey);
     }
   }
 }

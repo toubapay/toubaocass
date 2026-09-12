@@ -12,7 +12,10 @@ use App\Services\Push\LogPushGateway;
 use App\Services\Sms\LogSmsGateway;
 use App\Services\Sms\PromobileSmsGateway;
 use App\Services\Sms\TwilioSmsGateway;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -68,5 +71,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JsonResource::withoutWrapping();
+
+        // Keyed by phone+IP so a single number can't be SMS-bombed and a
+        // single IP can't brute-force OTP codes across many numbers.
+        RateLimiter::for('otp', function (Request $request) {
+            $key = mb_strtolower((string) $request->input('phone')).'|'.$request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
     }
 }

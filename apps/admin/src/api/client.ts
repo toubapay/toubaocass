@@ -1,15 +1,23 @@
 import axios from 'axios';
 
 const TOKEN_KEY = 'intercity_admin_token';
+const REQUEST_TIMEOUT_MS = 15000;
 
 export const apiBaseUrl = (import.meta.env.VITE_ADMIN_API_BASE_URL as string | undefined) ?? 'http://localhost:8000/api/admin';
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,
+  timeout: REQUEST_TIMEOUT_MS,
   headers: { Accept: 'application/json' },
 });
 
 let authToken: string | null = localStorage.getItem(TOKEN_KEY);
+let onUnauthorized: (() => void) | null = null;
+
+/** Called once at app startup with a callback that clears the signed-in admin and routes to sign-in. */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
+}
 
 export function setAuthToken(token: string | null): void {
   authToken = token;
@@ -31,6 +39,17 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401 && authToken) {
+      setAuthToken(null);
+      onUnauthorized?.();
+    }
+    return Promise.reject(error);
+  },
+);
 
 export function extractErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
