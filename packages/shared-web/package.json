@@ -1,0 +1,32 @@
+{
+  "name": "shared-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Code shared between the web (rider), driver-web and admin Vite apps — the API client factory, domain types, theme, and a handful of pages/components that are identical (or differ only by additive, role-specific fields) between web and driver-web. Referenced via a file: dependency from each app's package.json. No single entry point — always imported by subpath, e.g. `shared-web/src/theme`.",
+  "peerDependencies": {
+    "@vis.gl/react-google-maps": "*",
+    "axios": "*",
+    "firebase": "*",
+    "i18next": "*",
+    "leaflet": "*",
+    "react": "*",
+    "react-dom": "*",
+    "react-i18next": "*",
+    "react-leaflet": "*",
+    "react-router-dom": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@vis.gl/react-google-maps": "^1.9.0",
+    "axios": "^1.18.1",
+    "firebase": "^12.16.0",
+    "i18next": "^26.3.6",
+    "leaflet": "^1.9.4",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.10",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.1",
+    "typescript": "~6.0.2"
+  }
+}
