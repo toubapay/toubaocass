@@ -63,6 +63,10 @@ module.exports = {
       // the address picker's Places Autocomplete/Details REST calls can use
       // it (those are plain fetch() calls, not part of the native Maps SDK).
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+      // Keep distinct from the rider app's key — see shared-mobile's
+      // api/client.ts — so an existing install isn't signed out by an
+      // update that moves this file into the shared package.
+      tokenStorageKey: 'intercity_driver_token',
     },
   },
 };
