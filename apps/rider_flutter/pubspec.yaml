@@ -49,6 +49,8 @@ dependencies:
   intl: ^0.19.0
   url_launcher: ^6.3.1
   speech_to_text: ^7.0.0
+  shared_flutter:
+    path: ../../packages/shared_flutter
 
 dev_dependencies:
   flutter_test:

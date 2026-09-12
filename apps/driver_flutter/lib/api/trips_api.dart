@@ -1,14 +1,9 @@
+import 'package:shared_flutter/api/pagination.dart';
+
 import '../models.dart';
 import 'client.dart';
 
-class Paginated<T> {
-  final List<T> data;
-  Paginated({required this.data});
-
-  factory Paginated.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
-    return Paginated(data: (json['data'] as List).map((e) => fromJson(e as Map<String, dynamic>)).toList());
-  }
-}
+export 'package:shared_flutter/api/pagination.dart';
 
 Future<Paginated<Trip>> fetchMyTrips() async {
   final response = await ApiClient.instance.dio.get('/driver/trips');
