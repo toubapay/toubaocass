@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { fetchMe, login as apiLogin, logout as apiLogout } from '../api/auth';
-import { getStoredToken, setAuthToken } from '../api/client';
+import { getStoredToken, setAuthToken, setUnauthorizedHandler } from '../api/client';
 import type { AdminUser } from '../api/types';
 
 interface AdminAuthContextValue {
@@ -31,6 +31,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
       setIsLoading(false);
     })();
+  }, []);
+
+  // A 401 from the API means the server no longer considers this token
+  // valid (expired/revoked) — client.ts already clears it from storage, so
+  // this just drops the signed-in admin so the app falls back to sign-in
+  // instead of looping on now-unauthorized requests.
+  useEffect(() => {
+    setUnauthorizedHandler(() => setAdminState(null));
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {

@@ -109,10 +109,19 @@ class BookingTest extends TestCase
 
     public function test_rider_cannot_book_a_trip_scheduled_for_today_at_an_earlier_time(): void
     {
+        $now = now();
+        // now()->subHour() can roll back onto yesterday's date right after
+        // midnight, which would make departure_time "earlier" than now only
+        // in clock-face terms while still being on today's departure_date —
+        // clamp to the start of today instead so the trip is unambiguously
+        // in the past regardless of what time the test happens to run at.
+        $departureMoment = $now->copy()->subHour();
+        $departureTime = $departureMoment->isSameDay($now) ? $departureMoment->format('H:i') : '00:00';
+
         $trip = $this->makeTrip(4, [
             'status' => Trip::STATUS_SCHEDULED,
-            'departure_date' => now()->toDateString(),
-            'departure_time' => now()->subHour()->format('H:i'),
+            'departure_date' => $now->toDateString(),
+            'departure_time' => $departureTime,
         ]);
         $rider = User::factory()->create();
 

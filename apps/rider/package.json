@@ -19,6 +19,7 @@
     "expo-image-picker": "^57.0.2",
     "expo-location": "^57.0.2",
     "expo-notifications": "^57.0.3",
+    "expo-secure-store": "^57.0.4",
     "expo-speech-recognition": "^56.0.1",
     "expo-status-bar": "~57.0.0",
     "i18next": "^26.3.6",
@@ -29,7 +30,8 @@
     "react-native-maps": "^1.29.0",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.25.2",
-    "react-native-web": "^0.21.2"
+    "react-native-web": "^0.21.2",
+    "shared-mobile": "file:../../packages/shared-mobile"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

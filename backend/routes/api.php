@@ -34,7 +34,7 @@ use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->group(function () {
+Route::prefix('auth')->middleware('throttle:otp')->group(function () {
     Route::post('otp/request', [AuthController::class, 'requestOtp']);
     Route::post('otp/verify', [AuthController::class, 'verifyOtp']);
 });

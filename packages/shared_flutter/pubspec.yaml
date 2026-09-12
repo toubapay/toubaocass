@@ -1,0 +1,29 @@
+name: shared_flutter
+description: "Code shared between the rider_flutter and driver_flutter apps — API client, domain models, push registration, and the SOS share sheet. Not published; referenced via a path dependency from each app's pubspec.yaml."
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.7.0
+  flutter_secure_storage: ^11.1.1
+  firebase_core: ^3.9.0
+  firebase_messaging: ^15.1.6
+  flutter_local_notifications: ^18.0.1
+  url_launcher: ^6.3.1
+  geolocator: ^13.0.2
+  provider: ^6.1.2
+  image_picker: ^1.1.2
+  google_maps_flutter: ^2.10.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

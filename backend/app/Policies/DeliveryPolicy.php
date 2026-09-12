@@ -7,6 +7,11 @@ use App\Models\User;
 
 class DeliveryPolicy
 {
+    public function view(User $user, Delivery $delivery): bool
+    {
+        return $user->id === $delivery->sender_id;
+    }
+
     public function delete(User $user, Delivery $delivery): bool
     {
         return $user->id === $delivery->sender_id;

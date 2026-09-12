@@ -174,6 +174,33 @@ class WalletTest extends TestCase
         $this->assertSame(3000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
+    public function test_driver_cancelling_the_whole_trip_refunds_wallet_paid_bookings(): void
+    {
+        $trip = $this->makeTrip(fare: 3000, seats: 4);
+        $riderA = User::factory()->create();
+        $riderB = User::factory()->create();
+        app(WalletService::class)->topUp($riderA, 10000);
+        app(WalletService::class)->topUp($riderB, 10000);
+
+        $this->actingAs($riderA, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2, 'payment_method' => 'wallet'])
+            ->assertCreated();
+        $this->actingAs($riderB, 'sanctum')
+            ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1, 'payment_method' => 'cash'])
+            ->assertCreated();
+
+        // Driver earned 6000 from riderA's wallet booking; nothing from riderB's cash one.
+        $this->assertSame(6000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+
+        $this->actingAs($trip->driver, 'sanctum')
+            ->deleteJson("/api/driver/trips/{$trip->id}")
+            ->assertOk();
+
+        $this->assertSame(10000, Wallet::where('user_id', $riderA->id)->value('balance'));
+        $this->assertSame(0, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $riderB->id)->value('balance'));
+    }
+
     public function test_each_users_wallet_is_isolated_from_others(): void
     {
         $owner = User::factory()->create();

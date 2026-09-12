@@ -16,9 +16,11 @@ use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
 use App\Models\SecurityAlert;
+use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
+use App\Services\WalletService;
 use App\Support\Geo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -269,11 +271,20 @@ class TripController extends Controller
     {
         $this->authorize('update', $trip);
 
-        if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
-            return response()->json(['message' => 'Seul un trajet programmé peut être démarré.'], 422);
-        }
+        try {
+            DB::transaction(function () use ($trip) {
+                /** @var Trip $locked */
+                $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
-        $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+                if (! in_array($locked->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
+                    throw new \RuntimeException('Seul un trajet programmé peut être démarré.');
+                }
+
+                $locked->update(['status' => Trip::STATUS_IN_PROGRESS]);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
@@ -287,11 +298,20 @@ class TripController extends Controller
     {
         $this->authorize('update', $trip);
 
-        if (! in_array($trip->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
-            return response()->json(['message' => 'Seul un trajet programmé peut être marqué comme "arrivé".'], 422);
-        }
+        try {
+            DB::transaction(function () use ($trip) {
+                /** @var Trip $locked */
+                $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
-        $trip->update(['arrived_at' => now()]);
+                if (! in_array($locked->status, [Trip::STATUS_SCHEDULED, Trip::STATUS_FULL], true)) {
+                    throw new \RuntimeException('Seul un trajet programmé peut être marqué comme "arrivé".');
+                }
+
+                $locked->update(['arrived_at' => now()]);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
@@ -300,17 +320,24 @@ class TripController extends Controller
     {
         $this->authorize('update', $trip);
 
-        if ($trip->status !== Trip::STATUS_IN_PROGRESS) {
-            return response()->json(['message' => 'Seul un trajet en cours peut être terminé.'], 422);
+        try {
+            DB::transaction(function () use ($trip) {
+                /** @var Trip $locked */
+                $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
+
+                if ($locked->status !== Trip::STATUS_IN_PROGRESS) {
+                    throw new \RuntimeException('Seul un trajet en cours peut être terminé.');
+                }
+
+                $locked->update(['status' => Trip::STATUS_COMPLETED]);
+
+                $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(
+                    fn (Booking $booking) => $this->commissionService->applyToBooking($booking),
+                );
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
-
-        DB::transaction(function () use ($trip) {
-            $trip->update(['status' => Trip::STATUS_COMPLETED]);
-
-            $trip->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(
-                fn (Booking $booking) => $this->commissionService->applyToBooking($booking),
-            );
-        });
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
@@ -337,18 +364,37 @@ class TripController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
-    public function cancel(Request $request, Trip $trip)
+    public function cancel(Request $request, Trip $trip, WalletService $walletService)
     {
         $this->authorize('delete', $trip);
 
-        if (in_array($trip->status, [Trip::STATUS_CANCELLED, Trip::STATUS_COMPLETED], true)) {
-            return response()->json(['message' => 'Ce trajet ne peut plus être annulé.'], 422);
+        try {
+            DB::transaction(function () use ($trip, $walletService) {
+                /** @var Trip $locked */
+                $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
+
+                if (in_array($locked->status, [Trip::STATUS_CANCELLED, Trip::STATUS_COMPLETED], true)) {
+                    throw new \RuntimeException('Ce trajet ne peut plus être annulé.');
+                }
+
+                $confirmedBookings = $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get();
+
+                foreach ($confirmedBookings as $booking) {
+                    $booking->update(['status' => Booking::STATUS_CANCELLED]);
+
+                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
+                        $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation (trajet annulé)');
+                        $walletService->debit($locked->driver, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Reprise de revenu (trajet annulé)');
+                    }
+                }
+
+                $locked->update(['status' => Trip::STATUS_CANCELLED]);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        $trip->update(['status' => Trip::STATUS_CANCELLED]);
-        $trip->bookings()->where('status', Booking::STATUS_CONFIRMED)->update(['status' => Booking::STATUS_CANCELLED]);
-
-        TripCancelled::dispatch($trip);
+        TripCancelled::dispatch($trip->fresh());
 
         return response()->json(['message' => 'Trajet annulé.']);
     }

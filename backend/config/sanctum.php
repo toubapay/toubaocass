@@ -50,7 +50,11 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Bounds how long a stolen/leaked bearer token stays usable. Riders and
+    // drivers re-authenticate via phone+OTP (no password), so this can be
+    // generous without being a real login friction; override per-environment
+    // with SANCTUM_EXPIRATION (minutes) if needed.
+    'expiration' => env('SANCTUM_EXPIRATION', 129600),
 
     /*
     |--------------------------------------------------------------------------

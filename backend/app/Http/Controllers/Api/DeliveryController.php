@@ -77,7 +77,7 @@ class DeliveryController extends Controller
 
     public function show(Request $request, Delivery $delivery)
     {
-        abort_unless($delivery->sender_id === $request->user()->id, 404);
+        abort_unless($request->user()->can('view', $delivery), 404);
 
         return new DeliveryResource($delivery->load(['sender', 'driver.driverProfile']));
     }
@@ -90,7 +90,7 @@ class DeliveryController extends Controller
      */
     public function update(UpdateDeliveryRequest $request, Delivery $delivery, DeliveryPricingService $pricing)
     {
-        abort_unless($delivery->sender_id === $request->user()->id, 404);
+        abort_unless($request->user()->can('view', $delivery), 404);
 
         if ($delivery->status !== Delivery::STATUS_PENDING) {
             return response()->json(['message' => 'Seule une livraison en attente peut être modifiée.'], 422);

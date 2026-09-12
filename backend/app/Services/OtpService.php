@@ -55,7 +55,7 @@ class OtpService
             ]);
         }
 
-        $bypass = config('services.otp.bypass_code');
+        $bypass = ! app()->environment('production') ? config('services.otp.bypass_code') : null;
         $isValid = ($bypass && $code === $bypass) || Hash::check($code, $otp->code);
 
         if (! $isValid) {
