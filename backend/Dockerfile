@@ -21,6 +21,19 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends supervisor \
     && rm -rf /var/lib/apt/lists/*
 
+# The base image sets the cap_net_bind_service capability on the frankenphp
+# binary (via setcap) so it can bind privileged ports (<1024) without
+# running as root. We only ever bind 8080/10000, both unprivileged, so we
+# don't need it — and leaving it set breaks exec entirely on sandboxed
+# Docker runtimes (Render, Cloud Run's gVisor, ...) that don't support
+# Linux file capabilities: `octane` crash-loops with exit status 126 and
+# "exec: /usr/local/bin/frankenphp: Operation not permitted". `cp` (unlike
+# `mv`) doesn't copy extended attributes/capabilities by default, so
+# replacing the binary with a plain copy of itself strips it.
+RUN cp /usr/local/bin/frankenphp /usr/local/bin/frankenphp.nocap \
+    && mv /usr/local/bin/frankenphp.nocap /usr/local/bin/frankenphp \
+    && chmod 0755 /usr/local/bin/frankenphp
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
