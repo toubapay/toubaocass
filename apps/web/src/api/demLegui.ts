@@ -77,3 +77,15 @@ export async function sendDemLeguiMessage(requestId: number, body: string): Prom
   const { data } = await apiClient.post(`/dem-legui/requests/${requestId}/messages`, { body });
   return data;
 }
+
+export interface ActiveChat {
+  type: 'booking' | 'dem_legui_request';
+  id: number;
+  other_party_name: string | null;
+}
+
+/** Powers the floating chat button — see ChatFab. */
+export async function fetchActiveChat(): Promise<ActiveChat | null> {
+  const { data } = await apiClient.get<{ active_chat: ActiveChat | null }>('/rider/active-chat');
+  return data.active_chat;
+}

@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
 use App\Http\Controllers\Api\ProfileStatsController;
+use App\Http\Controllers\Api\RiderActiveChatController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
@@ -129,6 +130,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rider-facing trip search & booking.
     Route::middleware('role:rider')->group(function () {
+        // Powers the floating chat button — resolves the single most
+        // relevant conversation across all this rider's bookings/requests.
+        Route::get('rider/active-chat', [RiderActiveChatController::class, 'show']);
+
         Route::get('trips', [TripController::class, 'search']);
         Route::get('trips/instant', [TripController::class, 'instantIndex']);
         Route::get('trips/{trip}', [TripController::class, 'show']);
