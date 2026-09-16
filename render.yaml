@@ -129,8 +129,13 @@ services:
         value: public
       - key: KYC_FILESYSTEM_DISK
         value: local
+      # `sync: false` (not a hardcoded value:) so a manual dashboard change
+      # (e.g. switching to promobile once PROMOBILE_TOKEN is set) survives
+      # future Blueprint syncs instead of being silently reset back to
+      # "log" — see the same fix already applied to VITE_API_BASE_URL
+      # above. Defaults to "log" in config/services.php when unset.
       - key: SMS_DRIVER
-        value: log
+        sync: false
       - key: PROMOBILE_TOKEN
         sync: false
       - key: PROMOBILE_FROM
@@ -143,8 +148,9 @@ services:
         sync: false
       - key: TWILIO_FROM
         sync: false
+      # Same `sync: false` reasoning as SMS_DRIVER above.
       - key: PUSH_DRIVER
-        value: log
+        sync: false
       - key: FCM_PROJECT_ID
         sync: false
       - key: FCM_CREDENTIALS_JSON
