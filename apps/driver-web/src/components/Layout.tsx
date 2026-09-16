@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
+import { ChatFab } from './ChatFab';
 
 const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.trips', icon: '🚗', end: true },
@@ -66,6 +67,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
+
+      <ChatFab />
 
       {/* Opaque backdrop covering the floating nav's footprint so scrolled
           content never peeks through the gaps around it. */}
