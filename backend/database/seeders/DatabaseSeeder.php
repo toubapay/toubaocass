@@ -55,6 +55,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(TestRoutesSeeder::class);
         $this->call(AdditionalRoutesSeeder::class);
+        $this->call(SuperAdminSeeder::class);
 
         // Insurance comparison partners — no real api_base_url/api_key yet,
         // so each runs in simulated-quote mode until real credentials are
