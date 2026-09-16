@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
+import { ChatFab } from './ChatFab';
 import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
 
@@ -92,6 +93,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
+
+      <ChatFab />
 
       {/* The floating nav below has margin on every side, unlike the old
           edge-to-edge bar — without this, scrolled page content is visible
