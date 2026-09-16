@@ -32,11 +32,20 @@ services:
     plan: starter
     envVars:
       # Baked into the JS bundles at build time (Vite convention) — must
-      # point at the backend's public URL.
+      # point at the backend's public URL, including the /api prefix that
+      # routes/api.php's withRouting(api: ...) registration adds
+      # automatically (the admin app's routes additionally live under
+      # Route::prefix('admin') inside that file, hence /api/admin).
+      # A hardcoded `value:` here (not `sync: false`) is intentional even
+      # though it looks like a placeholder: intercity-backend is a fixed,
+      # single-instance Render service with a stable *.onrender.com URL, so
+      # there's no per-deploy value to preserve — and unlike `sync: false`,
+      # a `value:` here can't be silently reset back to a stale/placeholder
+      # value by a Blueprint sync clobbering a manual dashboard edit.
       - key: VITE_API_BASE_URL
-        value: https://api.example.com
+        value: https://intercity-backend.onrender.com/api
       - key: VITE_ADMIN_API_BASE_URL
-        value: https://api.example.com
+        value: https://intercity-backend.onrender.com/api/admin
       # Firebase web push config — same values used by apps/rider and
       # apps/driver, fill in via the Render dashboard (Firebase console →
       # Project settings → General → Your apps → Web app).
