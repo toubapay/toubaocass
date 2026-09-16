@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DemLeguiController;
 use App\Http\Controllers\Api\DemLeguiMessageController;
+use App\Http\Controllers\Api\DriverActiveChatController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\InsuranceController;
@@ -175,6 +176,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // be dispatched Dem Légui ride requests.
         Route::put('availability', [DriverAvailabilityController::class, 'update']);
         Route::post('location', [DriverAvailabilityController::class, 'updateLocation']);
+
+        // Powers the floating chat button — resolves the single most
+        // relevant conversation across all this driver's trips/requests.
+        Route::get('active-chat', [DriverActiveChatController::class, 'show']);
 
         Route::get('cars', [CarController::class, 'index']);
         Route::post('cars', [CarController::class, 'store']);

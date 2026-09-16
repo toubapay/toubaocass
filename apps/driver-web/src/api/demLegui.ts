@@ -12,6 +12,18 @@ export async function updateDriverAvailability(input: UpdateDriverAvailabilityIn
   return data;
 }
 
+export interface ActiveChat {
+  type: 'booking' | 'dem_legui_request';
+  id: number;
+  other_party_name: string | null;
+}
+
+/** Powers the floating chat button — see ChatFab. */
+export async function fetchActiveChat(): Promise<ActiveChat | null> {
+  const { data } = await apiClient.get<{ active_chat: ActiveChat | null }>('/driver/active-chat');
+  return data.active_chat;
+}
+
 export async function updateDriverLocation(latitude: number, longitude: number): Promise<void> {
   await apiClient.post('/driver/location', { latitude, longitude });
 }
