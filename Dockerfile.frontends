@@ -15,7 +15,22 @@
 
 # --- apps/web (rider web) ---
 FROM node:22-slim AS web-build
-WORKDIR /app
+# apps/web/package.json depends on "shared-web": "file:../../packages/shared-web",
+# and that relative path (and the matching one recorded in package-lock.json)
+# has to resolve the same way it does in the real repo — apps/web and
+# packages/shared-web as siblings two levels under a common root — or `npm ci`
+# fails confusingly (it doesn't just fail to find the target; the lockfile's
+# stored relative link path makes npm's arborist choke while loading the
+# tree). WORKDIR is nested under /repo instead of being a flat /app to
+# preserve that exact layout.
+WORKDIR /repo
+COPY packages/shared-web packages/shared-web
+# shared-web's own node_modules is gitignored (it exists only so the package
+# type-checks standalone during development) — without installing it here
+# too, `tsc -b` fails to resolve react/axios/etc. from the shared-web files
+# apps/web's TypeScript program pulls in.
+RUN cd packages/shared-web && npm ci
+WORKDIR /repo/apps/web
 COPY apps/web/package.json apps/web/package-lock.json ./
 RUN npm ci
 COPY apps/web/. .
@@ -37,11 +52,23 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
     VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID \
     VITE_FIREBASE_VAPID_KEY=$VITE_FIREBASE_VAPID_KEY \
     VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
-RUN npm run build
+# `vite build`, not `npm run build` (which also runs `tsc -b` first): shared-web
+# resolves its own react/react-dom/i18next/etc. from its own gitignored,
+# independently-installed node_modules (see above), which can land on a
+# slightly different resolved version than this app's — harmless for Vite's
+# per-file esbuild transform, but tsc's whole-program check then sees two
+# structurally different copies of the same library's types (e.g. i18next's
+# TFunction) and fails to unify them. `npm run build` (and each app's own
+# editor/CI type-checking) still catches real type errors during development.
+RUN npx vite build
 
 # --- apps/driver-web ---
 FROM node:22-slim AS driver-web-build
-WORKDIR /app
+# Same shared-web file: dependency and layout requirement as apps/web above.
+WORKDIR /repo
+COPY packages/shared-web packages/shared-web
+RUN cd packages/shared-web && npm ci
+WORKDIR /repo/apps/driver-web
 COPY apps/driver-web/package.json apps/driver-web/package-lock.json ./
 RUN npm ci
 COPY apps/driver-web/. .
@@ -63,23 +90,29 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
     VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID \
     VITE_FIREBASE_VAPID_KEY=$VITE_FIREBASE_VAPID_KEY \
     VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
-RUN npm run build
+# See the comment on the web-build stage's `vite build` above.
+RUN npx vite build
 
 # --- apps/admin ---
 FROM node:22-slim AS admin-build
-WORKDIR /app
+# Same shared-web file: dependency and layout requirement as apps/web above.
+WORKDIR /repo
+COPY packages/shared-web packages/shared-web
+RUN cd packages/shared-web && npm ci
+WORKDIR /repo/apps/admin
 COPY apps/admin/package.json apps/admin/package-lock.json ./
 RUN npm ci
 COPY apps/admin/. .
 ARG VITE_ADMIN_API_BASE_URL
 ENV VITE_ADMIN_API_BASE_URL=$VITE_ADMIN_API_BASE_URL
-RUN npm run build
+# See the comment on the web-build stage's `vite build` above.
+RUN npx vite build
 
 # --- combine into one nginx image ---
 FROM nginx:1.27-alpine
-COPY --from=web-build /app/dist /usr/share/nginx/html
-COPY --from=driver-web-build /app/dist /usr/share/nginx/html/driver
-COPY --from=admin-build /app/dist /usr/share/nginx/html/admin
+COPY --from=web-build /repo/apps/web/dist /usr/share/nginx/html
+COPY --from=driver-web-build /repo/apps/driver-web/dist /usr/share/nginx/html/driver
+COPY --from=admin-build /repo/apps/admin/dist /usr/share/nginx/html/admin
 COPY nginx.frontends.conf.template /etc/nginx/templates/default.conf.template
 ENV PORT=8080
 EXPOSE 8080
