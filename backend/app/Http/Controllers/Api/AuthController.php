@@ -3,17 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\PinLoginRequest;
 use App\Http\Requests\Auth\RequestOtpRequest;
+use App\Http\Requests\Auth\SetPinRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\OtpService;
+use App\Services\PinService;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly OtpService $otpService) {}
+    public function __construct(
+        private readonly OtpService $otpService,
+        private readonly PinService $pinService,
+    ) {}
 
     public function requestOtp(RequestOtpRequest $request)
     {
@@ -42,6 +48,29 @@ class AuthController extends Controller
             'token' => $token,
             'is_new_user' => $result['is_new'],
         ]);
+    }
+
+    public function loginWithPin(PinLoginRequest $request)
+    {
+        $user = $this->pinService->loginWithPin(
+            $request->string('phone'),
+            $request->string('role'),
+            $request->string('pin'),
+        );
+
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        return response()->json([
+            'user' => new UserResource($user->load('driverProfile')),
+            'token' => $token,
+        ]);
+    }
+
+    public function setPin(SetPinRequest $request)
+    {
+        $this->pinService->setPin($request->user(), $request->string('pin'));
+
+        return new UserResource($request->user()->fresh()->load('driverProfile'));
     }
 
     public function me(Request $request)

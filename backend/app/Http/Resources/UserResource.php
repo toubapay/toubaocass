@@ -16,6 +16,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'role' => $this->role,
             'phone_verified' => $this->phone_verified_at !== null,
+            'has_pin' => $this->pin_hash !== null,
             'profile_complete' => filled($this->name),
             'driver_profile' => new DriverProfileResource($this->whenLoaded('driverProfile')),
             'created_at' => $this->created_at,

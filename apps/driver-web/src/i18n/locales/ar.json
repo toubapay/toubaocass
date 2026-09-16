@@ -137,7 +137,12 @@
       "subtitle": "انشر رحلاتك واصطحب الركاب في جميع أنحاء السنغال.",
       "phoneLabel": "رقم الهاتف",
       "phonePlaceholder": "+221 77 000 00 00",
-      "continue": "متابعة"
+      "continue": "متابعة",
+      "tabLogin": "تسجيل الدخول",
+      "tabRegister": "إنشاء حساب",
+      "pinLabel": "رمز PIN",
+      "pinPlaceholder": "••••",
+      "login": "تسجيل الدخول"
     },
     "otpVerify": {
       "title": "أدخل الرمز",
@@ -147,6 +152,15 @@
       "verify": "تحقق",
       "resend": "إعادة إرسال الرمز",
       "resending": "جارٍ الإرسال..."
+    },
+    "createPin": {
+      "title": "أنشئ رمز PIN الخاص بك",
+      "subtitle": "سيتيح لك هذا الرمز المكوّن من 4 أرقام تسجيل الدخول بسرعة دون رسالة نصية.",
+      "pinLabel": "رمز PIN",
+      "pinPlaceholder": "••••",
+      "confirmLabel": "تأكيد رمز PIN",
+      "mismatch": "الرمزان غير متطابقين.",
+      "finish": "إنهاء"
     },
     "profileSetup": {
       "title": "حدثنا عن نفسك",

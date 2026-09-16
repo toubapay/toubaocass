@@ -16,6 +16,8 @@ class SecurityAlert extends Model
 
     const TYPE_REPEATED_OTP_FAILURES = 'repeated_otp_failures';
 
+    const TYPE_REPEATED_PIN_FAILURES = 'repeated_pin_failures';
+
     const TYPE_KYC_REJECTED = 'kyc_rejected';
 
     const TYPE_RIDER_SOS = 'rider_sos';

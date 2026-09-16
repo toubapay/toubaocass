@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ModuleStatusProvider } from './context/ModuleStatusContext';
 import { usePushNotifications } from './hooks/usePushNotifications';
 import { HomePage } from './pages/HomePage';
+import { CreatePinPage } from './pages/auth/CreatePinPage';
 import { OtpVerifyPage } from './pages/auth/OtpVerifyPage';
 import { PhoneEntryPage } from './pages/auth/PhoneEntryPage';
 import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
@@ -68,6 +69,14 @@ function AppRoutes() {
           <Route path="/verify" element={<OtpVerifyPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+      </div>
+    );
+  }
+
+  if (!user?.has_pin) {
+    return (
+      <div style={{ maxWidth: 420, margin: '0 auto', padding: 24 }}>
+        <CreatePinPage />
       </div>
     );
   }

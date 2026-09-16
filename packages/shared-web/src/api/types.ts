@@ -31,6 +31,7 @@ export interface User {
   email: string | null;
   role: Role;
   phone_verified: boolean;
+  has_pin: boolean;
   profile_complete: boolean;
   driver_profile: DriverProfile | null;
   created_at: string;

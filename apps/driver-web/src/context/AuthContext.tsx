@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { fetchMe, logout as apiLogout, requestOtp, verifyOtp } from '../api/auth';
+import { fetchMe, logout as apiLogout, loginWithPin, requestOtp, setPin as apiSetPin, verifyOtp } from '../api/auth';
 import { getStoredToken, setAuthToken, setUnauthorizedHandler } from '../api/client';
 import type { User } from '../api/types';
 
@@ -10,6 +10,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   sendOtp: (phone: string) => Promise<void>;
   confirmOtp: (phone: string, code: string) => Promise<User>;
+  confirmPin: (phone: string, pin: string) => Promise<User>;
+  setPin: (pin: string) => Promise<User>;
   setUser: (user: User) => void;
   signOut: () => Promise<void>;
 }
@@ -55,6 +57,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result.user;
   }, []);
 
+  const confirmPin = useCallback(async (phone: string, pin: string) => {
+    const result = await loginWithPin(phone, pin);
+    setAuthToken(result.token);
+    setUserState(result.user);
+    return result.user;
+  }, []);
+
+  const setPin = useCallback(async (pin: string) => {
+    const updated = await apiSetPin(pin);
+    setUserState(updated);
+    return updated;
+  }, []);
+
   const signOut = useCallback(async () => {
     try {
       await apiLogout();
@@ -72,10 +87,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: user !== null,
       sendOtp,
       confirmOtp,
+      confirmPin,
+      setPin,
       setUser: setUserState,
       signOut,
     }),
-    [user, isLoading, sendOtp, confirmOtp, signOut],
+    [user, isLoading, sendOtp, confirmOtp, confirmPin, setPin, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
