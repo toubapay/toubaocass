@@ -79,5 +79,17 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($key);
         });
+
+        // Looser than the account-level lockout in PinService (5 wrong PINs
+        // locks the account for services.pin.lockout_minutes) on purpose:
+        // that per-account lockout is the real defense against a 4-digit
+        // PIN's tiny keyspace, since it persists across IPs. This is just a
+        // coarse backstop against basic abuse, set above the lockout
+        // threshold so it never masks the lockout's own error message.
+        RateLimiter::for('pin', function (Request $request) {
+            $key = mb_strtolower((string) $request->input('phone')).'|'.$request->ip();
+
+            return Limit::perMinute(10)->by($key);
+        });
     }
 }

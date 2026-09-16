@@ -95,6 +95,14 @@ return [
         'server_key' => env('GOOGLE_MAPS_SERVER_KEY'),
     ],
 
+    'pin' => [
+        // Locks the account out for `lockout_minutes` after this many wrong
+        // PIN attempts in a row — a 4-digit PIN only has 10,000 possible
+        // values, so this matters far more than it does for the 6-digit OTP.
+        'max_attempts' => env('PIN_MAX_ATTEMPTS', 5),
+        'lockout_minutes' => env('PIN_LOCKOUT_MINUTES', 15),
+    ],
+
     'otp' => [
         'ttl_minutes' => env('OTP_TTL_MINUTES', 5),
         'length' => env('OTP_LENGTH', 6),

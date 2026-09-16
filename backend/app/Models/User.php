@@ -12,8 +12,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token', 'anando_rating', 'anando_ratings_count'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token', 'anando_rating', 'anando_ratings_count', 'pin_hash', 'pin_failed_attempts', 'pin_locked_until'])]
+#[Hidden(['password', 'remember_token', 'pin_hash'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -34,7 +34,19 @@ class User extends Authenticatable
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'anando_rating' => 'float',
+            'pin_hash' => 'hashed',
+            'pin_locked_until' => 'datetime',
         ];
+    }
+
+    public function hasPin(): bool
+    {
+        return $this->pin_hash !== null;
+    }
+
+    public function isPinLocked(): bool
+    {
+        return $this->pin_locked_until !== null && $this->pin_locked_until->isFuture();
     }
 
     public function driverProfile(): HasOne

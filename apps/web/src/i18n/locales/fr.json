@@ -527,7 +527,12 @@
       "subtitle": "Réservez une place pour un trajet entre villes.",
       "phoneLabel": "Numéro de téléphone",
       "phonePlaceholder": "+221 77 000 00 00",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "tabLogin": "Se connecter",
+      "tabRegister": "Créer un compte",
+      "pinLabel": "Code PIN",
+      "pinPlaceholder": "••••",
+      "login": "Se connecter"
     },
     "otpVerify": {
       "title": "Saisissez le code",
@@ -537,6 +542,15 @@
       "verify": "Vérifier",
       "resend": "Renvoyer le code",
       "resending": "Envoi en cours..."
+    },
+    "createPin": {
+      "title": "Créez votre code PIN",
+      "subtitle": "Ce code à 4 chiffres vous permettra de vous reconnecter rapidement, sans SMS.",
+      "pinLabel": "Code PIN",
+      "pinPlaceholder": "••••",
+      "confirmLabel": "Confirmez le code PIN",
+      "mismatch": "Les deux codes ne correspondent pas.",
+      "finish": "Terminer"
     },
     "profileSetup": {
       "title": "Parlez-nous de vous",

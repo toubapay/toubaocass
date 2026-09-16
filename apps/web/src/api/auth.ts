@@ -14,6 +14,16 @@ export async function verifyOtp(
   return data;
 }
 
+export async function loginWithPin(phone: string, pin: string): Promise<{ user: User; token: string }> {
+  const { data } = await apiClient.post('/auth/pin/login', { phone, role: 'rider', pin });
+  return data;
+}
+
+export async function setPin(pin: string): Promise<User> {
+  const { data } = await apiClient.post('/auth/pin/set', { pin });
+  return data;
+}
+
 export async function fetchMe(): Promise<User> {
   const { data } = await apiClient.get('/me');
   return data;

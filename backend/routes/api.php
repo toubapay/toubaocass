@@ -34,9 +34,16 @@ use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->middleware('throttle:otp')->group(function () {
-    Route::post('otp/request', [AuthController::class, 'requestOtp']);
-    Route::post('otp/verify', [AuthController::class, 'verifyOtp']);
+Route::prefix('auth')->group(function () {
+    Route::middleware('throttle:otp')->group(function () {
+        Route::post('otp/request', [AuthController::class, 'requestOtp']);
+        Route::post('otp/verify', [AuthController::class, 'verifyOtp']);
+    });
+
+    // Returning-user shortcut: phone + 4-digit PIN instead of a fresh SMS
+    // OTP round-trip. Rate-limited separately (see AppServiceProvider) —
+    // a 4-digit PIN's tiny keyspace needs tighter throttling than OTP.
+    Route::post('pin/login', [AuthController::class, 'loginWithPin'])->middleware('throttle:pin');
 });
 
 Route::get('cities', [CityController::class, 'index']);
@@ -52,6 +59,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('profile', [AuthController::class, 'updateProfile']);
     Route::post('fcm-token', [AuthController::class, 'updateFcmToken']);
     Route::post('logout', [AuthController::class, 'logout']);
+    // Set (or change) the PIN used by auth/pin/login above — prompted right
+    // after OTP verification for anyone who doesn't have one yet.
+    Route::post('auth/pin/set', [AuthController::class, 'setPin']);
 
     // Chat on a booking — shared between the rider who booked and the
     // driver of that trip (authorized per-booking, not per-role).
