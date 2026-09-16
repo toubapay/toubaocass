@@ -126,11 +126,24 @@ services:
         sync: false
       - key: PROMOBILE_FROM
         sync: false
+      # Only read when SMS_DRIVER=twilio above — leave blank while on the
+      # promobile driver.
+      - key: TWILIO_SID
+        sync: false
+      - key: TWILIO_TOKEN
+        sync: false
+      - key: TWILIO_FROM
+        sync: false
       - key: PUSH_DRIVER
         value: log
       - key: FCM_PROJECT_ID
         sync: false
       - key: FCM_CREDENTIALS_JSON
+        sync: false
+      # Only needed if you're mounting the FCM service-account file yourself
+      # instead of letting FCM_CREDENTIALS_JSON/entrypoint.sh write it —
+      # leave blank otherwise (see config/services.php).
+      - key: FCM_CREDENTIALS_PATH
         sync: false
       # Leave unset in production — only useful for demos.
       - key: OTP_BYPASS_CODE
