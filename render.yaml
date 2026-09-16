@@ -76,6 +76,14 @@ services:
       mountPath: /app/storage/app
       sizeGB: 5
     envVars:
+      # Render's port scanner/health check expects the service on port
+      # 10000 by default for Docker runtime services — it isn't injected
+      # automatically the way it is for buildpack runtimes. Without this,
+      # entrypoint.sh's `--port=${PORT:-8080}` falls back to 8080, Render
+      # never finds an open port, and the deploy times out even though
+      # octane/queue-worker/scheduler are all running fine.
+      - key: PORT
+        value: "10000"
       - key: APP_NAME
         value: Intercity
       - key: APP_ENV
