@@ -41,6 +41,7 @@ class ModuleController extends Controller
     public function update(UpdateModuleRequest $request, Module $module)
     {
         $module->update($request->validated());
+        $this->modules->forget($module->key);
 
         $this->auditLog->record($request->user(), 'module.update', "Module \"{$module->name}\" ({$module->key}) modifié.", $module, $request->validated());
 

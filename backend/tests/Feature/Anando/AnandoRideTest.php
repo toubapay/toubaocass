@@ -34,18 +34,32 @@ class AnandoRideTest extends TestCase
         ];
     }
 
-    public function test_any_authenticated_user_rider_or_driver_can_post_an_anando_ride(): void
+    public function test_a_rider_can_post_an_anando_ride(): void
     {
-        foreach ([User::factory()->create(), User::factory()->driver()->create()] as $user) {
-            $response = $this->actingAs($user, 'sanctum')
-                ->postJson('/api/anando-rides', $this->payload())
-                ->assertCreated();
+        $rider = User::factory()->create();
 
-            $response->assertJsonPath('poster.id', $user->id)
-                ->assertJsonPath('status', 'open')
-                ->assertJsonPath('available_seats', 3)
-                ->assertJsonPath('total_seats', 3);
-        }
+        $response = $this->actingAs($rider, 'sanctum')
+            ->postJson('/api/anando-rides', $this->payload())
+            ->assertCreated();
+
+        $response->assertJsonPath('poster.id', $rider->id)
+            ->assertJsonPath('status', 'open')
+            ->assertJsonPath('available_seats', 3)
+            ->assertJsonPath('total_seats', 3);
+    }
+
+    /**
+     * Anando is rider-only by default (Module::enabled_for_driver false for
+     * the "anando" key, see the 2026_09_17_000001 migration) — the driver
+     * app doesn't offer it.
+     */
+    public function test_a_driver_cannot_post_an_anando_ride(): void
+    {
+        $driver = User::factory()->driver()->create();
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson('/api/anando-rides', $this->payload())
+            ->assertForbidden();
     }
 
     public function test_posting_requires_different_origin_and_destination(): void

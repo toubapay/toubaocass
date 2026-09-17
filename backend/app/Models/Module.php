@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['key', 'name', 'description', 'category', 'config', 'is_enabled', 'enabled_at', 'disabled_at'])]
+#[Fillable(['key', 'name', 'description', 'category', 'config', 'is_enabled', 'enabled_for_rider', 'enabled_for_driver', 'enabled_at', 'disabled_at'])]
 class Module extends Model
 {
     protected function casts(): array
@@ -13,6 +13,8 @@ class Module extends Model
         return [
             'config' => 'array',
             'is_enabled' => 'boolean',
+            'enabled_for_rider' => 'boolean',
+            'enabled_for_driver' => 'boolean',
             'enabled_at' => 'datetime',
             'disabled_at' => 'datetime',
         ];

@@ -16,7 +16,7 @@ class EnsureModuleEnabled
      */
     public function handle(Request $request, Closure $next, string $key): Response
     {
-        if (! $this->modules->isEnabled($key)) {
+        if (! $this->modules->isEnabled($key, $request->user()?->role)) {
             return response()->json(['message' => 'Ce service est temporairement désactivé.'], 403);
         }
 
