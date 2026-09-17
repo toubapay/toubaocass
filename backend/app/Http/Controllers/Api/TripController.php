@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\InstantTripPosted;
 use App\Events\TripCancelled;
+use App\Events\TripCompleted;
+use App\Events\TripDriverArrived;
+use App\Events\TripStarted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\StoreInstantTripRequest;
 use App\Http\Requests\Driver\StoreTripRequest;
@@ -286,6 +289,8 @@ class TripController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
+        TripStarted::dispatch($trip->fresh());
+
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
 
@@ -313,6 +318,8 @@ class TripController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
+        TripDriverArrived::dispatch($trip->fresh());
+
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
 
@@ -338,6 +345,8 @@ class TripController extends Controller
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
+
+        TripCompleted::dispatch($trip->fresh());
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }

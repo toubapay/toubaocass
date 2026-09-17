@@ -6,6 +6,7 @@ use App\Models\Delivery;
 use App\Models\DriverProfile;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\DeliveryAcceptedDriverNotification;
 use App\Notifications\DeliveryAcceptedNotification;
 use App\Notifications\DeliveryCancelledNotification;
 use App\Notifications\DeliveryDeliveredNotification;
@@ -316,6 +317,7 @@ class DeliveryTest extends TestCase
 
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$created['id']}/accept")->assertOk();
         Notification::assertSentTo($rider, DeliveryAcceptedNotification::class);
+        Notification::assertSentTo($driver, DeliveryAcceptedDriverNotification::class);
 
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$created['id']}/pickup")->assertOk();
         Notification::assertSentTo($rider, DeliveryPickedUpNotification::class);
