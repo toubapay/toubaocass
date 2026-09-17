@@ -61,7 +61,12 @@ class ActiveChatTest extends TestCase
         $this->actingAs($rider, 'sanctum')
             ->getJson('/api/rider/active-chat')
             ->assertOk()
-            ->assertJson(['active_chat' => ['type' => 'booking', 'id' => $booking->id, 'other_party_name' => $booking->trip->driver->name]]);
+            ->assertJson(['active_chat' => [
+                'type' => 'booking',
+                'id' => $booking->id,
+                'other_party_name' => $booking->trip->driver->name,
+                'latest_message_id' => null,
+            ]]);
     }
 
     public function test_falls_back_to_the_dem_legui_request_when_nobody_has_messaged_yet(): void
@@ -82,12 +87,17 @@ class ActiveChatTest extends TestCase
         $this->makeDemLeguiRequest($rider);
 
         $driver = $olderBooking->trip->driver;
-        $olderBooking->messages()->create(['sender_id' => $driver->id, 'body' => "J'arrive dans 5 minutes."]);
+        $message = $olderBooking->messages()->create(['sender_id' => $driver->id, 'body' => "J'arrive dans 5 minutes."]);
 
         $this->actingAs($rider, 'sanctum')
             ->getJson('/api/rider/active-chat')
             ->assertOk()
-            ->assertJson(['active_chat' => ['type' => 'booking', 'id' => $olderBooking->id]]);
+            ->assertJson(['active_chat' => [
+                'type' => 'booking',
+                'id' => $olderBooking->id,
+                'latest_message_id' => $message->id,
+                'preview' => "J'arrive dans 5 minutes.",
+            ]]);
     }
 
     public function test_active_chat_is_scoped_to_the_authenticated_rider(): void

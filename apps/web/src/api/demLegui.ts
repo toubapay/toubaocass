@@ -82,6 +82,8 @@ export interface ActiveChat {
   type: 'booking' | 'dem_legui_request';
   id: number;
   other_party_name: string | null;
+  latest_message_id: number | null;
+  preview: string | null;
 }
 
 /** Powers the floating chat button — see ChatFab. */
