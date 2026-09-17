@@ -14,6 +14,32 @@ server {
         return 301 /admin/;
     }
 
+    # index.html and sw.js must always be revalidated. Every build produces
+    # freshly content-hashed asset filenames (e.g. TripsListPage-a1b2c3.js)
+    # and the previous dist/ is replaced wholesale — nothing keeps old
+    # hashes around. Without an explicit no-cache here, a browser's default
+    # heuristic caching can keep serving an index.html from a previous
+    # deploy after a new one lands; its <script> tags then point at asset
+    # files that no longer exist, the JS 404s, and the app fails to mount
+    # at all — a blank white screen with no error UI to explain it, since
+    # nothing ever ran to render one. Exact-match locations are checked
+    # before the prefix locations below, so these win for these two paths.
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+    location = /sw.js {
+        add_header Cache-Control "no-cache";
+    }
+    location = /driver/index.html {
+        add_header Cache-Control "no-cache";
+    }
+    location = /driver/sw.js {
+        add_header Cache-Control "no-cache";
+    }
+    location = /admin/index.html {
+        add_header Cache-Control "no-cache";
+    }
+
     # apps/driver-web, built with `base: '/driver/'` — its own asset URLs
     # already come out prefixed with /driver/, so `alias` here just strips
     # the location prefix back off to find the files on disk.
