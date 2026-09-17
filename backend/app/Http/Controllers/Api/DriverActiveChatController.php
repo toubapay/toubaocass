@@ -8,6 +8,7 @@ use App\Models\DemLeguiRequest;
 use App\Models\Message;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 /**
  * Powers the floating chat button in the driver app: rather than making a
@@ -45,7 +46,7 @@ class DriverActiveChatController extends Controller
             ->first();
 
         if ($latestMessage) {
-            return $this->respond($latestMessage->booking_id, $latestMessage->dem_legui_request_id);
+            return $this->respond($latestMessage->booking_id, $latestMessage->dem_legui_request_id, $latestMessage);
         }
 
         // No messages yet on either side — still point at the most recent
@@ -75,24 +76,33 @@ class DriverActiveChatController extends Controller
         return response()->json(['active_chat' => null]);
     }
 
-    private function respond(?int $bookingId, ?int $demLeguiRequestId): JsonResponse
+    private function respond(?int $bookingId, ?int $demLeguiRequestId, ?Message $latestMessage = null): JsonResponse
     {
+        // latest_message_id/preview let the frontend tell "a new message
+        // just arrived" apart from "this has been the active chat for a
+        // while" across polls, to drive the in-app new-message alert
+        // without depending on push notification permission/FCM setup.
+        $messageFields = [
+            'latest_message_id' => $latestMessage?->id,
+            'preview' => $latestMessage ? Str::limit($latestMessage->body, 80) : null,
+        ];
+
         if ($bookingId) {
             $booking = Booking::with('rider')->find($bookingId);
 
-            return response()->json(['active_chat' => [
+            return response()->json(['active_chat' => array_merge([
                 'type' => 'booking',
                 'id' => $bookingId,
                 'other_party_name' => $booking?->rider?->name,
-            ]]);
+            ], $messageFields)]);
         }
 
         $demLeguiRequest = DemLeguiRequest::with('rider')->find($demLeguiRequestId);
 
-        return response()->json(['active_chat' => [
+        return response()->json(['active_chat' => array_merge([
             'type' => 'dem_legui_request',
             'id' => $demLeguiRequestId,
             'other_party_name' => $demLeguiRequest?->rider?->name,
-        ]]);
+        ], $messageFields)]);
     }
 }

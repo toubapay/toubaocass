@@ -59,7 +59,7 @@ class ActiveChatTest extends TestCase
         $this->actingAs($driver, 'sanctum')
             ->getJson('/api/driver/active-chat')
             ->assertOk()
-            ->assertJson(['active_chat' => ['type' => 'booking', 'id' => $booking->id]]);
+            ->assertJson(['active_chat' => ['type' => 'booking', 'id' => $booking->id, 'latest_message_id' => null]]);
     }
 
     public function test_falls_back_to_the_dem_legui_request_when_nobody_has_messaged_yet(): void
@@ -81,12 +81,17 @@ class ActiveChatTest extends TestCase
 
         // The booking is older, but its rider messaged more recently — that
         // should win over the newer, silent Dem Légui request.
-        $olderBooking->messages()->create(['sender_id' => $olderBooking->rider_id, 'body' => 'Bonjour']);
+        $message = $olderBooking->messages()->create(['sender_id' => $olderBooking->rider_id, 'body' => 'Bonjour']);
 
         $this->actingAs($driver, 'sanctum')
             ->getJson('/api/driver/active-chat')
             ->assertOk()
-            ->assertJson(['active_chat' => ['type' => 'booking', 'id' => $olderBooking->id]]);
+            ->assertJson(['active_chat' => [
+                'type' => 'booking',
+                'id' => $olderBooking->id,
+                'latest_message_id' => $message->id,
+                'preview' => 'Bonjour',
+            ]]);
     }
 
     public function test_ignores_the_drivers_own_messages_when_picking_by_recency(): void
