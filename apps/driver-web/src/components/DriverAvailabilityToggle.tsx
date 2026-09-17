@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { extractErrorMessage } from '../api/client';
 import { updateDriverAvailability, updateDriverLocation } from '../api/demLegui';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
@@ -31,7 +32,7 @@ export function DriverAvailabilityToggle() {
         .then((profile) => {
           if (user) setUser({ ...user, driver_profile: profile });
         })
-        .catch(() => setError(t('demLegui.availabilityUpdateFailed')))
+        .catch((err) => setError(extractErrorMessage(err)))
         .finally(() => setToggling(false));
       return;
     }
@@ -52,7 +53,7 @@ export function DriverAvailabilityToggle() {
           .then((profile) => {
             if (user) setUser({ ...user, driver_profile: profile });
           })
-          .catch(() => setError(t('demLegui.availabilityUpdateFailed')))
+          .catch((err) => setError(extractErrorMessage(err)))
           .finally(() => setToggling(false));
       },
       () => {
