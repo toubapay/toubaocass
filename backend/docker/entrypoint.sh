@@ -13,6 +13,17 @@ if [ -n "$FCM_CREDENTIALS_JSON" ]; then
     printf '%s' "$FCM_CREDENTIALS_JSON" > storage/app/fcm-credentials.json
 fi
 
+# On Render, storage/app is a persistent disk mounted at container *start*
+# (see render.yaml's `disk:`), not part of the image — it's a separate
+# volume with its own on-disk ownership, which does not inherit the
+# Dockerfile's build-time `chown -R www-data:www-data /app/storage`. Octane
+# and the queue worker run as www-data (see supervisord.conf), so without
+# re-chowning here on every boot, any write under storage/app — KYC/carte
+# grise uploads, the FCM credentials file above, logs — fails with a
+# permission error that surfaces to users as a bare "Server Error".
+# Harmless where storage/app isn't a separate mount (local dev, Railway).
+chown -R www-data:www-data storage bootstrap/cache
+
 php artisan config:cache
 php artisan route:cache
 php artisan event:cache
