@@ -43,8 +43,11 @@ export function usePushNotifications() {
         if (!messaging) return;
         unsubscribe = onMessage(messaging, (payload) => {
           if (Notification.permission !== 'granted') return;
-          const title = payload.notification?.title ?? 'Intercity';
-          new Notification(title, { body: payload.notification?.body, icon: `${import.meta.env.BASE_URL}icons/icon-192.png` });
+          // Backend sends data-only FCM messages (no top-level "notification"
+          // key) specifically so nothing but this handler ever displays one —
+          // see FcmPushGateway's own comment for why.
+          const title = payload.data?.title ?? 'Intercity';
+          new Notification(title, { body: payload.data?.body, icon: `${import.meta.env.BASE_URL}icons/icon-192.png` });
 
           // The native Notification API has no reliable cross-browser sound
           // option (Chrome on Android in particular stays silent for

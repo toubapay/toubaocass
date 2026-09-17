@@ -38,9 +38,13 @@ try {
 
   const messaging = firebase.messaging();
 
+  // Backend sends data-only FCM messages (no top-level "notification" key)
+  // specifically so nothing but this handler ever displays one — a payload
+  // with both fields gets auto-displayed by the browser AND handled here,
+  // showing the same push twice.
   messaging.onBackgroundMessage((payload) => {
-    self.registration.showNotification(payload.notification?.title ?? 'Intercity', {
-      body: payload.notification?.body,
+    self.registration.showNotification(payload.data?.title ?? 'Intercity', {
+      body: payload.data?.body,
       icon: '/icons/icon-192.png',
     });
   });

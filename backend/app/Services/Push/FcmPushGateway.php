@@ -37,15 +37,19 @@ class FcmPushGateway implements PushGateway
             return PushSendResult::failed();
         }
 
+        // Data-only message (no top-level "notification" key) on purpose:
+        // when FCM sees a "notification" payload, the browser/OS displays
+        // it itself, on top of whichever handler the app registers
+        // (onMessage in the foreground, the service worker's
+        // onBackgroundMessage otherwise) — the classic "web push shows
+        // twice" bug. Keeping title/body inside "data" instead means only
+        // our own handler ever calls Notification()/showNotification(), so
+        // each push renders exactly once.
         $response = Http::withToken($accessToken)
             ->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", [
                 'message' => [
                     'token' => $token,
-                    'notification' => [
-                        'title' => $title,
-                        'body' => $body,
-                    ],
-                    'data' => array_map('strval', $data),
+                    'data' => array_map('strval', [...$data, 'title' => $title, 'body' => $body]),
                 ],
             ]);
 
