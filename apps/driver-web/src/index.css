@@ -27,6 +27,14 @@ html, body, #root {
      which can make height:100% content jump under a position:fixed bottom
      nav mid-scroll. dvh tracks the actual visible viewport instead. */
   height: 100dvh;
+  /* The page itself never scrolls — only Layout's <main> does (see its
+     overflowY: 'auto'). Without this, the document keeps scrolling too,
+     and iOS Safari's dynamic toolbar (its height briefly changing as the
+     address bar shows/hides mid-scroll) recalculates position:fixed
+     against a viewport that's shifting under it, so the bottom nav visibly
+     drifts up the page instead of staying pinned. Confining all scrolling
+     to one non-document element sidesteps that recalculation entirely. */
+  overflow: hidden;
 }
 
 body {
