@@ -20,7 +20,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const items = NAV_ITEMS.filter((item) => !item.module || isModuleEnabled(item.module));
 
   return (
-    <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <header
         style={{
           position: 'sticky',
@@ -58,6 +58,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main
         style={{
           flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
           width: '100%',
           maxWidth: 480,
           margin: '0 auto',
