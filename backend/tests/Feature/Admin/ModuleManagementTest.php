@@ -208,6 +208,34 @@ class ModuleManagementTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_toggle_a_module_for_one_app_only(): void
+    {
+        $admin = AdminUser::factory()->create();
+        $module = Module::where('key', 'anando')->first();
+        $rider = User::factory()->create();
+        $driver = User::factory()->driver()->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/modules/{$module->id}", ['enabled_for_driver' => false])
+            ->assertOk()
+            ->assertJsonPath('enabled_for_rider', true)
+            ->assertJsonPath('enabled_for_driver', false);
+
+        $this->assertDatabaseHas('modules', ['key' => 'anando', 'enabled_for_rider' => true, 'enabled_for_driver' => false]);
+
+        $this->actingAs($rider, 'sanctum')->postJson('/api/anando-rides', [])->assertUnprocessable();
+        $this->actingAs($driver, 'sanctum')->postJson('/api/anando-rides', [])->assertForbidden();
+    }
+
+    public function test_anando_ships_disabled_for_drivers_by_default(): void
+    {
+        $module = Module::where('key', 'anando')->first();
+
+        $this->assertTrue($module->is_enabled);
+        $this->assertTrue($module->enabled_for_rider);
+        $this->assertFalse($module->enabled_for_driver);
+    }
+
     public function test_deleting_a_module_fails_open_and_stops_gating_its_route(): void
     {
         $admin = AdminUser::factory()->create();

@@ -8,14 +8,14 @@ interface ModuleStatusContextValue {
 
 const ModuleStatusContext = createContext<ModuleStatusContextValue>({ isModuleEnabled: () => true });
 
-export function ModuleStatusProvider({ children }: { children: React.ReactNode }) {
+export function ModuleStatusProvider({ app, children }: { app: 'rider' | 'driver'; children: React.ReactNode }) {
   const [status, setStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchModuleStatus()
+    fetchModuleStatus(app)
       .then(setStatus)
       .catch(() => {});
-  }, []);
+  }, [app]);
 
   const isModuleEnabled = (key: string) => status[key] ?? true;
 

@@ -20,6 +20,8 @@ class StoreModuleRequest extends FormRequest
             'category' => ['nullable', 'string', 'max:100'],
             'config' => ['nullable', 'array'],
             'is_enabled' => ['sometimes', 'boolean'],
+            'enabled_for_rider' => ['sometimes', 'boolean'],
+            'enabled_for_driver' => ['sometimes', 'boolean'],
         ];
     }
 }

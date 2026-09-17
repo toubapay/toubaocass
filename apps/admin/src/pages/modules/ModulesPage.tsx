@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { createModule, listModules, updateModuleStatus } from '../../api/modules';
+import { createModule, listModules, updateModule, updateModuleStatus } from '../../api/modules';
 import { extractErrorMessage } from '../../api/client';
 import type { Module } from '../../api/types';
 import { Button } from '../../components/Button';
@@ -38,6 +38,52 @@ function StatusToggle({ module, onToggled }: { module: Module; onToggled: (updat
       }}
     >
       {module.is_enabled ? 'Activé' : 'Désactivé'}
+    </button>
+  );
+}
+
+function AppFlagToggle({
+  module,
+  app,
+  onToggled,
+}: {
+  module: Module;
+  app: 'rider' | 'driver';
+  onToggled: (updated: Module) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const field = app === 'rider' ? 'enabled_for_rider' : 'enabled_for_driver';
+  const enabled = module[field];
+  const label = app === 'rider' ? 'Passagers' : 'Chauffeurs';
+
+  const handleToggle = async () => {
+    setSaving(true);
+    try {
+      const updated = await updateModule(module.id, { [field]: !enabled });
+      onToggled(updated);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      disabled={saving}
+      style={{
+        border: `1px solid ${enabled ? colors.success : colors.border}`,
+        borderRadius: 999,
+        padding: '3px 10px',
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: saving ? 'default' : 'pointer',
+        opacity: saving ? 0.6 : 1,
+        backgroundColor: enabled ? colors.successSoft : colors.surface,
+        color: enabled ? colors.success : colors.textMuted,
+        marginRight: spacing.xs,
+      }}
+    >
+      {label} {enabled ? '✓' : '✕'}
     </button>
   );
 }
@@ -91,7 +137,9 @@ export function ModulesPage() {
       </div>
       <p style={{ fontSize: 14, color: colors.textMuted, margin: `0 0 ${spacing.lg}px` }}>
         Active ou désactive des fonctionnalités de la plateforme sans déploiement. Un module désactivé bloque uniquement
-        la création de nouvelles ressources (ex. publier un trajet Anando) — l'existant reste consultable.
+        la création de nouvelles ressources (ex. publier un trajet Anando) — l'existant reste consultable. Le statut
+        général coupe le module pour tout le monde ; les bascules Passagers/Chauffeurs permettent de l'activer sur une
+        seule des deux apps.
       </p>
 
       {showForm && (
@@ -126,7 +174,7 @@ export function ModulesPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${colors.border}`, textAlign: 'left' }}>
-                {['Module', 'Catégorie', 'Statut'].map((label) => (
+                {['Module', 'Catégorie', 'Apps', 'Statut'].map((label) => (
                   <th key={label} style={{ padding: spacing.sm, fontSize: 12, color: colors.textMuted, fontWeight: 700 }}>
                     {label}
                   </th>
@@ -144,6 +192,10 @@ export function ModulesPage() {
                     )}
                   </td>
                   <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>{module.category ?? '—'}</td>
+                  <td style={{ padding: spacing.sm, whiteSpace: 'nowrap' }}>
+                    <AppFlagToggle module={module} app="rider" onToggled={handleToggled} />
+                    <AppFlagToggle module={module} app="driver" onToggled={handleToggled} />
+                  </td>
                   <td style={{ padding: spacing.sm }}>
                     <StatusToggle module={module} onToggled={handleToggled} />
                   </td>
@@ -151,7 +203,7 @@ export function ModulesPage() {
               ))}
               {modules.length === 0 && (
                 <tr>
-                  <td colSpan={3} style={{ padding: spacing.lg, textAlign: 'center', color: colors.textMuted }}>
+                  <td colSpan={4} style={{ padding: spacing.lg, textAlign: 'center', color: colors.textMuted }}>
                     Aucun module configuré. Les fonctionnalités non listées ici restent activées par défaut.
                   </td>
                 </tr>

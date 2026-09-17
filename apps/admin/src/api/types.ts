@@ -258,6 +258,8 @@ export interface Module {
   category: string | null;
   config: Record<string, unknown> | null;
   is_enabled: boolean;
+  enabled_for_rider: boolean;
+  enabled_for_driver: boolean;
   enabled_at: string | null;
   disabled_at: string | null;
   created_at: string;
@@ -275,6 +277,8 @@ export interface UpdateModuleInput {
   name?: string;
   description?: string;
   category?: string;
+  enabled_for_rider?: boolean;
+  enabled_for_driver?: boolean;
 }
 
 export interface ApiError {

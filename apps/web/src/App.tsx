@@ -125,7 +125,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <ModuleStatusProvider>
+      <ModuleStatusProvider app="rider">
         <AppRoutes />
       </ModuleStatusProvider>
     </AuthProvider>

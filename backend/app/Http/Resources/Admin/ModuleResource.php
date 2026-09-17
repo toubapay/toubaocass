@@ -17,6 +17,8 @@ class ModuleResource extends JsonResource
             'category' => $this->category,
             'config' => $this->config,
             'is_enabled' => $this->is_enabled,
+            'enabled_for_rider' => $this->enabled_for_rider,
+            'enabled_for_driver' => $this->enabled_for_driver,
             'enabled_at' => $this->enabled_at,
             'disabled_at' => $this->disabled_at,
             'created_at' => $this->created_at,

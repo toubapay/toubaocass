@@ -18,6 +18,8 @@ class UpdateModuleRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'category' => ['nullable', 'string', 'max:100'],
             'config' => ['nullable', 'array'],
+            'enabled_for_rider' => ['sometimes', 'boolean'],
+            'enabled_for_driver' => ['sometimes', 'boolean'],
             'key' => ['prohibited'],
         ];
     }
