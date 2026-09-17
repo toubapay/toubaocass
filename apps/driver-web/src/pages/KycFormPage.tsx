@@ -1,80 +1,51 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { submitKyc } from '../api/kyc';
+import { scanLicense, submitKyc } from '../api/kyc';
 import { Button } from '../components/Button';
+import { CenteredSpinner } from '../components/Spinner';
 import { TextField } from '../components/TextField';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
 
-function DocumentPicker({ label, file, onPick }: { label: string; file: File | null; onPick: (f: File) => void }) {
-  const { t } = useTranslation();
-  const inputId = `doc-${label.replace(/\s+/g, '-')}`;
-  return (
-    <div style={{ marginBottom: spacing.md }}>
-      <label htmlFor={inputId} style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
-        {label}
-      </label>
-      <label
-        htmlFor={inputId}
-        style={{
-          display: 'flex',
-          height: 120,
-          borderRadius: radius.md,
-          border: `1px dashed ${colors.border}`,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: colors.surface,
-          overflow: 'hidden',
-          cursor: 'pointer',
-        }}
-      >
-        {file ? (
-          <img src={URL.createObjectURL(file)} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <span style={{ color: colors.textMuted }}>{t('kyc.form.pickPlaceholder')}</span>
-        )}
-      </label>
-      <input
-        id={inputId}
-        type="file"
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onPick(f);
-        }}
-      />
-    </div>
-  );
-}
+type Step = 'scan' | 'analyzing' | 'confirm';
 
 export function KycFormPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [step, setStep] = useState<Step>('scan');
+  const [scanError, setScanError] = useState<string | undefined>();
+  const [licenseDocumentPath, setLicenseDocumentPath] = useState<string | null>(null);
   const [licenseNumber, setLicenseNumber] = useState('');
   const [licenseExpiry, setLicenseExpiry] = useState('');
-  const [nationalId, setNationalId] = useState('');
-  const [idDocument, setIdDocument] = useState<File | null>(null);
-  const [licenseDocument, setLicenseDocument] = useState<File | null>(null);
-  const [selfie, setSelfie] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  const canSubmit =
-    licenseNumber.trim().length > 0 &&
-    licenseExpiry.length > 0 &&
-    nationalId.trim().length > 0 &&
-    idDocument != null &&
-    licenseDocument != null &&
-    selfie != null;
+  const runScan = (file: File) => {
+    setStep('analyzing');
+    setScanError(undefined);
+    scanLicense(file)
+      .then((info) => {
+        setLicenseDocumentPath(info.license_document_path);
+        setLicenseNumber(info.license_number ?? '');
+        setLicenseExpiry(info.license_expiry ?? '');
+        setStep('confirm');
+      })
+      .catch((err) => {
+        setScanError(extractErrorMessage(err));
+        setStep('scan');
+      });
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canSubmit || !idDocument || !licenseDocument || !selfie) return;
+  const canSubmit = licenseNumber.trim().length > 0 && licenseExpiry.length > 0 && licenseDocumentPath != null;
+
+  const handleSubmit = async () => {
+    if (!canSubmit || !licenseDocumentPath) return;
 
     setError(undefined);
     setLoading(true);
@@ -82,10 +53,7 @@ export function KycFormPage() {
       const profile = await submitKyc({
         license_number: licenseNumber.trim(),
         license_expiry: licenseExpiry,
-        national_id_number: nationalId.trim(),
-        id_document: idDocument,
-        license_document: licenseDocument,
-        selfie,
+        license_document_path: licenseDocumentPath,
       });
       if (user) setUser({ ...user, driver_profile: profile });
       navigate('/kyc');
@@ -96,17 +64,31 @@ export function KycFormPage() {
     }
   };
 
-  return (
-    <div>
-      <button
-        onClick={() => navigate(-1)}
-        style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
-      >
-        ←
-      </button>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('kyc.form.title')}</h1>
+  const backButton = (onClick: () => void) => (
+    <button
+      onClick={onClick}
+      style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.md }}
+    >
+      ←
+    </button>
+  );
 
-      <form onSubmit={handleSubmit}>
+  if (step === 'analyzing') {
+    return (
+      <div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('kyc.form.analyzingTitle')}</h1>
+        <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: spacing.xl }}>{t('kyc.form.analyzingHint')}</p>
+        <CenteredSpinner />
+      </div>
+    );
+  }
+
+  if (step === 'confirm') {
+    return (
+      <div>
+        {backButton(() => setStep('scan'))}
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('kyc.form.title')}</h1>
+
         <TextField label={t('kyc.form.licenseNumberLabel')} value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} />
         <div style={{ marginBottom: spacing.md }}>
           <label style={{ display: 'block', fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: spacing.xs }}>
@@ -130,16 +112,37 @@ export function KycFormPage() {
             }}
           />
         </div>
-        <TextField label={t('kyc.form.nationalIdLabel')} type="number" value={nationalId} onChange={(e) => setNationalId(e.target.value)} />
-
-        <DocumentPicker label={t('kyc.form.idPhotoLabel')} file={idDocument} onPick={setIdDocument} />
-        <DocumentPicker label={t('kyc.form.licensePhotoLabel')} file={licenseDocument} onPick={setLicenseDocument} />
-        <DocumentPicker label={t('kyc.form.selfieLabel')} file={selfie} onPick={setSelfie} />
 
         {error && <p style={{ fontSize: 14, color: colors.danger, marginBottom: spacing.sm }}>{error}</p>}
 
-        <Button label={t('kyc.form.submit')} type="submit" disabled={!canSubmit} loading={loading} />
-      </form>
+        <Button label={t('kyc.form.submit')} onClick={handleSubmit} disabled={!canSubmit} loading={loading} />
+      </div>
+    );
+  }
+
+  // step === 'scan'
+  return (
+    <div>
+      {backButton(() => navigate(-1))}
+      <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.text, marginBottom: spacing.xs }}>{t('kyc.form.title')}</h1>
+      <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: spacing.xl }}>{t('kyc.form.scanHint')}</p>
+
+      <div style={{ fontSize: 72, textAlign: 'center', marginBottom: spacing.xl }}>🪪</div>
+
+      {scanError && <p style={{ color: colors.danger, fontSize: 13.5, marginBottom: spacing.md }}>{scanError}</p>}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) runScan(file);
+        }}
+      />
+      <Button label={`📷 ${t('kyc.form.takePhoto')}`} onClick={() => fileInputRef.current?.click()} />
     </div>
   );
 }

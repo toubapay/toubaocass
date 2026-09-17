@@ -42,4 +42,12 @@ class SimulatedDocumentOcrClient implements DocumentOcrClient
             'vehicle_age_bracket' => self::AGE_BRACKETS[array_rand(self::AGE_BRACKETS)],
         ];
     }
+
+    public function extractLicenseInfo(string $path, string $disk): array
+    {
+        return [
+            'license_number' => 'SN'.random_int(10000000, 99999999),
+            'license_expiry' => now()->addYears(random_int(1, 5))->toDateString(),
+        ];
+    }
 }

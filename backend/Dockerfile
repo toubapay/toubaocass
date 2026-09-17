@@ -14,6 +14,19 @@ RUN install-php-extensions \
     zip \
     intl
 
+# PHP's shipped defaults (upload_max_filesize=2M, post_max_size=8M) are
+# well below what a phone camera photo actually is (routinely 5-15MB) and
+# below Laravel's own 5MB-per-file validation cap on KYC/carte grise
+# uploads — a driver submitting even one real camera photo would have it
+# silently truncated by PHP before Laravel's validation ever saw it,
+# surfacing only as a generic failure on the frontend. Raised comfortably
+# above Laravel's cap so that cap (with a real error message) is what
+# actually enforces the limit, not a silent PHP-level cutoff.
+RUN { \
+        echo "upload_max_filesize=20M"; \
+        echo "post_max_size=25M"; \
+    } > "$PHP_INI_DIR/conf.d/uploads.ini"
+
 # supervisor: only used when RUN_ALL_IN_ONE=true (single-instance hosts like
 # Render), to run Octane + the queue worker + the scheduler as one process
 # group instead of as separate services. See docker/supervisord.conf.
