@@ -124,7 +124,10 @@ export interface DashboardRoutes {
   delivery_zone_coverage: DeliveryZone[];
 }
 
+export type LiveTripType = 'trip' | 'anando' | 'dem_legui';
+
 export interface LiveTrip {
+  type: LiveTripType;
   id: number;
   driver_name: string | null;
   driver_phone: string | null;
@@ -133,8 +136,11 @@ export interface LiveTrip {
   destination_city: string | null;
   latitude: number;
   longitude: number;
-  departure_date: string | null;
-  departure_time: string | null;
+  // false only for a scheduled Trip whose driver hasn't sent a GPS ping
+  // yet — latitude/longitude are then its recorded departure point, not a
+  // live position.
+  is_live: boolean;
+  updated_at: string | null;
 }
 
 export type SecurityAlertType = 'repeated_otp_failures' | 'kyc_rejected';

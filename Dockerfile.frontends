@@ -104,7 +104,9 @@ COPY apps/admin/package.json apps/admin/package-lock.json ./
 RUN npm ci
 COPY apps/admin/. .
 ARG VITE_ADMIN_API_BASE_URL
-ENV VITE_ADMIN_API_BASE_URL=$VITE_ADMIN_API_BASE_URL
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_ADMIN_API_BASE_URL=$VITE_ADMIN_API_BASE_URL \
+    VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 # See the comment on the web-build stage's `vite build` above.
 RUN npx vite build
 
