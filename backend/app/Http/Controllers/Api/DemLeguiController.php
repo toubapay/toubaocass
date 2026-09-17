@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\DemLeguiDriverArrivedAtPickup;
+use App\Events\DemLeguiRequestCancelledAfterMatch;
 use App\Events\DemLeguiRequestMatched;
 use App\Events\DemLeguiRequestPosted;
+use App\Events\DemLeguiTripCompleted;
+use App\Events\DemLeguiTripStarted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\AcceptDemLeguiRequestRequest;
 use App\Http\Requests\Rider\QuoteDemLeguiRequest;
@@ -177,6 +181,12 @@ class DemLeguiController extends Controller
             $locked->update(['status' => DemLeguiRequest::STATUS_CANCELLED]);
         });
 
+        $fresh = $demLeguiRequest->fresh();
+
+        if ($fresh->dem_legui_trip_id) {
+            DemLeguiRequestCancelledAfterMatch::dispatch($fresh);
+        }
+
         return response()->json(['message' => 'Demande annulée.']);
     }
 
@@ -319,6 +329,8 @@ class DemLeguiController extends Controller
 
         $demLeguiTrip->update(['arrived_at' => now()]);
 
+        DemLeguiDriverArrivedAtPickup::dispatch($demLeguiTrip->fresh());
+
         return new DemLeguiTripResource($demLeguiTrip->load(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
     }
 
@@ -331,6 +343,8 @@ class DemLeguiController extends Controller
         }
 
         $demLeguiTrip->update(['status' => DemLeguiTrip::STATUS_IN_PROGRESS, 'started_at' => now()]);
+
+        DemLeguiTripStarted::dispatch($demLeguiTrip->fresh());
 
         return new DemLeguiTripResource($demLeguiTrip->load(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
     }
@@ -350,6 +364,8 @@ class DemLeguiController extends Controller
                 $commission->applyToDemLeguiRequest($attachedRequest);
             }
         });
+
+        DemLeguiTripCompleted::dispatch($demLeguiTrip->fresh());
 
         return new DemLeguiTripResource($demLeguiTrip->fresh(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
     }
