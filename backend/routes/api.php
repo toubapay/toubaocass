@@ -175,6 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Driver-facing KYC, fleet, and trip management.
     Route::prefix('driver')->middleware('role:driver')->group(function () {
         Route::get('kyc', [DriverController::class, 'showKyc']);
+        Route::post('kyc/scan', [DriverController::class, 'scanLicense']);
         Route::post('kyc', [DriverController::class, 'submitKyc']);
 
         // Online/offline availability toggle — going online is required to

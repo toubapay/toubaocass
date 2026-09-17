@@ -37,15 +37,13 @@ class KycReviewService
 
     /**
      * Completeness/expiry check only — no document-content or identity
-     * verification. All three documents are already required at submission
+     * verification. The license photo is already required at submission
      * time, so in practice this only ever blocks on an already-expired
      * license.
      */
     public function passesAutomaticRule(DriverProfile $profile): bool
     {
-        return filled($profile->id_document_path)
-            && filled($profile->license_document_path)
-            && filled($profile->selfie_path)
+        return filled($profile->license_document_path)
             && $profile->license_expiry !== null
             && $profile->license_expiry->isFuture();
     }

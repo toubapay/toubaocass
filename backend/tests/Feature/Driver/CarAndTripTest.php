@@ -76,17 +76,18 @@ class CarAndTripTest extends TestCase
 
     public function test_driver_can_submit_kyc_documents(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $driver = User::factory()->driver()->create();
+
+        $scan = $this->actingAs($driver, 'sanctum')
+            ->postJson('/api/driver/kyc/scan', ['license_document' => UploadedFile::fake()->image('license.jpg')])
+            ->assertOk();
 
         $this->actingAs($driver, 'sanctum')->postJson('/api/driver/kyc', [
             'license_number' => 'LIC-001',
             'license_expiry' => now()->addYear()->toDateString(),
-            'national_id_number' => '1234567890123',
-            'id_document' => UploadedFile::fake()->image('id.jpg'),
-            'license_document' => UploadedFile::fake()->image('license.jpg'),
-            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
+            'license_document_path' => $scan->json('license_document_path'),
         ])->assertCreated()->assertJsonPath('kyc_status', 'submitted');
 
         $this->assertDatabaseHas('driver_profiles', ['user_id' => $driver->id, 'kyc_status' => 'submitted']);
