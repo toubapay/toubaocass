@@ -96,6 +96,11 @@
     "placeholder": "Écrire un message...",
     "send": "Envoyer"
   },
+  "inbox": {
+    "title": "Messages",
+    "empty": "Aucune conversation pour l'instant.",
+    "unknownParty": "Utilisateur"
+  },
   "wallet": {
     "title": "Mon portefeuille",
     "availableBalance": "Solde disponible",
@@ -391,6 +396,10 @@
   "deliveries": {
     "title": "Livraisons",
     "kycNotice": "Votre vérification conducteur doit être approuvée avant d'accepter des livraisons. Consultez l'onglet Vérification.",
+    "newDeliveryToast": "📦 Nouvelle livraison : {{pickup}} → {{destination}}",
+    "newDeliveryToastView": "Voir →",
+    "availableCardTitle": "{{count}} livraison(s) disponible(s)",
+    "availableCardSubtitle": "Appuyez pour voir et accepter",
     "tabAvailable": "Disponibles",
     "tabMine": "Mes livraisons",
     "emptyAvailable": "Aucune livraison disponible pour le moment.",

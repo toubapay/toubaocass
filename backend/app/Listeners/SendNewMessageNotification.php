@@ -15,25 +15,27 @@ class SendNewMessageNotification
             'booking.trip.driver',
             'demLeguiRequest.rider',
             'demLeguiRequest.trip.driver',
+            'anandoRideBooking.user',
+            'anandoRideBooking.anandoRide.poster',
+            'delivery.sender',
+            'delivery.driver',
         );
 
-        if ($message->booking_id) {
-            $booking = $message->booking;
-
-            $recipient = $message->sender_id === $booking->rider_id
-                ? $booking->trip->driver
-                : $booking->rider;
-
-            $recipient->notify(new NewMessageNotification($message));
-
-            return;
-        }
-
-        $demLeguiRequest = $message->demLeguiRequest;
-
-        $recipient = $message->sender_id === $demLeguiRequest->rider_id
-            ? $demLeguiRequest->trip?->driver
-            : $demLeguiRequest->rider;
+        $recipient = match (true) {
+            $message->booking_id !== null => $message->sender_id === $message->booking->rider_id
+                ? $message->booking->trip->driver
+                : $message->booking->rider,
+            $message->dem_legui_request_id !== null => $message->sender_id === $message->demLeguiRequest->rider_id
+                ? $message->demLeguiRequest->trip?->driver
+                : $message->demLeguiRequest->rider,
+            $message->anando_ride_booking_id !== null => $message->sender_id === $message->anandoRideBooking->user_id
+                ? $message->anandoRideBooking->anandoRide->poster
+                : $message->anandoRideBooking->user,
+            $message->delivery_id !== null => $message->sender_id === $message->delivery->sender_id
+                ? $message->delivery->driver
+                : $message->delivery->sender,
+            default => null,
+        };
 
         $recipient?->notify(new NewMessageNotification($message));
     }

@@ -16,16 +16,19 @@ use App\Http\Controllers\Api\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AnandoRideController;
+use App\Http\Controllers\Api\AnandoRideMessageController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DeliveryMessageController;
 use App\Http\Controllers\Api\DemLeguiController;
 use App\Http\Controllers\Api\DemLeguiMessageController;
 use App\Http\Controllers\Api\DriverActiveChatController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\InboxController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
@@ -70,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('bookings/{booking}/messages', [MessageController::class, 'index']);
     Route::post('bookings/{booking}/messages', [MessageController::class, 'store']);
 
+    // Unified inbox — every chat thread (trip bookings, Dem Légui, Anando,
+    // deliveries) the authenticated user is a participant in, with a
+    // per-thread unread count. Powers the inbox icon/badge and page on
+    // both rider and driver apps; role-agnostic, same as active-chat below.
+    Route::get('inbox', [InboxController::class, 'index']);
+
     // Wallet — available to both riders and drivers. Top-ups aren't
     // self-service; they're credited by an admin (see the wallet:top-up
     // Artisan command), so there's no top-up endpoint here.
@@ -104,6 +113,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('anando-rides/{anandoRide}/share-link', [AnandoRideController::class, 'shareLink']);
     Route::post('anando-rides/{anandoRide}/sos', [AnandoRideController::class, 'sos']);
 
+    // Chat on an Anando booking — shared between the joiner and the
+    // poster of the ride (authorized per-booking, mirrors bookings/messages
+    // above).
+    Route::get('anando-ride-bookings/{anandoRideBooking}/messages', [AnandoRideMessageController::class, 'index']);
+    Route::post('anando-ride-bookings/{anandoRideBooking}/messages', [AnandoRideMessageController::class, 'store']);
+
     // SOS "share my live position" links for Trip and Dem Légui — sit
     // outside the role:rider/role:driver groups since either side of the
     // ride (driver or a confirmed rider) may want to generate their own.
@@ -117,6 +132,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // just like the ride share-links above.
     Route::post('deliveries/{delivery}/share-link', [DeliveryController::class, 'shareLink']);
     Route::post('deliveries/{delivery}/sos', [DeliveryController::class, 'sos']);
+
+    // Chat on a delivery — shared between the sender and the assigned
+    // driver (authorized per-delivery, mirrors bookings/messages above).
+    Route::get('deliveries/{delivery}/messages', [DeliveryMessageController::class, 'index']);
+    Route::post('deliveries/{delivery}/messages', [DeliveryMessageController::class, 'store']);
 
     // Assurance — vehicle-attribute based (no existing platform Car
     // required), open to any authenticated user (rider or driver). Mirrors

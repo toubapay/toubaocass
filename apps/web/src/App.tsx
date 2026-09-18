@@ -14,12 +14,15 @@ import { ProfileSetupPage } from './pages/auth/ProfileSetupPage';
 
 // Lazy-loaded: everything below is only reachable after login/navigation,
 // so it doesn't need to sit in the initial bundle every visitor downloads.
+const AnandoChatPage = lazy(() => import('./pages/AnandoChatPage').then((m) => ({ default: m.AnandoChatPage })));
 const AnandoPage = lazy(() => import('./pages/AnandoPage').then((m) => ({ default: m.AnandoPage })));
 const AnandoRideDetailPage = lazy(() => import('./pages/AnandoRideDetailPage').then((m) => ({ default: m.AnandoRideDetailPage })));
 const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })));
 const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) => ({ default: m.DemLeguiChatPage })));
 const DemLeguiRequestDetailPage = lazy(() => import('./pages/DemLeguiRequestDetailPage').then((m) => ({ default: m.DemLeguiRequestDetailPage })));
+const DeliveryChatPage = lazy(() => import('./pages/DeliveryChatPage').then((m) => ({ default: m.DeliveryChatPage })));
 const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then((m) => ({ default: m.DeliveryDetailPage })));
+const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const InstantDeparturesPage = lazy(() => import('./pages/InstantDeparturesPage').then((m) => ({ default: m.InstantDeparturesPage })));
 const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
 const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
@@ -100,12 +103,15 @@ function AppRoutes() {
         <Route path="/services/livraison" element={<NewDeliveryPage />} />
         <Route path="/services/anando" element={<AnandoPage />} />
         <Route path="/services/anando/:id" element={<AnandoRideDetailPage />} />
+        <Route path="/anando-ride-bookings/:bookingId/chat" element={<AnandoChatPage />} />
         <Route path="/services/dem-legui" element={<NewDemLeguiRequestPage />} />
         <Route path="/services/dem-legui/:id" element={<DemLeguiRequestDetailPage />} />
         <Route path="/services/dem-legui/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<MyDeliveriesPage />} />
         <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
         <Route path="/deliveries/:id/edit" element={<NewDeliveryPage />} />
+        <Route path="/deliveries/:deliveryId/chat" element={<DeliveryChatPage />} />
+        <Route path="/inbox" element={<InboxPage />} />
         <Route path="/trips/:id" element={<TripDetailPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/ride-bookings" element={<MyRideBookingsPage />} />

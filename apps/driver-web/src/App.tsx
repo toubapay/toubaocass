@@ -15,15 +15,18 @@ import { TripsListPage } from './pages/TripsListPage';
 // Lazy-loaded: everything below is only reachable after login/navigation,
 // so it doesn't need to sit in the initial bundle every visitor downloads.
 const AddCarPage = lazy(() => import('./pages/AddCarPage').then((m) => ({ default: m.AddCarPage })));
+const AnandoChatPage = lazy(() => import('./pages/AnandoChatPage').then((m) => ({ default: m.AnandoChatPage })));
 const AnandoPage = lazy(() => import('./pages/AnandoPage').then((m) => ({ default: m.AnandoPage })));
 const AnandoRideDetailPage = lazy(() => import('./pages/AnandoRideDetailPage').then((m) => ({ default: m.AnandoRideDetailPage })));
 const CarsListPage = lazy(() => import('./pages/CarsListPage').then((m) => ({ default: m.CarsListPage })));
 const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })));
 const DeliveriesListPage = lazy(() => import('./pages/DeliveriesListPage').then((m) => ({ default: m.DeliveriesListPage })));
+const DeliveryChatPage = lazy(() => import('./pages/DeliveryChatPage').then((m) => ({ default: m.DeliveryChatPage })));
 const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then((m) => ({ default: m.DeliveryDetailPage })));
 const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) => ({ default: m.DemLeguiChatPage })));
 const DemLeguiRequestsPage = lazy(() => import('./pages/DemLeguiRequestsPage').then((m) => ({ default: m.DemLeguiRequestsPage })));
 const DemLeguiTripDetailPage = lazy(() => import('./pages/DemLeguiTripDetailPage').then((m) => ({ default: m.DemLeguiTripDetailPage })));
+const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const InsuranceComparePage = lazy(() => import('./pages/InsuranceComparePage').then((m) => ({ default: m.InsuranceComparePage })));
 const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
 const KycFormPage = lazy(() => import('./pages/KycFormPage').then((m) => ({ default: m.KycFormPage })));
@@ -82,11 +85,14 @@ function AppRoutes() {
         <Route path="/trips/:tripId" element={<TripDetailPage />} />
         <Route path="/anando" element={<AnandoPage />} />
         <Route path="/anando/:id" element={<AnandoRideDetailPage />} />
+        <Route path="/anando-ride-bookings/:bookingId/chat" element={<AnandoChatPage />} />
         <Route path="/dem-legui" element={<DemLeguiRequestsPage />} />
         <Route path="/dem-legui/trips/:id" element={<DemLeguiTripDetailPage />} />
         <Route path="/dem-legui/requests/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<DeliveriesListPage />} />
         <Route path="/deliveries/:deliveryId" element={<DeliveryDetailPage />} />
+        <Route path="/deliveries/:deliveryId/chat" element={<DeliveryChatPage />} />
+        <Route path="/inbox" element={<InboxPage />} />
         <Route path="/fleet" element={<CarsListPage />} />
         <Route path="/fleet/add-car" element={<AddCarPage />} />
         <Route path="/fleet/insurance-compare" element={<InsuranceComparePage />} />

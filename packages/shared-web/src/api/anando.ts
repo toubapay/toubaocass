@@ -1,5 +1,5 @@
 import { getActiveClient } from './client';
-import type { AnandoRide, AnandoRideBooking, Paginated, PaymentMethod } from './types';
+import type { AnandoRide, AnandoRideBooking, Message, Paginated, PaymentMethod } from './types';
 
 export interface PostAnandoRideInput {
   origin_city_id: number;
@@ -88,4 +88,15 @@ export interface UpdateAnandoRideLocationInput {
 
 export async function updateAnandoRideLocation(rideId: number, input: UpdateAnandoRideLocationInput): Promise<void> {
   await getActiveClient().post(`/anando-rides/${rideId}/location`, input);
+}
+
+// Chat on a booking — shared between the joiner and the ride's poster.
+export async function fetchAnandoMessages(bookingId: number): Promise<Message[]> {
+  const { data } = await getActiveClient().get(`/anando-ride-bookings/${bookingId}/messages`);
+  return data;
+}
+
+export async function sendAnandoMessage(bookingId: number, body: string): Promise<Message> {
+  const { data } = await getActiveClient().post(`/anando-ride-bookings/${bookingId}/messages`, { body });
+  return data;
 }

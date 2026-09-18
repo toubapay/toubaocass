@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['booking_id', 'dem_legui_request_id', 'sender_id', 'body'])]
+#[Fillable(['booking_id', 'dem_legui_request_id', 'anando_ride_booking_id', 'delivery_id', 'sender_id', 'body'])]
 class Message extends Model
 {
     protected function casts(): array
@@ -24,6 +24,16 @@ class Message extends Model
     public function demLeguiRequest(): BelongsTo
     {
         return $this->belongsTo(DemLeguiRequest::class);
+    }
+
+    public function anandoRideBooking(): BelongsTo
+    {
+        return $this->belongsTo(AnandoRideBooking::class);
+    }
+
+    public function delivery(): BelongsTo
+    {
+        return $this->belongsTo(Delivery::class);
     }
 
     public function sender(): BelongsTo
