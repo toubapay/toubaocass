@@ -6,6 +6,7 @@ import { fetchMyTrips } from '../api/trips';
 import type { Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { Button } from '../components/Button';
+import { DeliveryAvailableCard } from '../components/DeliveryAvailableCard';
 import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle';
 import { CenteredSpinner } from '../components/Spinner';
 import { useModuleStatus } from '../context/ModuleStatusContext';
@@ -122,6 +123,8 @@ export function TripsListPage() {
           </span>
         </button>
       )}
+
+      {isModuleEnabled('livraison') && <DeliveryAvailableCard />}
 
       <button
         onClick={() => navigate('/post-trip')}

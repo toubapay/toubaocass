@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Delivery, PackageType, Paginated, PaymentMethod } from './types';
+import type { Delivery, Message, PackageType, Paginated, PaymentMethod } from './types';
 
 export interface QuoteDeliveryParams {
   pickup_latitude: number;
@@ -58,4 +58,15 @@ export async function cancelDelivery(deliveryId: number): Promise<void> {
 
 export async function updateDeliveryLocation(deliveryId: number, latitude: number, longitude: number): Promise<void> {
   await apiClient.post(`/driver/deliveries/${deliveryId}/location`, { latitude, longitude });
+}
+
+// Chat on a delivery — shared between the sender and the assigned driver.
+export async function fetchDeliveryMessages(deliveryId: number): Promise<Message[]> {
+  const { data } = await apiClient.get(`/deliveries/${deliveryId}/messages`);
+  return data;
+}
+
+export async function sendDeliveryMessage(deliveryId: number, body: string): Promise<Message> {
+  const { data } = await apiClient.post(`/deliveries/${deliveryId}/messages`, { body });
+  return data;
 }

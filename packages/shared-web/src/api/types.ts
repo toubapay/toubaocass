@@ -139,12 +139,31 @@ export interface Message {
   id: number;
   booking_id: number | null;
   dem_legui_request_id: number | null;
+  anando_ride_booking_id: number | null;
+  delivery_id: number | null;
   body: string;
   sender_id: number;
   sender_name: string | null;
   is_mine: boolean;
   read_at: string | null;
   created_at: string;
+}
+
+export type InboxThreadType = 'booking' | 'dem_legui_request' | 'anando' | 'delivery';
+
+export interface InboxThread {
+  type: InboxThreadType;
+  id: number;
+  other_party_name: string | null;
+  unread_count: number;
+  preview: string | null;
+  latest_at: string | null;
+  latest_message_id: number | null;
+}
+
+export interface InboxResponse {
+  data: InboxThread[];
+  unread_total: number;
 }
 
 export type PackageType = 'document' | 'colis_leger' | 'colis_moyen' | 'colis_volumineux';

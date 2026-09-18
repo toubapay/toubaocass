@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
 import { ChatFab } from './ChatFab';
+import { InboxIcon } from './InboxIcon';
 
 const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.trips', icon: '🚗', end: true },
@@ -53,6 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </div>
         </div>
+        <InboxIcon />
       </header>
 
       <main

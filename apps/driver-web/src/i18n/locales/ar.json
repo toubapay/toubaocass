@@ -96,6 +96,11 @@
     "placeholder": "اكتب رسالة...",
     "send": "إرسال"
   },
+  "inbox": {
+    "title": "الرسائل",
+    "empty": "لا توجد محادثات حالياً.",
+    "unknownParty": "مستخدم"
+  },
   "wallet": {
     "title": "محفظتي",
     "availableBalance": "الرصيد المتاح",
@@ -401,6 +406,10 @@
   "deliveries": {
     "title": "التوصيلات",
     "kycNotice": "يجب أن تتم الموافقة على التحقق الخاص بك كسائق قبل قبول التوصيلات. راجع علامة التبويب التحقق.",
+    "newDeliveryToast": "📦 توصيلة جديدة: {{pickup}} → {{destination}}",
+    "newDeliveryToastView": "عرض ←",
+    "availableCardTitle": "{{count}} توصيلة متاحة",
+    "availableCardSubtitle": "اضغط للعرض والقبول",
     "tabAvailable": "المتاحة",
     "tabMine": "توصيلاتي",
     "emptyAvailable": "لا توجد توصيلات متاحة حالياً.",

@@ -212,6 +212,11 @@
     "placeholder": "Écrire un message...",
     "send": "Envoyer"
   },
+  "inbox": {
+    "title": "Messages",
+    "empty": "Aucune conversation pour l'instant.",
+    "unknownParty": "Utilisateur"
+  },
   "deliveryDetail": {
     "titleWithId": "Livraison #{{id}}",
     "pickup": "Ramassage",

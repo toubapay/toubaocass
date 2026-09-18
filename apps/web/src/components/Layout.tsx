@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { colors, radius, spacing } from '../theme';
 import { ChatFab } from './ChatFab';
+import { InboxIcon } from './InboxIcon';
 import { MyLocationBar } from './MyLocationBar';
 import { ServicesIcon } from './ServicesIcon';
 
@@ -78,7 +79,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </div>
         </div>
-        <MyLocationBar />
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
+          <MyLocationBar />
+          <InboxIcon />
+        </div>
       </header>
 
       <main

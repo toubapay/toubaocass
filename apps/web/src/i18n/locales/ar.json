@@ -216,6 +216,11 @@
     "placeholder": "اكتب رسالة...",
     "send": "إرسال"
   },
+  "inbox": {
+    "title": "الرسائل",
+    "empty": "لا توجد محادثات حالياً.",
+    "unknownParty": "مستخدم"
+  },
   "deliveryDetail": {
     "titleWithId": "توصيل #{{id}}",
     "pickup": "الاستلام",
