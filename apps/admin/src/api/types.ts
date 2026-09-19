@@ -82,6 +82,7 @@ export interface FareSettings {
   dem_legui_fare_per_km: number;
   commission_rate_trip: number;
   commission_rate_delivery: number;
+  delivery_max_active_per_driver: number | null;
 }
 
 export interface FinancialsBreakdown {

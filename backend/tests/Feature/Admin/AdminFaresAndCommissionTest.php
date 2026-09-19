@@ -119,6 +119,28 @@ class AdminFaresAndCommissionTest extends TestCase
         $response->assertJsonPath('fare_total', 500);
     }
 
+    public function test_admin_can_set_and_clear_the_max_active_deliveries_per_driver_limit(): void
+    {
+        $admin = AdminUser::factory()->role(AdminUser::ROLE_ACCOUNTANT)->create();
+
+        // Defaults to 3 until an admin sets an explicit value.
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/settings/fares')
+            ->assertOk()
+            ->assertJsonPath('delivery_max_active_per_driver', 3);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/admin/settings/fares', ['delivery_max_active_per_driver' => 5])
+            ->assertOk()
+            ->assertJsonPath('delivery_max_active_per_driver', 5);
+
+        // Explicit null clears the cap (no limit), distinct from omitting the field.
+        $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/admin/settings/fares', ['delivery_max_active_per_driver' => null])
+            ->assertOk()
+            ->assertJsonPath('delivery_max_active_per_driver', null);
+    }
+
     public function test_support_cannot_manage_fares(): void
     {
         $admin = AdminUser::factory()->role(AdminUser::ROLE_SUPPORT)->create();

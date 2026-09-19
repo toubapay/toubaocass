@@ -47,6 +47,15 @@ class FareSettingsController extends Controller
             }
         }
 
+        // Nullable, unlike the fields above: an explicit null clears the cap
+        // (no limit) rather than meaning "leave unchanged", so this checks
+        // has() instead of filled().
+        if ($request->has('delivery_max_active_per_driver')) {
+            $value = $request->input('delivery_max_active_per_driver');
+            $this->settings->set(DeliveryPricingService::MAX_ACTIVE_PER_DRIVER_KEY, $value === null ? '' : (string) $value, $admin);
+            $changed['delivery_max_active_per_driver'] = $value;
+        }
+
         if ($changed !== []) {
             $this->auditLog->record($admin, 'fares.update', 'Mise à jour des tarifs et de la commission.', metadata: $changed);
         }
@@ -63,6 +72,7 @@ class FareSettingsController extends Controller
             'dem_legui_fare_per_km' => $this->demLeguiPricing->farePerKm(),
             'commission_rate_trip' => $this->commission->tripRate(),
             'commission_rate_delivery' => $this->commission->deliveryRate(),
+            'delivery_max_active_per_driver' => $this->pricing->maxActiveDeliveriesPerDriver(),
         ];
     }
 }

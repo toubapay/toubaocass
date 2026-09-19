@@ -6,6 +6,7 @@ import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
 import { AuditLogPage } from './pages/audit/AuditLogPage';
 import { BackupsPage } from './pages/backups/BackupsPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { DeliverySettingsPage } from './pages/deliveries/DeliverySettingsPage';
 import { FinancialsPage } from './pages/financials/FinancialsPage';
 import { InsurancePoliciesPage } from './pages/insurance/InsurancePoliciesPage';
 import { InsuranceProvidersPage } from './pages/insurance/InsuranceProvidersPage';
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="/live-trips" element={<LiveTripsPage />} />
         <Route path="/security-alerts" element={<SecurityAlertsPage />} />
         <Route path="/fares" element={<FaresPage />} />
+        <Route path="/deliveries" element={<DeliverySettingsPage />} />
         <Route path="/financials" element={<FinancialsPage />} />
         <Route path="/insurance/providers" element={<InsuranceProvidersPage />} />
         <Route path="/insurance/policies" element={<InsurancePoliciesPage />} />
