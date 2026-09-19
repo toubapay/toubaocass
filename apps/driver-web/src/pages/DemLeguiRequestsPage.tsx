@@ -10,6 +10,9 @@ import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle
 import { CenteredSpinner } from '../components/Spinner';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
+
+const POLL_INTERVAL_MS = 20000;
 
 export function DemLeguiRequestsPage() {
   const { t } = useTranslation();
@@ -38,7 +41,16 @@ export function DemLeguiRequestsPage() {
       .finally(() => setLoading(false));
   }, [isOnline]);
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    load();
+    const interval = setInterval(load, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // A rider posting a request pushes 'dem_legui_request_posted' to nearby
+  // online drivers (see NotifyNearbyOnlineDriversOfDemLeguiRequest) — jump
+  // the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
+  usePushEvent('dem_legui_request_posted', load);
 
   const doAccept = async (requestId: number, carId?: number) => {
     setAcceptingId(requestId);

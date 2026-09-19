@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Notifications\DeliveryAcceptedDriverNotification;
 use App\Notifications\DeliveryAcceptedNotification;
+use App\Notifications\DeliveryAvailableNotification;
 use App\Notifications\DeliveryCancelledNotification;
 use App\Notifications\DeliveryDeliveredNotification;
 use App\Notifications\DeliveryPickedUpNotification;
@@ -101,6 +102,37 @@ class DeliveryTest extends TestCase
             ->getJson('/api/deliveries')
             ->assertOk()
             ->assertJsonPath('data.0.id', $created['id']);
+    }
+
+    private function onlineDriver(array $profileOverrides = []): User
+    {
+        $driver = User::factory()->driver()->create(['fcm_token' => 'token-'.uniqid()]);
+        DriverProfile::factory()->create(array_merge([
+            'user_id' => $driver->id,
+            'is_online' => true,
+            'current_latitude' => self::PICKUP_LAT,
+            'current_longitude' => self::PICKUP_LNG,
+        ], $profileOverrides));
+
+        return $driver;
+    }
+
+    public function test_delivery_is_only_notified_to_nearby_online_drivers(): void
+    {
+        Notification::fake();
+        $rider = User::factory()->create();
+
+        $nearbyOnline = $this->onlineDriver(['current_latitude' => 14.71, 'current_longitude' => -17.45]);
+        $farOnline = $this->onlineDriver(['current_latitude' => 16.00, 'current_longitude' => -16.00]);
+        $nearbyOffline = $this->onlineDriver(['is_online' => false]);
+
+        $this->actingAs($rider, 'sanctum')
+            ->postJson('/api/deliveries', $this->payload())
+            ->assertCreated();
+
+        Notification::assertSentTo($nearbyOnline, DeliveryAvailableNotification::class);
+        Notification::assertNotSentTo($farOnline, DeliveryAvailableNotification::class);
+        Notification::assertNotSentTo($nearbyOffline, DeliveryAvailableNotification::class);
     }
 
     public function test_rider_cannot_view_another_riders_delivery(): void

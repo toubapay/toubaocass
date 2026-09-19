@@ -3,6 +3,7 @@ import { getToken, onMessage } from 'firebase/messaging';
 
 import { registerPushToken } from '../api/auth';
 import { getFirebaseMessaging } from '../firebase';
+import { dispatchPushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 export type PushPermissionState = 'unsupported' | 'default' | 'granted' | 'denied';
 
@@ -42,6 +43,13 @@ export function usePushNotifications() {
       .then((messaging) => {
         if (!messaging) return;
         unsubscribe = onMessage(messaging, (payload) => {
+          // Let interested components (instant departures banner, …)
+          // refetch immediately regardless of whether a native notification
+          // is actually shown below — a rider who denied the permission
+          // prompt should still see live-updating lists while the tab is
+          // open.
+          dispatchPushEvent(payload.data);
+
           if (Notification.permission !== 'granted') return;
           // Backend sends data-only FCM messages (no top-level "notification"
           // key) specifically so nothing but this handler ever displays one —
