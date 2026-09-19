@@ -10,6 +10,8 @@ class DeliveryPricingService
 
     const FEE_PER_KM_KEY = 'delivery_fee_per_km';
 
+    const MAX_ACTIVE_PER_DRIVER_KEY = 'delivery_max_active_per_driver';
+
     public function __construct(private readonly PlatformSettingsService $settings) {}
 
     /**
@@ -39,5 +41,17 @@ class DeliveryPricingService
     public function feePerKm(): float
     {
         return (float) $this->settings->get(self::FEE_PER_KM_KEY, (string) config('services.delivery.fee_per_km'));
+    }
+
+    /**
+     * How many deliveries a driver may have simultaneously accepted/picked
+     * up before accept() refuses further ones — null means no cap. Defaults
+     * to 3 until a super_admin/accountant sets or clears an explicit value.
+     */
+    public function maxActiveDeliveriesPerDriver(): ?int
+    {
+        $value = $this->settings->get(self::MAX_ACTIVE_PER_DRIVER_KEY, '3');
+
+        return $value === '' || $value === null ? null : (int) $value;
     }
 }

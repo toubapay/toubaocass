@@ -227,7 +227,7 @@ class DeliveryController extends Controller
         return new DeliveryResource($delivery->load(['sender', 'driver.driverProfile']));
     }
 
-    public function accept(Request $request, Delivery $delivery, WalletService $walletService)
+    public function accept(Request $request, Delivery $delivery, WalletService $walletService, DeliveryPricingService $pricing)
     {
         $user = $request->user();
 
@@ -237,7 +237,27 @@ class DeliveryController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($delivery, $user, $walletService) {
+        DB::transaction(function () use ($delivery, $user, $walletService, $pricing) {
+            // Locks the driver's own profile row first so two concurrent
+            // accept() calls from the same driver (different deliveries)
+            // serialize instead of both reading the active-count below
+            // before either commits — otherwise both could slip past the
+            // limit at once.
+            DriverProfile::where('user_id', $user->id)->lockForUpdate()->first();
+
+            $maxActive = $pricing->maxActiveDeliveriesPerDriver();
+            if ($maxActive !== null) {
+                $activeCount = Delivery::where('driver_id', $user->id)
+                    ->whereIn('status', [Delivery::STATUS_ACCEPTED, Delivery::STATUS_PICKED_UP])
+                    ->count();
+
+                if ($activeCount >= $maxActive) {
+                    throw ValidationException::withMessages([
+                        'delivery' => ["Vous avez déjà {$activeCount} livraison(s) active(s), la limite autorisée. Terminez-en une avant d'en accepter une nouvelle."],
+                    ]);
+                }
+            }
+
             /** @var Delivery $locked */
             $locked = Delivery::where('id', $delivery->id)->lockForUpdate()->firstOrFail();
 

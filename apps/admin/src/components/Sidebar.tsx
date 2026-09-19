@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/live-trips', label: 'Trajets en direct', permission: 'view_dashboard' },
   { to: '/security-alerts', label: 'Alertes de sécurité', permission: 'view_security_alerts' },
   { to: '/fares', label: 'Tarifs & commission', permission: 'manage_fares' },
+  { to: '/deliveries', label: 'Livraisons', permission: 'manage_fares' },
   { to: '/financials', label: 'Finances', permission: 'view_financials' },
   { to: '/insurance/providers', label: 'Partenaires assurance', permission: 'manage_insurance' },
   { to: '/insurance/policies', label: 'Polices vendues', permission: 'manage_insurance' },

@@ -14,6 +14,7 @@ use App\Notifications\DeliveryDeliveredNotification;
 use App\Notifications\DeliveryPickedUpNotification;
 use App\Notifications\DeliveryRequestedNotification;
 use App\Services\DeliveryPricingService;
+use App\Services\PlatformSettingsService;
 use App\Services\WalletService;
 use App\Support\Geo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -160,6 +161,58 @@ class DeliveryTest extends TestCase
             ->assertUnprocessable();
 
         $this->assertDatabaseHas('deliveries', ['id' => $delivery->id, 'status' => 'pending', 'driver_id' => null]);
+    }
+
+    public function test_driver_cannot_accept_beyond_the_configured_active_delivery_limit(): void
+    {
+        app(PlatformSettingsService::class)->set(DeliveryPricingService::MAX_ACTIVE_PER_DRIVER_KEY, '1');
+
+        $driver = User::factory()->driver()->create();
+        DriverProfile::factory()->create(['user_id' => $driver->id]);
+        Delivery::factory()->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_ACCEPTED]);
+
+        $rider = User::factory()->create();
+        $secondDelivery = Delivery::factory()->create(['sender_id' => $rider->id, 'status' => Delivery::STATUS_PENDING]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/deliveries/{$secondDelivery->id}/accept")
+            ->assertUnprocessable();
+
+        $this->assertDatabaseHas('deliveries', ['id' => $secondDelivery->id, 'status' => 'pending', 'driver_id' => null]);
+    }
+
+    public function test_driver_can_accept_up_to_the_configured_active_delivery_limit(): void
+    {
+        app(PlatformSettingsService::class)->set(DeliveryPricingService::MAX_ACTIVE_PER_DRIVER_KEY, '2');
+
+        $driver = User::factory()->driver()->create();
+        DriverProfile::factory()->create(['user_id' => $driver->id]);
+        Delivery::factory()->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_ACCEPTED]);
+
+        $rider = User::factory()->create();
+        $secondDelivery = Delivery::factory()->create(['sender_id' => $rider->id, 'status' => Delivery::STATUS_PENDING]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/deliveries/{$secondDelivery->id}/accept")
+            ->assertOk()
+            ->assertJsonPath('status', 'accepted');
+    }
+
+    public function test_clearing_the_active_delivery_limit_removes_the_cap(): void
+    {
+        app(PlatformSettingsService::class)->set(DeliveryPricingService::MAX_ACTIVE_PER_DRIVER_KEY, '');
+
+        $driver = User::factory()->driver()->create();
+        DriverProfile::factory()->create(['user_id' => $driver->id]);
+        Delivery::factory()->count(5)->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_ACCEPTED]);
+
+        $rider = User::factory()->create();
+        $newDelivery = Delivery::factory()->create(['sender_id' => $rider->id, 'status' => Delivery::STATUS_PENDING]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/deliveries/{$newDelivery->id}/accept")
+            ->assertOk()
+            ->assertJsonPath('status', 'accepted');
     }
 
     public function test_a_rider_account_cannot_use_the_driver_accept_endpoint(): void
