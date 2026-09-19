@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { fetchAvailableDeliveries, fetchMyDeliveries } from '../api/deliveries';
+import { acceptDelivery, fetchAvailableDeliveries, fetchMyDeliveries } from '../api/deliveries';
+import { extractErrorMessage } from '../api/client';
 import type { Delivery } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +26,8 @@ export function DeliveriesListPage() {
   const [tab, setTab] = useState<'available' | 'mine'>('available');
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [acceptingId, setAcceptingId] = useState<number | null>(null);
+  const [acceptError, setAcceptError] = useState<string | undefined>();
 
   const load = useCallback(() => {
     if (!kycApproved) return;
@@ -36,6 +39,21 @@ export function DeliveriesListPage() {
   }, [tab, kycApproved]);
 
   useEffect(load, [load]);
+
+  const doAccept = async (deliveryId: number) => {
+    setAcceptError(undefined);
+    setAcceptingId(deliveryId);
+    try {
+      await acceptDelivery(deliveryId);
+      // Accepted deliveries drop off the "available" list immediately
+      // rather than waiting for the next poll/push refresh.
+      setDeliveries((prev) => prev.filter((d) => d.id !== deliveryId));
+    } catch (e) {
+      setAcceptError(extractErrorMessage(e));
+    } finally {
+      setAcceptingId(null);
+    }
+  };
 
   if (!kycApproved) {
     return (
@@ -71,6 +89,8 @@ export function DeliveriesListPage() {
         </button>
       </div>
 
+      {acceptError && <p style={{ fontSize: 14, color: colors.danger, marginBottom: spacing.sm }}>{acceptError}</p>}
+
       {loading ? (
         <CenteredSpinner />
       ) : deliveries.length === 0 ? (
@@ -79,9 +99,14 @@ export function DeliveriesListPage() {
         </p>
       ) : (
         deliveries.map((item) => (
-          <button
+          <div
             key={item.id}
+            role="button"
+            tabIndex={0}
             onClick={() => navigate(`/deliveries/${item.id}`)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') navigate(`/deliveries/${item.id}`);
+            }}
             style={{
               display: 'block',
               width: '100%',
@@ -106,7 +131,31 @@ export function DeliveriesListPage() {
             <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, margin: `${spacing.xs}px 0 0` }}>
               {item.fee.toLocaleString()} FCFA
             </p>
-          </button>
+            {tab === 'available' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  doAccept(item.id);
+                }}
+                disabled={acceptingId === item.id}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  borderRadius: radius.sm,
+                  backgroundColor: colors.primary,
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  padding: spacing.sm,
+                  marginTop: spacing.sm,
+                  cursor: acceptingId === item.id ? 'default' : 'pointer',
+                  opacity: acceptingId === item.id ? 0.7 : 1,
+                }}
+              >
+                {acceptingId === item.id ? '…' : t('deliveries.detail.accept')}
+              </button>
+            )}
+          </div>
         ))
       )}
     </div>
