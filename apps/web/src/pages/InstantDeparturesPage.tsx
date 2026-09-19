@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import type { Trip } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripCard } from '../components/TripCard';
 import { colors, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 const POLL_INTERVAL_MS = 20000;
 
@@ -15,27 +16,32 @@ export function InstantDeparturesPage() {
   const navigate = useNavigate();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const load = useCallback(() => {
+    fetchInstantTrips()
+      .then((data) => {
+        if (mounted.current) setTrips(data);
+      })
+      .finally(() => {
+        if (mounted.current) setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const load = () => {
-      fetchInstantTrips()
-        .then((data) => {
-          if (!cancelled) setTrips(data);
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-    };
-
     load();
     const interval = setInterval(load, POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // A driver posting an instant trip pushes 'instant_trip_posted' to every
+  // rider (see SendInstantTripPostedNotifications) — jump the poll instead
+  // of waiting up to POLL_INTERVAL_MS to notice it.
+  usePushEvent('instant_trip_posted', load);
 
   return (
     <div>

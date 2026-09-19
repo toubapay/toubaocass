@@ -44,6 +44,8 @@ class Delivery extends Model
 
     const PAYMENT_METHOD_WALLET = 'wallet';
 
+    const NEARBY_RADIUS_KM = 15;
+
     protected function casts(): array
     {
         return [

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { fetchAvailableDeliveries } from '../api/deliveries';
 import type { Delivery } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 const POLL_INTERVAL_MS = 20000;
 const VISIBLE_DURATION_MS = 4000;
@@ -28,39 +29,44 @@ export function DeliveryAvailableCard() {
   const [current, setCurrent] = useState<Delivery | null>(null);
   const [visible, setVisible] = useState(false);
   const seenIds = useRef<Set<number> | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const load = useCallback(() => {
+    fetchAvailableDeliveries()
+      .then((res) => {
+        if (!mounted.current) return;
+        const deliveries = res.data;
+        setTotal(res.meta?.total ?? deliveries.length);
+
+        if (seenIds.current === null) {
+          seenIds.current = new Set(deliveries.map((d) => d.id));
+          return;
+        }
+
+        const fresh = deliveries.filter((d) => !seenIds.current!.has(d.id));
+        if (fresh.length === 0) return;
+
+        fresh.forEach((d) => seenIds.current!.add(d.id));
+        setQueue((prev) => [...prev, ...fresh]);
+        playBeep();
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const load = () => {
-      fetchAvailableDeliveries()
-        .then((res) => {
-          if (cancelled) return;
-          const deliveries = res.data;
-          setTotal(res.meta?.total ?? deliveries.length);
-
-          if (seenIds.current === null) {
-            seenIds.current = new Set(deliveries.map((d) => d.id));
-            return;
-          }
-
-          const fresh = deliveries.filter((d) => !seenIds.current!.has(d.id));
-          if (fresh.length === 0) return;
-
-          fresh.forEach((d) => seenIds.current!.add(d.id));
-          setQueue((prev) => [...prev, ...fresh]);
-          playBeep();
-        })
-        .catch(() => {});
-    };
-
     load();
     const interval = setInterval(load, POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // A rider posting a new delivery pushes 'delivery_available' to nearby
+  // online drivers (see NotifyNearbyOnlineDriversOfDeliveryAvailable) — jump
+  // the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
+  usePushEvent('delivery_available', load);
 
   useEffect(() => {
     if (current === null && queue.length > 0) {
