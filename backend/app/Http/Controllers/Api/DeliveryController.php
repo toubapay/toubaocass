@@ -341,11 +341,8 @@ class DeliveryController extends Controller
         DB::transaction(function () use ($delivery, $commission, $walletService) {
             $delivery->update(['status' => Delivery::STATUS_DELIVERED, 'delivered_at' => now()]);
             $delivery = $commission->applyToDelivery($delivery);
-
-            if ($delivery->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
-                $net = $delivery->fee - $delivery->commission_amount;
-                $walletService->credit($delivery->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu de livraison #{$delivery->id} (livrée)");
-            }
+            $net = $delivery->fee - $delivery->commission_amount;
+            $walletService->credit($delivery->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu de livraison #{$delivery->id} (livrée)");
         });
 
         DeliveryDelivered::dispatch($delivery->fresh());

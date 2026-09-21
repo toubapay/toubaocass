@@ -412,14 +412,12 @@ class DemLeguiController extends Controller
             $demLeguiTrip->update(['status' => DemLeguiTrip::STATUS_COMPLETED, 'completed_at' => now()]);
 
             // Earnings are credited here, net of commission, rather than up
-            // front at accept() — same reasoning as Trip bookings.
+            // front at accept() — same reasoning as Trip bookings. This is
+            // the driver's earnings ledger regardless of how the rider paid.
             foreach ($demLeguiTrip->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->get() as $attachedRequest) {
                 $attachedRequest = $commission->applyToDemLeguiRequest($attachedRequest);
-
-                if ($attachedRequest->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
-                    $net = $attachedRequest->fare_total - $attachedRequest->commission_amount;
-                    $walletService->credit($demLeguiTrip->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Dem Légui #{$attachedRequest->id} (trajet terminé)");
-                }
+                $net = $attachedRequest->fare_total - $attachedRequest->commission_amount;
+                $walletService->credit($demLeguiTrip->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Dem Légui #{$attachedRequest->id} (trajet terminé)");
             }
         });
 

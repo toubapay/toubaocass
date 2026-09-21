@@ -151,18 +151,16 @@ class AnandoRideController extends Controller
             $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
 
             // Earnings are credited here, net of commission, rather than up
-            // front at join() — same reasoning as Trip bookings.
+            // front at join() — same reasoning as Trip bookings. This is the
+            // poster's earnings ledger regardless of how each joiner paid.
             $confirmedBookings = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)
                 ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
                 ->get();
 
             foreach ($confirmedBookings as $booking) {
                 $booking = $commission->applyToAnandoBooking($booking);
-
-                if ($booking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
-                    $net = $booking->price_total - $booking->commission_amount;
-                    $walletService->credit($anandoRide->poster, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Anando #{$anandoRide->id} (trajet terminé)");
-                }
+                $net = $booking->price_total - $booking->commission_amount;
+                $walletService->credit($anandoRide->poster, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Anando #{$anandoRide->id} (trajet terminé)");
             }
         });
 

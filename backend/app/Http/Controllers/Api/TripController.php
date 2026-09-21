@@ -348,16 +348,15 @@ class TripController extends Controller
 
                 // Earnings are credited here, net of commission, rather than
                 // up front at booking time — a driver only gets paid once
-                // the trip actually happened. Cash bookings never touched the
-                // wallet in the first place (the rider pays the driver
-                // directly), so only wallet-paid ones are settled here.
+                // the trip actually happened. This is the driver's earnings
+                // ledger regardless of how the rider paid: a wallet booking
+                // already had the platform holding the fare, while a cash
+                // booking was paid straight to the driver in person — either
+                // way the app records what the driver earned on the trip.
                 $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(function (Booking $booking) use ($walletService, $locked) {
                     $booking = $this->commissionService->applyToBooking($booking);
-
-                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
-                        $net = $booking->fare_total - $booking->commission_amount;
-                        $walletService->credit($locked->driver, $net, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation (trajet terminé)');
-                    }
+                    $net = $booking->fare_total - $booking->commission_amount;
+                    $walletService->credit($locked->driver, $net, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation (trajet terminé)');
                 });
             });
         } catch (\RuntimeException $e) {

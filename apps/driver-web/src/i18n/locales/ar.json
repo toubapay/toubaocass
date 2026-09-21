@@ -1,4 +1,14 @@
 {
+  "ratings": {
+    "myReviewsTitle": "تقييماتي",
+    "noReviewsYet": "لم تتلقَّ أي تقييم بعد.",
+    "anonymousRider": "عميل",
+    "rateableType": {
+      "trip": "رحلة",
+      "demLegui": "Dem Légui",
+      "delivery": "توصيل"
+    }
+  },
   "common": {
     "back": "رجوع",
     "ok": "حسناً",
