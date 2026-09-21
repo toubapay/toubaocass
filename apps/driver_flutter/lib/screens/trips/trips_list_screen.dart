@@ -3,13 +3,16 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../api/deliveries_api.dart';
+import '../../api/dem_legui_api.dart';
 import '../../api/trips_api.dart';
 import '../../api/wallet_api.dart';
 import '../../models.dart';
 import '../../push/push_service.dart';
+import '../../state/auth_provider.dart';
 import '../../state/module_status_provider.dart';
 import '../../theme.dart';
 import '../../widgets/delivery_available_tile.dart';
+import '../../widgets/dem_legui_available_tile.dart';
 import '../../widgets/inbox_icon.dart';
 
 const _statusColor = {
@@ -79,6 +82,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
   Widget build(BuildContext context) {
     final currency = NumberFormat.decimalPattern('fr');
     final moduleStatus = context.watch<ModuleStatusProvider>();
+    final isOnline = context.watch<AuthProvider>().user?.driverProfile?.isOnline ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -144,34 +148,10 @@ class _TripsListScreenState extends State<TripsListScreen> {
                     ),
                   ),
                   if (moduleStatus.isEnabled('dem_legui'))
-                    InkWell(
+                    DemLeguiAvailableTile(
                       onTap: widget.onOpenDemLegui,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      child: Container(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: const Row(
-                          children: [
-                            Text('🚕', style: TextStyle(fontSize: 24)),
-                            SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Demandes Dem Légui', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700)),
-                                  Text('Acceptez des courses à la demande près de vous',
-                                      style: TextStyle(fontSize: 14.0, color: AppColors.textMuted)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      fetchAvailable: fetchAvailableDemLeguiRequests,
+                      isOnline: isOnline,
                     ),
                   if (moduleStatus.isEnabled('anando'))
                     InkWell(

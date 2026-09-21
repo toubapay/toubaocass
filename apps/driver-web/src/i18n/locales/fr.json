@@ -301,6 +301,9 @@
   "demLegui": {
     "driverCardTitle": "Demandes Dem Légui",
     "driverCardSubtitle": "Acceptez des courses à la demande près de vous",
+    "availableCardTitle": "{{count}} demande(s) Dem Légui disponible(s)",
+    "newRequestToast": "🚕 Nouvelle demande Dem Légui : {{pickup}}",
+    "newRequestToastView": "Voir →",
     "driverTitle": "Demandes Dem Légui",
     "youAreOnline": "Vous êtes en ligne",
     "youAreOffline": "Vous êtes hors ligne",
