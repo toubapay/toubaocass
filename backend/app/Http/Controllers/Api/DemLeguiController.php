@@ -318,13 +318,22 @@ class DemLeguiController extends Controller
         return new DemLeguiTripResource($demLeguiTrip->load(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
     }
 
+    /**
+     * ?historic=1 restricts this to completed/cancelled trips only — powers
+     * the driver's trip history under Profile, kept separate from the
+     * active-only tile on Home (see myActiveTrip() below).
+     */
     public function myTrips(Request $request)
     {
-        $trips = $request->user()->demLeguiTrips()
+        $query = $request->user()->demLeguiTrips()
             ->with(['car', 'destinationCity'])
-            ->withCount('requests')
-            ->latest()
-            ->paginate(20);
+            ->withCount('requests');
+
+        if ($request->boolean('historic')) {
+            $query->whereIn('status', [DemLeguiTrip::STATUS_COMPLETED, DemLeguiTrip::STATUS_CANCELLED]);
+        }
+
+        $trips = $query->latest()->paginate(20);
 
         return DemLeguiTripResource::collection($trips);
     }

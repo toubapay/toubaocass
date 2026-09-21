@@ -26,6 +26,7 @@ const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then(
 const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) => ({ default: m.DemLeguiChatPage })));
 const DemLeguiRequestsPage = lazy(() => import('./pages/DemLeguiRequestsPage').then((m) => ({ default: m.DemLeguiRequestsPage })));
 const DemLeguiTripDetailPage = lazy(() => import('./pages/DemLeguiTripDetailPage').then((m) => ({ default: m.DemLeguiTripDetailPage })));
+const DemLeguiTripHistoryPage = lazy(() => import('./pages/DemLeguiTripHistoryPage').then((m) => ({ default: m.DemLeguiTripHistoryPage })));
 const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const InsuranceComparePage = lazy(() => import('./pages/InsuranceComparePage').then((m) => ({ default: m.InsuranceComparePage })));
 const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
@@ -88,6 +89,7 @@ function AppRoutes() {
         <Route path="/anando-ride-bookings/:bookingId/chat" element={<AnandoChatPage />} />
         <Route path="/dem-legui" element={<DemLeguiRequestsPage />} />
         <Route path="/dem-legui/trips/:id" element={<DemLeguiTripDetailPage />} />
+        <Route path="/dem-legui/history" element={<DemLeguiTripHistoryPage />} />
         <Route path="/dem-legui/requests/:requestId/chat" element={<DemLeguiChatPage />} />
         <Route path="/deliveries" element={<DeliveriesListPage />} />
         <Route path="/deliveries/:deliveryId" element={<DeliveryDetailPage />} />
