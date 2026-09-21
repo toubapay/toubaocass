@@ -1,4 +1,14 @@
 {
+  "ratings": {
+    "myReviewsTitle": "Mes avis",
+    "noReviewsYet": "Vous n'avez pas encore reçu d'avis.",
+    "anonymousRider": "Client",
+    "rateableType": {
+      "trip": "Trajet",
+      "demLegui": "Dem Légui",
+      "delivery": "Livraison"
+    }
+  },
   "common": {
     "back": "Retour",
     "ok": "OK",

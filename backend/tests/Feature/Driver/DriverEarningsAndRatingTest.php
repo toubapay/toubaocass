@@ -31,7 +31,7 @@ class DriverEarningsAndRatingTest extends TestCase
 
     // --- Trip: earnings on completion + rating ---------------------------
 
-    public function test_completing_a_trip_credits_driver_net_of_commission_for_wallet_bookings_only(): void
+    public function test_completing_a_trip_credits_driver_net_of_commission_for_both_wallet_and_cash_bookings(): void
     {
         $driver = $this->driverWithProfile();
         $car = Car::factory()->create(['driver_id' => $driver->id]);
@@ -54,8 +54,10 @@ class DriverEarningsAndRatingTest extends TestCase
 
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
 
-        // 4000 fare, 15% default commission -> 600, net 3400. Cash booking never touches the wallet.
-        $this->assertSame(3400, Wallet::where('user_id', $driver->id)->value('balance'));
+        // (4000 + 2000) fare, 15% default commission -> 900, net 5100 — the
+        // driver's earnings ledger reflects both bookings regardless of how
+        // each rider paid.
+        $this->assertSame(5100, Wallet::where('user_id', $driver->id)->value('balance'));
     }
 
     public function test_rider_can_rate_driver_after_trip_completes(): void
@@ -169,6 +171,37 @@ class DriverEarningsAndRatingTest extends TestCase
         $this->assertSame(1700, Wallet::where('user_id', $driver->id)->value('balance'));
     }
 
+    public function test_completing_a_cash_paid_dem_legui_trip_still_credits_driver_earnings(): void
+    {
+        $driver = $this->driverWithProfile();
+        $car = Car::factory()->create(['driver_id' => $driver->id, 'seats' => 4]);
+        $trip = DemLeguiTrip::create([
+            'driver_id' => $driver->id,
+            'car_id' => $car->id,
+            'destination_city_id' => City::factory()->create()->id,
+            'total_seats' => 4,
+            'available_seats' => 3,
+            'price_per_seat' => 1000,
+            'status' => DemLeguiTrip::STATUS_IN_PROGRESS,
+        ]);
+
+        $rider = User::factory()->create();
+        DemLeguiRequest::factory()->create([
+            'rider_id' => $rider->id,
+            'dem_legui_trip_id' => $trip->id,
+            'destination_city_id' => $trip->destination_city_id,
+            'fare_total' => 2000,
+            'payment_method' => DemLeguiRequest::PAYMENT_METHOD_CASH,
+            'status' => DemLeguiRequest::STATUS_MATCHED,
+        ]);
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$trip->id}/complete")->assertOk();
+
+        // Cash paid directly to the driver, but the earnings ledger still
+        // records the net amount so the driver's wallet reflects it.
+        $this->assertSame(1700, Wallet::where('user_id', $driver->id)->value('balance'));
+    }
+
     public function test_rider_can_rate_driver_after_dem_legui_trip_completes(): void
     {
         $driver = $this->driverWithProfile();
@@ -232,6 +265,23 @@ class DriverEarningsAndRatingTest extends TestCase
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/deliver")->assertOk();
 
         // 3000 fee, 15% default commission -> 450, net 2550.
+        $this->assertSame(2550, Wallet::where('user_id', $driver->id)->value('balance'));
+    }
+
+    public function test_delivering_a_cash_paid_delivery_still_credits_driver_earnings(): void
+    {
+        $driver = $this->driverWithProfile();
+        $delivery = Delivery::factory()->create([
+            'driver_id' => $driver->id,
+            'fee' => 3000,
+            'payment_method' => Delivery::PAYMENT_METHOD_CASH,
+            'status' => Delivery::STATUS_PICKED_UP,
+        ]);
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/deliver")->assertOk();
+
+        // Cash paid directly to the driver, but the earnings ledger still
+        // records the net amount so the driver's wallet reflects it.
         $this->assertSame(2550, Wallet::where('user_id', $driver->id)->value('balance'));
     }
 
@@ -326,5 +376,49 @@ class DriverEarningsAndRatingTest extends TestCase
         $profile = DriverProfile::factory()->create(['rating' => 2.00, 'ratings_count' => DriverProfile::MIN_RATINGS_FOR_TIER]);
 
         $this->assertSame(DriverProfile::TIER_DEBUTANT, $profile->tier);
+    }
+
+    // --- GET /driver/ratings — the driver reading their own reviews --------
+
+    public function test_driver_can_list_reviews_received_across_trip_dem_legui_and_delivery(): void
+    {
+        $driver = $this->driverWithProfile();
+
+        $car = Car::factory()->create(['driver_id' => $driver->id]);
+        [$origin, $destination] = City::factory()->count(2)->create();
+        $trip = Trip::factory()->create([
+            'driver_id' => $driver->id, 'car_id' => $car->id,
+            'origin_city_id' => $origin->id, 'destination_city_id' => $destination->id,
+            'status' => Trip::STATUS_COMPLETED,
+        ]);
+        $tripRider = User::factory()->create(['name' => 'Aminata']);
+        Booking::factory()->create(['trip_id' => $trip->id, 'rider_id' => $tripRider->id, 'status' => Booking::STATUS_CONFIRMED]);
+        $this->actingAs($tripRider, 'sanctum')->postJson("/api/trips/{$trip->id}/rate", ['score' => 5, 'comment' => 'Super chauffeur'])->assertOk();
+
+        $delivery = Delivery::factory()->create(['driver_id' => $driver->id, 'status' => Delivery::STATUS_DELIVERED]);
+        $this->actingAs($delivery->sender, 'sanctum')->postJson("/api/deliveries/{$delivery->id}/rate", ['score' => 3])->assertOk();
+
+        $response = $this->actingAs($driver, 'sanctum')->getJson('/api/driver/ratings')->assertOk();
+
+        $data = $response->json('data');
+        $this->assertCount(2, $data);
+        $this->assertEqualsCanonicalizing(['trip', 'delivery'], array_column($data, 'rateable_type'));
+        $tripReview = collect($data)->firstWhere('rateable_type', 'trip');
+        $this->assertSame('Aminata', $tripReview['rater_name']);
+        $this->assertSame(5, $tripReview['score']);
+        $this->assertSame('Super chauffeur', $tripReview['comment']);
+    }
+
+    public function test_driver_ratings_list_never_includes_another_drivers_reviews(): void
+    {
+        $driver = $this->driverWithProfile();
+        $otherDriver = $this->driverWithProfile();
+
+        $delivery = Delivery::factory()->create(['driver_id' => $otherDriver->id, 'status' => Delivery::STATUS_DELIVERED]);
+        $this->actingAs($delivery->sender, 'sanctum')->postJson("/api/deliveries/{$delivery->id}/rate", ['score' => 4])->assertOk();
+
+        $response = $this->actingAs($driver, 'sanctum')->getJson('/api/driver/ratings')->assertOk();
+
+        $this->assertCount(0, $response->json('data'));
     }
 }

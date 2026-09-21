@@ -33,6 +33,7 @@ const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ 
 const KycFormPage = lazy(() => import('./pages/KycFormPage').then((m) => ({ default: m.KycFormPage })));
 const KycStatusPage = lazy(() => import('./pages/KycStatusPage').then((m) => ({ default: m.KycStatusPage })));
 const MyPoliciesPage = lazy(() => import('./pages/MyPoliciesPage').then((m) => ({ default: m.MyPoliciesPage })));
+const MyRatingsPage = lazy(() => import('./pages/MyRatingsPage').then((m) => ({ default: m.MyRatingsPage })));
 const PostInstantTripPage = lazy(() => import('./pages/PostInstantTripPage').then((m) => ({ default: m.PostInstantTripPage })));
 const PostTripPage = lazy(() => import('./pages/PostTripPage').then((m) => ({ default: m.PostTripPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
@@ -104,6 +105,7 @@ function AppRoutes() {
         <Route path="/kyc/form" element={<KycFormPage />} />
         <Route path="/chat/:bookingId" element={<ChatPage />} />
         <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/ratings" element={<MyRatingsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage pushNotifications={pushNotifications} />} />
         <Route path="*" element={<Navigate to="/" replace />} />

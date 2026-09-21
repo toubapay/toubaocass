@@ -7,6 +7,7 @@ import { colors, radius, spacing } from '../theme';
 import { ChatFab } from './ChatFab';
 import { DriverLocationBar } from './DriverLocationBar';
 import { InboxIcon } from './InboxIcon';
+import { WalletHeaderButton } from './WalletHeaderButton';
 
 const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.trips', icon: '🚗', end: true },
@@ -57,6 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
           <DriverLocationBar />
+          <WalletHeaderButton />
           <InboxIcon />
         </div>
       </header>

@@ -79,9 +79,14 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
             {tierStyle.icon} {t(`profile.tier.${tier}`)}
           </span>
         </div>
-        <p style={{ fontSize: 13, color: colors.textMuted, margin: `2px 0 0` }}>
-          {t('profile.ratingsCount', { count: ratingsCount })}
-        </p>
+        <button
+          onClick={() => navigate('/ratings')}
+          style={{ border: 'none', background: 'none', padding: 0, margin: '2px 0 0', cursor: 'pointer', display: 'block' }}
+        >
+          <span style={{ fontSize: 13, color: colors.primary, fontWeight: 600, textDecoration: 'underline' }}>
+            {t('profile.ratingsCount', { count: ratingsCount })}
+          </span>
+        </button>
       </div>
 
       <button

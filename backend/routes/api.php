@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
 use App\Http\Controllers\Api\ProfileStatsController;
+use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\RiderActiveChatController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\TripController;
@@ -214,6 +215,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Powers the floating chat button — resolves the single most
         // relevant conversation across all this driver's trips/requests.
         Route::get('active-chat', [DriverActiveChatController::class, 'show']);
+
+        // Reviews riders/senders have left, across Trip/Dem Légui/Delivery.
+        Route::get('ratings', [RatingController::class, 'mine']);
 
         Route::get('cars', [CarController::class, 'index']);
         Route::post('cars', [CarController::class, 'store']);
