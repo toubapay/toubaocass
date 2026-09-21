@@ -17,6 +17,7 @@ use App\Models\AnandoRideBooking;
 use App\Models\SecurityAlert;
 use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Services\CommissionService;
 use App\Services\RatingService;
 use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
@@ -138,7 +139,7 @@ class AnandoRideController extends Controller
         return new AnandoRideResource($anandoRide->load(['poster', 'originCity', 'destinationCity']));
     }
 
-    public function complete(Request $request, AnandoRide $anandoRide)
+    public function complete(Request $request, AnandoRide $anandoRide, CommissionService $commission, WalletService $walletService)
     {
         abort_unless($anandoRide->user_id === $request->user()->id, 404);
 
@@ -146,9 +147,26 @@ class AnandoRideController extends Controller
             return response()->json(['message' => "Ce trajet Anando doit d'abord être démarré."], 422);
         }
 
-        $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
+        DB::transaction(function () use ($anandoRide, $commission, $walletService) {
+            $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
 
-        return new AnandoRideResource($anandoRide->load(['poster', 'originCity', 'destinationCity']));
+            // Earnings are credited here, net of commission, rather than up
+            // front at join() — same reasoning as Trip bookings.
+            $confirmedBookings = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)
+                ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
+                ->get();
+
+            foreach ($confirmedBookings as $booking) {
+                $booking = $commission->applyToAnandoBooking($booking);
+
+                if ($booking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
+                    $net = $booking->price_total - $booking->commission_amount;
+                    $walletService->credit($anandoRide->poster, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Anando #{$anandoRide->id} (trajet terminé)");
+                }
+            }
+        });
+
+        return new AnandoRideResource($anandoRide->fresh(['poster', 'originCity', 'destinationCity']));
     }
 
     /**
@@ -325,9 +343,11 @@ class AnandoRideController extends Controller
                 'status' => AnandoRideBooking::STATUS_CONFIRMED,
             ]);
 
+            // The joiner pays up front; the poster is only credited their net
+            // earnings once the ride completes (see complete()) — same
+            // reasoning as Trip bookings.
             if ($paymentMethod === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
                 $walletService->charge($user, $priceTotal, null, "Trajet Anando #{$locked->id}");
-                $walletService->credit($locked->poster, $priceTotal, null, WalletTransaction::TYPE_EARNING, "Revenu Anando #{$locked->id}");
             }
 
             $locked->decrement('available_seats', $seats);
@@ -361,10 +381,11 @@ class AnandoRideController extends Controller
                 ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
                 ->get();
 
+            // No poster-side reversal needed — the poster isn't credited
+            // until the ride completes (see join()'s comment).
             foreach ($bookings as $booking) {
                 if ($booking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
                     $walletService->credit($booking->user, $booking->price_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Anando #{$locked->id}");
-                    $walletService->debit($locked->poster, $booking->price_total, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (Anando #{$locked->id} annulé)");
                 }
                 $booking->update(['status' => AnandoRideBooking::STATUS_CANCELLED]);
             }
@@ -417,14 +438,13 @@ class AnandoRideController extends Controller
             $newPriceTotal = $ride->price_per_seat * $newSeats;
             $priceDelta = $newPriceTotal - $lockedBooking->price_total;
 
+            // Only the joiner's side is adjusted here — the poster isn't
+            // credited until the ride completes (see join()'s comment).
             if ($lockedBooking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET && $priceDelta !== 0) {
                 if ($priceDelta > 0) {
                     $walletService->charge($lockedBooking->user, $priceDelta, null, "Ajustement Anando #{$ride->id}");
-                    $walletService->credit($ride->poster, $priceDelta, null, WalletTransaction::TYPE_EARNING, "Ajustement de revenu Anando #{$ride->id}");
                 } else {
-                    $refundAmount = abs($priceDelta);
-                    $walletService->credit($lockedBooking->user, $refundAmount, null, WalletTransaction::TYPE_REFUND, "Remboursement partiel Anando #{$ride->id}");
-                    $walletService->debit($ride->poster, $refundAmount, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Ajustement de revenu Anando #{$ride->id}");
+                    $walletService->credit($lockedBooking->user, abs($priceDelta), null, WalletTransaction::TYPE_REFUND, "Remboursement partiel Anando #{$ride->id}");
                 }
             }
 
@@ -464,9 +484,10 @@ class AnandoRideController extends Controller
             $lockedBooking = AnandoRideBooking::where('id', $anandoRideBooking->id)->lockForUpdate()->firstOrFail();
             $ride = AnandoRide::where('id', $lockedBooking->anando_ride_id)->lockForUpdate()->firstOrFail();
 
+            // No poster-side reversal needed — the poster isn't credited
+            // until the ride completes (see join()'s comment).
             if ($lockedBooking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
                 $walletService->credit($lockedBooking->user, $lockedBooking->price_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Anando #{$ride->id}");
-                $walletService->debit($ride->poster, $lockedBooking->price_total, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (place Anando #{$ride->id} annulée)");
             }
 
             $lockedBooking->update(['status' => AnandoRideBooking::STATUS_CANCELLED]);

@@ -234,10 +234,10 @@ class AnandoRideTest extends TestCase
             ->assertUnprocessable();
     }
 
-    public function test_joining_with_wallet_charges_joiner_and_credits_poster(): void
+    public function test_joining_with_wallet_charges_joiner_but_poster_is_only_credited_when_the_ride_completes(): void
     {
         $poster = User::factory()->create();
-        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1500, 'total_seats' => 3, 'available_seats' => 3]);
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1500, 'total_seats' => 3, 'available_seats' => 3, 'status' => AnandoRide::STATUS_OPEN]);
 
         $joiner = User::factory()->create();
         app(WalletService::class)->topUp($joiner, 10000);
@@ -247,7 +247,13 @@ class AnandoRideTest extends TestCase
             ->assertCreated();
 
         $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
-        $this->assertSame(3000, Wallet::where('user_id', $poster->id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
+
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/start")->assertOk();
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/complete")->assertOk();
+
+        // price_total 3000, default 15% commission -> 450, net 2550.
+        $this->assertSame(2550, Wallet::where('user_id', $poster->id)->value('balance'));
     }
 
     public function test_joining_with_wallet_fails_if_balance_is_insufficient(): void
@@ -289,7 +295,7 @@ class AnandoRideTest extends TestCase
             ->assertCreated();
 
         $this->assertSame(3000, Wallet::where('user_id', $joiner->id)->value('balance'));
-        $this->assertSame(7000, Wallet::where('user_id', $poster->id)->value('balance'));
+        $this->assertSame(5000, Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($poster, 'sanctum')
             ->deleteJson("/api/anando-rides/{$ride->id}")
@@ -430,27 +436,28 @@ class AnandoRideTest extends TestCase
             ->assertCreated()
             ->json('id');
 
-        // 10000 - 1000 = 9000 joiner, poster earned 1000.
+        // 10000 - 1000 = 9000 joiner. Poster isn't credited until the ride
+        // completes (see test_joining_with_wallet_...).
         $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
-        $this->assertSame(1000, Wallet::where('user_id', $poster->id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($joiner, 'sanctum')
             ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 3])
             ->assertOk()
             ->assertJsonPath('price_total', 3000);
 
-        // Charged an extra 2000: 9000 - 2000 = 7000; poster earns 2000 more: 1000 + 2000 = 3000.
+        // Charged an extra 2000: 9000 - 2000 = 7000.
         $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
-        $this->assertSame(3000, Wallet::where('user_id', $poster->id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($joiner, 'sanctum')
             ->putJson("/api/anando-ride-bookings/{$bookingId}", ['seats' => 1])
             ->assertOk()
             ->assertJsonPath('price_total', 1000);
 
-        // Refunded 2000: 7000 + 2000 = 9000; poster reversed 2000: 3000 - 2000 = 1000.
+        // Refunded 2000: 7000 + 2000 = 9000.
         $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
-        $this->assertSame(1000, Wallet::where('user_id', $poster->id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
     }
 
     public function test_only_the_booking_owner_can_modify_their_booking(): void
@@ -573,7 +580,7 @@ class AnandoRideTest extends TestCase
             ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $rider->id, 'score' => 5, 'comment' => 'Excellent passager'])
             ->assertOk();
 
-        $this->assertDatabaseHas('ratings', ['anando_ride_id' => $ride->id, 'rater_id' => $poster->id, 'ratee_id' => $rider->id, 'score' => 5]);
+        $this->assertDatabaseHas('ratings', ['rateable_type' => AnandoRide::class, 'rateable_id' => $ride->id, 'rater_id' => $poster->id, 'ratee_id' => $rider->id, 'score' => 5]);
         $this->assertSame(5.0, $rider->fresh()->anando_rating);
         $this->assertSame(1, $rider->fresh()->anando_ratings_count);
     }
@@ -589,7 +596,7 @@ class AnandoRideTest extends TestCase
             ->postJson("/api/anando-rides/{$ride->id}/rate", ['ratee_id' => $poster->id, 'score' => 4])
             ->assertOk();
 
-        $this->assertDatabaseHas('ratings', ['anando_ride_id' => $ride->id, 'rater_id' => $rider->id, 'ratee_id' => $poster->id, 'score' => 4]);
+        $this->assertDatabaseHas('ratings', ['rateable_type' => AnandoRide::class, 'rateable_id' => $ride->id, 'rater_id' => $rider->id, 'ratee_id' => $poster->id, 'score' => 4]);
         $this->assertSame(4.0, $poster->fresh()->anando_rating);
     }
 

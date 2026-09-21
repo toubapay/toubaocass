@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AnandoRideBooking;
 use App\Models\Booking;
 use App\Models\Delivery;
 use App\Models\DemLeguiRequest;
@@ -14,6 +15,8 @@ class CommissionService
     const RATE_KEY_DELIVERY = 'commission_rate_delivery';
 
     const RATE_KEY_DEM_LEGUI = 'commission_rate_dem_legui';
+
+    const RATE_KEY_ANANDO = 'commission_rate_anando';
 
     const DEFAULT_RATE = '15.00';
 
@@ -32,6 +35,11 @@ class CommissionService
     public function demLeguiRate(): float
     {
         return (float) $this->settings->get(self::RATE_KEY_DEM_LEGUI, self::DEFAULT_RATE);
+    }
+
+    public function anandoRate(): float
+    {
+        return (float) $this->settings->get(self::RATE_KEY_ANANDO, self::DEFAULT_RATE);
     }
 
     /**
@@ -84,6 +92,18 @@ class CommissionService
         ]);
 
         return $request->fresh();
+    }
+
+    public function applyToAnandoBooking(AnandoRideBooking $booking): AnandoRideBooking
+    {
+        $result = $this->calculate($booking->price_total, $this->anandoRate());
+
+        $booking->update([
+            'commission_rate' => $result['rate'],
+            'commission_amount' => $result['amount'],
+        ]);
+
+        return $booking->fresh();
     }
 
     /**

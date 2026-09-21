@@ -135,6 +135,18 @@
     "deleteConfirm": "Supprimer l'adresse \"{{label}}\" ?",
     "cancel": "Annuler"
   },
+  "driverTier": {
+    "debutant": "Débutant",
+    "silver": "Argent",
+    "gold": "Or"
+  },
+  "rating": {
+    "prompt": "Notez votre chauffeur",
+    "starLabel": "{{count}} étoile(s)",
+    "commentPlaceholder": "Un commentaire ? (facultatif)",
+    "submit": "Envoyer mon avis",
+    "thanks": "Merci pour votre avis !"
+  },
   "tripDetail": {
     "departureAt": "{{date}} à {{time}}",
     "reserveButton": "⚡ Réserver — {{amount}} FCFA",

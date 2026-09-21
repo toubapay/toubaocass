@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
     'driver_id', 'car_id', 'origin_city_id', 'destination_city_id',
@@ -92,6 +93,11 @@ class Trip extends Model
     public function riderBooking(): HasOne
     {
         return $this->hasOne(Booking::class);
+    }
+
+    public function ratings(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rateable');
     }
 
     public function departureDateTime(): Carbon

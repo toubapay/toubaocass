@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { cancelDelivery, fetchDelivery } from '../api/deliveries';
+import { cancelDelivery, fetchDelivery, rateDelivery } from '../api/deliveries';
 import type { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DriverTierBadge } from '../components/DriverTierBadge';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
@@ -179,6 +181,11 @@ export function DeliveryDetailPage() {
         <div style={cardStyle}>
           <p style={sectionTitleStyle}>{t('deliveryDetail.courier')}</p>
           <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{delivery.driver.name ?? t('common.courierFallback')}</p>
+          {delivery.driver.tier && (
+            <div style={{ marginTop: 2 }}>
+              <DriverTierBadge tier={delivery.driver.tier} />
+            </div>
+          )}
           <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.sm }}>
             <a
               href={`tel:${delivery.driver.phone}`}
@@ -214,6 +221,10 @@ export function DeliveryDetailPage() {
             </a>
           </div>
         </div>
+      )}
+
+      {delivery.status === 'delivered' && delivery.driver && (
+        <RateDriverCard onSubmit={(score, comment) => rateDelivery(delivery.id, score, comment)} />
       )}
 
       {delivery.status === 'pending' && (

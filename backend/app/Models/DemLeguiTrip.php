@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
     'driver_id', 'car_id', 'destination_city_id', 'total_seats', 'available_seats',
@@ -53,5 +54,10 @@ class DemLeguiTrip extends Model
     public function requests(): HasMany
     {
         return $this->hasMany(DemLeguiRequest::class);
+    }
+
+    public function ratings(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rateable');
     }
 }

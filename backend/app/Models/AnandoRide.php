@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Builder;
 
 #[Fillable([
@@ -92,9 +93,9 @@ class AnandoRide extends Model
         return $this->hasMany(AnandoRideBooking::class);
     }
 
-    public function ratings(): HasMany
+    public function ratings(): MorphMany
     {
-        return $this->hasMany(Rating::class);
+        return $this->morphMany(Rating::class, 'rateable');
     }
 
     /**

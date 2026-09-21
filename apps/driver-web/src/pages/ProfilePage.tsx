@@ -32,6 +32,15 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
 
   const kycStatus = user?.driver_profile?.kyc_status ?? 'pending';
   const rating = user?.driver_profile?.rating ?? 5;
+  const tier = user?.driver_profile?.tier ?? 'debutant';
+  const ratingsCount = user?.driver_profile?.ratings_count ?? 0;
+
+  const TIER_STYLE: Record<string, { bg: string; fg: string; icon: string }> = {
+    debutant: { bg: colors.border, fg: colors.textMuted, icon: '🌱' },
+    silver: { bg: '#E5E9EC', fg: '#5B6770', icon: '🥈' },
+    gold: { bg: '#FCEFC7', fg: colors.primary, icon: '🥇' },
+  };
+  const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.debutant;
 
   return (
     <div>
@@ -52,7 +61,27 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
         <p style={{ fontSize: 16, color: colors.text, fontWeight: 600, marginTop: spacing.sm, marginBottom: 0 }}>
           {t('profile.kycLabel', { status: t(`common.kycStatus.${kycStatus}`) })}
         </p>
-        <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{t('profile.rating', { value: rating.toFixed(1) })}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginTop: 2 }}>
+          <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{t('profile.rating', { value: rating.toFixed(1) })}</p>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              backgroundColor: tierStyle.bg,
+              color: tierStyle.fg,
+              borderRadius: radius.lg,
+              padding: '2px 10px',
+              fontSize: 12.5,
+              fontWeight: 700,
+            }}
+          >
+            {tierStyle.icon} {t(`profile.tier.${tier}`)}
+          </span>
+        </div>
+        <p style={{ fontSize: 13, color: colors.textMuted, margin: `2px 0 0` }}>
+          {t('profile.ratingsCount', { count: ratingsCount })}
+        </p>
       </div>
 
       <button

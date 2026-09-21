@@ -73,7 +73,7 @@ class WalletTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_booking_with_wallet_payment_charges_rider_and_credits_driver(): void
+    public function test_booking_with_wallet_payment_charges_rider_immediately_but_driver_only_at_completion(): void
     {
         $trip = $this->makeTrip(fare: 3000);
         $rider = User::factory()->create();
@@ -84,8 +84,17 @@ class WalletTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('payment_method', 'wallet');
 
+        // Rider pays up front; the driver isn't paid until the trip
+        // completes (net of the platform's commission — see
+        // DemLeguiEarningsTest/DeliveryEarningsTest for the full picture).
         $this->assertSame(4000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertSame(6000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
+
+        $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+        $this->actingAs($trip->driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
+
+        // fare_total 6000, default 15% commission -> 900, net 5100.
+        $this->assertSame(5100, Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_booking_with_wallet_payment_fails_when_balance_is_insufficient(): void
@@ -117,7 +126,7 @@ class WalletTest extends TestCase
         $this->assertSame(0, Wallet::count());
     }
 
-    public function test_cancelling_a_wallet_paid_booking_refunds_rider_and_reverses_driver_earning(): void
+    public function test_cancelling_a_wallet_paid_booking_refunds_rider_driver_was_never_credited(): void
     {
         $trip = $this->makeTrip(fare: 3000);
         $rider = User::factory()->create();
@@ -131,7 +140,7 @@ class WalletTest extends TestCase
         $this->actingAs($rider, 'sanctum')->deleteJson("/api/bookings/{$bookingId}")->assertOk();
 
         $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertSame(0, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_increasing_seats_on_a_wallet_paid_booking_charges_the_difference(): void
@@ -151,7 +160,7 @@ class WalletTest extends TestCase
             ->assertOk();
 
         $this->assertSame(1000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertSame(9000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_decreasing_seats_on_a_wallet_paid_booking_refunds_the_difference(): void
@@ -171,7 +180,7 @@ class WalletTest extends TestCase
             ->assertOk();
 
         $this->assertSame(7000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertSame(3000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_driver_cancelling_the_whole_trip_refunds_wallet_paid_bookings(): void
@@ -189,15 +198,16 @@ class WalletTest extends TestCase
             ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 1, 'payment_method' => 'cash'])
             ->assertCreated();
 
-        // Driver earned 6000 from riderA's wallet booking; nothing from riderB's cash one.
-        $this->assertSame(6000, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        // Driver isn't credited until the trip completes, so cancelling now
+        // has nothing to reverse.
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
 
         $this->actingAs($trip->driver, 'sanctum')
             ->deleteJson("/api/driver/trips/{$trip->id}")
             ->assertOk();
 
         $this->assertSame(10000, Wallet::where('user_id', $riderA->id)->value('balance'));
-        $this->assertSame(0, Wallet::where('user_id', $trip->driver_id)->value('balance'));
+        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
         $this->assertSame(10000, Wallet::where('user_id', $riderB->id)->value('balance'));
     }
 

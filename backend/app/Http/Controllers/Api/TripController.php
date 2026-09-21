@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\StoreInstantTripRequest;
 use App\Http\Requests\Driver\StoreTripRequest;
 use App\Http\Requests\Driver\UpdateTripRequest;
+use App\Http\Requests\RateTripRequest;
 use App\Http\Requests\Rider\SearchTripsRequest;
 use App\Http\Requests\UpdateTripLocationRequest;
 use App\Http\Resources\TripResource;
@@ -21,6 +22,7 @@ use App\Models\Trip;
 use App\Models\SecurityAlert;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
+use App\Services\RatingService;
 use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Services\WalletService;
@@ -329,12 +331,12 @@ class TripController extends Controller
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
     }
 
-    public function complete(Request $request, Trip $trip)
+    public function complete(Request $request, Trip $trip, WalletService $walletService)
     {
         $this->authorize('update', $trip);
 
         try {
-            DB::transaction(function () use ($trip) {
+            DB::transaction(function () use ($trip, $walletService) {
                 /** @var Trip $locked */
                 $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
@@ -344,9 +346,19 @@ class TripController extends Controller
 
                 $locked->update(['status' => Trip::STATUS_COMPLETED]);
 
-                $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(
-                    fn (Booking $booking) => $this->commissionService->applyToBooking($booking),
-                );
+                // Earnings are credited here, net of commission, rather than
+                // up front at booking time — a driver only gets paid once
+                // the trip actually happened. Cash bookings never touched the
+                // wallet in the first place (the rider pays the driver
+                // directly), so only wallet-paid ones are settled here.
+                $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(function (Booking $booking) use ($walletService, $locked) {
+                    $booking = $this->commissionService->applyToBooking($booking);
+
+                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
+                        $net = $booking->fare_total - $booking->commission_amount;
+                        $walletService->credit($locked->driver, $net, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation (trajet terminé)');
+                    }
+                });
             });
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
@@ -355,6 +367,30 @@ class TripController extends Controller
         TripCompleted::dispatch($trip->fresh());
 
         return new TripResource($trip->fresh(['car', 'originCity', 'destinationCity']));
+    }
+
+    /**
+     * Rider leaves a 1-5 star review of the driver after a completed trip.
+     * One-directional (rider -> driver only, unlike Anando's bidirectional
+     * rating) — re-rating the same trip updates the existing review.
+     */
+    public function rate(RateTripRequest $request, Trip $trip, RatingService $ratingService)
+    {
+        $rider = $request->user();
+
+        if ($trip->status !== Trip::STATUS_COMPLETED) {
+            return response()->json(['message' => 'Ce trajet doit être terminé avant de laisser un avis.'], 422);
+        }
+
+        $hasBooking = $trip->bookings()->where('rider_id', $rider->id)->where('status', Booking::STATUS_CONFIRMED)->exists();
+
+        if (! $hasBooking) {
+            throw ValidationException::withMessages(['trip' => ["Vous n'avez pas de réservation confirmée sur ce trajet."]]);
+        }
+
+        $ratingService->submitRating($trip, $rider, $trip->driver, (int) $request->validated('score'), $request->validated('comment'));
+
+        return response()->json(['message' => 'Avis enregistré.']);
     }
 
     /**
@@ -397,9 +433,11 @@ class TripController extends Controller
                 foreach ($confirmedBookings as $booking) {
                     $booking->update(['status' => Booking::STATUS_CANCELLED]);
 
+                    // No driver-side reversal needed — the driver isn't
+                    // credited until the trip completes (see
+                    // BookingController::store()'s comment).
                     if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
                         $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation (trajet annulé)');
-                        $walletService->debit($locked->driver, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Reprise de revenu (trajet annulé)');
                     }
                 }
 

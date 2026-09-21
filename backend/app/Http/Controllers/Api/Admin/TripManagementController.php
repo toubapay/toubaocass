@@ -53,9 +53,10 @@ class TripManagementController extends Controller
                 foreach ($confirmedBookings as $booking) {
                     $booking->update(['status' => Booking::STATUS_CANCELLED]);
 
+                    // No driver-side reversal needed — the driver isn't
+                    // credited until the trip completes.
                     if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
                         $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation (trajet annulé par un administrateur)');
-                        $walletService->debit($locked->driver, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Reprise de revenu (trajet annulé par un administrateur)');
                     }
                 }
 

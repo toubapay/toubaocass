@@ -193,6 +193,14 @@
     "title": "ملفي الشخصي",
     "kycLabel": "التحقق: {{status}}",
     "rating": "التقييم: {{value}} ★",
+    "ratingsCount_zero": "لا يوجد تقييم بعد",
+    "ratingsCount_one": "تقييم واحد",
+    "ratingsCount_other": "{{count}} تقييمات",
+    "tier": {
+      "debutant": "مبتدئ",
+      "silver": "فضي",
+      "gold": "ذهبي"
+    },
     "wallet": "محفظتي",
     "settings": "⚙️ الإعدادات",
     "notificationsEnabled": "🔔 الإشعارات مفعّلة",

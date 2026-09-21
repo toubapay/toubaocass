@@ -16,6 +16,7 @@ class DemLeguiTripResource extends JsonResource
                 'name' => $this->driver->name,
                 'phone' => $this->driver->phone,
                 'rating' => (float) ($this->driver->driverProfile?->rating ?? 5.0),
+                'tier' => $this->driver->driverProfile?->tier,
                 'current_latitude' => $this->driver->driverProfile?->current_latitude,
                 'current_longitude' => $this->driver->driverProfile?->current_longitude,
                 'last_seen_at' => $this->driver->driverProfile?->last_seen_at,
