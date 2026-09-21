@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 
 import { extractErrorMessage } from '../../api/client';
 import { assignDeliveryDriver, cancelAdminDelivery, fetchAdminDeliveries } from '../../api/deliveryManagement';
+import { assignDemLeguiTripDriver, cancelAdminDemLeguiTrip, fetchAdminDemLeguiTrips } from '../../api/demLeguiTripManagement';
 import { assignTripDriver, cancelTrip, fetchEligibleDrivers, fetchTrips } from '../../api/tripManagement';
-import type { AdminDelivery, AdminTrip, EligibleDriver } from '../../api/types';
+import type { AdminDelivery, AdminDemLeguiTrip, AdminTrip, EligibleDriver } from '../../api/types';
 import { Button } from '../../components/Button';
 import { CenteredSpinner } from '../../components/Spinner';
 import { colors, radius, spacing } from '../../theme';
 
-type Tab = 'trips' | 'deliveries';
+type Tab = 'trips' | 'deliveries' | 'dem_legui';
 
 const TRIP_STATUS_LABELS: Record<string, string> = {
   scheduled: 'Programmé',
@@ -25,6 +26,26 @@ const DELIVERY_STATUS_LABELS: Record<string, string> = {
   delivered: 'Livrée',
   cancelled: 'Annulée',
 };
+
+const DEM_LEGUI_TRIP_STATUS_LABELS: Record<string, string> = {
+  open: 'Ouvert',
+  in_progress: 'En cours',
+  completed: 'Terminé',
+  cancelled: 'Annulé',
+};
+
+const DEM_LEGUI_REQUEST_STATUS_LABELS: Record<string, string> = {
+  pending: 'En attente',
+  matched: 'Confirmé',
+  cancelled: 'Annulé',
+  expired: 'Expiré',
+};
+
+// Dem Légui trips can be actively moving — poll faster than the other two
+// tabs (which only change on an admin/driver action) so the position link
+// and status shown here stay close to live, mirroring the live-trips map's
+// cadence.
+const DEM_LEGUI_POLL_INTERVAL_MS = 15000;
 
 function StatusBadge({ label, tone }: { label: string; tone: 'neutral' | 'danger' | 'success' }) {
   const style =
@@ -329,6 +350,144 @@ function DeliveriesTab() {
   );
 }
 
+function DemLeguiTab() {
+  const [trips, setTrips] = useState<AdminDemLeguiTrip[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
+    fetchAdminDemLeguiTrips()
+      .then((res) => setTrips(res.data))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+    const interval = setInterval(() => load(false), DEM_LEGUI_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCancel = async (trip: AdminDemLeguiTrip) => {
+    if (!window.confirm(`Annuler le trajet Dem Légui #${trip.id} ? Les clients confirmés seront remboursés.`)) return;
+    setBusyId(trip.id);
+    setError(null);
+    try {
+      await cancelAdminDemLeguiTrip(trip.id);
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleAssign = async (trip: AdminDemLeguiTrip, driverId: number) => {
+    setBusyId(trip.id);
+    setError(null);
+    try {
+      await assignDemLeguiTripDriver(trip.id, driverId);
+      load();
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (loading) return <CenteredSpinner />;
+
+  return (
+    <div>
+      {error && <p style={{ color: colors.danger, fontSize: 13.5, marginBottom: spacing.sm }}>{error}</p>}
+      <div style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.md }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${colors.border}`, textAlign: 'left' }}>
+              {['Trajet', 'Statut', 'Conducteur', 'Véhicule', 'Clients', 'Position', ''].map((label) => (
+                <th key={label} style={{ padding: spacing.sm, fontSize: 12, color: colors.textMuted, fontWeight: 700 }}>
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {trips.map((trip) => {
+              const canCancel = !['completed', 'cancelled'].includes(trip.status);
+              const canReassign = trip.status === 'open';
+              const clients = trip.requests.filter((r) => r.status !== 'cancelled' && r.status !== 'expired');
+              return (
+                <tr key={trip.id} style={{ borderBottom: `1px solid ${colors.border}` }}>
+                  <td style={{ padding: spacing.sm, fontSize: 14, color: colors.text, fontWeight: 600 }}>
+                    #{trip.id} → {trip.destination_city?.name ?? '?'}
+                  </td>
+                  <td style={{ padding: spacing.sm }}>
+                    <StatusBadge
+                      label={DEM_LEGUI_TRIP_STATUS_LABELS[trip.status] ?? trip.status}
+                      tone={trip.status === 'cancelled' ? 'danger' : trip.status === 'completed' ? 'success' : 'neutral'}
+                    />
+                  </td>
+                  <td style={{ padding: spacing.sm, fontSize: 13, color: colors.text }}>
+                    {trip.driver.name ?? `#${trip.driver.id}`}
+                    <span style={{ display: 'block', color: colors.textMuted }}>{trip.driver.phone}</span>
+                  </td>
+                  <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>
+                    {trip.car ? `${trip.car.make} ${trip.car.model} · ${trip.car.plate_number}` : '—'}
+                  </td>
+                  <td style={{ padding: spacing.sm, fontSize: 12.5, color: colors.text }}>
+                    {clients.length === 0 ? (
+                      <span style={{ color: colors.textMuted }}>Aucun client</span>
+                    ) : (
+                      clients.map((client) => (
+                        <span key={client.id} style={{ display: 'block', marginBottom: 2 }}>
+                          {client.rider.name ?? `#${client.rider.id}`} · {client.rider.phone}
+                          <span style={{ color: colors.textMuted }}> — {DEM_LEGUI_REQUEST_STATUS_LABELS[client.status] ?? client.status}</span>
+                        </span>
+                      ))
+                    )}
+                  </td>
+                  <td style={{ padding: spacing.sm, fontSize: 13 }}>
+                    {trip.current_latitude != null && trip.current_longitude != null ? (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${trip.current_latitude},${trip.current_longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: colors.accent, fontWeight: 700, textDecoration: 'none' }}
+                      >
+                        📍 Suivre
+                      </a>
+                    ) : (
+                      <span style={{ color: colors.textMuted }}>—</span>
+                    )}
+                  </td>
+                  <td style={{ padding: spacing.sm }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs, alignItems: 'flex-start' }}>
+                      {canReassign && (
+                        <AssignDriverControl requiresActiveCar busy={busyId === trip.id} onAssign={(driverId) => handleAssign(trip, driverId)} />
+                      )}
+                      {canCancel && (
+                        <Button label="Annuler" onClick={() => handleCancel(trip)} variant="danger" loading={busyId === trip.id} style={{ fontSize: 12.5, padding: '6px 10px', minHeight: 30 }} />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {trips.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ padding: spacing.lg, textAlign: 'center', color: colors.textMuted }}>
+                  Aucun trajet Dem Légui.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export function TripManagementPage() {
   const [tab, setTab] = useState<Tab>('trips');
 
@@ -343,6 +502,7 @@ export function TripManagementPage() {
         {([
           { key: 'trips', label: 'Trajets' },
           { key: 'deliveries', label: 'Livraisons' },
+          { key: 'dem_legui', label: 'Dem Légui' },
         ] as const).map(({ key, label }) => (
           <button
             key={key}
@@ -363,7 +523,7 @@ export function TripManagementPage() {
         ))}
       </div>
 
-      {tab === 'trips' ? <TripsTab /> : <DeliveriesTab />}
+      {tab === 'trips' ? <TripsTab /> : tab === 'deliveries' ? <DeliveriesTab /> : <DemLeguiTab />}
     </div>
   );
 }
