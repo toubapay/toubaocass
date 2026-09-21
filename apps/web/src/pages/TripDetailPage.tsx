@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
-import { fetchTrip } from '../api/trips';
+import { fetchTrip, rateTrip } from '../api/trips';
 import type { PaymentMethod, Trip } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DriverTierBadge } from '../components/DriverTierBadge';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { RouteMap } from '../components/RouteMap';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
@@ -168,6 +170,10 @@ export function TripDetailPage() {
       )}
       {showSos && <SosShareModal kind="trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
+      {editing && trip.status === 'completed' && (
+        <RateDriverCard onSubmit={(score, comment) => rateTrip(trip.id, score, comment)} />
+      )}
+
       {editing && trip.status === 'in_progress' && (
         trip.current_latitude != null && trip.current_longitude != null ? (
           <AnandoLiveMap
@@ -244,7 +250,10 @@ export function TripDetailPage() {
       <div style={cardStyle}>
         <p style={sectionTitleStyle}>{t('tripDetail.driverSection')}</p>
         <p style={{ fontSize: 18, color: colors.text, margin: 0 }}>{trip.driver.name ?? t('common.driverFallback')}</p>
-        <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs, marginTop: 2 }}>
+          <p style={{ fontSize: 14, color: colors.textMuted, margin: 0 }}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</p>
+          <DriverTierBadge tier={trip.driver.tier} />
+        </div>
         <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.sm }}>
           <a
             href={`tel:${trip.driver.phone}`}

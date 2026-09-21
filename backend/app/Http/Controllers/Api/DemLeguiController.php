@@ -10,6 +10,7 @@ use App\Events\DemLeguiTripCompleted;
 use App\Events\DemLeguiTripStarted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\AcceptDemLeguiRequestRequest;
+use App\Http\Requests\RateDemLeguiTripRequest;
 use App\Http\Requests\Rider\QuoteDemLeguiRequest;
 use App\Http\Requests\Rider\StoreDemLeguiRequestRequest;
 use App\Http\Requests\UpdateDemLeguiTripLocationRequest;
@@ -24,6 +25,7 @@ use App\Models\SecurityAlert;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DemLeguiPricingService;
+use App\Services\RatingService;
 use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Services\WalletService;
@@ -169,9 +171,10 @@ class DemLeguiController extends Controller
                 ]);
             }
 
+            // No driver-side reversal needed — the driver isn't credited
+            // until the trip completes (see accept()'s comment).
             if ($locked->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET && $locked->status === DemLeguiRequest::STATUS_MATCHED) {
                 $walletService->credit($locked->rider, $locked->fare_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Dem Légui #{$locked->id}");
-                $walletService->debit($trip->driver, $locked->fare_total, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (Dem Légui #{$locked->id} annulée)");
             }
 
             if ($trip) {
@@ -294,9 +297,11 @@ class DemLeguiController extends Controller
                 'dem_legui_trip_id' => $trip->id,
             ]);
 
+            // The rider pays up front; the driver is only credited their net
+            // earnings once the trip completes (see completeTrip()) — same
+            // reasoning as Trip bookings.
             if ($locked->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
                 $walletService->charge($locked->rider, $locked->fare_total, null, "Paiement Dem Légui #{$locked->id}");
-                $walletService->credit($driver, $locked->fare_total, null, WalletTransaction::TYPE_EARNING, "Revenu Dem Légui #{$locked->id}");
             }
 
             return $trip;
@@ -395,7 +400,7 @@ class DemLeguiController extends Controller
         return new DemLeguiTripResource($demLeguiTrip->load(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
     }
 
-    public function completeTrip(Request $request, DemLeguiTrip $demLeguiTrip, CommissionService $commission)
+    public function completeTrip(Request $request, DemLeguiTrip $demLeguiTrip, CommissionService $commission, WalletService $walletService)
     {
         abort_unless($demLeguiTrip->driver_id === $request->user()->id, 404);
 
@@ -403,17 +408,48 @@ class DemLeguiController extends Controller
             return response()->json(['message' => "Ce trajet Dem Légui doit d'abord être démarré."], 422);
         }
 
-        DB::transaction(function () use ($demLeguiTrip, $commission) {
+        DB::transaction(function () use ($demLeguiTrip, $commission, $walletService) {
             $demLeguiTrip->update(['status' => DemLeguiTrip::STATUS_COMPLETED, 'completed_at' => now()]);
 
+            // Earnings are credited here, net of commission, rather than up
+            // front at accept() — same reasoning as Trip bookings.
             foreach ($demLeguiTrip->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->get() as $attachedRequest) {
-                $commission->applyToDemLeguiRequest($attachedRequest);
+                $attachedRequest = $commission->applyToDemLeguiRequest($attachedRequest);
+
+                if ($attachedRequest->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
+                    $net = $attachedRequest->fare_total - $attachedRequest->commission_amount;
+                    $walletService->credit($demLeguiTrip->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Dem Légui #{$attachedRequest->id} (trajet terminé)");
+                }
             }
         });
 
         DemLeguiTripCompleted::dispatch($demLeguiTrip->fresh());
 
         return new DemLeguiTripResource($demLeguiTrip->fresh(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider']));
+    }
+
+    /**
+     * Rider leaves a 1-5 star review of the driver after a completed trip.
+     * Any rider whose request was matched to this trip may rate — re-rating
+     * updates the existing review.
+     */
+    public function rate(RateDemLeguiTripRequest $request, DemLeguiTrip $demLeguiTrip, RatingService $ratingService)
+    {
+        $rider = $request->user();
+
+        if ($demLeguiTrip->status !== DemLeguiTrip::STATUS_COMPLETED) {
+            return response()->json(['message' => "Ce trajet Dem Légui doit être terminé avant de laisser un avis."], 422);
+        }
+
+        $wasMatched = $demLeguiTrip->requests()->where('rider_id', $rider->id)->where('status', DemLeguiRequest::STATUS_MATCHED)->exists();
+
+        if (! $wasMatched) {
+            throw ValidationException::withMessages(['dem_legui_trip' => ["Vous n'avez pas participé à ce trajet Dem Légui."]]);
+        }
+
+        $ratingService->submitRating($demLeguiTrip, $rider, $demLeguiTrip->driver, (int) $request->validated('score'), $request->validated('comment'));
+
+        return response()->json(['message' => 'Avis enregistré.']);
     }
 
     /**

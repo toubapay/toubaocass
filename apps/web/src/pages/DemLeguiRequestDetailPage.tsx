@@ -2,13 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers } from '../api/demLegui';
+import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers, rateDemLeguiTrip } from '../api/demLegui';
 import { extractErrorMessage } from '../api/client';
 import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import type { NearbyDriver } from '../api/demLegui';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DriverTierBadge } from '../components/DriverTierBadge';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SosShareModal } from '../components/SosShareModal';
 import { colors, radius, spacing } from '../theme';
@@ -182,6 +184,10 @@ export function DemLeguiRequestDetailPage() {
       )}
       {showSos && trip && <SosShareModal kind="dem-legui/trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
+      {trip?.status === 'completed' && (
+        <RateDriverCard onSubmit={(score, comment) => rateDemLeguiTrip(trip.id, score, comment)} />
+      )}
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.text, margin: 0 }}>
           {t('demLegui.tripToLabel', { city: request.destination_city?.name })}
@@ -215,7 +221,10 @@ export function DemLeguiRequestDetailPage() {
           <p style={sectionTitleStyle}>{t('demLegui.yourDriver')}</p>
           <p style={{ fontSize: 17, color: colors.text, margin: 0 }}>{trip.driver.name}</p>
           <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>{trip.driver.phone}</p>
-          <p style={{ fontSize: 13, color: colors.textMuted, margin: '4px 0 0' }}>★ {trip.driver.rating.toFixed(1)}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs, marginTop: 4 }}>
+            <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>★ {trip.driver.rating.toFixed(1)}</p>
+            <DriverTierBadge tier={trip.driver.tier} />
+          </div>
           {trip.car && (
             <p style={{ fontSize: 14, color: colors.textMuted, margin: '6px 0 0' }}>
               🚗 {trip.car.make} {trip.car.model} · {trip.car.plate_number}

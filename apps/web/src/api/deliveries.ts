@@ -70,3 +70,8 @@ export async function sendDeliveryMessage(deliveryId: number, body: string): Pro
   const { data } = await apiClient.post(`/deliveries/${deliveryId}/messages`, { body });
   return data;
 }
+
+/** Post-delivery driver feedback — only once delivered; re-rating updates the existing review. */
+export async function rateDelivery(deliveryId: number, score: number, comment?: string): Promise<void> {
+  await apiClient.post(`/deliveries/${deliveryId}/rate`, { score, comment });
+}

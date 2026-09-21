@@ -8,6 +8,7 @@ use App\Events\DeliveryDelivered;
 use App\Events\DeliveryPickedUp;
 use App\Events\DeliveryRequested;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RateDeliveryRequest;
 use App\Http\Requests\Rider\QuoteDeliveryRequest;
 use App\Http\Requests\Rider\StoreDeliveryRequest;
 use App\Http\Requests\Rider\UpdateDeliveryRequest;
@@ -19,6 +20,7 @@ use App\Models\SecurityAlert;
 use App\Models\WalletTransaction;
 use App\Services\CommissionService;
 use App\Services\DeliveryPricingService;
+use App\Services\RatingService;
 use App\Services\SecurityAlertService;
 use App\Services\TrackingLinkService;
 use App\Services\WalletService;
@@ -180,9 +182,10 @@ class DeliveryController extends Controller
             /** @var Delivery $locked */
             $locked = Delivery::where('id', $delivery->id)->lockForUpdate()->firstOrFail();
 
+            // No driver-side reversal needed — the driver isn't credited
+            // until delivered (see accept()'s comment).
             if ($locked->status === Delivery::STATUS_ACCEPTED && $locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
                 $walletService->credit($locked->sender, $locked->fee, null, WalletTransaction::TYPE_REFUND, "Remboursement de livraison #{$locked->id}");
-                $walletService->debit($locked->driver, $locked->fee, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (livraison #{$locked->id} annulée)");
             }
 
             $locked->update(['status' => Delivery::STATUS_CANCELLED, 'cancelled_at' => now()]);
@@ -277,9 +280,11 @@ class DeliveryController extends Controller
                 'accepted_at' => now(),
             ]);
 
+            // The sender pays up front; the driver is only credited their net
+            // earnings once the delivery is actually delivered (see
+            // deliver()) — same reasoning as Trip bookings.
             if ($locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
                 $walletService->charge($locked->sender, $locked->fee, null, "Paiement de livraison #{$locked->id}");
-                $walletService->credit($user, $locked->fee, null, WalletTransaction::TYPE_EARNING, "Revenu de livraison #{$locked->id}");
             }
         });
 
@@ -325,7 +330,7 @@ class DeliveryController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
-    public function deliver(Request $request, Delivery $delivery, CommissionService $commission)
+    public function deliver(Request $request, Delivery $delivery, CommissionService $commission, WalletService $walletService)
     {
         $this->authorize('update', $delivery);
 
@@ -333,13 +338,37 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Seule une livraison récupérée peut être marquée livrée.'], 422);
         }
 
-        DB::transaction(function () use ($delivery, $commission) {
+        DB::transaction(function () use ($delivery, $commission, $walletService) {
             $delivery->update(['status' => Delivery::STATUS_DELIVERED, 'delivered_at' => now()]);
-            $commission->applyToDelivery($delivery);
+            $delivery = $commission->applyToDelivery($delivery);
+
+            if ($delivery->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
+                $net = $delivery->fee - $delivery->commission_amount;
+                $walletService->credit($delivery->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu de livraison #{$delivery->id} (livrée)");
+            }
         });
 
         DeliveryDelivered::dispatch($delivery->fresh());
 
         return new DeliveryResource($delivery->fresh(['sender', 'driver.driverProfile']));
+    }
+
+    /**
+     * Sender leaves a 1-5 star review of the driver after a delivered
+     * package. Re-rating updates the existing review.
+     */
+    public function rate(RateDeliveryRequest $request, Delivery $delivery, RatingService $ratingService)
+    {
+        $sender = $request->user();
+
+        abort_unless($delivery->sender_id === $sender->id, 404);
+
+        if ($delivery->status !== Delivery::STATUS_DELIVERED) {
+            return response()->json(['message' => 'Cette livraison doit être livrée avant de laisser un avis.'], 422);
+        }
+
+        $ratingService->submitRating($delivery, $sender, $delivery->driver, (int) $request->validated('score'), $request->validated('comment'));
+
+        return response()->json(['message' => 'Avis enregistré.']);
     }
 }

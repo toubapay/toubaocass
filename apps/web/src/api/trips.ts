@@ -28,3 +28,8 @@ export async function fetchInstantTrips(): Promise<Trip[]> {
   const { data } = await apiClient.get('/trips/instant');
   return data;
 }
+
+/** Post-trip driver feedback — only once the trip is completed; re-rating updates the existing review. */
+export async function rateTrip(tripId: number, score: number, comment?: string): Promise<void> {
+  await apiClient.post(`/trips/${tripId}/rate`, { score, comment });
+}

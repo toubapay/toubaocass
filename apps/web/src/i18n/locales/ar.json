@@ -139,6 +139,18 @@
     "deleteConfirm": "حذف العنوان \"{{label}}\"؟",
     "cancel": "إلغاء"
   },
+  "driverTier": {
+    "debutant": "مبتدئ",
+    "silver": "فضي",
+    "gold": "ذهبي"
+  },
+  "rating": {
+    "prompt": "قيّم سائقك",
+    "starLabel": "{{count}} نجمة/نجوم",
+    "commentPlaceholder": "تعليق؟ (اختياري)",
+    "submit": "إرسال تقييمي",
+    "thanks": "شكراً على تقييمك!"
+  },
   "tripDetail": {
     "departureAt": "{{date}} في {{time}}",
     "reserveButton": "⚡ حجز — {{amount}} فرنك",

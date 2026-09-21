@@ -20,6 +20,7 @@ class TripResource extends JsonResource
                 'name' => $this->driver->name,
                 'phone' => $this->driver->phone,
                 'rating' => (float) $this->driver->driverProfile?->rating,
+                'tier' => $this->driver->driverProfile?->tier,
             ],
             'car' => new CarResource($this->whenLoaded('car')),
             'origin_city' => new CityResource($this->whenLoaded('originCity')),

@@ -77,9 +77,13 @@ class BookingController extends Controller
                 'status' => Booking::STATUS_CONFIRMED,
             ]);
 
+            // The rider pays up front (held by the platform); the driver is
+            // only credited their net earnings once the trip actually
+            // completes (see TripController::complete()) — this avoids
+            // paying out before the trip happens and lets the payout account
+            // for the platform's commission.
             if ($paymentMethod === Booking::PAYMENT_METHOD_WALLET) {
                 $walletService->charge($rider, $fareTotal, $booking, 'Paiement de réservation');
-                $walletService->credit($locked->driver, $fareTotal, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation');
             }
 
             $locked->decrement('available_seats', $seatsRequested);
@@ -142,14 +146,13 @@ class BookingController extends Controller
             $newFareTotal = $trip->fare * $newSeats;
             $fareDelta = $newFareTotal - $booking->fare_total;
 
+            // Only the rider's side is adjusted here — the driver isn't
+            // credited until the trip completes (see store()'s comment).
             if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET && $fareDelta !== 0) {
                 if ($fareDelta > 0) {
                     $walletService->charge($booking->rider, $fareDelta, $booking, 'Ajustement de réservation');
-                    $walletService->credit($trip->driver, $fareDelta, $booking, WalletTransaction::TYPE_EARNING, 'Ajustement de revenu');
                 } else {
-                    $refundAmount = abs($fareDelta);
-                    $walletService->credit($booking->rider, $refundAmount, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement partiel de réservation');
-                    $walletService->debit($trip->driver, $refundAmount, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Ajustement de revenu');
+                    $walletService->credit($booking->rider, abs($fareDelta), $booking, WalletTransaction::TYPE_REFUND, 'Remboursement partiel de réservation');
                 }
             }
 
@@ -197,9 +200,10 @@ class BookingController extends Controller
                 $trip->update(['status' => Trip::STATUS_SCHEDULED]);
             }
 
+            // No driver-side reversal needed — the driver was never credited
+            // for this booking in the first place (see store()'s comment).
             if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
                 $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation annulée');
-                $walletService->debit($trip->driver, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND_REVERSAL, 'Reprise de revenu (réservation annulée)');
             }
         });
 

@@ -61,9 +61,10 @@ class DemLeguiTripManagementController extends Controller
                 $matchedRequests = $locked->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->get();
 
                 foreach ($matchedRequests as $attachedRequest) {
+                    // No driver-side reversal needed — the driver isn't
+                    // credited until the trip completes.
                     if ($attachedRequest->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
                         $walletService->credit($attachedRequest->rider, $attachedRequest->fare_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Dem Légui #{$attachedRequest->id} (trajet annulé par un administrateur)");
-                        $walletService->debit($locked->driver, $attachedRequest->fare_total, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (Dem Légui #{$attachedRequest->id} annulée)");
                     }
 
                     $attachedRequest->update(['status' => DemLeguiRequest::STATUS_CANCELLED]);

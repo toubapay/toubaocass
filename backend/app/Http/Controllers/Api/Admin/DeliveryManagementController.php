@@ -45,9 +45,10 @@ class DeliveryManagementController extends Controller
             /** @var Delivery $locked */
             $locked = Delivery::where('id', $delivery->id)->lockForUpdate()->firstOrFail();
 
+            // No driver-side reversal needed — the driver isn't credited
+            // until delivered.
             if ($locked->status === Delivery::STATUS_ACCEPTED && $locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
                 $walletService->credit($locked->sender, $locked->fee, null, WalletTransaction::TYPE_REFUND, "Remboursement de livraison #{$locked->id} (annulée par un administrateur)");
-                $walletService->debit($locked->driver, $locked->fee, null, WalletTransaction::TYPE_REFUND_REVERSAL, "Reprise de revenu (livraison #{$locked->id} annulée par un administrateur)");
             }
 
             $locked->update(['status' => Delivery::STATUS_CANCELLED, 'cancelled_at' => now()]);

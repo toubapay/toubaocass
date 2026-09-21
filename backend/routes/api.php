@@ -165,6 +165,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('bookings', [BookingController::class, 'index']);
         Route::put('bookings/{booking}', [BookingController::class, 'update']);
         Route::delete('bookings/{booking}', [BookingController::class, 'destroy']);
+        // Post-trip driver feedback — 1-5 stars, only once the trip is completed.
+        Route::post('trips/{trip}/rate', [TripController::class, 'rate']);
 
         // Livraison (package delivery) requests.
         Route::post('deliveries/quote', [DeliveryController::class, 'quote']);
@@ -173,6 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::put('deliveries/{delivery}', [DeliveryController::class, 'update']);
         Route::delete('deliveries/{delivery}', [DeliveryController::class, 'destroy']);
+        Route::post('deliveries/{delivery}/rate', [DeliveryController::class, 'rate']);
 
         // Dem Légui — on-demand ride request (rider-initiated, dispatched to
         // online drivers).
@@ -182,6 +185,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('dem-legui/requests/mine', [DemLeguiController::class, 'myRequests']);
         Route::delete('dem-legui/requests/{demLeguiRequest}', [DemLeguiController::class, 'cancel']);
         Route::get('dem-legui/requests/{demLeguiRequest}/nearby-drivers', [DemLeguiController::class, 'nearbyDrivers']);
+        Route::post('dem-legui/trips/{demLeguiTrip}/rate', [DemLeguiController::class, 'rate']);
     });
 
     // Dem Légui show endpoints sit outside the role:rider/role:driver groups

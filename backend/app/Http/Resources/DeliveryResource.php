@@ -21,6 +21,7 @@ class DeliveryResource extends JsonResource
                 'name' => $this->driver->name,
                 'phone' => $this->driver->phone,
                 'rating' => $this->driver->driverProfile?->rating,
+                'tier' => $this->driver->driverProfile?->tier,
             ] : null,
             'receiver_name' => $this->receiver_name,
             'receiver_phone' => $this->receiver_phone,

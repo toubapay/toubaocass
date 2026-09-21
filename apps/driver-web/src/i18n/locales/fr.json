@@ -193,6 +193,14 @@
     "title": "Mon profil",
     "kycLabel": "Vérification : {{status}}",
     "rating": "Note : {{value}} ★",
+    "ratingsCount_zero": "Aucun avis pour l'instant",
+    "ratingsCount_one": "{{count}} avis",
+    "ratingsCount_other": "{{count}} avis",
+    "tier": {
+      "debutant": "Débutant",
+      "silver": "Argent",
+      "gold": "Or"
+    },
     "wallet": "Mon portefeuille",
     "settings": "⚙️ Paramètres",
     "notificationsEnabled": "🔔 Notifications activées",
