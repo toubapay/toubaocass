@@ -288,6 +288,8 @@ export interface DemLeguiRequest {
   payment_method: PaymentMethod;
   status: DemLeguiRequestStatus;
   dem_legui_trip_id: number | null;
+  trip_status?: DemLeguiTripStatus | null;
+  trip_arrived_at?: string | null;
   eta_minutes?: number | null;
   created_at: string;
 }

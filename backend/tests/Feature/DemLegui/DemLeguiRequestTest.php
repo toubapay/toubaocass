@@ -203,6 +203,49 @@ class DemLeguiRequestTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_my_active_request_reflects_the_matched_trips_progress(): void
+    {
+        $rider = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $request = DemLeguiRequest::factory()->create(['rider_id' => $rider->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($rider, 'sanctum')->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data.status', 'pending')
+            ->assertJsonPath('data.trip_status', null);
+
+        $trip = $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
+            ->assertOk()
+            ->json();
+
+        $this->actingAs($rider, 'sanctum')->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data.status', 'matched')
+            ->assertJsonPath('data.trip_status', 'open')
+            ->assertJsonPath('data.trip_arrived_at', null);
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$trip['id']}/arrived")->assertOk();
+
+        $arrivedResponse = $this->actingAs($rider, 'sanctum')->getJson('/api/dem-legui/requests/mine/active')->assertOk();
+        $this->assertNotNull($arrivedResponse->json('data.trip_arrived_at'));
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$trip['id']}/start")->assertOk();
+
+        $this->actingAs($rider, 'sanctum')->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data.trip_status', 'in_progress');
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$trip['id']}/complete")->assertOk();
+
+        $this->actingAs($rider, 'sanctum')->getJson('/api/dem-legui/requests/mine/active')
+            ->assertOk()
+            ->assertJsonPath('data', null);
+    }
+
     public function test_a_second_compatible_request_joins_the_existing_open_trip(): void
     {
         $riderA = User::factory()->create();
