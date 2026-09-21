@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { fetchMyCars } from '../api/cars';
-import { acceptDemLeguiRequest, fetchAvailableDemLeguiRequests } from '../api/demLegui';
-import type { Car, DemLeguiRequest } from '../api/types';
+import { acceptDemLeguiRequest, fetchAvailableDemLeguiRequests, fetchMyDemLeguiTrips } from '../api/demLegui';
+import type { Car, DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle';
 import { CenteredSpinner } from '../components/Spinner';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,51 @@ import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 const POLL_INTERVAL_MS = 20000;
 
+// A trip the driver has already accepted stays reachable here — status
+// drives which action button (arrived/start/finish) shows on its detail
+// page — until it wraps up, independent of the online toggle below (a
+// driver mid-trip shouldn't lose access to it just because they went
+// offline).
+const ACTIVE_TRIP_STATUSES = new Set(['open', 'in_progress']);
+
+function MyTripsSection({ trips, onOpenTrip }: { trips: DemLeguiTrip[]; onOpenTrip: (id: number) => void }) {
+  const { t } = useTranslation();
+
+  if (trips.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: spacing.lg }}>
+      <p style={{ fontSize: 13, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase', marginBottom: spacing.xs }}>
+        {t('demLegui.myTripsTitle')}
+      </p>
+      {trips.map((trip) => (
+        <button
+          key={trip.id}
+          onClick={() => onOpenTrip(trip.id)}
+          style={{
+            display: 'block',
+            width: '100%',
+            textAlign: 'left',
+            border: `1px solid ${trip.status === 'in_progress' ? colors.primary : colors.border}`,
+            borderRadius: radius.md,
+            backgroundColor: trip.status === 'in_progress' ? colors.primary : colors.surface,
+            padding: spacing.md,
+            marginBottom: spacing.sm,
+            cursor: 'pointer',
+          }}
+        >
+          <p style={{ fontSize: 16, fontWeight: 700, margin: 0, color: trip.status === 'in_progress' ? '#fff' : colors.text }}>
+            {t('demLegui.tripToLabel', { city: trip.destination_city?.name })}
+          </p>
+          <p style={{ fontSize: 13.5, margin: '2px 0 0', color: trip.status === 'in_progress' ? 'rgba(255,255,255,0.85)' : colors.textMuted }}>
+            {t(`demLegui.tripStatus.${trip.status}`)} · {t('demLegui.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
+          </p>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function DemLeguiRequestsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -21,11 +66,18 @@ export function DemLeguiRequestsPage() {
   const isOnline = user?.driver_profile?.is_online ?? false;
 
   const [requests, setRequests] = useState<DemLeguiRequest[]>([]);
+  const [myTrips, setMyTrips] = useState<DemLeguiTrip[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
   const [pendingRequest, setPendingRequest] = useState<DemLeguiRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const loadMyTrips = useCallback(() => {
+    fetchMyDemLeguiTrips()
+      .then((res) => setMyTrips(res.data.filter((trip) => ACTIVE_TRIP_STATUSES.has(trip.status))))
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(() => {
     if (!isOnline) {
@@ -46,6 +98,12 @@ export function DemLeguiRequestsPage() {
     const interval = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [load]);
+
+  useEffect(() => {
+    loadMyTrips();
+    const interval = setInterval(loadMyTrips, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [loadMyTrips]);
 
   // A rider posting a request pushes 'dem_legui_request_posted' to nearby
   // online drivers (see NotifyNearbyOnlineDriversOfDemLeguiRequest) — jump
@@ -78,6 +136,7 @@ export function DemLeguiRequestsPage() {
     return (
       <div>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('demLegui.driverTitle')}</h1>
+        <MyTripsSection trips={myTrips} onOpenTrip={(id) => navigate(`/dem-legui/trips/${id}`)} />
         <DriverAvailabilityToggle />
         <p style={{ color: colors.textMuted, fontSize: 15, textAlign: 'center', marginTop: spacing.lg }}>
           {t('demLegui.goOnlineToSeeRequests')}
@@ -88,14 +147,23 @@ export function DemLeguiRequestsPage() {
 
   if (loading) return <CenteredSpinner />;
 
+  const hasActiveTrip = myTrips.length > 0;
+
   return (
     <div>
       <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.text, marginBottom: spacing.md }}>{t('demLegui.driverTitle')}</h1>
+      <MyTripsSection trips={myTrips} onOpenTrip={(id) => navigate(`/dem-legui/trips/${id}`)} />
       <DriverAvailabilityToggle />
 
       {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
 
-      {pendingRequest && (
+      {hasActiveTrip && (
+        <p style={{ color: colors.textMuted, fontSize: 15, textAlign: 'center', margin: `${spacing.lg}px 0` }}>
+          {t('demLegui.activeTripBlocksNewRequests')}
+        </p>
+      )}
+
+      {!hasActiveTrip && pendingRequest && (
         <div
           style={{
             border: `1px solid ${colors.border}`,
@@ -134,7 +202,7 @@ export function DemLeguiRequestsPage() {
         </div>
       )}
 
-      {requests.length === 0 ? (
+      {!hasActiveTrip && (requests.length === 0 ? (
         <p style={{ color: colors.textMuted, fontSize: 16, textAlign: 'center', margin: `${spacing.lg}px 0` }}>
           {t('demLegui.noRequestsNearby')}
         </p>
@@ -179,7 +247,7 @@ export function DemLeguiRequestsPage() {
             </button>
           </div>
         ))
-      )}
+      ))}
     </div>
   );
 }

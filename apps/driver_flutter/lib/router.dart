@@ -205,6 +205,7 @@ GoRouter buildRouter(AuthProvider auth) {
                 onPostTrip: () => context.push('/post-trip'),
                 onOpenWallet: () => context.push('/wallet'),
                 onOpenDemLegui: () => context.push('/dem-legui'),
+                onOpenDemLeguiTrip: (id) => context.push('/dem-legui/trips/$id'),
                 onOpenAnando: () => context.push('/anando'),
                 onOpenDeliveries: () => context.push('/deliveries'),
                 onOpenInbox: () => context.push('/inbox'),

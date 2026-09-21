@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +11,9 @@ import '../../models.dart';
 import '../../state/auth_provider.dart';
 import '../../theme.dart';
 import '../../widgets/driver_availability_toggle.dart';
+
+const _myTripsPollInterval = Duration(seconds: 20);
+const _activeTripStatuses = {'open', 'in_progress'};
 
 class DemLeguiRequestsScreen extends StatefulWidget {
   const DemLeguiRequestsScreen({super.key, required this.onOpenTrip});
@@ -22,9 +27,11 @@ class DemLeguiRequestsScreen extends StatefulWidget {
 class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
   List<DemLeguiRequest> requests = [];
   List<Car> cars = [];
+  List<DemLeguiTrip> myTrips = [];
   bool loading = true;
   int? acceptingId;
   bool? _wasOnline;
+  Timer? _myTripsTimer;
 
   bool get isOnline => context.read<AuthProvider>().user?.driverProfile?.isOnline ?? false;
 
@@ -32,6 +39,24 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
   void initState() {
     super.initState();
     _load();
+    _loadMyTrips();
+    _myTripsTimer = Timer.periodic(_myTripsPollInterval, (_) => _loadMyTrips());
+  }
+
+  @override
+  void dispose() {
+    _myTripsTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadMyTrips() async {
+    try {
+      final result = await fetchMyDemLeguiTrips();
+      if (!mounted) return;
+      setState(() => myTrips = result.data.where((t) => _activeTripStatuses.contains(t.status)).toList());
+    } catch (_) {
+      // Best-effort — keep the last known list on a transient poll failure.
+    }
   }
 
   Future<void> _load() async {
@@ -97,15 +122,61 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
     }
     _wasOnline = nowOnline;
 
+    final hasActiveTrip = myTrips.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Demandes Dem Légui')),
       body: RefreshIndicator(
-        onRefresh: _load,
+        onRefresh: () => Future.wait([_load(), _loadMyTrips()]),
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            if (myTrips.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Text('MES TRAJETS EN COURS',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+              ),
+              ...myTrips.map((t) {
+                final inProgress = t.status == 'in_progress';
+                return InkWell(
+                  onTap: () => widget.onOpenTrip(t.id),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: inProgress ? AppColors.primary : AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: inProgress ? AppColors.primary : AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Vers ${t.destinationCity?.name ?? '?'}',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w700, color: inProgress ? Colors.white : AppColors.text)),
+                        Text(
+                          '${inProgress ? 'En cours' : 'Ouvert'} · ${t.availableSeats}/${t.totalSeats} places restantes',
+                          style: TextStyle(fontSize: 13.5, color: inProgress ? Colors.white70 : AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: AppSpacing.md),
+            ],
             const DriverAvailabilityToggle(),
-            if (!isOnline)
+            if (hasActiveTrip)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Center(
+                  child: Text("Terminez votre trajet en cours avant d'en accepter un nouveau.",
+                      textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
+                ),
+              )
+            else if (!isOnline)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: Center(
