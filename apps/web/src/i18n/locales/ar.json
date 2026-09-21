@@ -154,6 +154,10 @@
     "thanks": "شكراً على تقييمك!",
     "rateButton": "⭐ قيّم السائق"
   },
+  "postTripRating": {
+    "title": "اكتملت رحلتك",
+    "later": "لاحقاً"
+  },
   "tripDetail": {
     "departureAt": "{{date}} في {{time}}",
     "reserveButton": "⚡ حجز — {{amount}} فرنك",

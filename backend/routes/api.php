@@ -159,6 +159,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // relevant conversation across all this rider's bookings/requests.
         Route::get('rider/active-chat', [RiderActiveChatController::class, 'show']);
 
+        // Powers the post-trip rating popup on the rider-web home screen —
+        // the single most recently completed, not-yet-rated Trip/Delivery/
+        // Dem Légui trip, if any.
+        Route::get('me/pending-rating', [RatingController::class, 'pendingRating']);
+
         Route::get('trips', [TripController::class, 'search']);
         Route::get('trips/instant', [TripController::class, 'instantIndex']);
         Route::get('trips/{trip}', [TripController::class, 'show']);

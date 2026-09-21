@@ -2,14 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fetchCities } from '../api/cities';
+import { fetchPendingRating } from '../api/ratings';
 import { searchTrips } from '../api/trips';
-import type { City, Trip } from '../api/types';
+import type { City, PendingRating, Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { AnandoMiniList } from '../components/AnandoMiniList';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { MyAnandoRideCard } from '../components/MyAnandoRideCard';
+import { PostTripRatingModal } from '../components/PostTripRatingModal';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
 import { TripsMap } from '../components/TripsMap';
@@ -41,6 +43,12 @@ export function HomePage() {
 
   useEffect(() => {
     fetchCities().then(setCities).catch(() => setCities([]));
+  }, []);
+
+  const [pendingRating, setPendingRating] = useState<PendingRating | null>(null);
+
+  useEffect(() => {
+    fetchPendingRating().then(setPendingRating).catch(() => setPendingRating(null));
   }, []);
 
   const hasFilters = origin || destination || date || nearMe;
@@ -331,6 +339,8 @@ export function HomePage() {
           <TripsMap trips={visibleTrips} />
         </div>
       )}
+
+      {pendingRating && <PostTripRatingModal pending={pendingRating} onClose={() => setPendingRating(null)} />}
     </div>
   );
 }

@@ -150,6 +150,10 @@
     "thanks": "Merci pour votre avis !",
     "rateButton": "⭐ Noter le chauffeur"
   },
+  "postTripRating": {
+    "title": "Votre trajet est terminé",
+    "later": "Plus tard"
+  },
   "tripDetail": {
     "departureAt": "{{date}} à {{time}}",
     "reserveButton": "⚡ Réserver — {{amount}} FCFA",

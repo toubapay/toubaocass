@@ -426,3 +426,23 @@ export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+export type PendingRatingType = 'trip' | 'delivery' | 'dem_legui';
+
+export interface PendingRating {
+  type: PendingRatingType;
+  id: number;
+  driver: {
+    id: number;
+    name: string | null;
+    phone: string;
+    rating: number;
+    tier: DriverTier | null;
+  };
+  origin_label: string | null;
+  destination_label: string | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
+  cost: number | null;
+  completed_at: string;
+}
