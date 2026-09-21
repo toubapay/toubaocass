@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +10,7 @@ import { Button } from '../components/Button';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
 
@@ -34,24 +35,31 @@ export function DemLeguiTripDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showSos, setShowSos] = useState(false);
 
-  const load = () => {
+  const load = useCallback(() => {
     if (!id) return;
     fetchDemLeguiTrip(Number(id))
       .then(setTrip)
       .finally(() => setLoading(false));
-  };
+  }, [id]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [load]);
 
   useEffect(() => {
     if (trip?.status !== 'in_progress') return;
     const interval = setInterval(load, LIVE_LOCATION_INTERVAL_MS);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trip?.status, id]);
+  }, [trip?.status, load]);
+
+  // A rider joining this (still open) trip pushes 'dem_legui_request_accepted'
+  // to the driver, cancelling their seat pushes 'dem_legui_request_cancelled',
+  // and the trip being cancelled elsewhere (e.g. by an admin) pushes
+  // 'dem_legui_trip_cancelled' — jump straight to the fresh passenger
+  // list/status instead of waiting for the next poll tick.
+  usePushEvent('dem_legui_request_accepted', load);
+  usePushEvent('dem_legui_request_cancelled', load);
+  usePushEvent('dem_legui_trip_cancelled', load);
 
   useEffect(() => {
     if (trip?.status !== 'in_progress' || !('geolocation' in navigator)) return;

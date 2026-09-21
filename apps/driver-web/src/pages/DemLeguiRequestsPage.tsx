@@ -107,6 +107,8 @@ export function DemLeguiRequestsPage() {
   // online drivers (see NotifyNearbyOnlineDriversOfDemLeguiRequest) — jump
   // the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
   usePushEvent('dem_legui_request_posted', load);
+  usePushEvent('dem_legui_request_accepted', loadMyTrips);
+  usePushEvent('dem_legui_trip_cancelled', loadMyTrips);
 
   const doAccept = async (requestId: number, carId?: number) => {
     setAcceptingId(requestId);

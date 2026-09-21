@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -6,7 +6,13 @@ import { fetchMyActiveDemLeguiRequest } from '../api/demLegui';
 import type { DemLeguiRequest } from '../api/types';
 import { colors, radius, spacing } from '../theme';
 import { SearchingCarIndicator } from './SearchingCarIndicator';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
+// The 8s poll is a fallback for when push isn't available (permission
+// denied, FCM not configured) — every status change that matters here also
+// pushes a matching event (see the usePushEvent calls below), so in the
+// common case the badge updates the instant it happens, not on the next
+// tick.
 const POLL_INTERVAL_MS = 8000;
 
 /**
@@ -24,25 +30,33 @@ export function DemLeguiStatusWidget() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [active, setActive] = useState<DemLeguiRequest | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const load = useCallback(() => {
+    fetchMyActiveDemLeguiRequest()
+      .then((r) => {
+        if (mounted.current) setActive(r);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const load = () => {
-      fetchMyActiveDemLeguiRequest()
-        .then((r) => {
-          if (!cancelled) setActive(r);
-        })
-        .catch(() => {});
-    };
-
     load();
     const interval = setInterval(load, POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  // Every status transition this badge cares about pushes one of these —
+  // jump the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
+  usePushEvent('dem_legui_request_matched', load);
+  usePushEvent('dem_legui_driver_arrived', load);
+  usePushEvent('dem_legui_trip_started', load);
+  usePushEvent('dem_legui_trip_completed', load);
+  usePushEvent('dem_legui_trip_cancelled', load);
 
   if (!active) return null;
 
