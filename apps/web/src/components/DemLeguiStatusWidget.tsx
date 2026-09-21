@@ -11,10 +11,14 @@ const POLL_INTERVAL_MS = 8000;
 
 /**
  * Persistent top-right badge, shown right below the nav bar on Home
- * whenever the rider has an active Dem Légui request — "waiting for a
- * driver" while pending, "driver arriving" (+ ETA once known) once
- * matched. Disappears on its own once the request/trip is no longer
- * active (backend filters those out of the "active" lookup).
+ * whenever the rider has an active Dem Légui request: "waiting for a
+ * driver" while pending, then once matched — "driver arriving" (+ ETA once
+ * known), "driver arrived" once they've checked in at the pickup point, and
+ * "trip in progress" once the driver starts driving. Always links through
+ * to the same request detail page, which already renders the live map,
+ * driver, and car info once a trip exists. Disappears on its own once the
+ * trip completes/cancels (backend filters those out of the "active"
+ * lookup).
  */
 export function DemLeguiStatusWidget() {
   const { t } = useTranslation();
@@ -43,11 +47,15 @@ export function DemLeguiStatusWidget() {
   if (!active) return null;
 
   const isMatched = active.status === 'matched';
-  const label = isMatched
-    ? active.eta_minutes != null
-      ? `${t('demLegui.driverArrivingBadge')} · ${t('demLegui.etaMinutes', { minutes: active.eta_minutes })}`
-      : t('demLegui.driverArrivingBadge')
-    : t('demLegui.waitingForDriverBadge');
+  const label = !isMatched
+    ? t('demLegui.waitingForDriverBadge')
+    : active.trip_status === 'in_progress'
+      ? t('demLegui.inProgressBadge')
+      : active.trip_arrived_at != null
+        ? t('demLegui.driverArrivedBadge')
+        : active.eta_minutes != null
+          ? `${t('demLegui.driverArrivingBadge')} · ${t('demLegui.etaMinutes', { minutes: active.eta_minutes })}`
+          : t('demLegui.driverArrivingBadge');
 
   return (
     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: spacing.sm }}>
