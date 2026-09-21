@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +12,11 @@ import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SosShareModal } from '../components/SosShareModal';
 import { colors, radius, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
+// A fallback for when push isn't available — every status change this page
+// tracks also pushes a matching event (see the usePushEvent calls below),
+// so in the common case it updates the instant a status change happens.
 const POLL_INTERVAL_MS = 8000;
 const NEARBY_DRIVERS_POLL_INTERVAL_MS = 5000;
 
@@ -47,7 +51,7 @@ export function DemLeguiRequestDetailPage() {
   const [showSos, setShowSos] = useState(false);
   const hadTripRef = useRef(false);
 
-  const load = () => {
+  const load = useCallback(() => {
     if (!id) return;
     fetchDemLeguiRequest(Number(id))
       .then((r) => {
@@ -57,20 +61,26 @@ export function DemLeguiRequestDetailPage() {
         }
       })
       .finally(() => setLoading(false));
-  };
+  }, [id]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [load]);
 
   useEffect(() => {
     if (!request || ['cancelled', 'expired'].includes(request.status)) return;
     if (trip?.status === 'completed' || trip?.status === 'cancelled') return;
     const interval = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [request?.status, trip?.status, id]);
+  }, [request?.status, trip?.status, load]);
+
+  // Every status transition this page tracks also pushes one of these —
+  // jump the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
+  usePushEvent('dem_legui_request_matched', load);
+  usePushEvent('dem_legui_driver_arrived', load);
+  usePushEvent('dem_legui_trip_started', load);
+  usePushEvent('dem_legui_trip_completed', load);
+  usePushEvent('dem_legui_trip_cancelled', load);
 
   useEffect(() => {
     if (!trip && hadTripRef.current === false) return;

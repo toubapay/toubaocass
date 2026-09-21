@@ -97,6 +97,11 @@ export function DemLeguiAvailableCard() {
   // online drivers (see NotifyNearbyOnlineDriversOfDemLeguiRequest) — jump
   // the poll instead of waiting up to POLL_INTERVAL_MS to notice it.
   usePushEvent('dem_legui_request_posted', load);
+  // The driver's own accept action already updates local state instantly,
+  // but an admin cancelling the trip (or a rider joining an already-open
+  // trip) happens elsewhere — jump the active-trip poll for those too.
+  usePushEvent('dem_legui_request_accepted', loadActiveTrip);
+  usePushEvent('dem_legui_trip_cancelled', loadActiveTrip);
 
   useEffect(() => {
     if (current === null && queue.length > 0) {
