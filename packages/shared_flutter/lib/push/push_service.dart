@@ -93,10 +93,23 @@ Future<void> registerPushToken() async {
 Future<void> _showDataNotification(RemoteMessage message) async {
   final title = message.data['title'];
   if (title == null) return;
+  await showLocalNotification(title, message.data['body']);
+}
+
+/// Shows a local notification outside of an actual push arriving — for
+/// alerts a screen detects itself while polling (e.g. a newly-available
+/// delivery), so it gets the same native sound/vibration as a push instead
+/// of only an in-app toast. Reuses the same plugin instance/channel as
+/// [_showDataNotification], initializing it first if this is the first
+/// notification shown this session.
+Future<void> showLocalNotification(String title, String? body) async {
+  if (!_initialized) {
+    await _localNotifications.initialize(_notificationInitSettings);
+  }
   await _localNotifications.show(
-    message.hashCode,
+    Object.hash(title, body, DateTime.now().millisecondsSinceEpoch),
     title,
-    message.data['body'],
+    body,
     const NotificationDetails(
       android: AndroidNotificationDetails('default', 'default', importance: Importance.defaultImportance),
       iOS: DarwinNotificationDetails(),
