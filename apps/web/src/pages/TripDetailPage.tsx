@@ -359,6 +359,17 @@ export function TripDetailPage() {
               </span>
             </button>
           </div>
+          {paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats && (
+            <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
+              {t('common.insufficientFunds')}{' '}
+              <button
+                onClick={() => setPaymentMethod('cash')}
+                style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
+              >
+                {t('common.useCashInstead')}
+              </button>
+            </p>
+          )}
         </div>
       )}
 

@@ -16,6 +16,7 @@
     "cash": "نقداً",
     "wallet": "المحفظة",
     "insufficientFunds": "الرصيد غير كافٍ لإتمام هذه العملية.",
+    "useCashInstead": "استخدام النقد بدلاً من ذلك",
     "topUp": "شحن الرصيد",
     "selectCity": "اختر مدينة",
     "rideType": {

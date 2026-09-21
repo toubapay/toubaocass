@@ -16,6 +16,7 @@
     "cash": "Espèces",
     "wallet": "Portefeuille",
     "insufficientFunds": "Solde insuffisant pour ce paiement.",
+    "useCashInstead": "Utiliser les espèces à la place",
     "topUp": "Recharger",
     "selectCity": "Sélectionner une ville",
     "rideType": {
