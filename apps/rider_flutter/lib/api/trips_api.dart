@@ -32,3 +32,12 @@ Future<Trip> fetchTrip(int tripId) async {
   final response = await ApiClient.instance.dio.get('/trips/$tripId');
   return Trip.fromJson(response.data as Map<String, dynamic>);
 }
+
+/// Post-trip driver feedback — only once the trip is completed; re-rating
+/// updates the existing review.
+Future<void> rateTrip(int tripId, {required int score, String? comment}) async {
+  await ApiClient.instance.dio.post('/trips/$tripId/rate', data: {
+    'score': score,
+    'comment': comment,
+  });
+}

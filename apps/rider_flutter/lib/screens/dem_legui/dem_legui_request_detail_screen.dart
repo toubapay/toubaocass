@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/rate_driver_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api/client.dart';
@@ -143,6 +145,8 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
                 updatedAt: t.currentLocationUpdatedAt,
               ),
             ),
+          if (t != null && t.status == 'completed')
+            RateDriverCard(onSubmit: (score, comment) => rateDemLeguiTrip(t.id, score: score, comment: comment)),
           if (t?.arrivedAt != null && t?.status == 'open')
             const Padding(
               padding: EdgeInsets.only(bottom: AppSpacing.md),
@@ -165,7 +169,13 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
                   const SizedBox(height: AppSpacing.xs),
                   Text(t.driver.name ?? '', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
                   Text(t.driver.phone, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                  Text('★ ${t.driver.rating.toStringAsFixed(1)}', style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                  Row(
+                    children: [
+                      Text('★ ${t.driver.rating.toStringAsFixed(1)}', style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                      const SizedBox(width: AppSpacing.xs),
+                      DriverTierBadge(tier: t.driver.tier),
+                    ],
+                  ),
                   if (t.car != null)
                     Text('🚗 ${t.car!.make} ${t.car!.model} · ${t.car!.plateNumber}',
                         style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),

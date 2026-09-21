@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/rate_driver_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api/client.dart';
@@ -122,9 +124,15 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
                       IconButton(icon: const Icon(Icons.call, size: 18, color: AppColors.primary), onPressed: () => launchUrl(Uri.parse('tel:${d.driver!.phone}'))),
                     ],
                   ),
+                  if (d.driver!.tier != null) ...[
+                    const SizedBox(height: 2),
+                    DriverTierBadge(tier: d.driver!.tier),
+                  ],
                 ],
               ),
             ),
+          if (d.status == 'delivered' && d.driver != null)
+            RateDriverCard(onSubmit: (score, comment) => rateDelivery(d.id, score: score, comment: comment)),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             margin: const EdgeInsets.only(bottom: AppSpacing.md),

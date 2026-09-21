@@ -77,3 +77,8 @@ export async function sendDemLeguiMessage(requestId: number, body: string): Prom
   const { data } = await apiClient.post(`/dem-legui/requests/${requestId}/messages`, { body });
   return data;
 }
+
+/** Post-trip driver feedback — only once the trip is completed; re-rating updates the existing review. */
+export async function rateDemLeguiTrip(tripId: number, score: number, comment?: string): Promise<void> {
+  await apiClient.post(`/dem-legui/trips/${tripId}/rate`, { score, comment });
+}

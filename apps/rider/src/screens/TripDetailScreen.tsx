@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 
 import { bookTrip, updateBooking } from '../api/bookings';
 import { extractErrorMessage } from '../api/client';
-import { fetchTrip } from '../api/trips';
+import { fetchTrip, rateTrip } from '../api/trips';
 import { PaymentMethod, Trip } from '../api/types';
 import { fetchWallet } from '../api/wallet';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
+import { DriverTierBadge } from '../components/DriverTierBadge';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { RouteMap } from '../components/RouteMap';
 import { Screen } from '../components/Screen';
 import { SosShareModal } from '../components/SosShareModal';
@@ -137,6 +139,9 @@ export function TripDetailScreen({ route, navigation }: Props) {
           </View>
         )}
         <SosShareModal kind="trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />
+        {editing && trip.status === 'completed' && (
+          <RateDriverCard onSubmit={(score, comment) => rateTrip(trip.id, score, comment)} />
+        )}
         {editing && trip.status === 'in_progress' && (
           trip.current_latitude != null && trip.current_longitude != null ? (
             <AnandoLiveMap
@@ -200,7 +205,10 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>{t('tripDetail.driverSection')}</Text>
           <Text style={styles.line}>{trip.driver.name ?? t('common.driverFallback')}</Text>
-          <Text style={styles.lineMuted}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</Text>
+          <View style={styles.ratingRow}>
+            <Text style={styles.lineMuted}>{t('tripDetail.ratingLabel', { rating: trip.driver.rating?.toFixed(1) ?? '5.0' })}</Text>
+            <DriverTierBadge tier={trip.driver.tier} />
+          </View>
           <View style={styles.contactRow}>
             <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${trip.driver.phone}`)}>
               <Text style={styles.contactButtonText}>📞 {t('common.call')}</Text>
@@ -331,6 +339,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs, textTransform: 'uppercase' },
   line: { fontSize: 18, color: colors.text },
   lineMuted: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
   contactRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   contactButton: {
     flex: 1,
