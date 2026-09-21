@@ -45,6 +45,12 @@ export async function fetchMyDemLeguiTrips(): Promise<Paginated<DemLeguiTrip>> {
   return data;
 }
 
+/** Completed/cancelled trips only — powers the history page under Profile. */
+export async function fetchMyDemLeguiTripHistory(): Promise<Paginated<DemLeguiTrip>> {
+  const { data } = await apiClient.get('/driver/dem-legui/trips/mine', { params: { historic: 1 } });
+  return data;
+}
+
 /**
  * The driver's single active (open or in_progress) trip, if any — a
  * dedicated lookup rather than filtering fetchMyDemLeguiTrips() client-side,

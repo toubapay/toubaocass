@@ -7,7 +7,6 @@ import type { Trip } from '../api/types';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { Button } from '../components/Button';
 import { DemLeguiAvailableCard } from '../components/DemLeguiAvailableCard';
-import { DemLeguiTripsHistorySection } from '../components/DemLeguiTripsHistorySection';
 import { DeliveryAvailableCard } from '../components/DeliveryAvailableCard';
 import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle';
 import { CenteredSpinner } from '../components/Spinner';
@@ -48,7 +47,6 @@ export function TripsListPage() {
       {isModuleEnabled('dem_legui') && <DriverAvailabilityToggle />}
 
       {isModuleEnabled('dem_legui') && <DemLeguiAvailableCard />}
-      {isModuleEnabled('dem_legui') && <DemLeguiTripsHistorySection />}
 
       {isModuleEnabled('instant_trips') && (
         <button
