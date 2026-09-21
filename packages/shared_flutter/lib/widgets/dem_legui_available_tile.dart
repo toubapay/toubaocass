@@ -29,21 +29,19 @@ class DemLeguiAvailableTile extends StatefulWidget {
     required this.onTap,
     required this.onOpenTrip,
     required this.fetchAvailable,
-    required this.fetchMyTrips,
+    required this.fetchActiveTrip,
     required this.isOnline,
   });
 
   final VoidCallback onTap;
   final void Function(int tripId) onOpenTrip;
   final Future<Paginated<DemLeguiRequest>> Function() fetchAvailable;
-  final Future<Paginated<DemLeguiTrip>> Function() fetchMyTrips;
+  final Future<DemLeguiTrip?> Function() fetchActiveTrip;
   final bool isOnline;
 
   @override
   State<DemLeguiAvailableTile> createState() => _DemLeguiAvailableTileState();
 }
-
-const _activeTripStatuses = {'open', 'in_progress'};
 
 class _DemLeguiAvailableTileState extends State<DemLeguiAvailableTile> {
   int _total = 0;
@@ -76,10 +74,9 @@ class _DemLeguiAvailableTileState extends State<DemLeguiAvailableTile> {
 
   Future<void> _loadActiveTrip() async {
     try {
-      final result = await widget.fetchMyTrips();
+      final trip = await widget.fetchActiveTrip();
       if (!mounted) return;
-      final matches = result.data.where((t) => _activeTripStatuses.contains(t.status));
-      setState(() => _activeTrip = matches.isEmpty ? null : matches.first);
+      setState(() => _activeTrip = trip);
     } catch (_) {
       // Best-effort — keep the last known trip on a transient poll failure.
     }

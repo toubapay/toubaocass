@@ -31,6 +31,16 @@ Future<Paginated<DemLeguiTrip>> fetchMyDemLeguiTrips() async {
   return Paginated.fromJson(response.data as Map<String, dynamic>, DemLeguiTrip.fromJson);
 }
 
+/// The driver's single active (open or in_progress) trip, if any — a
+/// dedicated lookup rather than filtering fetchMyDemLeguiTrips() client-side,
+/// since that call is paginated by creation date and could miss an
+/// old-but-still-open trip for a driver with a long history.
+Future<DemLeguiTrip?> fetchMyActiveDemLeguiTrip() async {
+  final response = await ApiClient.instance.dio.get('/driver/dem-legui/trips/mine/active');
+  final data = (response.data as Map<String, dynamic>)['data'];
+  return data == null ? null : DemLeguiTrip.fromJson(data as Map<String, dynamic>);
+}
+
 Future<DemLeguiTrip> fetchDemLeguiTrip(int tripId) async {
   final response = await ApiClient.instance.dio.get('/dem-legui/trips/$tripId');
   return DemLeguiTrip.fromJson(response.data as Map<String, dynamic>);

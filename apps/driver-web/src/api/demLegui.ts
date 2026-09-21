@@ -45,6 +45,17 @@ export async function fetchMyDemLeguiTrips(): Promise<Paginated<DemLeguiTrip>> {
   return data;
 }
 
+/**
+ * The driver's single active (open or in_progress) trip, if any — a
+ * dedicated lookup rather than filtering fetchMyDemLeguiTrips() client-side,
+ * since that call is paginated by creation date and could miss an
+ * old-but-still-open trip for a driver with a long history.
+ */
+export async function fetchMyActiveDemLeguiTrip(): Promise<DemLeguiTrip | null> {
+  const { data } = await apiClient.get<{ data: DemLeguiTrip | null }>('/driver/dem-legui/trips/mine/active');
+  return data.data;
+}
+
 export async function fetchDemLeguiTrip(tripId: number): Promise<DemLeguiTrip> {
   const { data } = await apiClient.get(`/dem-legui/trips/${tripId}`);
   return data;
