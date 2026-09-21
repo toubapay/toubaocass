@@ -7,14 +7,20 @@ class Paginated<T> {
   final int currentPage;
   final int lastPage;
 
-  Paginated({required this.data, this.currentPage = 1, this.lastPage = 1});
+  /// Total item count across every page, not just this one — falls back to
+  /// this page's own length when the endpoint doesn't paginate at all.
+  final int total;
+
+  Paginated({required this.data, this.currentPage = 1, this.lastPage = 1, int? total}) : total = total ?? data.length;
 
   factory Paginated.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
     final meta = json['meta'] as Map<String, dynamic>?;
+    final data = (json['data'] as List).map((e) => fromJson(e as Map<String, dynamic>)).toList();
     return Paginated(
-      data: (json['data'] as List).map((e) => fromJson(e as Map<String, dynamic>)).toList(),
+      data: data,
       currentPage: meta?['current_page'] as int? ?? 1,
       lastPage: meta?['last_page'] as int? ?? 1,
+      total: meta?['total'] as int? ?? data.length,
     );
   }
 }

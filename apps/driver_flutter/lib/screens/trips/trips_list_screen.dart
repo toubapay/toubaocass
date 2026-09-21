@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../api/deliveries_api.dart';
 import '../../api/trips_api.dart';
 import '../../api/wallet_api.dart';
 import '../../models.dart';
 import '../../push/push_service.dart';
 import '../../state/module_status_provider.dart';
 import '../../theme.dart';
+import '../../widgets/delivery_available_tile.dart';
 
 const _statusColor = {
   'scheduled': AppColors.success,
@@ -197,34 +199,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       ),
                     ),
                   if (moduleStatus.isEnabled('livraison'))
-                    InkWell(
-                      onTap: widget.onOpenDeliveries,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      child: Container(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: const Row(
-                          children: [
-                            Text('📦', style: TextStyle(fontSize: 24)),
-                            SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Livraisons', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700)),
-                                  Text('Acceptez des livraisons de colis près de vous', style: TextStyle(fontSize: 14.0, color: AppColors.textMuted)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    DeliveryAvailableTile(onTap: widget.onOpenDeliveries, fetchAvailable: fetchAvailableDeliveries),
                   if (trips.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
