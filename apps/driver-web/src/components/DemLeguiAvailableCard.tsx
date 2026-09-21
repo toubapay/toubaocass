@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { fetchAvailableDemLeguiRequests, fetchMyDemLeguiTrips } from '../api/demLegui';
+import { fetchAvailableDemLeguiRequests, fetchMyActiveDemLeguiTrip } from '../api/demLegui';
 import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
@@ -11,8 +11,6 @@ import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 const POLL_INTERVAL_MS = 20000;
 const VISIBLE_DURATION_MS = 4000;
 const FADE_DURATION_MS = 350;
-
-const ACTIVE_TRIP_STATUSES = new Set(['open', 'in_progress']);
 
 function playBeep() {
   new Audio(`${import.meta.env.BASE_URL}sounds/anando_beep.wav`).play().catch(() => {});
@@ -49,10 +47,10 @@ export function DemLeguiAvailableCard() {
   }, []);
 
   const loadActiveTrip = useCallback(() => {
-    fetchMyDemLeguiTrips()
-      .then((res) => {
+    fetchMyActiveDemLeguiTrip()
+      .then((trip) => {
         if (!mounted.current) return;
-        setActiveTrip(res.data.find((trip) => ACTIVE_TRIP_STATUSES.has(trip.status)) ?? null);
+        setActiveTrip(trip);
       })
       .catch(() => {});
   }, []);

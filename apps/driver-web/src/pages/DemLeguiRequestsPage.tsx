@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
 import { fetchMyCars } from '../api/cars';
-import { acceptDemLeguiRequest, fetchAvailableDemLeguiRequests, fetchMyDemLeguiTrips } from '../api/demLegui';
+import { acceptDemLeguiRequest, fetchAvailableDemLeguiRequests, fetchMyActiveDemLeguiTrip } from '../api/demLegui';
 import type { Car, DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle';
 import { CenteredSpinner } from '../components/Spinner';
@@ -19,8 +19,6 @@ const POLL_INTERVAL_MS = 20000;
 // page — until it wraps up, independent of the online toggle below (a
 // driver mid-trip shouldn't lose access to it just because they went
 // offline).
-const ACTIVE_TRIP_STATUSES = new Set(['open', 'in_progress']);
-
 function MyTripsSection({ trips, onOpenTrip }: { trips: DemLeguiTrip[]; onOpenTrip: (id: number) => void }) {
   const { t } = useTranslation();
 
@@ -74,8 +72,8 @@ export function DemLeguiRequestsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const loadMyTrips = useCallback(() => {
-    fetchMyDemLeguiTrips()
-      .then((res) => setMyTrips(res.data.filter((trip) => ACTIVE_TRIP_STATUSES.has(trip.status))))
+    fetchMyActiveDemLeguiTrip()
+      .then((trip) => setMyTrips(trip ? [trip] : []))
       .catch(() => {});
   }, []);
 

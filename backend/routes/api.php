@@ -241,6 +241,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('dem-legui/requests', [DemLeguiController::class, 'availableIndex']);
         Route::post('dem-legui/requests/{demLeguiRequest}/accept', [DemLeguiController::class, 'accept']);
         Route::get('dem-legui/trips/mine', [DemLeguiController::class, 'myTrips']);
+        Route::get('dem-legui/trips/mine/active', [DemLeguiController::class, 'myActiveTrip']);
         Route::post('dem-legui/trips/{demLeguiTrip}/arrived', [DemLeguiController::class, 'arrivedAtPickup']);
         Route::post('dem-legui/trips/{demLeguiTrip}/start', [DemLeguiController::class, 'startTrip']);
         Route::post('dem-legui/trips/{demLeguiTrip}/complete', [DemLeguiController::class, 'completeTrip']);

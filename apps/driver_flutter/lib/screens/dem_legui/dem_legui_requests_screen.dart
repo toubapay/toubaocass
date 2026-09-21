@@ -13,7 +13,6 @@ import '../../theme.dart';
 import '../../widgets/driver_availability_toggle.dart';
 
 const _myTripsPollInterval = Duration(seconds: 20);
-const _activeTripStatuses = {'open', 'in_progress'};
 
 class DemLeguiRequestsScreen extends StatefulWidget {
   const DemLeguiRequestsScreen({super.key, required this.onOpenTrip});
@@ -51,9 +50,9 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
 
   Future<void> _loadMyTrips() async {
     try {
-      final result = await fetchMyDemLeguiTrips();
+      final trip = await fetchMyActiveDemLeguiTrip();
       if (!mounted) return;
-      setState(() => myTrips = result.data.where((t) => _activeTripStatuses.contains(t.status)).toList());
+      setState(() => myTrips = trip == null ? [] : [trip]);
     } catch (_) {
       // Best-effort — keep the last known list on a transient poll failure.
     }

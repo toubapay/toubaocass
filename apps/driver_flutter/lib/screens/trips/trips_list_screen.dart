@@ -154,7 +154,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       onTap: widget.onOpenDemLegui,
                       onOpenTrip: widget.onOpenDemLeguiTrip,
                       fetchAvailable: fetchAvailableDemLeguiRequests,
-                      fetchMyTrips: fetchMyDemLeguiTrips,
+                      fetchActiveTrip: fetchMyActiveDemLeguiTrip,
                       isOnline: isOnline,
                     ),
                   if (moduleStatus.isEnabled('anando'))

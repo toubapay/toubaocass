@@ -330,6 +330,28 @@ class DemLeguiController extends Controller
     }
 
     /**
+     * Driver-facing: the driver's currently active trip (open or
+     * in_progress), if any — powers the Home screen tile without the
+     * caller needing to page through myTrips() above, which sorts by
+     * creation date and could push an old-but-still-open trip past the
+     * first page for a driver with a long history. A driver can only ever
+     * have one active trip at a time (see accept()'s one-trip guard), so
+     * this is always at most a single row.
+     */
+    public function myActiveTrip(Request $request)
+    {
+        $activeTrip = $request->user()->demLeguiTrips()
+            ->whereIn('status', [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS])
+            ->with(['driver.driverProfile', 'car', 'destinationCity', 'requests.rider'])
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'data' => $activeTrip ? new DemLeguiTripResource($activeTrip) : null,
+        ]);
+    }
+
+    /**
      * Driver marks having reached the rider's pickup point — an
      * informational checkpoint distinct from startTrip() (which actually
      * gets the ride moving), so it's only meaningful while still en route.
