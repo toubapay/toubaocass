@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'error_handling.dart';
+import 'push/push_service.dart';
 import 'router.dart';
 import 'state/auth_provider.dart';
 import 'state/module_status_provider.dart';
 import 'theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandling();
+  await initializePushBackgroundHandler();
   runApp(const IntercityRiderApp());
 }
 
