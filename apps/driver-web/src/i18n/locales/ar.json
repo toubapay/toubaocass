@@ -301,6 +301,9 @@
   "demLegui": {
     "driverCardTitle": "طلبات Dem Légui",
     "driverCardSubtitle": "اقبل طلبات الرحلات الفورية بالقرب منك",
+    "availableCardTitle": "{{count}} طلب Dem Légui متاح",
+    "newRequestToast": "🚕 طلب Dem Légui جديد: {{pickup}}",
+    "newRequestToastView": "عرض ←",
     "driverTitle": "طلبات Dem Légui",
     "youAreOnline": "أنت متصل",
     "youAreOffline": "أنت غير متصل",

@@ -144,11 +144,27 @@ export interface LiveTrip {
   updated_at: string | null;
 }
 
-export type SecurityAlertType = 'repeated_otp_failures' | 'kyc_rejected';
+export type SecurityAlertType = 'repeated_otp_failures' | 'repeated_pin_failures' | 'kyc_rejected' | 'rider_sos';
 
 export type SecurityAlertSeverity = 'low' | 'medium' | 'high';
 
 export type SecurityAlertStatus = 'open' | 'acknowledged';
+
+export interface SecurityAlertParty {
+  role: 'driver' | 'rider' | 'sender';
+  name: string | null;
+  phone: string | null;
+}
+
+export interface SecurityAlertMetadata {
+  kind?: string;
+  ride_id?: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  tracking_url?: string;
+  parties?: SecurityAlertParty[];
+  [key: string]: unknown;
+}
 
 export interface SecurityAlert {
   id: number;
@@ -157,7 +173,8 @@ export interface SecurityAlert {
   message: string;
   user_id: number | null;
   user_name: string | null;
-  metadata: Record<string, unknown> | null;
+  user_phone: string | null;
+  metadata: SecurityAlertMetadata | null;
   status: SecurityAlertStatus;
   acknowledged_by: string | null;
   acknowledged_at: string | null;
@@ -286,6 +303,52 @@ export interface UpdateModuleInput {
   category?: string;
   enabled_for_rider?: boolean;
   enabled_for_driver?: boolean;
+}
+
+export type TripStatus = 'scheduled' | 'full' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface AdminTrip {
+  id: number;
+  status: TripStatus;
+  origin_city: string | null;
+  destination_city: string | null;
+  departure_date: string;
+  departure_time: string;
+  fare: number;
+  ride_type: string;
+  total_seats: number;
+  available_seats: number;
+  confirmed_bookings_count: number;
+  driver_id: number;
+  driver_name: string | null;
+  driver_phone: string | null;
+  car: string | null;
+  created_at: string;
+}
+
+export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' | 'cancelled';
+
+export interface AdminDelivery {
+  id: number;
+  status: DeliveryStatus;
+  package_type: string;
+  pickup_address_line: string;
+  receiver_name: string;
+  receiver_address_line: string;
+  fee: number;
+  sender_id: number;
+  sender_name: string | null;
+  sender_phone: string | null;
+  driver_id: number | null;
+  driver_name: string | null;
+  driver_phone: string | null;
+  created_at: string;
+}
+
+export interface EligibleDriver {
+  id: number;
+  name: string | null;
+  phone: string;
 }
 
 export interface ApiError {

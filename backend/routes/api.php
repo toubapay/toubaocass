@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\Admin\AuditLogController as AdminAuditLogController
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\Admin\DeliveryManagementController as AdminDeliveryManagementController;
+use App\Http\Controllers\Api\Admin\DriverDirectoryController as AdminDriverDirectoryController;
 use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
 use App\Http\Controllers\Api\Admin\InsuranceController as AdminInsuranceController;
@@ -13,6 +15,7 @@ use App\Http\Controllers\Api\Admin\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
 use App\Http\Controllers\Api\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Api\Admin\StaffController as AdminStaffController;
+use App\Http\Controllers\Api\Admin\TripManagementController as AdminTripManagementController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AnandoRideController;
@@ -325,6 +328,20 @@ Route::prefix('admin')->group(function () {
             Route::put('modules/{module}', [AdminModuleController::class, 'update']);
             Route::put('modules/{module}/status', [AdminModuleController::class, 'updateStatus']);
             Route::delete('modules/{module}', [AdminModuleController::class, 'destroy']);
+        });
+
+        // Operational trip/delivery management — cancel or reassign a
+        // driver, separate from the read-only live map above.
+        Route::middleware('admin.permission:manage_trips')->group(function () {
+            Route::get('trips', [AdminTripManagementController::class, 'index']);
+            Route::post('trips/{trip}/cancel', [AdminTripManagementController::class, 'cancel']);
+            Route::put('trips/{trip}/driver', [AdminTripManagementController::class, 'assignDriver']);
+
+            Route::get('deliveries', [AdminDeliveryManagementController::class, 'index']);
+            Route::post('deliveries/{delivery}/cancel', [AdminDeliveryManagementController::class, 'cancel']);
+            Route::put('deliveries/{delivery}/driver', [AdminDeliveryManagementController::class, 'assignDriver']);
+
+            Route::get('drivers/eligible', [AdminDriverDirectoryController::class, 'eligible']);
         });
     });
 });

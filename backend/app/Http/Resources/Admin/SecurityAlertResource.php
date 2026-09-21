@@ -16,6 +16,7 @@ class SecurityAlertResource extends JsonResource
             'message' => $this->message,
             'user_id' => $this->user_id,
             'user_name' => $this->user?->name,
+            'user_phone' => $this->user?->phone,
             'metadata' => $this->metadata,
             'status' => $this->status,
             'acknowledged_by' => $this->acknowledgedBy?->name,

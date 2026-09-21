@@ -50,6 +50,15 @@ class DemLeguiRequest extends Model
      */
     const APPROACH_SPEED_KMH = 30.0;
 
+    /**
+     * A request still pending (no driver has accepted it) after this many
+     * minutes auto-expires — clears it from the driver-facing nearby list
+     * and frees the rider to post a new one under the one-active-request-
+     * at-a-time rule, mirroring AnandoRide::ACTIVE_WINDOW_HOURS. Kept
+     * comfortably above an hour so a request isn't cut off mid-search.
+     */
+    const ACTIVE_WINDOW_MINUTES = 90;
+
     protected function casts(): array
     {
         return [

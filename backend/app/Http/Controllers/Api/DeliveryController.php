@@ -158,6 +158,10 @@ class DeliveryController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'tracking_url' => $trackingLinks->generateUrl('delivery', $delivery->id),
+                'parties' => [
+                    ['role' => 'driver', 'name' => $delivery->driver?->name, 'phone' => $delivery->driver?->phone],
+                    ['role' => 'sender', 'name' => $delivery->sender?->name, 'phone' => $delivery->sender?->phone],
+                ],
             ],
         );
 

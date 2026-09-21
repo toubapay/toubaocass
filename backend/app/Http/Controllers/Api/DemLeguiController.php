@@ -425,6 +425,8 @@ class DemLeguiController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
+        $riders = $demLeguiTrip->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->with('rider')->get();
+
         $alerts->record(
             SecurityAlert::TYPE_RIDER_SOS,
             SecurityAlert::SEVERITY_HIGH,
@@ -436,6 +438,10 @@ class DemLeguiController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'tracking_url' => $trackingLinks->generateUrl('dem-legui', $demLeguiTrip->id),
+                'parties' => [
+                    ['role' => 'driver', 'name' => $demLeguiTrip->driver?->name, 'phone' => $demLeguiTrip->driver?->phone],
+                    ...$riders->map(fn (DemLeguiRequest $r) => ['role' => 'rider', 'name' => $r->rider?->name, 'phone' => $r->rider?->phone])->all(),
+                ],
             ],
         );
 

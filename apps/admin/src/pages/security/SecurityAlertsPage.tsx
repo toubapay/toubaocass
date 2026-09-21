@@ -99,7 +99,7 @@ export function SecurityAlertsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${colors.border}`, textAlign: 'left' }}>
-                {['Sévérité', 'Message', 'Utilisateur', 'Date', 'Statut', ''].map((label) => (
+                {['Sévérité', 'Message', 'Utilisateur', 'Téléphones', 'Position', 'Date', 'Statut', ''].map((label) => (
                   <th key={label} style={{ padding: spacing.sm, fontSize: 12, color: colors.textMuted, fontWeight: 700 }}>
                     {label}
                   </th>
@@ -107,33 +107,70 @@ export function SecurityAlertsPage() {
               </tr>
             </thead>
             <tbody>
-              {alerts.map((alert) => (
-                <tr key={alert.id} style={{ borderBottom: `1px solid ${colors.border}` }}>
-                  <td style={{ padding: spacing.sm }}>
-                    <SeverityBadge severity={alert.severity} />
-                  </td>
-                  <td style={{ padding: spacing.sm, fontSize: 14, color: colors.text }}>{alert.message}</td>
-                  <td style={{ padding: spacing.sm, fontSize: 14, color: colors.text }}>{alert.user_name ?? '—'}</td>
-                  <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>
-                    {new Date(alert.created_at).toLocaleString('fr-FR')}
-                  </td>
-                  <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>
-                    {alert.status === 'acknowledged' ? `Traitée par ${alert.acknowledged_by ?? '—'}` : 'Ouverte'}
-                  </td>
-                  <td style={{ padding: spacing.sm }}>
-                    {alert.status === 'open' && (
-                      <Button
-                        label="Marquer traitée"
-                        onClick={() => handleAcknowledge(alert.id)}
-                        loading={acknowledging === alert.id}
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {alerts.map((alert) => {
+                const parties = alert.metadata?.parties ?? [];
+                const latitude = alert.metadata?.latitude;
+                const longitude = alert.metadata?.longitude;
+                return (
+                  <tr key={alert.id} style={{ borderBottom: `1px solid ${colors.border}` }}>
+                    <td style={{ padding: spacing.sm }}>
+                      <SeverityBadge severity={alert.severity} />
+                    </td>
+                    <td style={{ padding: spacing.sm, fontSize: 14, color: colors.text }}>{alert.message}</td>
+                    <td style={{ padding: spacing.sm, fontSize: 14, color: colors.text }}>
+                      {alert.user_name ?? '—'}
+                      {alert.user_phone && (
+                        <span style={{ display: 'block', fontSize: 12, color: colors.textMuted }}>{alert.user_phone}</span>
+                      )}
+                    </td>
+                    <td style={{ padding: spacing.sm, fontSize: 12.5, color: colors.text }}>
+                      {parties.length > 0 ? (
+                        parties.map((party, index) => (
+                          <span key={index} style={{ display: 'block' }}>
+                            {party.role === 'driver' ? '🚗 Conducteur' : party.role === 'sender' ? '📦 Expéditeur' : '🧍 Passager'}
+                            {' — '}
+                            {party.name ?? '—'} {party.phone ? `· ${party.phone}` : ''}
+                          </span>
+                        ))
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td style={{ padding: spacing.sm, fontSize: 13 }}>
+                      {typeof latitude === 'number' && typeof longitude === 'number' ? (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: colors.accent, fontWeight: 700, textDecoration: 'none' }}
+                        >
+                          📍 Ouvrir dans Google Maps
+                        </a>
+                      ) : (
+                        <span style={{ color: colors.textMuted }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>
+                      {new Date(alert.created_at).toLocaleString('fr-FR')}
+                    </td>
+                    <td style={{ padding: spacing.sm, fontSize: 13, color: colors.textMuted }}>
+                      {alert.status === 'acknowledged' ? `Traitée par ${alert.acknowledged_by ?? '—'}` : 'Ouverte'}
+                    </td>
+                    <td style={{ padding: spacing.sm }}>
+                      {alert.status === 'open' && (
+                        <Button
+                          label="Marquer traitée"
+                          onClick={() => handleAcknowledge(alert.id)}
+                          loading={acknowledging === alert.id}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {alerts.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: spacing.lg, textAlign: 'center', color: colors.textMuted }}>
+                  <td colSpan={8} style={{ padding: spacing.lg, textAlign: 'center', color: colors.textMuted }}>
                     Aucune alerte.
                   </td>
                 </tr>
