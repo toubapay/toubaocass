@@ -5,6 +5,7 @@ import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
 import '../theme.dart';
+import '../widgets/inbox_icon.dart';
 
 const _kycLabel = {
   'pending': 'Non soumis',
@@ -14,11 +15,18 @@ const _kycLabel = {
 };
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key, required this.onOpenWallet, required this.onOpenSettings, required this.onOpenInsurance});
+  const ProfileScreen({
+    super.key,
+    required this.onOpenWallet,
+    required this.onOpenSettings,
+    required this.onOpenInsurance,
+    required this.onOpenInbox,
+  });
 
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenInsurance;
+  final VoidCallback onOpenInbox;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -42,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final moduleStatus = context.watch<ModuleStatusProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: const Text('Profil'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'api/anando_api.dart';
+import 'api/deliveries_api.dart';
+import 'models.dart';
 import 'screens/anando/anando_ride_detail_screen.dart';
 import 'screens/anando/anando_screen.dart';
 import 'screens/auth/otp_verify_screen.dart';
@@ -13,6 +16,7 @@ import 'screens/deliveries/delivery_detail_screen.dart';
 import 'screens/deliveries/my_deliveries_screen.dart';
 import 'screens/deliveries/new_delivery_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/inbox_screen.dart';
 import 'screens/insurance/insurance_screen.dart';
 import 'screens/insurance/my_policies_screen.dart';
 import 'screens/my_bookings_screen.dart';
@@ -22,6 +26,22 @@ import 'screens/settings_screen.dart';
 import 'screens/trip_detail_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'state/auth_provider.dart';
+
+/// Where each inbox thread type's chat lives — mirrors the web apps'
+/// InboxPage chatUrl resolver.
+void _openInboxThread(BuildContext context, InboxThread thread) {
+  final extra = {'title': thread.otherPartyName};
+  switch (thread.type) {
+    case 'booking':
+      context.push('/chat/${thread.id}', extra: extra);
+    case 'dem_legui_request':
+      context.push('/dem-legui/requests/${thread.id}/chat', extra: extra);
+    case 'anando':
+      context.push('/anando-ride-bookings/${thread.id}/chat', extra: extra);
+    case 'delivery':
+      context.push('/deliveries/${thread.id}/chat', extra: extra);
+  }
+}
 
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
@@ -157,6 +177,34 @@ GoRouter buildRouter(AuthProvider auth) {
           );
         },
       ),
+      GoRoute(
+        path: '/anando-ride-bookings/:bookingId/chat',
+        builder: (context, state) {
+          final bookingId = int.parse(state.pathParameters['bookingId']!);
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen.custom(
+            fetchMessages: () => fetchAnandoMessages(bookingId),
+            sendMessage: (body) => sendAnandoMessage(bookingId, body),
+            title: extra?['title'] as String?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/deliveries/:deliveryId/chat',
+        builder: (context, state) {
+          final deliveryId = int.parse(state.pathParameters['deliveryId']!);
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen.custom(
+            fetchMessages: () => fetchDeliveryMessages(deliveryId),
+            sendMessage: (body) => sendDeliveryMessage(deliveryId, body),
+            title: extra?['title'] as String?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/inbox',
+        builder: (context, state) => InboxScreen(onOpenThread: (thread) => _openInboxThread(context, thread)),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => _MainShell(navigationShell: navigationShell),
         branches: [
@@ -166,6 +214,7 @@ GoRouter buildRouter(AuthProvider auth) {
                 builder: (context, state) => HomeScreen(
                       onOpenTrip: (id) => context.push('/trips/$id'),
                       onOpenWallet: () => context.push('/wallet'),
+                      onOpenInbox: () => context.push('/inbox'),
                     )),
           ]),
           StatefulShellBranch(routes: [
@@ -175,6 +224,7 @@ GoRouter buildRouter(AuthProvider auth) {
                 onOpenDemLegui: () => context.push('/dem-legui/new'),
                 onOpenAnando: () => context.push('/anando'),
                 onOpenLivraison: () => context.push('/deliveries/new'),
+                onOpenInbox: () => context.push('/inbox'),
               ),
             ),
           ]),
@@ -185,6 +235,7 @@ GoRouter buildRouter(AuthProvider auth) {
                       onOpenTrip: (id) => context.push('/trips/$id'),
                       onOpenChat: (bookingId, title, subtitle) =>
                           context.push('/chat/$bookingId', extra: {'title': title, 'subtitle': subtitle}),
+                      onOpenInbox: () => context.push('/inbox'),
                     )),
           ]),
           StatefulShellBranch(routes: [
@@ -195,6 +246,7 @@ GoRouter buildRouter(AuthProvider auth) {
                       onOpenSettings: () => context.push('/settings'),
                       onOpenDeliveries: () => context.push('/deliveries'),
                       onOpenInsurance: () => context.push('/insurance'),
+                      onOpenInbox: () => context.push('/inbox'),
                     )),
           ]),
         ],

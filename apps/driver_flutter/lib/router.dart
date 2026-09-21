@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'api/anando_api.dart';
+import 'api/deliveries_api.dart';
+import 'models.dart';
 import 'screens/anando/anando_ride_detail_screen.dart';
 import 'screens/anando/anando_screen.dart';
 import 'screens/auth/otp_verify_screen.dart';
@@ -13,6 +16,7 @@ import 'screens/deliveries/deliveries_list_screen.dart';
 import 'screens/deliveries/delivery_detail_screen.dart';
 import 'screens/fleet/add_car_screen.dart';
 import 'screens/fleet/cars_list_screen.dart';
+import 'screens/inbox_screen.dart';
 import 'screens/insurance/insurance_screen.dart';
 import 'screens/insurance/my_policies_screen.dart';
 import 'screens/kyc/kyc_form_screen.dart';
@@ -24,6 +28,22 @@ import 'screens/trips/trip_detail_screen.dart';
 import 'screens/trips/trips_list_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'state/auth_provider.dart';
+
+/// Where each inbox thread type's chat lives — mirrors the web apps'
+/// InboxPage chatUrl resolver.
+void _openInboxThread(BuildContext context, InboxThread thread) {
+  final extra = {'title': thread.otherPartyName};
+  switch (thread.type) {
+    case 'booking':
+      context.push('/chat/${thread.id}', extra: extra);
+    case 'dem_legui_request':
+      context.push('/dem-legui/requests/${thread.id}/chat', extra: extra);
+    case 'anando':
+      context.push('/anando-ride-bookings/${thread.id}/chat', extra: extra);
+    case 'delivery':
+      context.push('/deliveries/${thread.id}/chat', extra: extra);
+  }
+}
 
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
@@ -134,6 +154,34 @@ GoRouter buildRouter(AuthProvider auth) {
           );
         },
       ),
+      GoRoute(
+        path: '/anando-ride-bookings/:bookingId/chat',
+        builder: (context, state) {
+          final bookingId = int.parse(state.pathParameters['bookingId']!);
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen.custom(
+            fetchMessages: () => fetchAnandoMessages(bookingId),
+            sendMessage: (body) => sendAnandoMessage(bookingId, body),
+            title: extra?['title'] as String?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/deliveries/:deliveryId/chat',
+        builder: (context, state) {
+          final deliveryId = int.parse(state.pathParameters['deliveryId']!);
+          final extra = state.extra as Map<String, dynamic>?;
+          return ChatScreen.custom(
+            fetchMessages: () => fetchDeliveryMessages(deliveryId),
+            sendMessage: (body) => sendDeliveryMessage(deliveryId, body),
+            title: extra?['title'] as String?,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/inbox',
+        builder: (context, state) => InboxScreen(onOpenThread: (thread) => _openInboxThread(context, thread)),
+      ),
       GoRoute(path: '/add-car', builder: (context, state) => AddCarScreen(onSaved: () => context.pop())),
       GoRoute(path: '/kyc-form', builder: (context, state) => KycFormScreen(onSubmitted: () => context.pop())),
       GoRoute(
@@ -154,16 +202,25 @@ GoRouter buildRouter(AuthProvider auth) {
                 onOpenDemLegui: () => context.push('/dem-legui'),
                 onOpenAnando: () => context.push('/anando'),
                 onOpenDeliveries: () => context.push('/deliveries'),
+                onOpenInbox: () => context.push('/inbox'),
               ),
             ),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/cars', builder: (context, state) => CarsListScreen(onAddCar: () => context.push('/add-car'))),
+            GoRoute(
+                path: '/cars',
+                builder: (context, state) => CarsListScreen(
+                      onAddCar: () => context.push('/add-car'),
+                      onOpenInbox: () => context.push('/inbox'),
+                    )),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/kyc',
-              builder: (context, state) => KycStatusScreen(onSubmitDocuments: () => context.push('/kyc-form')),
+              builder: (context, state) => KycStatusScreen(
+                onSubmitDocuments: () => context.push('/kyc-form'),
+                onOpenInbox: () => context.push('/inbox'),
+              ),
             ),
           ]),
           StatefulShellBranch(routes: [
@@ -173,6 +230,7 @@ GoRouter buildRouter(AuthProvider auth) {
                       onOpenWallet: () => context.push('/wallet'),
                       onOpenSettings: () => context.push('/settings'),
                       onOpenInsurance: () => context.push('/insurance'),
+                      onOpenInbox: () => context.push('/inbox'),
                     )),
           ]),
         ],

@@ -5,6 +5,7 @@ import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
 import '../theme.dart';
+import '../widgets/inbox_icon.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -13,11 +14,13 @@ class ProfileScreen extends StatefulWidget {
     required this.onOpenSettings,
     required this.onOpenDeliveries,
     required this.onOpenInsurance,
+    required this.onOpenInbox,
   });
 
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenDeliveries;
+  final VoidCallback onOpenInbox;
   final VoidCallback onOpenInsurance;
 
   @override
@@ -40,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final moduleStatus = context.watch<ModuleStatusProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: const Text('Profil'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(

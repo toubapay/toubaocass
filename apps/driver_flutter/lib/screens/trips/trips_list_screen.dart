@@ -10,6 +10,7 @@ import '../../push/push_service.dart';
 import '../../state/module_status_provider.dart';
 import '../../theme.dart';
 import '../../widgets/delivery_available_tile.dart';
+import '../../widgets/inbox_icon.dart';
 
 const _statusColor = {
   'scheduled': AppColors.success,
@@ -36,6 +37,7 @@ class TripsListScreen extends StatefulWidget {
     required this.onOpenDemLegui,
     required this.onOpenAnando,
     required this.onOpenDeliveries,
+    required this.onOpenInbox,
   });
 
   final void Function(int tripId) onOpenTrip;
@@ -44,6 +46,7 @@ class TripsListScreen extends StatefulWidget {
   final VoidCallback onOpenDemLegui;
   final VoidCallback onOpenAnando;
   final VoidCallback onOpenDeliveries;
+  final VoidCallback onOpenInbox;
 
   @override
   State<TripsListScreen> createState() => _TripsListScreenState();
@@ -81,6 +84,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
       appBar: AppBar(
         title: const Text('Mes trajets'),
         actions: [
+          InboxIcon(onTap: widget.onOpenInbox),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: Center(
