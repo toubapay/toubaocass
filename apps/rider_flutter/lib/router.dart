@@ -6,6 +6,7 @@ import 'api/deliveries_api.dart';
 import 'models.dart';
 import 'screens/anando/anando_ride_detail_screen.dart';
 import 'screens/anando/anando_screen.dart';
+import 'screens/auth/create_pin_screen.dart';
 import 'screens/auth/otp_verify_screen.dart';
 import 'screens/auth/phone_entry_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
@@ -80,10 +81,13 @@ GoRouter buildRouter(AuthProvider auth) {
       if (!auth.isAuthenticated) {
         return loggingIn ? null : '/login';
       }
+      if (auth.user?.hasPin != true) {
+        return state.matchedLocation == '/create-pin' ? null : '/create-pin';
+      }
       if (auth.user?.profileComplete != true) {
         return state.matchedLocation == '/profile-setup' ? null : '/profile-setup';
       }
-      if (loggingIn || state.matchedLocation == '/profile-setup') {
+      if (loggingIn || state.matchedLocation == '/create-pin' || state.matchedLocation == '/profile-setup') {
         return '/';
       }
       return null;
@@ -94,6 +98,7 @@ GoRouter buildRouter(AuthProvider auth) {
         path: '/verify',
         builder: (context, state) => OtpVerifyScreen(phone: state.extra as String? ?? ''),
       ),
+      GoRoute(path: '/create-pin', builder: (context, state) => const CreatePinScreen()),
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
       GoRoute(path: '/wallet', builder: (context, state) => const WalletScreen()),
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
