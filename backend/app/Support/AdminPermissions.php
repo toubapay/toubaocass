@@ -30,6 +30,8 @@ class AdminPermissions
 
     const MANAGE_MODULES = 'manage_modules';
 
+    const MANAGE_TRIPS = 'manage_trips';
+
     /**
      * Small, fixed role set — a hardcoded map is simpler and easier to audit
      * than a granular DB-backed permissions package for 6 roles.
@@ -39,15 +41,15 @@ class AdminPermissions
             self::MANAGE_ADMINS, self::MANAGE_USERS, self::MANAGE_KYC, self::MANAGE_FARES,
             self::MANAGE_SYSTEM_SETTINGS, self::VIEW_DASHBOARD, self::VIEW_FINANCIALS,
             self::MANAGE_BACKUPS, self::VIEW_SECURITY_ALERTS, self::MODERATE_CONTENT, self::MANAGE_INSURANCE,
-            self::MANAGE_MODULES,
+            self::MANAGE_MODULES, self::MANAGE_TRIPS,
         ],
         AdminUser::ROLE_ADMIN => [
             self::MANAGE_USERS, self::MANAGE_KYC, self::MANAGE_FARES,
             self::VIEW_DASHBOARD, self::VIEW_FINANCIALS, self::VIEW_SECURITY_ALERTS, self::MODERATE_CONTENT,
-            self::MANAGE_INSURANCE, self::MANAGE_MODULES,
+            self::MANAGE_INSURANCE, self::MANAGE_MODULES, self::MANAGE_TRIPS,
         ],
         AdminUser::ROLE_CONTROLLERS => [
-            self::VIEW_DASHBOARD, self::VIEW_SECURITY_ALERTS, self::MANAGE_KYC,
+            self::VIEW_DASHBOARD, self::VIEW_SECURITY_ALERTS, self::MANAGE_KYC, self::MANAGE_TRIPS,
         ],
         AdminUser::ROLE_SUPPORT => [
             self::MANAGE_USERS, self::VIEW_DASHBOARD, self::MODERATE_CONTENT,

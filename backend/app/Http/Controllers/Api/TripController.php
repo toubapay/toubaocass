@@ -160,6 +160,8 @@ class TripController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
+        $riders = Booking::where('trip_id', $trip->id)->where('status', Booking::STATUS_CONFIRMED)->with('rider')->get();
+
         $alerts->record(
             SecurityAlert::TYPE_RIDER_SOS,
             SecurityAlert::SEVERITY_HIGH,
@@ -171,6 +173,10 @@ class TripController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'tracking_url' => $trackingLinks->generateUrl('trip', $trip->id),
+                'parties' => [
+                    ['role' => 'driver', 'name' => $trip->driver?->name, 'phone' => $trip->driver?->phone],
+                    ...$riders->map(fn (Booking $booking) => ['role' => 'rider', 'name' => $booking->rider?->name, 'phone' => $booking->rider?->phone])->all(),
+                ],
             ],
         );
 

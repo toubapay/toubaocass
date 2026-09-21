@@ -209,6 +209,8 @@ class AnandoRideController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
+        $joiners = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)->where('status', AnandoRideBooking::STATUS_CONFIRMED)->with('user')->get();
+
         $alerts->record(
             SecurityAlert::TYPE_RIDER_SOS,
             SecurityAlert::SEVERITY_HIGH,
@@ -220,6 +222,10 @@ class AnandoRideController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'tracking_url' => $trackingLinks->generateUrl('anando', $anandoRide->id),
+                'parties' => [
+                    ['role' => 'driver', 'name' => $anandoRide->poster?->name, 'phone' => $anandoRide->poster?->phone],
+                    ...$joiners->map(fn (AnandoRideBooking $booking) => ['role' => 'rider', 'name' => $booking->user?->name, 'phone' => $booking->user?->phone])->all(),
+                ],
             ],
         );
 

@@ -19,6 +19,7 @@ import { SecurityAlertsPage } from './pages/security/SecurityAlertsPage';
 import { FaresPage } from './pages/settings/FaresPage';
 import { SystemSettingsPage } from './pages/settings/SystemSettingsPage';
 import { StaffPage } from './pages/staff/StaffPage';
+import { TripManagementPage } from './pages/trips/TripManagementPage';
 import { UserDetailPage } from './pages/users/UserDetailPage';
 import { UsersListPage } from './pages/users/UsersListPage';
 
@@ -48,6 +49,7 @@ function AppRoutes() {
         <Route path="/kyc" element={<KycQueuePage />} />
         <Route path="/kyc/:id" element={<KycReviewPage />} />
         <Route path="/live-trips" element={<LiveTripsPage />} />
+        <Route path="/trips" element={<TripManagementPage />} />
         <Route path="/security-alerts" element={<SecurityAlertsPage />} />
         <Route path="/fares" element={<FaresPage />} />
         <Route path="/deliveries" element={<DeliverySettingsPage />} />

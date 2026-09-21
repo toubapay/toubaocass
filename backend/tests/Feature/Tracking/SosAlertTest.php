@@ -41,6 +41,10 @@ class SosAlertTest extends TestCase
         $this->assertSame('trip', $alert->metadata['kind']);
         $this->assertSame($trip->id, $alert->metadata['ride_id']);
         $this->assertSame(14.7, $alert->metadata['latitude']);
+
+        $parties = collect($alert->metadata['parties']);
+        $this->assertSame($trip->driver->phone, $parties->firstWhere('role', 'driver')['phone']);
+        $this->assertSame($rider->phone, $parties->firstWhere('role', 'rider')['phone']);
     }
 
     public function test_a_trips_driver_can_raise_an_sos_alert(): void
