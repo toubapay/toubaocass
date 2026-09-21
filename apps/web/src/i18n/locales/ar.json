@@ -81,7 +81,8 @@
     "title": "ملفي الشخصي",
     "wallet": "محفظتي",
     "myDeliveries": "📦 طلبيات توصيلي",
-    "myRideBookings": "🧾 حجوزاتي",
+    "myRideBookings": "🚗 حجوزاتي في Anando",
+    "myDemLeguiHistory": "🚕 سجل Dem Légui",
     "assuranceLink": "التأمين",
     "settings": "⚙️ الإعدادات",
     "notificationsEnabled": "🔔 الإشعارات مفعّلة",
@@ -149,7 +150,8 @@
     "starLabel": "{{count}} نجمة/نجوم",
     "commentPlaceholder": "تعليق؟ (اختياري)",
     "submit": "إرسال تقييمي",
-    "thanks": "شكراً على تقييمك!"
+    "thanks": "شكراً على تقييمك!",
+    "rateButton": "⭐ قيّم السائق"
   },
   "tripDetail": {
     "departureAt": "{{date}} في {{time}}",
@@ -307,11 +309,12 @@
     "policyNumber": "رقم {{number}}"
   },
   "myRideBookings": {
-    "title": "حجوزاتي",
-    "anandoSection": "Anando",
-    "anandoEmpty": "لم تحجز أي رحلة Anando بعد.",
-    "demLeguiSection": "Dem Légui",
-    "demLeguiEmpty": "ليس لديك أي طلب Dem Légui."
+    "title": "حجوزاتي في Anando",
+    "anandoEmpty": "لم تحجز أي رحلة Anando بعد."
+  },
+  "demLeguiHistory": {
+    "title": "سجل Dem Légui",
+    "empty": "ليس لديك أي طلب Dem Légui."
   },
   "newDelivery": {
     "title": "توصيل جديد",
@@ -381,6 +384,7 @@
     "submit": "اطلب رحلة",
     "submitWithFare": "اطلب — {{amount}} FCFA",
     "tripToLabel": "إلى {{city}}",
+    "walletWithBalance": "المحفظة {{balance}}",
     "status": {
       "pending": "جارٍ البحث عن سائق…",
       "matched": "تم العثور على سائق",
@@ -452,10 +456,11 @@
     "passengers_other": "ركاب ({{count}})",
     "noPassengers": "لم ينضم أحد إلى هذه الرحلة بعد.",
     "cancelRide": "إلغاء رحلة أناندو هذه",
-    "cancelConfirm": "سيتم استرداد أموال جميع الركاب المؤكدين وإشعارهم. هل تريد تأكيد الإلغاء؟",
+    "cancelConfirm": "سيتم إشعار جميع الركاب المؤكدين. هل تريد تأكيد الإلغاء؟",
     "joinTitle": "الانضمام إلى هذه الرحلة",
     "seatsToJoin": "عدد المقاعد",
     "joinSubmit": "انضمام — {{amount}} FCFA",
+    "walletWithBalance": "المحفظة {{balance}}",
     "newRideToast": "🚗 رحلة أناندو جديدة: {{origin}} → {{destination}}",
     "newRideToastView": "عرض ←",
     "tabs": {
@@ -469,7 +474,7 @@
     "modifyBooking": "تعديل حجزي",
     "modifySubmit": "حفظ التعديلات",
     "cancelBooking": "إلغاء حجزي",
-    "cancelBookingConfirm": "سيتم استرداد أموالك إذا دفعت عبر المحفظة. هل تريد تأكيد الإلغاء؟",
+    "cancelBookingConfirm": "هل تريد تأكيد الإلغاء؟",
     "bookingStatus": {
       "confirmed": "مؤكدة",
       "cancelled": "ملغاة"

@@ -203,7 +203,6 @@ export function AnandoRideDetailPage() {
   }
 
   const priceTotal = ride.price_per_seat * (Number(seats) || 0);
-  const insufficientWalletFunds = paymentMethod === 'wallet' && walletBalance !== null && walletBalance < priceTotal;
   const canJoin = ride.is_joinable && Number(seats) > 0 && Number(seats) <= ride.available_seats && !ride.is_mine;
 
   const handleJoin = async () => {
@@ -497,14 +496,10 @@ export function AnandoRideDetailPage() {
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                 <WalletIcon size={15} color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted} detailColor={paymentMethod === 'wallet' ? colors.accentSoft : colors.surface} />
-                {t('common.wallet')}
+                {t('anando.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
               </span>
             </button>
           </div>
-
-          {insufficientWalletFunds && (
-            <p style={{ fontSize: 12.5, color: colors.danger, marginBottom: spacing.sm }}>{t('common.insufficientFunds')}</p>
-          )}
 
           {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
 
@@ -512,7 +507,7 @@ export function AnandoRideDetailPage() {
             label={t('anando.joinSubmit', { amount: priceTotal.toLocaleString() })}
             onClick={handleJoin}
             loading={joining}
-            disabled={!canJoin || insufficientWalletFunds}
+            disabled={!canJoin}
           />
         </>
       )}

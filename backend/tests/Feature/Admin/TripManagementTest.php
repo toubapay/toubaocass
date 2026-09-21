@@ -32,11 +32,12 @@ class TripManagementTest extends TestCase
         $this->actingAs($admin, 'sanctum')->getJson('/api/admin/trips')->assertForbidden();
     }
 
-    public function test_admin_can_cancel_a_trip_and_refund_wallet_bookings(): void
+    public function test_admin_can_cancel_a_trip_without_touching_any_wallet(): void
     {
         $admin = AdminUser::factory()->superAdmin()->create();
         $trip = Trip::factory()->create(['status' => Trip::STATUS_SCHEDULED]);
         $rider = User::factory()->create();
+        $rider->wallet()->create(['balance' => 3000]);
         $booking = Booking::factory()->create([
             'trip_id' => $trip->id,
             'rider_id' => $rider->id,
@@ -51,6 +52,8 @@ class TripManagementTest extends TestCase
 
         $this->assertDatabaseHas('trips', ['id' => $trip->id, 'status' => Trip::STATUS_CANCELLED]);
         $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'status' => Booking::STATUS_CANCELLED]);
+        // Nobody was ever charged for this booking, so cancelling it leaves
+        // the rider's wallet untouched.
         $this->assertDatabaseHas('wallets', ['user_id' => $rider->id, 'balance' => 3000]);
         $this->assertDatabaseHas('audit_logs', ['admin_id' => $admin->id, 'action' => 'trip.cancel']);
     }

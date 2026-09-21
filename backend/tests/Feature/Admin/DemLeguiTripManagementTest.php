@@ -54,13 +54,14 @@ class DemLeguiTripManagementTest extends TestCase
         $this->actingAs($admin, 'sanctum')->getJson('/api/admin/dem-legui-trips')->assertForbidden();
     }
 
-    public function test_admin_can_cancel_a_dem_legui_trip_and_refund_matched_wallet_riders(): void
+    public function test_admin_can_cancel_a_dem_legui_trip_without_touching_any_wallet(): void
     {
         $admin = AdminUser::factory()->superAdmin()->create();
         $driver = User::factory()->driver()->create();
         $car = Car::factory()->create(['driver_id' => $driver->id]);
         $trip = $this->createTrip($driver, $car, ['available_seats' => $car->seats - 1]);
         $rider = User::factory()->create();
+        $rider->wallet()->create(['balance' => 1500]);
         $matchedRequest = DemLeguiRequest::factory()->create([
             'rider_id' => $rider->id,
             'dem_legui_trip_id' => $trip->id,
@@ -75,6 +76,8 @@ class DemLeguiTripManagementTest extends TestCase
 
         $this->assertDatabaseHas('dem_legui_trips', ['id' => $trip->id, 'status' => DemLeguiTrip::STATUS_CANCELLED]);
         $this->assertDatabaseHas('dem_legui_requests', ['id' => $matchedRequest->id, 'status' => DemLeguiRequest::STATUS_CANCELLED]);
+        // Nobody was ever charged for this request, so cancelling it leaves
+        // the rider's wallet untouched.
         $this->assertDatabaseHas('wallets', ['user_id' => $rider->id, 'balance' => 1500]);
         $this->assertDatabaseHas('audit_logs', ['admin_id' => $admin->id, 'action' => 'dem_legui_trip.cancel']);
     }

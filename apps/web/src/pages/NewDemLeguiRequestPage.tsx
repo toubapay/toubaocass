@@ -95,9 +95,6 @@ export function NewDemLeguiRequestPage() {
   const canSubmit =
     pickupAddress.trim() !== '' && pickupLat != null && pickupLng != null && destination != null && Number(seats) > 0 && quote != null;
 
-  const insufficientWalletFunds =
-    paymentMethod === 'wallet' && walletBalance !== null && quote !== null && walletBalance < quote.fare_total;
-
   const handleSubmit = async () => {
     if (!canSubmit || pickupLat == null || pickupLng == null || !destination) return;
     setSubmitting(true);
@@ -224,11 +221,10 @@ export function NewDemLeguiRequestPage() {
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <WalletIcon size={15} color={paymentMethod === 'wallet' ? colors.primary : colors.textMuted} detailColor={paymentMethod === 'wallet' ? colors.accentSoft : colors.surface} />
-              {t('common.wallet')}
+              {t('demLegui.walletWithBalance', { balance: walletBalance !== null ? `(${walletBalance.toLocaleString()} F)` : '' })}
             </span>
           </button>
         </div>
-        {insufficientWalletFunds && <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.sm }}>{t('common.insufficientFunds')}</p>}
       </div>
 
       {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
@@ -237,7 +233,7 @@ export function NewDemLeguiRequestPage() {
         label={quote ? t('demLegui.submitWithFare', { amount: quote.fare_total.toLocaleString() }) : t('demLegui.submit')}
         onClick={handleSubmit}
         loading={submitting}
-        disabled={!canSubmit || insufficientWalletFunds}
+        disabled={!canSubmit}
       />
     </div>
   );

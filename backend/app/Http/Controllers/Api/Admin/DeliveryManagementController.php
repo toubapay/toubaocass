@@ -8,9 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\AdminDeliveryResource;
 use App\Models\Delivery;
 use App\Models\DriverProfile;
-use App\Models\WalletTransaction;
 use App\Services\AuditLogService;
-use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -35,22 +33,18 @@ class DeliveryManagementController extends Controller
         return AdminDeliveryResource::collection($deliveries);
     }
 
-    public function cancel(Request $request, Delivery $delivery, WalletService $walletService)
+    public function cancel(Request $request, Delivery $delivery)
     {
         if (! $delivery->isCancellable()) {
             return response()->json(['message' => 'Cette livraison ne peut plus être annulée.'], 422);
         }
 
-        DB::transaction(function () use ($delivery, $walletService) {
+        DB::transaction(function () use ($delivery) {
             /** @var Delivery $locked */
             $locked = Delivery::where('id', $delivery->id)->lockForUpdate()->firstOrFail();
 
-            // No driver-side reversal needed — the driver isn't credited
-            // until delivered.
-            if ($locked->status === Delivery::STATUS_ACCEPTED && $locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
-                $walletService->credit($locked->sender, $locked->fee, null, WalletTransaction::TYPE_REFUND, "Remboursement de livraison #{$locked->id} (annulée par un administrateur)");
-            }
-
+            // No wallet refund needed — nobody was ever charged for this
+            // delivery (payment only happens once it's delivered).
             $locked->update(['status' => Delivery::STATUS_CANCELLED, 'cancelled_at' => now()]);
         });
 

@@ -170,7 +170,7 @@ class DeliveryController extends Controller
         return response()->json(['message' => 'Alerte SOS envoyée.']);
     }
 
-    public function destroy(Request $request, Delivery $delivery, WalletService $walletService)
+    public function destroy(Request $request, Delivery $delivery)
     {
         $this->authorize('delete', $delivery);
 
@@ -178,16 +178,13 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Cette livraison ne peut plus être annulée.'], 422);
         }
 
-        DB::transaction(function () use ($delivery, $walletService) {
+        DB::transaction(function () use ($delivery) {
             /** @var Delivery $locked */
             $locked = Delivery::where('id', $delivery->id)->lockForUpdate()->firstOrFail();
 
-            // No driver-side reversal needed — the driver isn't credited
-            // until delivered (see accept()'s comment).
-            if ($locked->status === Delivery::STATUS_ACCEPTED && $locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
-                $walletService->credit($locked->sender, $locked->fee, null, WalletTransaction::TYPE_REFUND, "Remboursement de livraison #{$locked->id}");
-            }
-
+            // No wallet refund needed — nobody was ever charged (payment
+            // only happens once the delivery is actually delivered, see
+            // deliver()).
             $locked->update(['status' => Delivery::STATUS_CANCELLED, 'cancelled_at' => now()]);
         });
 
@@ -234,7 +231,7 @@ class DeliveryController extends Controller
         return new DeliveryResource($delivery->load(['sender', 'driver.driverProfile']));
     }
 
-    public function accept(Request $request, Delivery $delivery, WalletService $walletService, DeliveryPricingService $pricing)
+    public function accept(Request $request, Delivery $delivery, DeliveryPricingService $pricing)
     {
         $user = $request->user();
 
@@ -244,7 +241,7 @@ class DeliveryController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($delivery, $user, $walletService, $pricing) {
+        DB::transaction(function () use ($delivery, $user, $pricing) {
             // Locks the driver's own profile row first so two concurrent
             // accept() calls from the same driver (different deliveries)
             // serialize instead of both reading the active-count below
@@ -280,12 +277,10 @@ class DeliveryController extends Controller
                 'accepted_at' => now(),
             ]);
 
-            // The sender pays up front; the driver is only credited their net
-            // earnings once the delivery is actually delivered (see
-            // deliver()) — same reasoning as Trip bookings.
-            if ($locked->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
-                $walletService->charge($locked->sender, $locked->fee, null, "Paiement de livraison #{$locked->id}");
-            }
+            // No wallet interaction here — a wallet-paying sender is only
+            // charged (and the driver credited) once the delivery is
+            // actually delivered (see deliver()) — same reasoning as Trip
+            // bookings.
         });
 
         DeliveryAccepted::dispatch($delivery->fresh());
@@ -342,6 +337,16 @@ class DeliveryController extends Controller
             $delivery->update(['status' => Delivery::STATUS_DELIVERED, 'delivered_at' => now()]);
             $delivery = $commission->applyToDelivery($delivery);
             $net = $delivery->fee - $delivery->commission_amount;
+
+            // Money moves here, at delivery, not at accept() — a
+            // wallet-paying sender's balance is allowed to go negative
+            // (debit() rather than charge()) so an insufficient balance
+            // never blocks the driver from completing a delivery they
+            // already made.
+            if ($delivery->payment_method === Delivery::PAYMENT_METHOD_WALLET) {
+                $walletService->debit($delivery->sender, $delivery->fee, null, WalletTransaction::TYPE_PAYMENT, "Paiement de livraison #{$delivery->id} (livrée)");
+            }
+
             $walletService->credit($delivery->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu de livraison #{$delivery->id} (livrée)");
         });
 

@@ -113,9 +113,6 @@ export function NewDeliveryPage() {
 
   const canSubmit = senderComplete && receiverComplete && quote != null;
 
-  const insufficientWalletFunds =
-    paymentMethod === 'wallet' && walletBalance !== null && quote !== null && walletBalance < quote.fee;
-
   const handleSubmit = async () => {
     if (!canSubmit || pickupLat == null || pickupLng == null || receiverLat == null || receiverLng == null) return;
     setSubmitting(true);
@@ -375,17 +372,6 @@ export function NewDeliveryPage() {
             </span>
           </button>
         </div>
-        {insufficientWalletFunds && (
-          <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
-            {t('common.insufficientFunds')}{' '}
-            <button
-              onClick={() => navigate('/wallet')}
-              style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
-            >
-              {t('common.topUp')}
-            </button>
-          </p>
-        )}
       </div>
 
       {error && <p style={{ color: colors.danger, fontSize: 14, marginBottom: spacing.md }}>{error}</p>}
@@ -400,7 +386,7 @@ export function NewDeliveryPage() {
         }
         onClick={handleSubmit}
         loading={submitting}
-        disabled={!canSubmit || insufficientWalletFunds}
+        disabled={!canSubmit}
       />
     </div>
   );

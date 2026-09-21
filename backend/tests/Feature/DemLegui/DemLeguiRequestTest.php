@@ -387,7 +387,7 @@ class DemLeguiRequestTest extends TestCase
         $this->assertDatabaseHas('dem_legui_requests', ['id' => $request->id, 'status' => DemLeguiRequest::STATUS_CANCELLED]);
     }
 
-    public function test_cancelling_a_wallet_paid_matched_request_refunds_rider_driver_was_never_credited(): void
+    public function test_cancelling_a_wallet_paid_matched_request_does_not_touch_any_wallet(): void
     {
         $rider = User::factory()->create();
         $rider->wallet()->create(['balance' => 5000]);
@@ -408,9 +408,9 @@ class DemLeguiRequestTest extends TestCase
             ->postJson("/api/driver/dem-legui/requests/{$request->id}/accept", ['car_id' => $car->id])
             ->json('id');
 
-        // Rider pays up front; the driver isn't credited until the trip
-        // completes (see DemLeguiEarningsTest).
-        $this->assertEquals(4000, $rider->wallet->fresh()->balance);
+        // Nobody is charged or credited until the trip completes (see
+        // DemLeguiEarningsTest).
+        $this->assertEquals(5000, $rider->wallet->fresh()->balance);
         $this->assertEquals(0, $driver->wallet->fresh()->balance);
 
         $this->actingAs($rider, 'sanctum')

@@ -9,9 +9,7 @@ use App\Models\Car;
 use App\Models\DemLeguiRequest;
 use App\Models\DemLeguiTrip;
 use App\Models\DriverProfile;
-use App\Models\WalletTransaction;
 use App\Services\AuditLogService;
-use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -45,12 +43,12 @@ class DemLeguiTripManagementController extends Controller
         return DemLeguiTripResource::collection($trips);
     }
 
-    public function cancel(Request $request, DemLeguiTrip $demLeguiTrip, WalletService $walletService)
+    public function cancel(Request $request, DemLeguiTrip $demLeguiTrip)
     {
         $cancelledRequestIds = [];
 
         try {
-            DB::transaction(function () use ($demLeguiTrip, $walletService, &$cancelledRequestIds) {
+            DB::transaction(function () use ($demLeguiTrip, &$cancelledRequestIds) {
                 /** @var DemLeguiTrip $locked */
                 $locked = DemLeguiTrip::where('id', $demLeguiTrip->id)->lockForUpdate()->firstOrFail();
 
@@ -60,13 +58,9 @@ class DemLeguiTripManagementController extends Controller
 
                 $matchedRequests = $locked->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->get();
 
+                // No wallet refund needed — nobody was ever charged for
+                // these requests (payment only happens at trip completion).
                 foreach ($matchedRequests as $attachedRequest) {
-                    // No driver-side reversal needed — the driver isn't
-                    // credited until the trip completes.
-                    if ($attachedRequest->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
-                        $walletService->credit($attachedRequest->rider, $attachedRequest->fare_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Dem Légui #{$attachedRequest->id} (trajet annulé par un administrateur)");
-                    }
-
                     $attachedRequest->update(['status' => DemLeguiRequest::STATUS_CANCELLED]);
                     $cancelledRequestIds[] = $attachedRequest->id;
                 }
