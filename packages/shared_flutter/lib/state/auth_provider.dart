@@ -35,6 +35,23 @@ class AuthProvider extends ChangeNotifier {
     return result.user;
   }
 
+  /// [role] is 'rider' or 'driver' — hardcoded per app at the call site,
+  /// since there's no token yet at this point for the backend to infer it.
+  Future<User> confirmPin(String phone, String pin, {required String role}) async {
+    final result = await auth_api.loginWithPin(phone, pin, role);
+    await ApiClient.instance.setToken(result.token);
+    _user = result.user;
+    notifyListeners();
+    return result.user;
+  }
+
+  Future<User> setPin(String pin) async {
+    final updated = await auth_api.setPin(pin);
+    _user = updated;
+    notifyListeners();
+    return updated;
+  }
+
   Future<void> refreshUser() async {
     _user = await auth_api.fetchMe();
     notifyListeners();

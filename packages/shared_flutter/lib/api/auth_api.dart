@@ -17,6 +17,21 @@ Future<AuthResult> verifyOtp(String phone, String code) async {
   return AuthResult(token: data['token'] as String, user: User.fromJson(data['user'] as Map<String, dynamic>));
 }
 
+/// Returning-user shortcut: phone + 4-digit PIN instead of a fresh SMS OTP
+/// round-trip. [role] must be 'rider' or 'driver' — there's no token yet at
+/// this point for the backend to infer it from.
+Future<AuthResult> loginWithPin(String phone, String pin, String role) async {
+  final response = await ApiClient.instance.dio.post('/auth/pin/login', data: {'phone': phone, 'role': role, 'pin': pin});
+  final data = response.data as Map<String, dynamic>;
+  return AuthResult(token: data['token'] as String, user: User.fromJson(data['user'] as Map<String, dynamic>));
+}
+
+/// Sets (or changes) the PIN used by [loginWithPin] above.
+Future<User> setPin(String pin) async {
+  final response = await ApiClient.instance.dio.post('/auth/pin/set', data: {'pin': pin});
+  return User.fromJson(response.data as Map<String, dynamic>);
+}
+
 Future<User> fetchMe() async {
   final response = await ApiClient.instance.dio.get('/me');
   return User.fromJson(response.data as Map<String, dynamic>);

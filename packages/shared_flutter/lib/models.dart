@@ -39,6 +39,7 @@ class User {
   final String role;
   final bool phoneVerified;
   final bool profileComplete;
+  final bool hasPin;
   final DriverProfile? driverProfile;
   final String createdAt;
 
@@ -50,6 +51,7 @@ class User {
     required this.role,
     required this.phoneVerified,
     required this.profileComplete,
+    required this.hasPin,
     required this.driverProfile,
     required this.createdAt,
   });
@@ -62,6 +64,7 @@ class User {
         role: json['role'] as String,
         phoneVerified: json['phone_verified'] as bool? ?? false,
         profileComplete: json['profile_complete'] as bool? ?? false,
+        hasPin: json['has_pin'] as bool? ?? false,
         driverProfile: json['driver_profile'] == null
             ? null
             : DriverProfile.fromJson(json['driver_profile'] as Map<String, dynamic>),
@@ -76,6 +79,7 @@ class User {
         role: role,
         phoneVerified: phoneVerified,
         profileComplete: profileComplete,
+        hasPin: hasPin,
         driverProfile: driverProfile ?? this.driverProfile,
         createdAt: createdAt,
       );

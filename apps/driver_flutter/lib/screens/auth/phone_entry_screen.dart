@@ -5,6 +5,8 @@ import '../../api/client.dart';
 import '../../state/auth_provider.dart';
 import '../../theme.dart';
 
+enum _Mode { login, register }
+
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key, required this.onSent});
 
@@ -16,8 +18,18 @@ class PhoneEntryScreen extends StatefulWidget {
 
 class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
   final phoneController = TextEditingController(text: '+221');
+  final pinController = TextEditingController();
+  _Mode mode = _Mode.login;
   bool loading = false;
   String? error;
+
+  void _switchMode(_Mode next) {
+    setState(() {
+      mode = next;
+      pinController.clear();
+      error = null;
+    });
+  }
 
   Future<void> _submit() async {
     setState(() {
@@ -26,13 +38,24 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
     });
     try {
       final phone = phoneController.text.trim();
-      await context.read<AuthProvider>().sendOtp(phone);
-      widget.onSent(phone);
+      if (mode == _Mode.login) {
+        await context.read<AuthProvider>().confirmPin(phone, pinController.text.trim(), role: 'driver');
+        // No navigation needed — the router's redirect re-evaluates once
+        // AuthProvider.user flips to authenticated.
+      } else {
+        await context.read<AuthProvider>().sendOtp(phone);
+        widget.onSent(phone);
+      }
     } catch (e) {
       setState(() => error = extractErrorMessage(e));
     } finally {
-      setState(() => loading = false);
+      if (mounted) setState(() => loading = false);
     }
+  }
+
+  bool get _isSubmitDisabled {
+    final phoneOk = phoneController.text.trim().length >= 8;
+    return mode == _Mode.login ? !phoneOk || pinController.text.length < 4 : !phoneOk;
   }
 
   @override
@@ -49,22 +72,64 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
               const SizedBox(height: AppSpacing.sm),
               const Text('Publiez vos trajets et prenez des passagers partout au Sénégal.',
                   style: TextStyle(fontSize: 18, color: AppColors.textMuted)),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _switchMode(_Mode.login),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: mode == _Mode.login ? AppColors.primary : null,
+                        foregroundColor: mode == _Mode.login ? Colors.white : AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                      child: const Text('Se connecter'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _switchMode(_Mode.register),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: mode == _Mode.register ? AppColors.primary : null,
+                        foregroundColor: mode == _Mode.register ? Colors.white : AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                      child: const Text('Créer un compte'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Numéro de téléphone',
                   hintText: '+221 77 000 00 00',
-                  errorText: error,
                 ),
+                onChanged: (_) => setState(() {}),
               ),
+              if (mode == _Mode.login) ...[
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: pinController,
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                  maxLength: 4,
+                  decoration: InputDecoration(labelText: 'Code PIN', counterText: '', errorText: error),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ] else if (error != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 13)),
+              ],
               const SizedBox(height: AppSpacing.md),
               ElevatedButton(
-                onPressed: loading ? null : _submit,
+                onPressed: loading || _isSubmitDisabled ? null : _submit,
                 child: loading
                     ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Continuer'),
+                    : Text(mode == _Mode.login ? 'Se connecter' : 'Continuer'),
               ),
             ],
           ),
