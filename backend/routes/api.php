@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\DeliveryManagementController as AdminDeliveryManagementController;
+use App\Http\Controllers\Api\Admin\DemLeguiTripManagementController as AdminDemLeguiTripManagementController;
 use App\Http\Controllers\Api\Admin\DriverDirectoryController as AdminDriverDirectoryController;
 use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsController;
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
@@ -340,6 +341,10 @@ Route::prefix('admin')->group(function () {
             Route::get('deliveries', [AdminDeliveryManagementController::class, 'index']);
             Route::post('deliveries/{delivery}/cancel', [AdminDeliveryManagementController::class, 'cancel']);
             Route::put('deliveries/{delivery}/driver', [AdminDeliveryManagementController::class, 'assignDriver']);
+
+            Route::get('dem-legui-trips', [AdminDemLeguiTripManagementController::class, 'index']);
+            Route::post('dem-legui-trips/{demLeguiTrip}/cancel', [AdminDemLeguiTripManagementController::class, 'cancel']);
+            Route::put('dem-legui-trips/{demLeguiTrip}/driver', [AdminDemLeguiTripManagementController::class, 'assignDriver']);
 
             Route::get('drivers/eligible', [AdminDriverDirectoryController::class, 'eligible']);
         });

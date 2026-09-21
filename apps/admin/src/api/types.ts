@@ -351,6 +351,56 @@ export interface EligibleDriver {
   phone: string;
 }
 
+export type DemLeguiTripStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
+
+export type DemLeguiRequestStatus = 'pending' | 'matched' | 'cancelled' | 'expired';
+
+export interface DemLeguiCar {
+  id: number;
+  make: string;
+  model: string;
+  plate_number: string;
+  seats: number;
+}
+
+export interface DemLeguiCity {
+  id: number;
+  name: string;
+}
+
+export interface DemLeguiClient {
+  id: number;
+  rider: { id: number; name: string | null; phone: string };
+  pickup_address: string;
+  seats_requested: number;
+  fare_total: number;
+  payment_method: 'cash' | 'wallet';
+  status: DemLeguiRequestStatus;
+}
+
+export interface AdminDemLeguiTrip {
+  id: number;
+  driver: {
+    id: number;
+    name: string | null;
+    phone: string;
+    rating: number;
+  };
+  car: DemLeguiCar | null;
+  destination_city: DemLeguiCity | null;
+  total_seats: number;
+  available_seats: number;
+  price_per_seat: number;
+  status: DemLeguiTripStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  current_latitude: number | null;
+  current_longitude: number | null;
+  current_location_updated_at: string | null;
+  created_at: string;
+  requests: DemLeguiClient[];
+}
+
 export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
