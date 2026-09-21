@@ -47,12 +47,19 @@ class DriverAvailabilityController extends Controller
         return new DriverProfileResource($profile->fresh());
     }
 
+    /**
+     * Also used to persist a driver's manually-set/auto-detected base
+     * location from the header location picker, not just the periodic
+     * foreground ping sent while online — so this intentionally works
+     * whether the driver is online or not (unlike the ping, which only
+     * ever fires while online in the first place).
+     */
     public function updateLocation(UpdateDriverLocationRequest $request)
     {
         $profile = $request->user()->driverProfile;
 
-        if (! $profile || ! $profile->is_online) {
-            return response()->json(['message' => 'Vous devez être en ligne pour partager votre position.'], 422);
+        if (! $profile) {
+            return response()->json(['message' => 'Profil conducteur introuvable.'], 422);
         }
 
         $profile->update([

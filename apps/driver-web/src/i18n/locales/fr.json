@@ -116,6 +116,7 @@
     }
   },
   "myLocationBar": {
+    "ariaLabel": "Ma position",
     "myPosition": "Ma position",
     "currentPositionFallback": "Position actuelle",
     "modalTitle": "Ma position",
@@ -125,12 +126,23 @@
   "addressMapPicker": {
     "placeholder": "Sacré-Cœur 3, Dakar",
     "searchPlaceholder": "Rechercher une adresse ou un lieu...",
+    "locating": "Localisation…",
     "positionSaved": "Position enregistrée ✓",
     "useMyLocation": "Utiliser ma position actuelle",
+    "dragHint": "Faites glisser le repère pour ajuster l'emplacement exact.",
     "dragHintTouch": "Touchez la carte pour ajuster l'emplacement exact.",
     "mapPreviewMobile": "Une carte interactive pour placer un repère est disponible dans l'application mobile.",
     "hintTouch": "Touchez la carte pour placer un repère à l'endroit où les passagers doivent vous retrouver.",
     "pinPlacedAt": "Repère placé à {{lat}}, {{lng}}"
+  },
+  "driverLocationBar": {
+    "ariaLabel": "Ma base de départ",
+    "myPosition": "Ma base",
+    "modalTitle": "Ma position de départ",
+    "hint": "Cette position est utilisée pour vous proposer des demandes Dem Légui à proximité, même hors ligne.",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "saveError": "Impossible d'enregistrer votre position."
   },
   "tripUrgencyBadge": {
     "urgent": "⚡ Départ imminent",

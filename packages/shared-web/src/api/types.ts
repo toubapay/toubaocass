@@ -22,6 +22,8 @@ export interface DriverProfile {
   approved_at: string | null;
   is_online: boolean;
   last_seen_at: string | null;
+  current_latitude: number | null;
+  current_longitude: number | null;
 }
 
 export interface User {
