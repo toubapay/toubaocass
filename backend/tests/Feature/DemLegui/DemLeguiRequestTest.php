@@ -160,6 +160,31 @@ class DemLeguiRequestTest extends TestCase
         $this->assertEquals(0, DemLeguiTrip::where('driver_id', $driverB->id)->count());
     }
 
+    public function test_driver_cannot_accept_a_new_request_while_their_trip_is_in_progress(): void
+    {
+        $rider1 = User::factory()->create();
+        $rider2 = User::factory()->create();
+        $destination = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
+        $driver = $this->onlineDriver();
+        $car = Car::where('driver_id', $driver->id)->first();
+
+        $requestA = DemLeguiRequest::factory()->create(['rider_id' => $rider1->id, 'destination_city_id' => $destination->id]);
+        $trip = $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$requestA->id}/accept", ['car_id' => $car->id])
+            ->assertOk()
+            ->json();
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/dem-legui/trips/{$trip['id']}/start")->assertOk();
+
+        $requestB = DemLeguiRequest::factory()->create(['rider_id' => $rider2->id, 'destination_city_id' => $destination->id]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/dem-legui/requests/{$requestB->id}/accept", ['car_id' => $car->id])
+            ->assertStatus(422);
+
+        $this->assertEquals(1, DemLeguiTrip::where('driver_id', $driver->id)->count());
+    }
+
     public function test_accepting_requires_online_and_kyc_approved_driver(): void
     {
         $rider = User::factory()->create();
@@ -212,6 +237,11 @@ class DemLeguiRequestTest extends TestCase
 
     public function test_a_request_to_a_different_destination_does_not_join_the_open_trip(): void
     {
+        // A driver is limited to one active (open or in_progress) Dem Légui
+        // trip at a time — see test_driver_cannot_accept_a_second_request_
+        // to_a_different_destination_while_a_trip_is_open below — so a
+        // request to an unrelated destination is rejected outright rather
+        // than silently spinning up a second concurrent trip.
         $riderA = User::factory()->create();
         $riderB = User::factory()->create();
         $destinationA = City::factory()->create(['latitude' => 14.85, 'longitude' => -17.06]);
@@ -228,9 +258,9 @@ class DemLeguiRequestTest extends TestCase
 
         $this->actingAs($driver, 'sanctum')
             ->postJson("/api/driver/dem-legui/requests/{$requestB->id}/accept", ['car_id' => $car->id])
-            ->assertOk();
+            ->assertStatus(422);
 
-        $this->assertEquals(2, DemLeguiTrip::count());
+        $this->assertEquals(1, DemLeguiTrip::count());
     }
 
     public function test_accepting_dispatches_matched_event_to_notify_rider(): void

@@ -38,6 +38,7 @@ class TripsListScreen extends StatefulWidget {
     required this.onPostTrip,
     required this.onOpenWallet,
     required this.onOpenDemLegui,
+    required this.onOpenDemLeguiTrip,
     required this.onOpenAnando,
     required this.onOpenDeliveries,
     required this.onOpenInbox,
@@ -47,6 +48,7 @@ class TripsListScreen extends StatefulWidget {
   final VoidCallback onPostTrip;
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenDemLegui;
+  final void Function(int tripId) onOpenDemLeguiTrip;
   final VoidCallback onOpenAnando;
   final VoidCallback onOpenDeliveries;
   final VoidCallback onOpenInbox;
@@ -150,7 +152,9 @@ class _TripsListScreenState extends State<TripsListScreen> {
                   if (moduleStatus.isEnabled('dem_legui'))
                     DemLeguiAvailableTile(
                       onTap: widget.onOpenDemLegui,
+                      onOpenTrip: widget.onOpenDemLeguiTrip,
                       fetchAvailable: fetchAvailableDemLeguiRequests,
+                      fetchMyTrips: fetchMyDemLeguiTrips,
                       isOnline: isOnline,
                     ),
                   if (moduleStatus.isEnabled('anando'))

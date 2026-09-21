@@ -9,39 +9,57 @@ import '../theme.dart';
 
 const _pollInterval = Duration(seconds: 20);
 
-/// Driver Home Screen tile for available (not-yet-accepted) Dem Légui
-/// requests — hidden entirely when there's nothing nearby to accept, a
-/// green count badge once some are, plus a local notification the instant a
-/// newly-posted one is detected. Mirrors DeliveryAvailableTile (same 20s
-/// poll, same seen-ids diffing) and the web driver app's
-/// DemLeguiAvailableCard. Unlike deliveries, the backend's available-Dem
-/// Légui-requests endpoint 422s while the driver is offline, so polling is
-/// gated on [isOnline] — the tile stays hidden while offline too.
+/// Driver Home Screen tile for Dem Légui: while the driver has no active
+/// trip, mirrors DeliveryAvailableTile (hidden with nothing nearby, a green
+/// count badge once some are, a local notification on a newly-posted one).
+/// A driver is limited to one active (open or in_progress) Dem Légui trip
+/// at a time — the backend rejects accepting a new one otherwise — so once
+/// they have one, this tile switches to showing it instead of a browse
+/// action that would just fail. The available-requests endpoint 422s while
+/// offline, so that half of the polling is gated on [isOnline]; the active
+/// trip poll isn't, since a driver mid-trip shouldn't lose it just because
+/// they went offline.
 ///
-/// Takes the fetch call as a parameter rather than importing it directly:
-/// dem_legui_api.dart lives per-app, so this widget — shared between apps —
-/// can't depend on it.
+/// Takes both fetch calls as parameters rather than importing them
+/// directly: dem_legui_api.dart lives per-app, so this widget — shared
+/// between apps — can't depend on it.
 class DemLeguiAvailableTile extends StatefulWidget {
-  const DemLeguiAvailableTile({super.key, required this.onTap, required this.fetchAvailable, required this.isOnline});
+  const DemLeguiAvailableTile({
+    super.key,
+    required this.onTap,
+    required this.onOpenTrip,
+    required this.fetchAvailable,
+    required this.fetchMyTrips,
+    required this.isOnline,
+  });
 
   final VoidCallback onTap;
+  final void Function(int tripId) onOpenTrip;
   final Future<Paginated<DemLeguiRequest>> Function() fetchAvailable;
+  final Future<Paginated<DemLeguiTrip>> Function() fetchMyTrips;
   final bool isOnline;
 
   @override
   State<DemLeguiAvailableTile> createState() => _DemLeguiAvailableTileState();
 }
 
+const _activeTripStatuses = {'open', 'in_progress'};
+
 class _DemLeguiAvailableTileState extends State<DemLeguiAvailableTile> {
   int _total = 0;
+  DemLeguiTrip? _activeTrip;
   Set<int>? _seenIds;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _loadActiveTrip();
     _load();
-    _timer = Timer.periodic(_pollInterval, (_) => _load());
+    _timer = Timer.periodic(_pollInterval, (_) {
+      _loadActiveTrip();
+      _load();
+    });
   }
 
   @override
@@ -56,8 +74,19 @@ class _DemLeguiAvailableTileState extends State<DemLeguiAvailableTile> {
     super.dispose();
   }
 
+  Future<void> _loadActiveTrip() async {
+    try {
+      final result = await widget.fetchMyTrips();
+      if (!mounted) return;
+      final matches = result.data.where((t) => _activeTripStatuses.contains(t.status));
+      setState(() => _activeTrip = matches.isEmpty ? null : matches.first);
+    } catch (_) {
+      // Best-effort — keep the last known trip on a transient poll failure.
+    }
+  }
+
   Future<void> _load() async {
-    if (!widget.isOnline) {
+    if (!widget.isOnline || _activeTrip != null) {
       if (mounted) setState(() => _total = 0);
       return;
     }
@@ -83,6 +112,45 @@ class _DemLeguiAvailableTileState extends State<DemLeguiAvailableTile> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTrip = _activeTrip;
+    if (activeTrip != null) {
+      final inProgress = activeTrip.status == 'in_progress';
+      return InkWell(
+        onTap: () => widget.onOpenTrip(activeTrip.id),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          margin: const EdgeInsets.only(bottom: AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.primary),
+          ),
+          child: Row(
+            children: [
+              const Text('🚕', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Vers ${activeTrip.destinationCity?.name ?? '?'}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                    ),
+                    Text(
+                      inProgress ? 'Trajet en cours — appuyez pour suivre' : 'Trajet accepté — appuyez pour gérer',
+                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_total == 0) return const SizedBox.shrink();
 
     return InkWell(

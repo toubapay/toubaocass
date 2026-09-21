@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { fetchAvailableDemLeguiRequests } from '../api/demLegui';
-import type { DemLeguiRequest } from '../api/types';
+import { fetchAvailableDemLeguiRequests, fetchMyDemLeguiTrips } from '../api/demLegui';
+import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
 import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
@@ -12,17 +12,23 @@ const POLL_INTERVAL_MS = 20000;
 const VISIBLE_DURATION_MS = 4000;
 const FADE_DURATION_MS = 350;
 
+const ACTIVE_TRIP_STATUSES = new Set(['open', 'in_progress']);
+
 function playBeep() {
   new Audio(`${import.meta.env.BASE_URL}sounds/anando_beep.wav`).play().catch(() => {});
 }
 
 /**
- * Home page Dem Légui availability card — mirrors DeliveryAvailableCard's
- * pattern (badge count, hidden once nothing's available, toast+sound on a
- * new nearby request) instead of the static "browse requests" button this
- * replaced, which stayed visible even with nothing to accept. The backend's
- * available-requests endpoint 422s while the driver is offline, so polling
- * only runs while online — offline naturally renders nothing too.
+ * Home page Dem Légui tile: while the driver has no active trip, mirrors
+ * DeliveryAvailableCard's pattern (badge count, hidden once nothing's
+ * available, toast+sound on a new nearby request). A driver is limited to
+ * one active (open or in_progress) Dem Légui trip at a time — the backend
+ * rejects accepting a new one otherwise — so once they have one, this tile
+ * switches to showing it instead of a browse action that would just fail.
+ * The available-requests endpoint also 422s while offline, so that half of
+ * the polling only runs while online — offline naturally renders nothing
+ * (unless there's still an active trip to show, which isn't gated on
+ * online status).
  */
 export function DemLeguiAvailableCard() {
   const { t } = useTranslation();
@@ -30,6 +36,7 @@ export function DemLeguiAvailableCard() {
   const { user } = useAuth();
   const isOnline = user?.driver_profile?.is_online ?? false;
 
+  const [activeTrip, setActiveTrip] = useState<DemLeguiTrip | null>(null);
   const [total, setTotal] = useState(0);
   const [queue, setQueue] = useState<DemLeguiRequest[]>([]);
   const [current, setCurrent] = useState<DemLeguiRequest | null>(null);
@@ -41,8 +48,17 @@ export function DemLeguiAvailableCard() {
     return () => { mounted.current = false; };
   }, []);
 
+  const loadActiveTrip = useCallback(() => {
+    fetchMyDemLeguiTrips()
+      .then((res) => {
+        if (!mounted.current) return;
+        setActiveTrip(res.data.find((trip) => ACTIVE_TRIP_STATUSES.has(trip.status)) ?? null);
+      })
+      .catch(() => {});
+  }, []);
+
   const load = useCallback(() => {
-    if (!isOnline) {
+    if (!isOnline || activeTrip) {
       setTotal(0);
       return;
     }
@@ -65,7 +81,13 @@ export function DemLeguiAvailableCard() {
         playBeep();
       })
       .catch(() => {});
-  }, [isOnline]);
+  }, [isOnline, activeTrip]);
+
+  useEffect(() => {
+    loadActiveTrip();
+    const interval = setInterval(loadActiveTrip, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [loadActiveTrip]);
 
   useEffect(() => {
     load();
@@ -144,6 +166,38 @@ export function DemLeguiAvailableCard() {
       </button>
     </div>
   );
+
+  if (activeTrip) {
+    const inProgress = activeTrip.status === 'in_progress';
+    return (
+      <button
+        onClick={() => navigate(`/dem-legui/trips/${activeTrip.id}`)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.sm,
+          width: '100%',
+          border: `1px solid ${colors.primary}`,
+          borderRadius: radius.md,
+          backgroundColor: colors.primary,
+          padding: spacing.md,
+          marginBottom: spacing.md,
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{ fontSize: 24 }}>🚕</span>
+        <span style={{ flex: 1 }}>
+          <span style={{ display: 'block', fontSize: 16, fontWeight: 700, color: '#fff' }}>
+            {t('demLegui.tripToLabel', { city: activeTrip.destination_city?.name })}
+          </span>
+          <span style={{ display: 'block', fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>
+            {inProgress ? t('demLegui.currentTripInProgress') : t('demLegui.currentTripOpen')}
+          </span>
+        </span>
+      </button>
+    );
+  }
 
   if (total === 0) return toast;
 

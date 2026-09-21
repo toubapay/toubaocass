@@ -245,6 +245,21 @@ class DemLeguiController extends Controller
                 ->first();
 
             if (! $trip) {
+                // The driver already has a live trip elsewhere (a different
+                // destination, or this one but already in_progress so it no
+                // longer matched the STATUS_OPEN lookup above) — one driver,
+                // one trip at a time, so this request must wait instead of
+                // spinning up a second concurrent trip.
+                $hasOtherActiveTrip = DemLeguiTrip::where('driver_id', $driver->id)
+                    ->whereIn('status', [DemLeguiTrip::STATUS_OPEN, DemLeguiTrip::STATUS_IN_PROGRESS])
+                    ->exists();
+
+                if ($hasOtherActiveTrip) {
+                    throw ValidationException::withMessages([
+                        'dem_legui_trip' => ['Vous avez déjà un trajet Dem Légui en cours. Terminez-le avant d\'en accepter un autre.'],
+                    ]);
+                }
+
                 if (! $carId) {
                     throw ValidationException::withMessages([
                         'car_id' => ['Sélectionnez le véhicule utilisé pour ce trajet.'],
