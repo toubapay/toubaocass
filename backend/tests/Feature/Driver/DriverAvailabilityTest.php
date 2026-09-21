@@ -96,15 +96,24 @@ class DriverAvailabilityTest extends TestCase
         ]);
     }
 
-    public function test_offline_driver_cannot_update_location(): void
+    public function test_offline_driver_can_also_update_location(): void
     {
+        // Also used to persist a manually-set/auto-detected base location
+        // from the header location picker, independent of the online-only
+        // periodic ping — so this must work while offline too.
         $driver = User::factory()->driver()->create();
         DriverProfile::factory()->create(['user_id' => $driver->id, 'is_online' => false]);
 
         $this->actingAs($driver, 'sanctum')->postJson('/api/driver/location', [
             'latitude' => 14.70,
             'longitude' => -17.40,
-        ])->assertStatus(422);
+        ])->assertOk();
+
+        $this->assertDatabaseHas('driver_profiles', [
+            'user_id' => $driver->id,
+            'current_latitude' => 14.70,
+            'current_longitude' => -17.40,
+        ]);
     }
 
     public function test_rider_cannot_access_availability_endpoint(): void

@@ -21,6 +21,8 @@ class DriverProfileResource extends JsonResource
                 'approved_at' => null,
                 'is_online' => false,
                 'last_seen_at' => null,
+                'current_latitude' => null,
+                'current_longitude' => null,
             ];
         }
 
@@ -34,6 +36,8 @@ class DriverProfileResource extends JsonResource
             'approved_at' => $this->approved_at,
             'is_online' => (bool) $this->is_online,
             'last_seen_at' => $this->last_seen_at,
+            'current_latitude' => $this->current_latitude !== null ? (float) $this->current_latitude : null,
+            'current_longitude' => $this->current_longitude !== null ? (float) $this->current_longitude : null,
         ];
     }
 }

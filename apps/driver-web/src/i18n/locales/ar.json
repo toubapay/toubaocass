@@ -116,6 +116,7 @@
     }
   },
   "myLocationBar": {
+    "ariaLabel": "موقعي",
     "myPosition": "موقعي",
     "currentPositionFallback": "الموقع الحالي",
     "modalTitle": "موقعي",
@@ -125,12 +126,23 @@
   "addressMapPicker": {
     "placeholder": "السكرى كور 3، داكار",
     "searchPlaceholder": "ابحث عن عنوان أو مكان...",
+    "locating": "تحديد الموقع…",
     "positionSaved": "تم حفظ الموقع ✓",
     "useMyLocation": "استخدام موقعي الحالي",
+    "dragHint": "اسحب العلامة لضبط الموقع الدقيق.",
     "dragHintTouch": "المس الخريطة لضبط الموقع الدقيق.",
     "mapPreviewMobile": "خريطة تفاعلية لتحديد موقع دقيق متاحة في تطبيق الجوال.",
     "hintTouch": "المس الخريطة لوضع علامة في المكان الذي يجب أن يجدك فيه الركاب.",
     "pinPlacedAt": "تم وضع العلامة عند {{lat}}, {{lng}}"
+  },
+  "driverLocationBar": {
+    "ariaLabel": "قاعدة انطلاقي",
+    "myPosition": "قاعدتي",
+    "modalTitle": "موقع انطلاقي",
+    "hint": "يُستخدم هذا الموقع لعرض طلبات دم لقي القريبة منك، حتى وأنت غير متصل.",
+    "save": "حفظ",
+    "close": "إغلاق",
+    "saveError": "تعذر حفظ موقعك."
   },
   "tripUrgencyBadge": {
     "urgent": "⚡ المغادرة وشيكة",
