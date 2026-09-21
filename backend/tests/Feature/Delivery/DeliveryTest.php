@@ -225,7 +225,7 @@ class DeliveryTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_accepting_charges_sender_wallet_but_driver_is_only_credited_when_delivered(): void
+    public function test_accepting_does_not_touch_any_wallet_sender_and_driver_only_settle_when_delivered(): void
     {
         $rider = User::factory()->create();
         app(WalletService::class)->topUp($rider, 10000);
@@ -244,17 +244,19 @@ class DeliveryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'accepted');
 
-        $this->assertSame(7500, Wallet::where('user_id', $rider->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $driver->id)->value('balance'));
 
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/pickup")->assertOk();
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/deliver")->assertOk();
 
+        // fee 2500 charged to the sender.
+        $this->assertSame(7500, Wallet::where('user_id', $rider->id)->value('balance'));
         // fee 2500, default 15% commission -> 375, net 2125.
         $this->assertSame(2125, Wallet::where('user_id', $driver->id)->value('balance'));
     }
 
-    public function test_accepting_fails_if_sender_wallet_balance_is_insufficient(): void
+    public function test_accepting_succeeds_even_if_sender_wallet_balance_is_insufficient_charge_happens_at_delivery(): void
     {
         $rider = User::factory()->create();
         app(WalletService::class)->topUp($rider, 1000);
@@ -270,10 +272,16 @@ class DeliveryTest extends TestCase
 
         $this->actingAs($driver, 'sanctum')
             ->postJson("/api/driver/deliveries/{$delivery->id}/accept")
-            ->assertUnprocessable();
+            ->assertOk();
 
-        $this->assertDatabaseHas('deliveries', ['id' => $delivery->id, 'status' => 'pending', 'driver_id' => null]);
+        $this->assertDatabaseHas('deliveries', ['id' => $delivery->id, 'status' => 'accepted']);
         $this->assertSame(1000, Wallet::where('user_id', $rider->id)->value('balance'));
+
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/pickup")->assertOk();
+        $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/deliver")->assertOk();
+
+        // fee 2500 debited unconditionally — goes negative.
+        $this->assertSame(-1500, Wallet::where('user_id', $rider->id)->value('balance'));
     }
 
     public function test_only_the_assigned_driver_can_mark_picked_up_or_delivered(): void
@@ -350,7 +358,7 @@ class DeliveryTest extends TestCase
         $this->assertDatabaseHas('deliveries', ['id' => $delivery->id, 'status' => 'accepted']);
     }
 
-    public function test_rider_can_cancel_a_pending_or_accepted_delivery_and_wallet_is_refunded_driver_was_never_credited(): void
+    public function test_rider_can_cancel_a_pending_or_accepted_delivery_without_any_wallet_having_been_touched(): void
     {
         $rider = User::factory()->create();
         app(WalletService::class)->topUp($rider, 10000);
@@ -365,7 +373,7 @@ class DeliveryTest extends TestCase
         ]);
 
         $this->actingAs($driver, 'sanctum')->postJson("/api/driver/deliveries/{$delivery->id}/accept")->assertOk();
-        $this->assertSame(7500, Wallet::where('user_id', $rider->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
 
         $this->actingAs($rider, 'sanctum')
             ->deleteJson("/api/deliveries/{$delivery->id}")

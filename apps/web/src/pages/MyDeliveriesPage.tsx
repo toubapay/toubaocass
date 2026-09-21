@@ -61,6 +61,17 @@ export function MyDeliveriesPage() {
             <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, marginTop: spacing.xs, marginBottom: 0 }}>
               {item.fee.toLocaleString()} FCFA
             </p>
+            {item.status === 'delivered' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/deliveries/${item.id}`);
+                }}
+                style={{ border: 'none', background: 'none', color: colors.primary, fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 15, marginTop: spacing.sm }}
+              >
+                {t('rating.rateButton')}
+              </button>
+            )}
           </div>
         ))
       )}

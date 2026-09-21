@@ -22,6 +22,7 @@ const DemLeguiChatPage = lazy(() => import('./pages/DemLeguiChatPage').then((m) 
 const DemLeguiRequestDetailPage = lazy(() => import('./pages/DemLeguiRequestDetailPage').then((m) => ({ default: m.DemLeguiRequestDetailPage })));
 const DeliveryChatPage = lazy(() => import('./pages/DeliveryChatPage').then((m) => ({ default: m.DeliveryChatPage })));
 const DeliveryDetailPage = lazy(() => import('./pages/DeliveryDetailPage').then((m) => ({ default: m.DeliveryDetailPage })));
+const DemLeguiHistoryPage = lazy(() => import('./pages/DemLeguiHistoryPage').then((m) => ({ default: m.DemLeguiHistoryPage })));
 const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const InstantDeparturesPage = lazy(() => import('./pages/InstantDeparturesPage').then((m) => ({ default: m.InstantDeparturesPage })));
 const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
@@ -107,6 +108,7 @@ function AppRoutes() {
         <Route path="/services/dem-legui" element={<NewDemLeguiRequestPage />} />
         <Route path="/services/dem-legui/:id" element={<DemLeguiRequestDetailPage />} />
         <Route path="/services/dem-legui/:requestId/chat" element={<DemLeguiChatPage />} />
+        <Route path="/dem-legui-history" element={<DemLeguiHistoryPage />} />
         <Route path="/deliveries" element={<MyDeliveriesPage />} />
         <Route path="/deliveries/:id" element={<DeliveryDetailPage />} />
         <Route path="/deliveries/:id/edit" element={<NewDeliveryPage />} />

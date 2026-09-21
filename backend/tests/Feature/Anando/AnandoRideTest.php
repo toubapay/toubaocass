@@ -234,7 +234,7 @@ class AnandoRideTest extends TestCase
             ->assertUnprocessable();
     }
 
-    public function test_joining_with_wallet_charges_joiner_but_poster_is_only_credited_when_the_ride_completes(): void
+    public function test_joining_with_wallet_charges_joiner_and_credits_poster_only_when_the_ride_completes(): void
     {
         $poster = User::factory()->create();
         $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1500, 'total_seats' => 3, 'available_seats' => 3, 'status' => AnandoRide::STATUS_OPEN]);
@@ -246,29 +246,38 @@ class AnandoRideTest extends TestCase
             ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2, 'payment_method' => 'wallet'])
             ->assertCreated();
 
-        $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $joiner->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/start")->assertOk();
         $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/complete")->assertOk();
 
+        // price_total 3000 charged to the joiner.
+        $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
         // price_total 3000, default 15% commission -> 450, net 2550.
         $this->assertSame(2550, Wallet::where('user_id', $poster->id)->value('balance'));
     }
 
-    public function test_joining_with_wallet_fails_if_balance_is_insufficient(): void
+    public function test_joining_with_wallet_succeeds_even_if_balance_is_insufficient_charge_happens_at_completion(): void
     {
-        $ride = AnandoRide::factory()->create(['price_per_seat' => 1500, 'total_seats' => 3, 'available_seats' => 3]);
+        $poster = User::factory()->create();
+        $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1500, 'total_seats' => 3, 'available_seats' => 3]);
 
         $joiner = User::factory()->create();
         app(WalletService::class)->topUp($joiner, 1000);
 
         $this->actingAs($joiner, 'sanctum')
             ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 1, 'payment_method' => 'wallet'])
-            ->assertUnprocessable();
+            ->assertCreated();
 
-        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'available_seats' => 3]);
+        $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'available_seats' => 2]);
         $this->assertSame(1000, Wallet::where('user_id', $joiner->id)->value('balance'));
+
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/start")->assertOk();
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/complete")->assertOk();
+
+        // price_total 1500 debited unconditionally — goes negative.
+        $this->assertSame(-500, Wallet::where('user_id', $joiner->id)->value('balance'));
     }
 
     public function test_only_the_poster_can_cancel_the_ride(): void
@@ -281,7 +290,7 @@ class AnandoRideTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_cancelling_a_ride_refunds_wallet_bookings_and_cancels_them(): void
+    public function test_cancelling_a_ride_cancels_wallet_bookings_without_touching_any_wallet(): void
     {
         $poster = User::factory()->create();
         app(WalletService::class)->topUp($poster, 5000);
@@ -294,7 +303,8 @@ class AnandoRideTest extends TestCase
             ->postJson("/api/anando-rides/{$ride->id}/join", ['seats' => 2, 'payment_method' => 'wallet'])
             ->assertCreated();
 
-        $this->assertSame(3000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        // Nobody is charged or credited until the ride completes.
+        $this->assertSame(5000, Wallet::where('user_id', $joiner->id)->value('balance'));
         $this->assertSame(5000, Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($poster, 'sanctum')
@@ -424,7 +434,7 @@ class AnandoRideTest extends TestCase
         $this->assertDatabaseHas('anando_rides', ['id' => $ride->id, 'status' => 'open', 'available_seats' => 2]);
     }
 
-    public function test_modifying_a_wallet_booking_charges_or_refunds_the_difference(): void
+    public function test_modifying_a_wallet_booking_does_not_touch_the_wallet_until_the_ride_completes(): void
     {
         $poster = User::factory()->create();
         $ride = AnandoRide::factory()->create(['user_id' => $poster->id, 'price_per_seat' => 1000, 'total_seats' => 4, 'available_seats' => 4]);
@@ -436,9 +446,7 @@ class AnandoRideTest extends TestCase
             ->assertCreated()
             ->json('id');
 
-        // 10000 - 1000 = 9000 joiner. Poster isn't credited until the ride
-        // completes (see test_joining_with_wallet_...).
-        $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $joiner->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($joiner, 'sanctum')
@@ -446,8 +454,7 @@ class AnandoRideTest extends TestCase
             ->assertOk()
             ->assertJsonPath('price_total', 3000);
 
-        // Charged an extra 2000: 9000 - 2000 = 7000.
-        $this->assertSame(7000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $joiner->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
 
         $this->actingAs($joiner, 'sanctum')
@@ -455,9 +462,14 @@ class AnandoRideTest extends TestCase
             ->assertOk()
             ->assertJsonPath('price_total', 1000);
 
-        // Refunded 2000: 7000 + 2000 = 9000.
-        $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $joiner->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $poster->id)->value('balance'));
+
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/start")->assertOk();
+        $this->actingAs($poster, 'sanctum')->postJson("/api/anando-rides/{$ride->id}/complete")->assertOk();
+
+        // Only the final price_total (1 seat × 1000 = 1000) is charged, once.
+        $this->assertSame(9000, Wallet::where('user_id', $joiner->id)->value('balance'));
     }
 
     public function test_only_the_booking_owner_can_modify_their_booking(): void

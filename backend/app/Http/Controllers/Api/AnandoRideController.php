@@ -150,9 +150,11 @@ class AnandoRideController extends Controller
         DB::transaction(function () use ($anandoRide, $commission, $walletService) {
             $anandoRide->update(['status' => AnandoRide::STATUS_COMPLETED, 'completed_at' => now()]);
 
-            // Earnings are credited here, net of commission, rather than up
-            // front at join() — same reasoning as Trip bookings. This is the
-            // poster's earnings ledger regardless of how each joiner paid.
+            // Money moves here, at completion, not at join() — same
+            // reasoning as Trip bookings. A wallet-paying joiner's balance
+            // is allowed to go negative (debit() rather than charge()) so
+            // an insufficient balance never blocks the poster from
+            // completing a ride they already drove.
             $confirmedBookings = AnandoRideBooking::where('anando_ride_id', $anandoRide->id)
                 ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
                 ->get();
@@ -160,6 +162,11 @@ class AnandoRideController extends Controller
             foreach ($confirmedBookings as $booking) {
                 $booking = $commission->applyToAnandoBooking($booking);
                 $net = $booking->price_total - $booking->commission_amount;
+
+                if ($booking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
+                    $walletService->debit($booking->user, $booking->price_total, null, WalletTransaction::TYPE_PAYMENT, "Paiement Anando #{$anandoRide->id} (trajet terminé)");
+                }
+
                 $walletService->credit($anandoRide->poster, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Anando #{$anandoRide->id} (trajet terminé)");
             }
         });
@@ -296,7 +303,7 @@ class AnandoRideController extends Controller
         return response()->json(['message' => 'Avis enregistré.']);
     }
 
-    public function join(JoinAnandoRideRequest $request, AnandoRide $anandoRide, WalletService $walletService)
+    public function join(JoinAnandoRideRequest $request, AnandoRide $anandoRide)
     {
         $user = $request->user();
         $data = $request->validated();
@@ -309,7 +316,7 @@ class AnandoRideController extends Controller
             ]);
         }
 
-        $booking = DB::transaction(function () use ($anandoRide, $user, $seats, $paymentMethod, $walletService) {
+        $booking = DB::transaction(function () use ($anandoRide, $user, $seats, $paymentMethod) {
             /** @var AnandoRide $locked */
             $locked = AnandoRide::where('id', $anandoRide->id)->lockForUpdate()->firstOrFail();
 
@@ -341,13 +348,9 @@ class AnandoRideController extends Controller
                 'status' => AnandoRideBooking::STATUS_CONFIRMED,
             ]);
 
-            // The joiner pays up front; the poster is only credited their net
-            // earnings once the ride completes (see complete()) — same
-            // reasoning as Trip bookings.
-            if ($paymentMethod === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
-                $walletService->charge($user, $priceTotal, null, "Trajet Anando #{$locked->id}");
-            }
-
+            // No wallet interaction here — a wallet-paying joiner is only
+            // charged (and the poster credited) once the ride completes
+            // (see complete()) — same reasoning as Trip bookings.
             $locked->decrement('available_seats', $seats);
             if ($locked->fresh()->available_seats <= 0) {
                 $locked->update(['status' => AnandoRide::STATUS_FULL]);
@@ -363,7 +366,7 @@ class AnandoRideController extends Controller
         return new AnandoRideBookingResource($booking);
     }
 
-    public function cancelRide(Request $request, AnandoRide $anandoRide, WalletService $walletService)
+    public function cancelRide(Request $request, AnandoRide $anandoRide)
     {
         abort_unless($anandoRide->user_id === $request->user()->id, 404);
 
@@ -371,22 +374,16 @@ class AnandoRideController extends Controller
             return response()->json(['message' => 'Ce trajet Anando ne peut plus être annulé.'], 422);
         }
 
-        DB::transaction(function () use ($anandoRide, $walletService) {
+        DB::transaction(function () use ($anandoRide) {
             /** @var AnandoRide $locked */
             $locked = AnandoRide::where('id', $anandoRide->id)->lockForUpdate()->firstOrFail();
 
-            $bookings = AnandoRideBooking::where('anando_ride_id', $locked->id)
+            // No wallet refund needed — nobody was ever charged for these
+            // bookings (payment only happens at ride completion, see
+            // complete()).
+            AnandoRideBooking::where('anando_ride_id', $locked->id)
                 ->where('status', AnandoRideBooking::STATUS_CONFIRMED)
-                ->get();
-
-            // No poster-side reversal needed — the poster isn't credited
-            // until the ride completes (see join()'s comment).
-            foreach ($bookings as $booking) {
-                if ($booking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
-                    $walletService->credit($booking->user, $booking->price_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Anando #{$locked->id}");
-                }
-                $booking->update(['status' => AnandoRideBooking::STATUS_CANCELLED]);
-            }
+                ->update(['status' => AnandoRideBooking::STATUS_CANCELLED]);
 
             $locked->update(['status' => AnandoRide::STATUS_CANCELLED, 'cancelled_at' => now()]);
         });
@@ -399,21 +396,21 @@ class AnandoRideController extends Controller
      * BookingController::update() for regular Trip bookings. Reducing to 0
      * seats is treated as a cancellation.
      */
-    public function updateBooking(UpdateAnandoBookingRequest $request, AnandoRideBooking $anandoRideBooking, WalletService $walletService)
+    public function updateBooking(UpdateAnandoBookingRequest $request, AnandoRideBooking $anandoRideBooking)
     {
         abort_unless($anandoRideBooking->user_id === $request->user()->id, 404);
 
         $newSeats = (int) $request->validated('seats');
 
         if ($newSeats === 0) {
-            return $this->cancelBooking($request, $anandoRideBooking, $walletService);
+            return $this->cancelBooking($request, $anandoRideBooking);
         }
 
         if ($anandoRideBooking->status !== AnandoRideBooking::STATUS_CONFIRMED) {
             return response()->json(['message' => 'Cette réservation Anando est déjà annulée.'], 422);
         }
 
-        $updated = DB::transaction(function () use ($anandoRideBooking, $newSeats, $walletService) {
+        $updated = DB::transaction(function () use ($anandoRideBooking, $newSeats) {
             /** @var AnandoRideBooking $lockedBooking */
             $lockedBooking = AnandoRideBooking::where('id', $anandoRideBooking->id)->lockForUpdate()->firstOrFail();
             /** @var AnandoRide $ride */
@@ -434,18 +431,11 @@ class AnandoRideController extends Controller
             }
 
             $newPriceTotal = $ride->price_per_seat * $newSeats;
-            $priceDelta = $newPriceTotal - $lockedBooking->price_total;
 
-            // Only the joiner's side is adjusted here — the poster isn't
-            // credited until the ride completes (see join()'s comment).
-            if ($lockedBooking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET && $priceDelta !== 0) {
-                if ($priceDelta > 0) {
-                    $walletService->charge($lockedBooking->user, $priceDelta, null, "Ajustement Anando #{$ride->id}");
-                } else {
-                    $walletService->credit($lockedBooking->user, abs($priceDelta), null, WalletTransaction::TYPE_REFUND, "Remboursement partiel Anando #{$ride->id}");
-                }
-            }
-
+            // No wallet interaction here — a wallet-paying joiner is only
+            // charged the final price_total once the ride completes (see
+            // complete()), so an in-progress seat change just updates the
+            // number that'll be charged then.
             $lockedBooking->update([
                 'seats_booked' => $newSeats,
                 'price_total' => $newPriceTotal,
@@ -469,7 +459,7 @@ class AnandoRideController extends Controller
         return new AnandoRideBookingResource($updated->load(['anandoRide.poster', 'anandoRide.originCity', 'anandoRide.destinationCity', 'user']));
     }
 
-    public function cancelBooking(Request $request, AnandoRideBooking $anandoRideBooking, WalletService $walletService)
+    public function cancelBooking(Request $request, AnandoRideBooking $anandoRideBooking)
     {
         abort_unless($anandoRideBooking->user_id === $request->user()->id, 404);
 
@@ -477,17 +467,14 @@ class AnandoRideController extends Controller
             return response()->json(['message' => 'Cette réservation Anando ne peut plus être annulée.'], 422);
         }
 
-        DB::transaction(function () use ($anandoRideBooking, $walletService) {
+        DB::transaction(function () use ($anandoRideBooking) {
             /** @var AnandoRideBooking $lockedBooking */
             $lockedBooking = AnandoRideBooking::where('id', $anandoRideBooking->id)->lockForUpdate()->firstOrFail();
             $ride = AnandoRide::where('id', $lockedBooking->anando_ride_id)->lockForUpdate()->firstOrFail();
 
-            // No poster-side reversal needed — the poster isn't credited
-            // until the ride completes (see join()'s comment).
-            if ($lockedBooking->payment_method === AnandoRideBooking::PAYMENT_METHOD_WALLET) {
-                $walletService->credit($lockedBooking->user, $lockedBooking->price_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Anando #{$ride->id}");
-            }
-
+            // No wallet refund needed — nobody was ever charged for this
+            // booking (payment only happens at ride completion, see
+            // complete()).
             $lockedBooking->update(['status' => AnandoRideBooking::STATUS_CANCELLED]);
 
             $ride->increment('available_seats', $lockedBooking->seats_booked);

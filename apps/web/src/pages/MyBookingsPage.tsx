@@ -142,6 +142,27 @@ export function MyBookingsPage() {
                 )}
               </div>
             )}
+
+            {bookingStage(item) === 'completed' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/trips/${item.trip.id}`);
+                }}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: colors.primary,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: 15,
+                  marginTop: spacing.sm,
+                }}
+              >
+                {t('rating.rateButton')}
+              </button>
+            )}
           </div>
         ))
       )}

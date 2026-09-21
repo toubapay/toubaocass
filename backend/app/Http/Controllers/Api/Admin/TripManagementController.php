@@ -9,9 +9,7 @@ use App\Models\Booking;
 use App\Models\Car;
 use App\Models\DriverProfile;
 use App\Models\Trip;
-use App\Models\WalletTransaction;
 use App\Services\AuditLogService;
-use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -37,10 +35,10 @@ class TripManagementController extends Controller
         return AdminTripResource::collection($trips);
     }
 
-    public function cancel(Request $request, Trip $trip, WalletService $walletService)
+    public function cancel(Request $request, Trip $trip)
     {
         try {
-            DB::transaction(function () use ($trip, $walletService) {
+            DB::transaction(function () use ($trip) {
                 /** @var Trip $locked */
                 $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
@@ -48,17 +46,9 @@ class TripManagementController extends Controller
                     throw new \RuntimeException('Ce trajet ne peut plus être annulé.');
                 }
 
-                $confirmedBookings = $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get();
-
-                foreach ($confirmedBookings as $booking) {
-                    $booking->update(['status' => Booking::STATUS_CANCELLED]);
-
-                    // No driver-side reversal needed — the driver isn't
-                    // credited until the trip completes.
-                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
-                        $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation (trajet annulé par un administrateur)');
-                    }
-                }
+                // No wallet refund needed — nobody was ever charged for
+                // these bookings (payment only happens at trip completion).
+                $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->update(['status' => Booking::STATUS_CANCELLED]);
 
                 $locked->update(['status' => Trip::STATUS_CANCELLED]);
             });

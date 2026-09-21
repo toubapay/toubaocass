@@ -73,7 +73,7 @@ class WalletTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_booking_with_wallet_payment_charges_rider_immediately_but_driver_only_at_completion(): void
+    public function test_booking_with_wallet_payment_charges_rider_and_credits_driver_only_at_completion(): void
     {
         $trip = $this->makeTrip(fare: 3000);
         $rider = User::factory()->create();
@@ -84,20 +84,22 @@ class WalletTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('payment_method', 'wallet');
 
-        // Rider pays up front; the driver isn't paid until the trip
-        // completes (net of the platform's commission — see
+        // Nobody is charged or credited until the trip completes — both
+        // sides of the payment move atomically at completion (see
         // DemLeguiEarningsTest/DeliveryEarningsTest for the full picture).
-        $this->assertSame(4000, Wallet::where('user_id', $rider->id)->value('balance'));
+        $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
         $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
 
         $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
         $this->actingAs($trip->driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
 
+        // fare_total 6000 charged to the rider.
+        $this->assertSame(4000, Wallet::where('user_id', $rider->id)->value('balance'));
         // fare_total 6000, default 15% commission -> 900, net 5100.
         $this->assertSame(5100, Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
-    public function test_booking_with_wallet_payment_fails_when_balance_is_insufficient(): void
+    public function test_booking_with_wallet_payment_and_insufficient_balance_still_completes_and_goes_negative(): void
     {
         $trip = $this->makeTrip(fare: 3000);
         $rider = User::factory()->create();
@@ -105,11 +107,19 @@ class WalletTest extends TestCase
 
         $this->actingAs($rider, 'sanctum')
             ->postJson("/api/trips/{$trip->id}/bookings", ['seats' => 2, 'payment_method' => 'wallet'])
-            ->assertStatus(422);
+            ->assertCreated();
 
-        $this->assertSame(0, Booking::count());
+        $this->assertSame(1, Booking::count());
         $this->assertSame(1000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertSame(4, $trip->fresh()->available_seats);
+        $this->assertSame(2, $trip->fresh()->available_seats);
+
+        $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+        $this->actingAs($trip->driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
+
+        // fare_total 6000 debited unconditionally — the rider's balance
+        // goes negative rather than blocking the driver's completion.
+        $this->assertSame(-5000, Wallet::where('user_id', $rider->id)->value('balance'));
+        $this->assertSame(5100, Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_booking_with_cash_payment_never_touches_any_wallet(): void
@@ -143,7 +153,7 @@ class WalletTest extends TestCase
         $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
-    public function test_increasing_seats_on_a_wallet_paid_booking_charges_the_difference(): void
+    public function test_increasing_seats_on_a_wallet_paid_booking_charges_the_updated_total_at_completion(): void
     {
         $trip = $this->makeTrip(fare: 3000, seats: 4);
         $rider = User::factory()->create();
@@ -154,16 +164,21 @@ class WalletTest extends TestCase
             ->assertCreated();
         $bookingId = $response->json('id');
 
-        // 3000 charged so far; going to 3 seats charges 6000 more.
+        // No wallet interaction on the seat change itself.
         $this->actingAs($rider, 'sanctum')
             ->putJson("/api/bookings/{$bookingId}", ['seats' => 3])
             ->assertOk();
 
+        $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
+
+        $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+        $this->actingAs($trip->driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
+
+        // Only the final fare_total (3 seats × 3000 = 9000) is charged, once.
         $this->assertSame(1000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
-    public function test_decreasing_seats_on_a_wallet_paid_booking_refunds_the_difference(): void
+    public function test_decreasing_seats_on_a_wallet_paid_booking_charges_the_updated_total_at_completion(): void
     {
         $trip = $this->makeTrip(fare: 3000, seats: 4);
         $rider = User::factory()->create();
@@ -174,13 +189,18 @@ class WalletTest extends TestCase
             ->assertCreated();
         $bookingId = $response->json('id');
 
-        // 9000 charged so far; going down to 1 seat refunds 6000.
+        // No wallet interaction on the seat change itself.
         $this->actingAs($rider, 'sanctum')
             ->putJson("/api/bookings/{$bookingId}", ['seats' => 1])
             ->assertOk();
 
+        $this->assertSame(10000, Wallet::where('user_id', $rider->id)->value('balance'));
+
+        $trip->update(['status' => Trip::STATUS_IN_PROGRESS]);
+        $this->actingAs($trip->driver, 'sanctum')->postJson("/api/driver/trips/{$trip->id}/complete")->assertOk();
+
+        // Only the final fare_total (1 seat × 3000 = 3000) is charged, once.
         $this->assertSame(7000, Wallet::where('user_id', $rider->id)->value('balance'));
-        $this->assertNull(Wallet::where('user_id', $trip->driver_id)->value('balance'));
     }
 
     public function test_driver_cancelling_the_whole_trip_refunds_wallet_paid_bookings(): void

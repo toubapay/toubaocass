@@ -81,7 +81,8 @@
     "title": "Mon profil",
     "wallet": "Mon portefeuille",
     "myDeliveries": "📦 Mes livraisons",
-    "myRideBookings": "🧾 Mes réservations",
+    "myRideBookings": "🚗 Mes réservations Anando",
+    "myDemLeguiHistory": "🚕 Historique Dem Légui",
     "assuranceLink": "Assurance",
     "settings": "⚙️ Paramètres",
     "notificationsEnabled": "🔔 Notifications activées",
@@ -145,7 +146,8 @@
     "starLabel": "{{count}} étoile(s)",
     "commentPlaceholder": "Un commentaire ? (facultatif)",
     "submit": "Envoyer mon avis",
-    "thanks": "Merci pour votre avis !"
+    "thanks": "Merci pour votre avis !",
+    "rateButton": "⭐ Noter le chauffeur"
   },
   "tripDetail": {
     "departureAt": "{{date}} à {{time}}",
@@ -303,11 +305,12 @@
     "policyNumber": "N° {{number}}"
   },
   "myRideBookings": {
-    "title": "Mes réservations",
-    "anandoSection": "Anando",
-    "anandoEmpty": "Vous n'avez réservé aucun trajet Anando.",
-    "demLeguiSection": "Dem Légui",
-    "demLeguiEmpty": "Vous n'avez aucune course Dem Légui."
+    "title": "Mes réservations Anando",
+    "anandoEmpty": "Vous n'avez réservé aucun trajet Anando."
+  },
+  "demLeguiHistory": {
+    "title": "Historique Dem Légui",
+    "empty": "Vous n'avez aucune course Dem Légui."
   },
   "newDelivery": {
     "title": "Nouvelle livraison",
@@ -377,6 +380,7 @@
     "submit": "Demander une course",
     "submitWithFare": "Demander — {{amount}} FCFA",
     "tripToLabel": "Vers {{city}}",
+    "walletWithBalance": "Portefeuille {{balance}}",
     "status": {
       "pending": "Recherche d'un conducteur…",
       "matched": "Conducteur trouvé",
@@ -438,10 +442,11 @@
     "passengers_other": "Passagers ({{count}})",
     "noPassengers": "Personne n'a encore rejoint ce trajet.",
     "cancelRide": "Annuler ce trajet Anando",
-    "cancelConfirm": "Tous les passagers confirmés seront remboursés et notifiés. Confirmer l'annulation ?",
+    "cancelConfirm": "Tous les passagers confirmés seront notifiés. Confirmer l'annulation ?",
     "joinTitle": "Rejoindre ce trajet",
     "seatsToJoin": "Nombre de places",
     "joinSubmit": "Rejoindre — {{amount}} FCFA",
+    "walletWithBalance": "Portefeuille {{balance}}",
     "newRideToast": "🚗 Nouveau trajet Anando : {{origin}} → {{destination}}",
     "newRideToastView": "Voir →",
     "tabs": {
@@ -455,7 +460,7 @@
     "modifyBooking": "Modifier ma réservation",
     "modifySubmit": "Enregistrer les modifications",
     "cancelBooking": "Annuler ma réservation",
-    "cancelBookingConfirm": "Vous serez remboursé si vous avez payé par portefeuille. Confirmer l'annulation ?",
+    "cancelBookingConfirm": "Confirmer l'annulation ?",
     "bookingStatus": {
       "confirmed": "Confirmée",
       "cancelled": "Annulée"

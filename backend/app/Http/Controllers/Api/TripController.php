@@ -346,16 +346,23 @@ class TripController extends Controller
 
                 $locked->update(['status' => Trip::STATUS_COMPLETED]);
 
-                // Earnings are credited here, net of commission, rather than
-                // up front at booking time — a driver only gets paid once
-                // the trip actually happened. This is the driver's earnings
-                // ledger regardless of how the rider paid: a wallet booking
-                // already had the platform holding the fare, while a cash
-                // booking was paid straight to the driver in person — either
-                // way the app records what the driver earned on the trip.
+                // Money moves here, at completion, not at booking time — a
+                // wallet-paying rider is charged and the driver credited net
+                // of commission only once the trip actually happened. A
+                // rider's insufficient balance never blocks the driver from
+                // completing a trip they already drove: debit() (unlike
+                // charge()) allows the balance to go negative rather than
+                // throwing. Cash bookings never touch the rider's wallet —
+                // that fare was paid straight to the driver in person — but
+                // the driver's earnings ledger still records it.
                 $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get()->each(function (Booking $booking) use ($walletService, $locked) {
                     $booking = $this->commissionService->applyToBooking($booking);
                     $net = $booking->fare_total - $booking->commission_amount;
+
+                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
+                        $walletService->debit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_PAYMENT, 'Paiement de réservation (trajet terminé)');
+                    }
+
                     $walletService->credit($locked->driver, $net, $booking, WalletTransaction::TYPE_EARNING, 'Revenu de réservation (trajet terminé)');
                 });
             });
@@ -414,12 +421,12 @@ class TripController extends Controller
         return response()->json(['message' => 'Position mise à jour.']);
     }
 
-    public function cancel(Request $request, Trip $trip, WalletService $walletService)
+    public function cancel(Request $request, Trip $trip)
     {
         $this->authorize('delete', $trip);
 
         try {
-            DB::transaction(function () use ($trip, $walletService) {
+            DB::transaction(function () use ($trip) {
                 /** @var Trip $locked */
                 $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
@@ -427,18 +434,9 @@ class TripController extends Controller
                     throw new \RuntimeException('Ce trajet ne peut plus être annulé.');
                 }
 
-                $confirmedBookings = $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->get();
-
-                foreach ($confirmedBookings as $booking) {
-                    $booking->update(['status' => Booking::STATUS_CANCELLED]);
-
-                    // No driver-side reversal needed — the driver isn't
-                    // credited until the trip completes (see
-                    // BookingController::store()'s comment).
-                    if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
-                        $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation (trajet annulé)');
-                    }
-                }
+                // No wallet refund needed — nobody was ever charged (payment
+                // only happens at trip completion, see complete()).
+                $locked->bookings()->where('status', Booking::STATUS_CONFIRMED)->update(['status' => Booking::STATUS_CANCELLED]);
 
                 $locked->update(['status' => Trip::STATUS_CANCELLED]);
             });

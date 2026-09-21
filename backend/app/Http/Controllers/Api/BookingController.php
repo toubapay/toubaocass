@@ -10,8 +10,6 @@ use App\Http\Requests\Rider\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Trip;
-use App\Models\WalletTransaction;
-use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -28,13 +26,13 @@ class BookingController extends Controller
         return BookingResource::collection($bookings);
     }
 
-    public function store(StoreBookingRequest $request, Trip $trip, WalletService $walletService)
+    public function store(StoreBookingRequest $request, Trip $trip)
     {
         $rider = $request->user();
         $seatsRequested = (int) $request->validated('seats');
         $paymentMethod = $request->validated('payment_method') ?? Booking::PAYMENT_METHOD_CASH;
 
-        $booking = DB::transaction(function () use ($trip, $rider, $seatsRequested, $paymentMethod, $walletService) {
+        $booking = DB::transaction(function () use ($trip, $rider, $seatsRequested, $paymentMethod) {
             /** @var Trip $locked */
             $locked = Trip::where('id', $trip->id)->lockForUpdate()->firstOrFail();
 
@@ -77,15 +75,11 @@ class BookingController extends Controller
                 'status' => Booking::STATUS_CONFIRMED,
             ]);
 
-            // The rider pays up front (held by the platform); the driver is
-            // only credited their net earnings once the trip actually
-            // completes (see TripController::complete()) — this avoids
-            // paying out before the trip happens and lets the payout account
-            // for the platform's commission.
-            if ($paymentMethod === Booking::PAYMENT_METHOD_WALLET) {
-                $walletService->charge($rider, $fareTotal, $booking, 'Paiement de réservation');
-            }
-
+            // Neither side's wallet is touched here — a wallet-paying rider
+            // is only actually charged (and the driver credited) once the
+            // trip completes (see TripController::complete()), so payment
+            // reflects what really happened rather than holding funds
+            // against a trip that hasn't happened yet.
             $locked->decrement('available_seats', $seatsRequested);
 
             if ($locked->fresh()->available_seats === 0) {
@@ -105,21 +99,21 @@ class BookingController extends Controller
      * add more seats (if available) or release some, without cancelling and
      * re-booking. Reducing to 0 seats is treated as a cancellation.
      */
-    public function update(UpdateBookingRequest $request, Booking $booking, WalletService $walletService)
+    public function update(UpdateBookingRequest $request, Booking $booking)
     {
         $this->authorize('update', $booking);
 
         $newSeats = (int) $request->validated('seats');
 
         if ($newSeats === 0) {
-            return $this->destroy($request, $booking, $walletService);
+            return $this->destroy($request, $booking);
         }
 
         if ($booking->status !== Booking::STATUS_CONFIRMED) {
             return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
         }
 
-        $updated = DB::transaction(function () use ($booking, $newSeats, $walletService) {
+        $updated = DB::transaction(function () use ($booking, $newSeats) {
             /** @var Trip $trip */
             $trip = Trip::where('id', $booking->trip_id)->lockForUpdate()->firstOrFail();
 
@@ -144,18 +138,11 @@ class BookingController extends Controller
             }
 
             $newFareTotal = $trip->fare * $newSeats;
-            $fareDelta = $newFareTotal - $booking->fare_total;
 
-            // Only the rider's side is adjusted here — the driver isn't
-            // credited until the trip completes (see store()'s comment).
-            if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET && $fareDelta !== 0) {
-                if ($fareDelta > 0) {
-                    $walletService->charge($booking->rider, $fareDelta, $booking, 'Ajustement de réservation');
-                } else {
-                    $walletService->credit($booking->rider, abs($fareDelta), $booking, WalletTransaction::TYPE_REFUND, 'Remboursement partiel de réservation');
-                }
-            }
-
+            // No wallet interaction here — a wallet-paying rider is only
+            // charged for the final fare_total once the trip completes
+            // (see TripController::complete()), so an in-progress seat
+            // change just updates the number that'll be charged then.
             $booking->update([
                 'seats_booked' => $newSeats,
                 'fare_total' => $newFareTotal,
@@ -179,7 +166,7 @@ class BookingController extends Controller
         return new BookingResource($updated->load(['trip.car', 'trip.originCity', 'trip.destinationCity', 'trip.driver']));
     }
 
-    public function destroy(Request $request, Booking $booking, WalletService $walletService)
+    public function destroy(Request $request, Booking $booking)
     {
         $this->authorize('delete', $booking);
 
@@ -187,7 +174,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'Cette réservation est déjà annulée.'], 422);
         }
 
-        DB::transaction(function () use ($booking, $walletService) {
+        DB::transaction(function () use ($booking) {
             $booking->update(['status' => Booking::STATUS_CANCELLED]);
 
             /** @var Trip $trip */
@@ -200,11 +187,8 @@ class BookingController extends Controller
                 $trip->update(['status' => Trip::STATUS_SCHEDULED]);
             }
 
-            // No driver-side reversal needed — the driver was never credited
-            // for this booking in the first place (see store()'s comment).
-            if ($booking->payment_method === Booking::PAYMENT_METHOD_WALLET) {
-                $walletService->credit($booking->rider, $booking->fare_total, $booking, WalletTransaction::TYPE_REFUND, 'Remboursement de réservation annulée');
-            }
+            // No wallet refund needed — nobody was ever charged for this
+            // booking (payment only happens at trip completion).
         });
 
         BookingCancelled::dispatch($booking->fresh());

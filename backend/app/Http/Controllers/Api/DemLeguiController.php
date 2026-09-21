@@ -152,11 +152,11 @@ class DemLeguiController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, DemLeguiRequest $demLeguiRequest, WalletService $walletService)
+    public function cancel(Request $request, DemLeguiRequest $demLeguiRequest)
     {
         abort_unless($demLeguiRequest->rider_id === $request->user()->id, 404);
 
-        DB::transaction(function () use ($demLeguiRequest, $walletService) {
+        DB::transaction(function () use ($demLeguiRequest) {
             /** @var DemLeguiRequest $locked */
             $locked = DemLeguiRequest::where('id', $demLeguiRequest->id)->lockForUpdate()->firstOrFail();
 
@@ -171,12 +171,8 @@ class DemLeguiController extends Controller
                 ]);
             }
 
-            // No driver-side reversal needed — the driver isn't credited
-            // until the trip completes (see accept()'s comment).
-            if ($locked->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET && $locked->status === DemLeguiRequest::STATUS_MATCHED) {
-                $walletService->credit($locked->rider, $locked->fare_total, null, WalletTransaction::TYPE_REFUND, "Remboursement Dem Légui #{$locked->id}");
-            }
-
+            // No wallet refund needed — nobody was ever charged (payment
+            // only happens at trip completion, see completeTrip()).
             if ($trip) {
                 $trip->increment('available_seats', $locked->seats_requested);
             }
@@ -218,7 +214,7 @@ class DemLeguiController extends Controller
         return DemLeguiRequestResource::collection($requests);
     }
 
-    public function accept(AcceptDemLeguiRequestRequest $request, DemLeguiRequest $demLeguiRequest, WalletService $walletService)
+    public function accept(AcceptDemLeguiRequestRequest $request, DemLeguiRequest $demLeguiRequest)
     {
         $driver = $request->user();
 
@@ -230,7 +226,7 @@ class DemLeguiController extends Controller
 
         $carId = $request->validated('car_id');
 
-        $trip = DB::transaction(function () use ($demLeguiRequest, $driver, $carId, $walletService) {
+        $trip = DB::transaction(function () use ($demLeguiRequest, $driver, $carId) {
             /** @var DemLeguiRequest $locked */
             $locked = DemLeguiRequest::where('id', $demLeguiRequest->id)->lockForUpdate()->firstOrFail();
 
@@ -297,13 +293,9 @@ class DemLeguiController extends Controller
                 'dem_legui_trip_id' => $trip->id,
             ]);
 
-            // The rider pays up front; the driver is only credited their net
-            // earnings once the trip completes (see completeTrip()) — same
-            // reasoning as Trip bookings.
-            if ($locked->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
-                $walletService->charge($locked->rider, $locked->fare_total, null, "Paiement Dem Légui #{$locked->id}");
-            }
-
+            // No wallet interaction here — a wallet-paying rider is only
+            // charged (and the driver credited) once the trip completes
+            // (see completeTrip()) — same reasoning as Trip bookings.
             return $trip;
         });
 
@@ -411,12 +403,19 @@ class DemLeguiController extends Controller
         DB::transaction(function () use ($demLeguiTrip, $commission, $walletService) {
             $demLeguiTrip->update(['status' => DemLeguiTrip::STATUS_COMPLETED, 'completed_at' => now()]);
 
-            // Earnings are credited here, net of commission, rather than up
-            // front at accept() — same reasoning as Trip bookings. This is
-            // the driver's earnings ledger regardless of how the rider paid.
+            // Money moves here, at completion, not at accept() — same
+            // reasoning as Trip bookings. A wallet-paying rider's balance is
+            // allowed to go negative (debit() rather than charge()) so an
+            // insufficient balance never blocks the driver from completing
+            // a trip they already drove.
             foreach ($demLeguiTrip->requests()->where('status', DemLeguiRequest::STATUS_MATCHED)->get() as $attachedRequest) {
                 $attachedRequest = $commission->applyToDemLeguiRequest($attachedRequest);
                 $net = $attachedRequest->fare_total - $attachedRequest->commission_amount;
+
+                if ($attachedRequest->payment_method === DemLeguiRequest::PAYMENT_METHOD_WALLET) {
+                    $walletService->debit($attachedRequest->rider, $attachedRequest->fare_total, null, WalletTransaction::TYPE_PAYMENT, "Paiement Dem Légui #{$attachedRequest->id} (trajet terminé)");
+                }
+
                 $walletService->credit($demLeguiTrip->driver, $net, null, WalletTransaction::TYPE_EARNING, "Revenu Dem Légui #{$attachedRequest->id} (trajet terminé)");
             }
         });

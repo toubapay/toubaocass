@@ -98,8 +98,6 @@ export function TripDetailPage() {
       ? !['scheduled', 'full'].includes(trip.status)
       : trip.available_seats <= 0 || trip.status !== 'scheduled');
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
-  const insufficientWalletFunds =
-    !editing && paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
 
   const cardStyle: React.CSSProperties = {
@@ -145,7 +143,7 @@ export function TripDetailPage() {
         {!editing && !isUnavailable && (
           <button
             onClick={handleBook}
-            disabled={booking || insufficientWalletFunds}
+            disabled={booking}
             style={{
               border: 'none',
               borderRadius: radius.sm,
@@ -154,8 +152,8 @@ export function TripDetailPage() {
               color: '#fff',
               fontWeight: 700,
               fontSize: 13,
-              cursor: booking || insufficientWalletFunds ? 'default' : 'pointer',
-              opacity: booking || insufficientWalletFunds ? 0.6 : 1,
+              cursor: booking ? 'default' : 'pointer',
+              opacity: booking ? 0.6 : 1,
               marginBottom: spacing.sm,
             }}
           >
@@ -361,17 +359,6 @@ export function TripDetailPage() {
               </span>
             </button>
           </div>
-          {paymentMethod === 'wallet' && walletBalance !== null && walletBalance < trip.fare * seats && (
-            <p style={{ fontSize: 12.5, color: colors.danger, marginTop: spacing.xs, marginBottom: 0 }}>
-              {t('common.insufficientFunds')}{' '}
-              <button
-                onClick={() => navigate('/wallet')}
-                style={{ border: 'none', background: 'none', color: colors.danger, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 12.5 }}
-              >
-                {t('tripDetail.topUpLink')}
-              </button>
-            </p>
-          )}
         </div>
       )}
 
@@ -418,7 +405,7 @@ export function TripDetailPage() {
         }
         onClick={handleBook}
         loading={booking}
-        disabled={isUnavailable || insufficientWalletFunds}
+        disabled={isUnavailable}
         variant={editing && seats === 0 ? 'danger' : 'primary'}
       />
     </div>
