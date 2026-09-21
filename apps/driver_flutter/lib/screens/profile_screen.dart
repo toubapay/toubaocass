@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_flutter/widgets/driver_tier_badge.dart';
 
 import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
@@ -47,6 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = auth.user;
     final kycStatus = user?.driverProfile?.kycStatus ?? 'pending';
     final rating = user?.driverProfile?.rating ?? 5.0;
+    final ratingsCount = user?.driverProfile?.ratingsCount ?? 0;
+    final tier = user?.driverProfile?.tier ?? 'debutant';
     final moduleStatus = context.watch<ModuleStatusProvider>();
 
     return Scaffold(
@@ -78,7 +81,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: AppSpacing.sm),
                   Text('Vérification : ${_kycLabel[kycStatus] ?? kycStatus}',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  Text('Note : ${rating.toStringAsFixed(1)} ★', style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
+                  Row(
+                    children: [
+                      Text('Note : ${rating.toStringAsFixed(1)} ★', style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
+                      const SizedBox(width: AppSpacing.sm),
+                      DriverTierBadge(tier: tier),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    ratingsCount == 0 ? "Aucun avis pour l'instant" : '$ratingsCount avis',
+                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  ),
                 ],
               ),
             ),

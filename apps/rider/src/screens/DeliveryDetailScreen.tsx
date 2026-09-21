@@ -4,10 +4,12 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, T
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { cancelDelivery, fetchDelivery } from '../api/deliveries';
+import { cancelDelivery, fetchDelivery, rateDelivery } from '../api/deliveries';
 import { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DriverTierBadge } from '../components/DriverTierBadge';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { Screen } from '../components/Screen';
 import { SosShareModal } from '../components/SosShareModal';
 import { ServicesStackParamList } from '../navigation/types';
@@ -170,6 +172,11 @@ export function DeliveryDetailScreen({ route, navigation }: Props) {
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>{t('deliveryDetail.courier')}</Text>
             <Text style={styles.line}>{delivery.driver.name ?? t('common.courierFallback')}</Text>
+            {delivery.driver.tier && (
+              <View style={{ marginTop: 2 }}>
+                <DriverTierBadge tier={delivery.driver.tier} />
+              </View>
+            )}
             <View style={styles.contactRow}>
               <Pressable style={styles.contactButton} onPress={() => Linking.openURL(`tel:${delivery.driver!.phone}`)}>
                 <Text style={styles.contactButtonText}>📞 {t('common.call')}</Text>
@@ -179,6 +186,10 @@ export function DeliveryDetailScreen({ route, navigation }: Props) {
               </Pressable>
             </View>
           </View>
+        )}
+
+        {delivery.status === 'delivered' && delivery.driver && (
+          <RateDriverCard onSubmit={(score, comment) => rateDelivery(delivery.id, score, comment)} />
         )}
 
         {delivery.status === 'pending' && (

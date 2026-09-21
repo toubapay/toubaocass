@@ -12,6 +12,8 @@ export type PaymentMethod = 'cash' | 'wallet';
 
 export type CarType = 'sedan' | 'suv' | 'van' | 'minibus';
 
+export type DriverTier = 'debutant' | 'silver' | 'gold';
+
 export interface DriverProfile {
   id: number;
   license_number: string | null;
@@ -19,6 +21,8 @@ export interface DriverProfile {
   kyc_status: KycStatus;
   kyc_rejection_reason: string | null;
   rating: number;
+  ratings_count: number;
+  tier: DriverTier;
   approved_at: string | null;
   is_online: boolean;
   last_seen_at: string | null;
@@ -64,6 +68,7 @@ export interface Trip {
     name: string | null;
     phone: string;
     rating: number;
+    tier: DriverTier | null;
   };
   car: Car | null;
   origin_city: City | null;
@@ -153,7 +158,7 @@ export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' 
 export interface Delivery {
   id: number;
   sender: { id: number; name: string | null; phone: string };
-  driver: { id: number; name: string | null; phone: string; rating: number | null } | null;
+  driver: { id: number; name: string | null; phone: string; rating: number | null; tier: DriverTier | null } | null;
   receiver_name: string;
   receiver_phone: string;
   receiver_address_line: string;
@@ -277,6 +282,7 @@ export interface DemLeguiTrip {
     name: string | null;
     phone: string;
     rating: number;
+    tier: DriverTier | null;
     current_latitude: number | null;
     current_longitude: number | null;
     last_seen_at: string | null;

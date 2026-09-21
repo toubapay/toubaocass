@@ -5,6 +5,8 @@ class DriverProfile {
   final String kycStatus;
   final String? kycRejectionReason;
   final double rating;
+  final int ratingsCount;
+  final String tier;
   final String? approvedAt;
   final bool isOnline;
 
@@ -15,6 +17,8 @@ class DriverProfile {
     required this.kycStatus,
     required this.kycRejectionReason,
     required this.rating,
+    this.ratingsCount = 0,
+    this.tier = 'debutant',
     required this.approvedAt,
     this.isOnline = false,
   });
@@ -26,6 +30,8 @@ class DriverProfile {
         kycStatus: json['kyc_status'] as String? ?? 'pending',
         kycRejectionReason: json['kyc_rejection_reason'] as String?,
         rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
+        ratingsCount: json['ratings_count'] as int? ?? 0,
+        tier: json['tier'] as String? ?? 'debutant',
         approvedAt: json['approved_at'] as String?,
         isOnline: json['is_online'] as bool? ?? false,
       );
@@ -152,6 +158,7 @@ class TripDriver {
   final String? name;
   final String phone;
   final double rating;
+  final String? tier;
   final double? currentLatitude;
   final double? currentLongitude;
   final String? lastSeenAt;
@@ -161,6 +168,7 @@ class TripDriver {
     required this.name,
     required this.phone,
     required this.rating,
+    this.tier,
     this.currentLatitude,
     this.currentLongitude,
     this.lastSeenAt,
@@ -171,6 +179,7 @@ class TripDriver {
         name: json['name'] as String?,
         phone: json['phone'] as String,
         rating: (json['rating'] as num?)?.toDouble() ?? 0,
+        tier: json['tier'] as String?,
         currentLatitude: (json['current_latitude'] as num?)?.toDouble(),
         currentLongitude: (json['current_longitude'] as num?)?.toDouble(),
         lastSeenAt: json['last_seen_at'] as String?,
@@ -623,14 +632,16 @@ class DeliveryParty {
   final String? name;
   final String phone;
   final double? rating;
+  final String? tier;
 
-  DeliveryParty({required this.id, required this.name, required this.phone, this.rating});
+  DeliveryParty({required this.id, required this.name, required this.phone, this.rating, this.tier});
 
   factory DeliveryParty.fromJson(Map<String, dynamic> json) => DeliveryParty(
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
         rating: (json['rating'] as num?)?.toDouble(),
+        tier: json['tier'] as String?,
       );
 }
 

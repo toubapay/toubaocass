@@ -79,3 +79,12 @@ Future<Message> sendDemLeguiMessage(int requestId, String body) async {
   final response = await ApiClient.instance.dio.post('/dem-legui/requests/$requestId/messages', data: {'body': body});
   return Message.fromJson(response.data as Map<String, dynamic>);
 }
+
+/// Post-trip driver feedback — only once the trip is completed; re-rating
+/// updates the existing review.
+Future<void> rateDemLeguiTrip(int tripId, {required int score, String? comment}) async {
+  await ApiClient.instance.dio.post('/dem-legui/trips/$tripId/rate', data: {
+    'score': score,
+    'comment': comment,
+  });
+}

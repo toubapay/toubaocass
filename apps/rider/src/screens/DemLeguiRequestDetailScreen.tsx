@@ -4,11 +4,13 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, T
 import { useTranslation } from 'react-i18next';
 
 import { extractErrorMessage } from '../api/client';
-import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers, NearbyDriver } from '../api/demLegui';
+import { cancelDemLeguiRequest, fetchDemLeguiRequest, fetchDemLeguiTrip, fetchNearbyDemLeguiDrivers, NearbyDriver, rateDemLeguiTrip } from '../api/demLegui';
 import { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DriverTierBadge } from '../components/DriverTierBadge';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
+import { RateDriverCard } from '../components/RateDriverCard';
 import { Screen } from '../components/Screen';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SosShareModal } from '../components/SosShareModal';
@@ -153,6 +155,10 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
         )}
         {trip && <SosShareModal kind="dem-legui/trips" rideId={trip.id} visible={showSos} onClose={() => setShowSos(false)} />}
 
+        {trip?.status === 'completed' && (
+          <RateDriverCard onSubmit={(score, comment) => rateDemLeguiTrip(trip.id, score, comment)} />
+        )}
+
         <View style={styles.titleRow}>
           <Text style={styles.title}>{t('demLegui.tripToLabel', { city: request.destination_city?.name })}</Text>
           {request.status === 'pending' ? (
@@ -180,7 +186,10 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
             <Text style={styles.sectionTitle}>{t('demLegui.yourDriver')}</Text>
             <Text style={styles.line}>{trip.driver.name}</Text>
             <Text style={styles.lineMuted}>{trip.driver.phone}</Text>
-            <Text style={styles.lineMuted}>★ {trip.driver.rating.toFixed(1)}</Text>
+            <View style={styles.ratingRow}>
+              <Text style={styles.lineMuted}>★ {trip.driver.rating.toFixed(1)}</Text>
+              <DriverTierBadge tier={trip.driver.tier} />
+            </View>
             {trip.car ? (
               <Text style={styles.lineMuted}>
                 🚗 {trip.car.make} {trip.car.model} · {trip.car.plate_number}
@@ -239,6 +248,7 @@ const styles = StyleSheet.create({
   },
   line: { fontSize: 17, fontWeight: '700', color: colors.text },
   lineMuted: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
   eta: { fontSize: 15, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
   fare: { fontSize: 20, fontWeight: '800', color: colors.primary },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },

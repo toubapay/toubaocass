@@ -55,3 +55,8 @@ export async function updateDelivery(deliveryId: number, input: CreateDeliveryIn
 export async function cancelDelivery(deliveryId: number): Promise<void> {
   await apiClient.delete(`/deliveries/${deliveryId}`);
 }
+
+/** Post-delivery driver feedback — only once delivered; re-rating updates the existing review. */
+export async function rateDelivery(deliveryId: number, score: number, comment?: string): Promise<void> {
+  await apiClient.post(`/deliveries/${deliveryId}/rate`, { score, comment });
+}

@@ -144,3 +144,12 @@ Future<Message> sendDeliveryMessage(int deliveryId, String body) async {
   final response = await ApiClient.instance.dio.post('/deliveries/$deliveryId/messages', data: {'body': body});
   return Message.fromJson(response.data as Map<String, dynamic>);
 }
+
+/// Post-delivery driver feedback — only once delivered; re-rating updates
+/// the existing review.
+Future<void> rateDelivery(int deliveryId, {required int score, String? comment}) async {
+  await ApiClient.instance.dio.post('/deliveries/$deliveryId/rate', data: {
+    'score': score,
+    'comment': comment,
+  });
+}

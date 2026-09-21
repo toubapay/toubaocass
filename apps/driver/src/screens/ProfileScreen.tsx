@@ -16,6 +16,12 @@ import { colors, radius, spacing } from '../theme';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'Profile'>;
 
+const TIER_STYLE: Record<string, { bg: string; fg: string; icon: string }> = {
+  debutant: { bg: colors.border, fg: colors.textMuted, icon: '🌱' },
+  silver: { bg: '#E5E9EC', fg: '#5B6770', icon: '🥈' },
+  gold: { bg: '#FCEFC7', fg: colors.primary, icon: '🥇' },
+};
+
 export function ProfileScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
@@ -42,7 +48,23 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.kyc}>
           {t('profile.kycLabel', { status: t(`common.kycStatus.${user?.driver_profile?.kyc_status ?? 'pending'}`) })}
         </Text>
-        <Text style={styles.meta}>{t('profile.rating', { value: (user?.driver_profile?.rating ?? 5).toFixed(1) })}</Text>
+        <View style={styles.ratingRow}>
+          <Text style={styles.meta}>{t('profile.rating', { value: (user?.driver_profile?.rating ?? 5).toFixed(1) })}</Text>
+          {(() => {
+            const tier = user?.driver_profile?.tier ?? 'debutant';
+            const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.debutant;
+            return (
+              <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
+                <Text style={[styles.tierBadgeText, { color: tierStyle.fg }]}>
+                  {tierStyle.icon} {t(`profile.tier.${tier}`)}
+                </Text>
+              </View>
+            );
+          })()}
+        </View>
+        <Text style={styles.ratingsCount}>
+          {t('profile.ratingsCount', { count: user?.driver_profile?.ratings_count ?? 0 })}
+        </Text>
       </View>
 
       <Pressable style={styles.walletCard} onPress={() => navigation.navigate('Wallet')}>
@@ -111,6 +133,10 @@ const styles = StyleSheet.create({
   name: { fontSize: 21, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
   meta: { fontSize: 16, color: colors.textMuted },
   kyc: { fontSize: 16, color: colors.text, fontWeight: '600', marginTop: spacing.sm },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 2 },
+  tierBadge: { borderRadius: radius.lg, paddingVertical: 2, paddingHorizontal: 10 },
+  tierBadgeText: { fontSize: 12.5, fontWeight: '700' },
+  ratingsCount: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
   walletCard: {
     flexDirection: 'row',
     alignItems: 'center',

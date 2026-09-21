@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/rate_driver_card.dart';
+
 import '../api/bookings_api.dart';
 import '../api/client.dart';
 import '../api/tracking_api.dart';
@@ -162,6 +165,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 ],
               ),
             ),
+          if (editing && t.status == 'completed')
+            RateDriverCard(onSubmit: (score, comment) => rateTrip(t.id, score: score, comment: comment)),
           const SizedBox(height: AppSpacing.lg),
           if (t.routeDistanceKm != null)
             _Card(
@@ -193,8 +198,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             title: 'Conducteur',
             children: [
               Text(t.driver.name ?? 'Conducteur', style: const TextStyle(fontSize: 18)),
-              Text('Note : ${t.driver.rating.toStringAsFixed(1)} ★',
-                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+              Row(
+                children: [
+                  Text('Note : ${t.driver.rating.toStringAsFixed(1)} ★',
+                      style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                  const SizedBox(width: AppSpacing.xs),
+                  DriverTierBadge(tier: t.driver.tier),
+                ],
+              ),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
