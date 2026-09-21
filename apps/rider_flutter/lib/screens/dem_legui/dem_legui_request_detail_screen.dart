@@ -8,6 +8,7 @@ import '../../api/dem_legui_api.dart';
 import '../../api/tracking_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/live_map.dart';
 import '../../widgets/sos_share_sheet.dart';
 import '../chat_screen.dart';
 
@@ -131,13 +132,15 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
               ),
             ),
           if (t != null && t.currentLatitude != null && t.currentLongitude != null && t.status == 'in_progress')
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              decoration: BoxDecoration(color: AppColors.accentSoft, borderRadius: BorderRadius.circular(AppRadius.md)),
-              child: Text(
-                'Position du chauffeur : ${t.currentLatitude!.toStringAsFixed(4)}, ${t.currentLongitude!.toStringAsFixed(4)}',
-                style: const TextStyle(fontSize: 13, color: AppColors.accent),
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: LiveMap(
+                currentLatitude: t.currentLatitude!,
+                currentLongitude: t.currentLongitude!,
+                destinationLatitude: r.destinationCity?.latitude,
+                destinationLongitude: r.destinationCity?.longitude,
+                destinationName: r.destinationCity?.name,
+                updatedAt: t.currentLocationUpdatedAt,
               ),
             ),
           if (t?.arrivedAt != null && t?.status == 'open')

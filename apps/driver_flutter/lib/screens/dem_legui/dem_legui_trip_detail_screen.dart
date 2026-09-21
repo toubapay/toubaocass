@@ -8,6 +8,7 @@ import '../../api/tracking_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
 import '../../utils/my_location.dart';
+import '../../widgets/live_map.dart';
 import '../../widgets/sos_share_sheet.dart';
 import '../chat_screen.dart';
 
@@ -126,16 +127,15 @@ class _DemLeguiTripDetailScreenState extends State<DemLeguiTripDetailScreen> {
               ),
             ),
           if (t.status == 'in_progress' && t.currentLatitude != null && t.currentLongitude != null)
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.accentSoft,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Text(
-                'Position en direct : ${t.currentLatitude!.toStringAsFixed(4)}, ${t.currentLongitude!.toStringAsFixed(4)}',
-                style: const TextStyle(fontSize: 13, color: AppColors.accent),
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: LiveMap(
+                currentLatitude: t.currentLatitude!,
+                currentLongitude: t.currentLongitude!,
+                destinationLatitude: t.destinationCity?.latitude,
+                destinationLongitude: t.destinationCity?.longitude,
+                destinationName: t.destinationCity?.name,
+                updatedAt: t.currentLocationUpdatedAt,
               ),
             ),
           if (t.arrivedAt != null && t.status == 'open')

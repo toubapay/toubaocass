@@ -6,6 +6,7 @@ import '../../api/tracking_api.dart';
 import '../../api/wallet_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/live_map.dart';
 import '../../widgets/sos_share_sheet.dart';
 
 const _statusLabel = {
@@ -146,6 +147,23 @@ class _AnandoRideDetailScreenState extends State<AnandoRideDetailScreen> {
                 child: const Text('🆘 Partager ma position'),
               ),
             ),
+          if (r.status == 'in_progress')
+            r.currentLatitude != null && r.currentLongitude != null
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: LiveMap(
+                      currentLatitude: r.currentLatitude!,
+                      currentLongitude: r.currentLongitude!,
+                      destinationLatitude: r.destinationCity?.latitude,
+                      destinationLongitude: r.destinationCity?.longitude,
+                      destinationName: r.destinationCity?.name,
+                      updatedAt: r.currentLocationUpdatedAt,
+                    ),
+                  )
+                : const Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Text('En attente de la position…', style: TextStyle(fontSize: 13.5, color: AppColors.textMuted)),
+                  ),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
