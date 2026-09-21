@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../state/module_status_provider.dart';
 import '../theme.dart';
+import '../widgets/inbox_icon.dart';
 
 class _ServiceEntry {
   final String key;
@@ -15,11 +16,18 @@ class _ServiceEntry {
 }
 
 class ServicesScreen extends StatelessWidget {
-  const ServicesScreen({super.key, required this.onOpenDemLegui, required this.onOpenAnando, required this.onOpenLivraison});
+  const ServicesScreen({
+    super.key,
+    required this.onOpenDemLegui,
+    required this.onOpenAnando,
+    required this.onOpenLivraison,
+    required this.onOpenInbox,
+  });
 
   final VoidCallback onOpenDemLegui;
   final VoidCallback onOpenAnando;
   final VoidCallback onOpenLivraison;
+  final VoidCallback onOpenInbox;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,7 @@ class ServicesScreen extends StatelessWidget {
     ].where((s) => moduleStatus.isEnabled(s.key)).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Services')),
+      appBar: AppBar(title: const Text('Services'), actions: [InboxIcon(onTap: onOpenInbox)]),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: services

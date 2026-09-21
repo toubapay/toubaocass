@@ -131,3 +131,16 @@ Future<Delivery> fetchDelivery(int deliveryId) async {
 Future<void> cancelDelivery(int deliveryId) async {
   await ApiClient.instance.dio.delete('/deliveries/$deliveryId');
 }
+
+// Chat on a delivery — shared between the sender and the assigned driver.
+// Reachable only via the inbox (see InboxController on the backend),
+// matching the web apps.
+Future<List<Message>> fetchDeliveryMessages(int deliveryId) async {
+  final response = await ApiClient.instance.dio.get('/deliveries/$deliveryId/messages');
+  return (response.data as List).map((e) => Message.fromJson(e as Map<String, dynamic>)).toList();
+}
+
+Future<Message> sendDeliveryMessage(int deliveryId, String body) async {
+  final response = await ApiClient.instance.dio.post('/deliveries/$deliveryId/messages', data: {'body': body});
+  return Message.fromJson(response.data as Map<String, dynamic>);
+}

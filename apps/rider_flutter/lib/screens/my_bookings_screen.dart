@@ -6,14 +6,16 @@ import '../api/client.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../widgets/booking_quick_action_sheet.dart';
+import '../widgets/inbox_icon.dart';
 
 const _statusLabel = {'confirmed': 'Confirmée', 'cancelled': 'Annulée'};
 
 class MyBookingsScreen extends StatefulWidget {
-  const MyBookingsScreen({super.key, required this.onOpenTrip, required this.onOpenChat});
+  const MyBookingsScreen({super.key, required this.onOpenTrip, required this.onOpenChat, required this.onOpenInbox});
 
   final void Function(int tripId) onOpenTrip;
   final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
+  final VoidCallback onOpenInbox;
 
   @override
   State<MyBookingsScreen> createState() => _MyBookingsScreenState();
@@ -105,7 +107,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     final currency = NumberFormat.decimalPattern('fr');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes réservations')),
+      appBar: AppBar(title: const Text('Mes réservations'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(

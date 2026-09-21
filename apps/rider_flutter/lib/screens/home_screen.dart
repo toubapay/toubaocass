@@ -8,6 +8,7 @@ import '../push/push_service.dart';
 import '../theme.dart';
 import '../utils/my_location.dart';
 import '../widgets/city_picker.dart';
+import '../widgets/inbox_icon.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trips_map.dart';
 import '../widgets/voice_search_button.dart';
@@ -15,9 +16,10 @@ import '../widgets/voice_search_button.dart';
 const _nearbyRadiusKm = 25.0;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onOpenTrip, required this.onOpenWallet});
+  const HomeScreen({super.key, required this.onOpenTrip, required this.onOpenWallet, required this.onOpenInbox});
 
   final void Function(int tripId) onOpenTrip;
+  final VoidCallback onOpenInbox;
   final VoidCallback onOpenWallet;
 
   @override
@@ -119,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Choisissez votre Destination'),
         actions: [
+          InboxIcon(onTap: widget.onOpenInbox),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: Center(

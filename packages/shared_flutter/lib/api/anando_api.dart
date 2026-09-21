@@ -88,6 +88,19 @@ Future<void> updateAnandoRideLocation(int rideId, double latitude, double longit
   await ApiClient.instance.dio.post('/anando-rides/$rideId/location', data: {'latitude': latitude, 'longitude': longitude});
 }
 
+// Chat on a booking — the joiner's private 1:1 thread with the ride's
+// poster. Reachable only via the inbox (see InboxController on the
+// backend), matching the web apps.
+Future<List<Message>> fetchAnandoMessages(int bookingId) async {
+  final response = await ApiClient.instance.dio.get('/anando-ride-bookings/$bookingId/messages');
+  return (response.data as List).map((e) => Message.fromJson(e as Map<String, dynamic>)).toList();
+}
+
+Future<Message> sendAnandoMessage(int bookingId, String body) async {
+  final response = await ApiClient.instance.dio.post('/anando-ride-bookings/$bookingId/messages', data: {'body': body});
+  return Message.fromJson(response.data as Map<String, dynamic>);
+}
+
 const anandoActiveWindowHours = 5;
 
 /// Mirrors the RN apps' `isAnandoRideStale()` — a ride with no fixed

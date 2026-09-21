@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../api/kyc_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/inbox_icon.dart';
 
 class _StatusCopy {
   final String title;
@@ -35,9 +36,10 @@ const _statusCopy = {
 };
 
 class KycStatusScreen extends StatefulWidget {
-  const KycStatusScreen({super.key, required this.onSubmitDocuments});
+  const KycStatusScreen({super.key, required this.onSubmitDocuments, required this.onOpenInbox});
 
   final VoidCallback onSubmitDocuments;
+  final VoidCallback onOpenInbox;
 
   @override
   State<KycStatusScreen> createState() => _KycStatusScreenState();
@@ -67,7 +69,7 @@ class _KycStatusScreenState extends State<KycStatusScreen> {
   Widget build(BuildContext context) {
     if (loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Vérification')),
+        appBar: AppBar(title: const Text('Vérification'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
         body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
     }
@@ -76,7 +78,7 @@ class _KycStatusScreenState extends State<KycStatusScreen> {
     final copy = _statusCopy[status]!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Vérification')),
+      appBar: AppBar(title: const Text('Vérification'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(

@@ -4,11 +4,13 @@ import '../../api/cars_api.dart';
 import '../../api/client.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/inbox_icon.dart';
 
 class CarsListScreen extends StatefulWidget {
-  const CarsListScreen({super.key, required this.onAddCar});
+  const CarsListScreen({super.key, required this.onAddCar, required this.onOpenInbox});
 
   final VoidCallback onAddCar;
+  final VoidCallback onOpenInbox;
 
   @override
   State<CarsListScreen> createState() => _CarsListScreenState();
@@ -60,7 +62,7 @@ class _CarsListScreenState extends State<CarsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes véhicules')),
+      appBar: AppBar(title: const Text('Mes véhicules'), actions: [InboxIcon(onTap: widget.onOpenInbox)]),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(

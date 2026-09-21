@@ -414,7 +414,13 @@ class Address {
 
 class Message {
   final int id;
-  final int bookingId;
+
+  /// Null for a Dem Légui/Anando/delivery message — this thread's own FK
+  /// column is null in the backend response whenever it isn't a booking
+  /// chat message (see MessageResource). Nothing currently reads this
+  /// field, but it must stay nullable to match the JSON or parsing any
+  /// non-booking message throws.
+  final int? bookingId;
   final String body;
   final int senderId;
   final String? senderName;
@@ -435,13 +441,57 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
         id: json['id'] as int,
-        bookingId: json['booking_id'] as int,
+        bookingId: json['booking_id'] as int?,
         body: json['body'] as String,
         senderId: json['sender_id'] as int,
         senderName: json['sender_name'] as String?,
         isMine: json['is_mine'] as bool,
         readAt: json['read_at'] as String?,
         createdAt: json['created_at'] as String? ?? '',
+      );
+}
+
+/// One row in the unified inbox — a single conversation, of any type, the
+/// current user is a participant in. See InboxController on the backend.
+class InboxThread {
+  final String type; // booking | dem_legui_request | anando | delivery
+  final int id;
+  final String? otherPartyName;
+  final int unreadCount;
+  final String? preview;
+  final String? latestAt;
+  final int? latestMessageId;
+
+  InboxThread({
+    required this.type,
+    required this.id,
+    required this.otherPartyName,
+    required this.unreadCount,
+    required this.preview,
+    required this.latestAt,
+    required this.latestMessageId,
+  });
+
+  factory InboxThread.fromJson(Map<String, dynamic> json) => InboxThread(
+        type: json['type'] as String,
+        id: json['id'] as int,
+        otherPartyName: json['other_party_name'] as String?,
+        unreadCount: json['unread_count'] as int? ?? 0,
+        preview: json['preview'] as String?,
+        latestAt: json['latest_at'] as String?,
+        latestMessageId: json['latest_message_id'] as int?,
+      );
+}
+
+class InboxResponse {
+  final List<InboxThread> data;
+  final int unreadTotal;
+
+  InboxResponse({required this.data, required this.unreadTotal});
+
+  factory InboxResponse.fromJson(Map<String, dynamic> json) => InboxResponse(
+        data: (json['data'] as List).map((e) => InboxThread.fromJson(e as Map<String, dynamic>)).toList(),
+        unreadTotal: json['unread_total'] as int? ?? 0,
       );
 }
 
