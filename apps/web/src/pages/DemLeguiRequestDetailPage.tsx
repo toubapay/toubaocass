@@ -13,6 +13,7 @@ import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { SosShareModal } from '../components/SosShareModal';
+import { SuccessModal } from '../components/SuccessModal';
 import { colors, radius, spacing } from '../theme';
 import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
@@ -51,6 +52,7 @@ export function DemLeguiRequestDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [justMatched, setJustMatched] = useState(false);
   const [showSos, setShowSos] = useState(false);
+  const [rated, setRated] = useState(false);
   const hadTripRef = useRef(false);
 
   const load = useCallback(() => {
@@ -185,7 +187,21 @@ export function DemLeguiRequestDetailPage() {
       {showSos && trip && <SosShareModal kind="dem-legui/trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
       {trip?.status === 'completed' && (
-        <RateDriverCard onSubmit={(score, comment) => rateDemLeguiTrip(trip.id, score, comment)} />
+        <RateDriverCard
+          onSubmit={async (score, comment) => {
+            await rateDemLeguiTrip(trip.id, score, comment);
+            setRated(true);
+          }}
+        />
+      )}
+
+      {rated && (
+        <SuccessModal
+          title={t('postTripRating.thanksTitle')}
+          body={t('postTripRating.thanksBody')}
+          buttonLabel={t('common.ok')}
+          onClose={() => navigate('/')}
+        />
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>

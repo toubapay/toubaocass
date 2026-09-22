@@ -152,7 +152,9 @@
   },
   "postTripRating": {
     "title": "Votre trajet est terminé",
-    "later": "Plus tard"
+    "later": "Plus tard",
+    "thanksTitle": "Merci pour votre avis !",
+    "thanksBody": "Votre évaluation aide les autres passagers à choisir un bon chauffeur."
   },
   "tripDetail": {
     "departureAt": "{{date}} à {{time}}",

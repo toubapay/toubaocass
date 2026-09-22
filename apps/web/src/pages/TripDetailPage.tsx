@@ -14,6 +14,7 @@ import { RateDriverCard } from '../components/RateDriverCard';
 import { RouteMap } from '../components/RouteMap';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
+import { SuccessModal } from '../components/SuccessModal';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
 import { WalletIcon } from '../components/WalletIcon';
 import { colors, radius, spacing } from '../theme';
@@ -32,6 +33,7 @@ export function TripDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [showSos, setShowSos] = useState(false);
+  const [rated, setRated] = useState(false);
 
   useEffect(() => {
     fetchWallet().then((w) => setWalletBalance(w.balance)).catch(() => setWalletBalance(null));
@@ -169,7 +171,21 @@ export function TripDetailPage() {
       {showSos && <SosShareModal kind="trips" rideId={trip.id} onClose={() => setShowSos(false)} />}
 
       {editing && trip.status === 'completed' && (
-        <RateDriverCard onSubmit={(score, comment) => rateTrip(trip.id, score, comment)} />
+        <RateDriverCard
+          onSubmit={async (score, comment) => {
+            await rateTrip(trip.id, score, comment);
+            setRated(true);
+          }}
+        />
+      )}
+
+      {rated && (
+        <SuccessModal
+          title={t('postTripRating.thanksTitle')}
+          body={t('postTripRating.thanksBody')}
+          buttonLabel={t('common.ok')}
+          onClose={() => navigate('/')}
+        />
       )}
 
       {editing && trip.status === 'in_progress' && (

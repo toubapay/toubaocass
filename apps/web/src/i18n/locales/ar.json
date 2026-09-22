@@ -156,7 +156,9 @@
   },
   "postTripRating": {
     "title": "اكتملت رحلتك",
-    "later": "لاحقاً"
+    "later": "لاحقاً",
+    "thanksTitle": "شكراً على تقييمك!",
+    "thanksBody": "تقييمك يساعد الركاب الآخرين على اختيار سائق جيد."
   },
   "tripDetail": {
     "departureAt": "{{date}} في {{time}}",
