@@ -446,3 +446,40 @@ export interface PendingRating {
   cost: number | null;
   completed_at: string;
 }
+
+export type FinancialReportRange = 'week' | 'month' | 'year';
+
+export interface FinancialReportPeriodRow {
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface FinancialReportServiceAmountRow {
+  service: 'trip' | 'dem_legui' | 'delivery' | 'anando';
+  label: string;
+  count: number;
+  amount: number;
+}
+
+export interface FinancialReportVehicleRow {
+  car_id: number | null;
+  label: string;
+  count: number;
+  earnings: number;
+}
+
+/**
+ * Normalized shape both the rider "spending" and driver "earnings"
+ * mini-reports map their own endpoint's response into — see
+ * MiniFinancialReportCard, which renders from this shape alone so the same
+ * component serves both rider-web and driver-web profile pages.
+ */
+export interface MiniFinancialReport {
+  range: FinancialReportRange;
+  total: number;
+  items_count: number;
+  by_period: FinancialReportPeriodRow[];
+  by_service: FinancialReportServiceAmountRow[];
+  by_vehicle?: FinancialReportVehicleRow[];
+}

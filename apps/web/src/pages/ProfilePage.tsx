@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { fetchSpendingReport } from '../api/reports';
 import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
+import { MiniFinancialReportCard } from '../components/MiniFinancialReportCard';
 import { ProfileDashboard } from '../components/ProfileDashboard';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
@@ -86,6 +88,12 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
       </button>
 
       <ProfileDashboard />
+
+      <MiniFinancialReportCard
+        title={t('spendingReport.title')}
+        totalLabel={t('spendingReport.totalLabel')}
+        fetchReport={fetchSpendingReport}
+      />
 
       <button
         onClick={() => navigate('/deliveries')}

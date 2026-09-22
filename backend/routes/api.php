@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\DemLeguiMessageController;
 use App\Http\Controllers\Api\DriverActiveChatController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\DriverReportController;
 use App\Http\Controllers\Api\InboxController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\MessageController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Api\ModuleStatusController;
 use App\Http\Controllers\Api\ProfileStatsController;
 use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\RiderActiveChatController;
+use App\Http\Controllers\Api\RiderReportController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\TripController;
 use App\Http\Controllers\Api\WalletController;
@@ -164,6 +166,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dem Légui trip, if any.
         Route::get('me/pending-rating', [RatingController::class, 'pendingRating']);
 
+        // "Mes dépenses" mini-report on the rider's profile page.
+        Route::get('me/spending-report', [RiderReportController::class, 'spending']);
+
         Route::get('trips', [TripController::class, 'search']);
         Route::get('trips/instant', [TripController::class, 'instantIndex']);
         Route::get('trips/{trip}', [TripController::class, 'show']);
@@ -223,6 +228,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Reviews riders/senders have left, across Trip/Dem Légui/Delivery.
         Route::get('ratings', [RatingController::class, 'mine']);
+
+        // "Mes revenus" mini-report on the driver's profile page.
+        Route::get('earnings-report', [DriverReportController::class, 'earnings']);
 
         Route::get('cars', [CarController::class, 'index']);
         Route::post('cars', [CarController::class, 'store']);
@@ -302,6 +310,7 @@ Route::prefix('admin')->group(function () {
 
         Route::middleware('admin.permission:view_financials')->group(function () {
             Route::get('financials/summary', [AdminFinancialsController::class, 'summary']);
+            Route::get('financials/report', [AdminFinancialsController::class, 'report']);
         });
 
         Route::middleware('admin.permission:view_dashboard')->group(function () {

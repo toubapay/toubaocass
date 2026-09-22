@@ -98,6 +98,64 @@ export interface FinancialsSummary {
   total_driver_earnings: number;
 }
 
+export interface FinancialReportTotals {
+  gross_revenue: number;
+  commission_total: number;
+  driver_earnings_total: number;
+  rider_spending_total: number;
+  trips_count: number;
+  dem_legui_count: number;
+  deliveries_count: number;
+  anando_count: number;
+  active_drivers_count: number;
+  active_riders_count: number;
+}
+
+export interface FinancialReportServiceRow {
+  service: 'trip' | 'dem_legui' | 'delivery' | 'anando';
+  label: string;
+  count: number;
+  gross: number;
+  commission: number;
+  driver_earnings: number;
+}
+
+export interface FinancialReportDestinationRow {
+  city: string;
+  count: number;
+  gross: number;
+  commission: number;
+  driver_earnings: number;
+}
+
+export interface FinancialReportVehicleCategoryRow {
+  ride_type: string;
+  label: string;
+  count: number;
+  gross: number;
+  commission: number;
+  driver_earnings: number;
+}
+
+export interface FinancialReportDriverRow {
+  driver_id: number;
+  name: string | null;
+  phone: string | null;
+  count: number;
+  gross: number;
+  commission: number;
+  driver_earnings: number;
+}
+
+export interface FinancialReport {
+  range: { from: string | null; to: string | null };
+  totals: FinancialReportTotals;
+  by_service: FinancialReportServiceRow[];
+  by_destination: FinancialReportDestinationRow[];
+  by_vehicle_category: FinancialReportVehicleCategoryRow[];
+  by_driver: FinancialReportDriverRow[];
+}
+
 export interface DashboardStats {
   registered_drivers: number;
   registered_riders: number;

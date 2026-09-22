@@ -588,5 +588,20 @@
     "sosAlertAdmin": "إرسال تنبيه SOS إلى المسؤول",
     "sosAlertConfirm": "هل تريد إرسال تنبيه SOS إلى فريق الأمان؟ استخدم هذا فقط في حالة طوارئ حقيقية.",
     "sosAlertSent": "تم إرسال تنبيه SOS. تم إخطار فريقنا."
+  },
+  "financialReport": {
+    "range": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "byPeriod": "حسب الفترة",
+    "byService": "حسب الخدمة",
+    "byVehicle": "حسب المركبة (الأسطول)",
+    "empty": "لا شيء لعرضه لهذه الفترة."
+  },
+  "earningsReport": {
+    "title": "💰 أرباحي",
+    "totalLabel": "إجمالي الأرباح"
   }
 }

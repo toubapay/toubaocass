@@ -627,5 +627,20 @@
     "deliverySosSheetTitle": "مشاركة تتبع التوصيل",
     "deliverySosSheetSubtitle": "أرسل هذا الرابط للمستلم ليتمكن من تتبع الطرد مباشرة لمدة 24 ساعة.",
     "deliverySosMessage": "تابع توصيلي مباشرة على Intercity: {{url}}"
+  },
+  "financialReport": {
+    "range": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "byPeriod": "حسب الفترة",
+    "byService": "حسب الخدمة",
+    "byVehicle": "حسب المركبة",
+    "empty": "لا شيء لعرضه لهذه الفترة."
+  },
+  "spendingReport": {
+    "title": "💳 مصاريفي",
+    "totalLabel": "إجمالي المصاريف"
   }
 }
