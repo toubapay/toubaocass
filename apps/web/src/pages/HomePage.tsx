@@ -21,6 +21,7 @@ import type { Coordinates } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
 
 const NEARBY_RADIUS_KM = 25;
+const POLL_INTERVAL_MS = 20000;
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -55,10 +56,12 @@ export function HomePage() {
   const invalidRoute = origin && destination && origin.id === destination.id;
 
   const load = useCallback(
-    (pageToLoad: number) => {
+    (pageToLoad: number, opts?: { silent?: boolean }) => {
       if (invalidRoute) return;
-      setLoading(true);
-      setError(undefined);
+      if (!opts?.silent) {
+        setLoading(true);
+        setError(undefined);
+      }
       searchTrips({
         origin_city_id: origin?.id,
         destination_city_id: destination?.id,
@@ -74,8 +77,12 @@ export function HomePage() {
           setLastPage(res.meta?.last_page ?? 1);
           setTotal(res.meta?.total ?? res.data.length);
         })
-        .catch(() => setError(t('home.loadError')))
-        .finally(() => setLoading(false));
+        .catch(() => {
+          if (!opts?.silent) setError(t('home.loadError'));
+        })
+        .finally(() => {
+          if (!opts?.silent) setLoading(false);
+        });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [origin, destination, date, seats, nearMe, invalidRoute],
@@ -88,6 +95,26 @@ export function HomePage() {
     load(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origin, destination, date, seats, nearMe]);
+
+  // Trips are posted by other drivers at any time, so the list on screen
+  // would otherwise go stale until the rider manually reloads — poll the
+  // currently viewed page/filter combo silently (no spinner/error flash),
+  // same pattern as AnandoMiniList's own live refresh right above this list.
+  useEffect(() => {
+    const poll = () => load(page, { silent: true });
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onFocus = () => poll();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [load, page]);
 
   const goToPage = (nextPage: number) => {
     setPage(nextPage);

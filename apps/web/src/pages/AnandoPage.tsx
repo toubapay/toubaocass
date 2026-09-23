@@ -21,6 +21,8 @@ import { TextField } from '../components/TextField';
 import { colors, radius, spacing } from '../theme';
 import { isAnandoRideStale } from '../utils/anando';
 
+const POLL_INTERVAL_MS = 20000;
+
 const sectionTitleStyle = {
   fontSize: 13,
   fontWeight: 700,
@@ -154,19 +156,39 @@ export function AnandoPage() {
 
   const activeRide = myRides.find((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status) && !isAnandoRideStale(ride));
 
-  const load = () => {
+  const load = (opts?: { silent?: boolean }) => {
     Promise.all([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()])
       .then(([available, mine, bookings]) => {
         setRides(available.data.filter((ride) => !isAnandoRideStale(ride)));
         setMyRides(mine.data);
         setMyBookings(bookings.data);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!opts?.silent) setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchCities().then(setCities);
     load();
+
+    // Other riders/drivers post, join, start, and complete Anando rides at
+    // any time — poll silently (plus refetch on tab focus) so this page
+    // stays current without a manual reload, same pattern as Home's
+    // AnandoMiniList.
+    const poll = () => load({ silent: true });
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onFocus = () => poll();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

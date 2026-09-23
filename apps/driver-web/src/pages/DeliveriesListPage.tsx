@@ -8,6 +8,9 @@ import type { Delivery } from '../api/types';
 import { CenteredSpinner } from '../components/Spinner';
 import { useAuth } from '../context/AuthContext';
 import { colors, radius, spacing } from '../theme';
+import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
+
+const POLL_INTERVAL_MS = 20000;
 
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
@@ -29,16 +32,31 @@ export function DeliveriesListPage() {
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
   const [acceptError, setAcceptError] = useState<string | undefined>();
 
-  const load = useCallback(() => {
-    if (!kycApproved) return;
-    setLoading(true);
-    const fetcher = tab === 'available' ? fetchAvailableDeliveries : fetchMyDeliveries;
-    fetcher()
-      .then((res) => setDeliveries(res.data))
-      .finally(() => setLoading(false));
-  }, [tab, kycApproved]);
+  const load = useCallback(
+    (opts?: { silent?: boolean }) => {
+      if (!kycApproved) return;
+      if (!opts?.silent) setLoading(true);
+      const fetcher = tab === 'available' ? fetchAvailableDeliveries : fetchMyDeliveries;
+      fetcher()
+        .then((res) => setDeliveries(res.data))
+        .finally(() => {
+          if (!opts?.silent) setLoading(false);
+        });
+    },
+    [tab, kycApproved],
+  );
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    load();
+    // A rider posting a new delivery is already pushed to nearby online
+    // drivers (see DeliveryAvailableCard's own usePushEvent) — this page
+    // itself polls too, silently, so its list stays current for anyone
+    // who has it open, same as DemLeguiRequestsPage.
+    const interval = setInterval(() => load({ silent: true }), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [load]);
+
+  usePushEvent('delivery_available', () => load({ silent: true }));
 
   const doAccept = async (deliveryId: number) => {
     setAcceptError(undefined);

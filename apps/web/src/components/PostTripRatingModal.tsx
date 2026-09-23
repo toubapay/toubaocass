@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +10,7 @@ import { colors, radius, spacing } from '../theme';
 import { formatDuration } from '../utils/trip';
 import { DriverTierBadge } from './DriverTierBadge';
 import { RateDriverCard } from './RateDriverCard';
+import { SuccessModal } from './SuccessModal';
 
 /**
  * Shown on the rider-web home screen right after a trip/delivery/Dem Légui
@@ -21,6 +23,7 @@ import { RateDriverCard } from './RateDriverCard';
  */
 export function PostTripRatingModal({ pending, onClose }: { pending: PendingRating; onClose: () => void }) {
   const { t } = useTranslation();
+  const [rated, setRated] = useState(false);
 
   const handleSubmit = async (score: number, comment?: string) => {
     if (pending.type === 'trip') {
@@ -30,8 +33,19 @@ export function PostTripRatingModal({ pending, onClose }: { pending: PendingRati
     } else {
       await rateDemLeguiTrip(pending.id, score, comment);
     }
-    setTimeout(onClose, 1200);
+    setRated(true);
   };
+
+  if (rated) {
+    return (
+      <SuccessModal
+        title={t('postTripRating.thanksTitle')}
+        body={t('postTripRating.thanksBody')}
+        buttonLabel={t('common.ok')}
+        onClose={onClose}
+      />
+    );
+  }
 
   return createPortal(
     <div
