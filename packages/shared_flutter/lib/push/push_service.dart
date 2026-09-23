@@ -19,6 +19,15 @@ const _notificationInitSettings = InitializationSettings(
 /// lifecycle — registered by [initializePushBackgroundHandler].
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // A message that carries a native `notification` block (e.g. the Dem
+  // Légui ETA push — see FcmPushGateway's os_display option) is already
+  // auto-displayed by the OS itself while the app is backgrounded/killed,
+  // with no app code needed. onBackgroundMessage still fires for it
+  // regardless, so showing a second, manually-built notification here
+  // would duplicate the OS's own. Only data-only messages (the default
+  // for everything else this app sends) need this manual path.
+  if (message.notification != null) return;
+
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp();
   }
@@ -85,15 +94,35 @@ Future<void> registerPushToken() async {
   }
 }
 
-/// Backend sends data-only FCM messages (no top-level "notification" key,
-/// on purpose — see FcmPushGateway's own comment) so `message.notification`
-/// is always null; title/body live in `message.data` instead. This is the
-/// only place a local Notification ever gets shown, foreground or
-/// background alike, mirroring the web apps' single-display-path fix.
+/// Backend sends data-only FCM messages by default (no top-level
+/// "notification" key — see FcmPushGateway's own comment) so
+/// `message.notification` is usually null and title/body live in
+/// `message.data` instead. In the foreground, the OS never auto-displays
+/// even an os_display message (see firebaseMessagingBackgroundHandler's own
+/// comment on why that path skips this one), so this is still the only
+/// place a local Notification ever gets shown while the app is open.
 Future<void> _showDataNotification(RemoteMessage message) async {
   final title = message.data['title'];
   if (title == null) return;
-  await showLocalNotification(title, message.data['body']);
+  await showLocalNotification(title, message.data['body'], id: _stableNotificationId(message.data));
+}
+
+/// A repeating update about the same subject (e.g. one Dem Légui trip's
+/// arrival ETA, ticking every minute) should replace its own previous
+/// notification rather than stack a fresh one on every tick — mirrors the
+/// `tag`/`apns-collapse-id` FcmPushGateway sets server-side for the exact
+/// same reason. Keyed on `type` + whichever `*_id` field is present, since
+/// every push this backend sends includes one identifying the thing it's
+/// about; falls back to null (caller then uses a fresh id per call) for a
+/// message with neither.
+int? _stableNotificationId(Map<String, dynamic> data) {
+  final subjectId = data.entries.firstWhere(
+    (entry) => entry.key.endsWith('_id'),
+    orElse: () => const MapEntry('', null),
+  );
+  if (subjectId.value == null) return null;
+
+  return Object.hash(data['type'], subjectId.key, subjectId.value);
 }
 
 /// Shows a local notification outside of an actual push arriving — for
@@ -101,13 +130,14 @@ Future<void> _showDataNotification(RemoteMessage message) async {
 /// delivery), so it gets the same native sound/vibration as a push instead
 /// of only an in-app toast. Reuses the same plugin instance/channel as
 /// [_showDataNotification], initializing it first if this is the first
-/// notification shown this session.
-Future<void> showLocalNotification(String title, String? body) async {
+/// notification shown this session. Pass [id] to replace a previously
+/// shown notification in place instead of stacking a new one.
+Future<void> showLocalNotification(String title, String? body, {int? id}) async {
   if (!_initialized) {
     await _localNotifications.initialize(_notificationInitSettings);
   }
   await _localNotifications.show(
-    Object.hash(title, body, DateTime.now().millisecondsSinceEpoch),
+    id ?? Object.hash(title, body, DateTime.now().millisecondsSinceEpoch),
     title,
     body,
     const NotificationDetails(

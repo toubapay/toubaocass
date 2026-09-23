@@ -13,9 +13,10 @@ use Illuminate\Support\Facades\Log;
  */
 class LogPushGateway implements PushGateway
 {
-    public function send(string $token, string $title, string $body, array $data = []): PushSendResult
+    public function send(string $token, string $title, string $body, array $data = [], ?array $osDisplay = null): PushSendResult
     {
-        Log::info("[PUSH] to {$token}: {$title} - {$body}", $data);
+        $suffix = $osDisplay !== null ? ' [os-displayed, tag='.($osDisplay['tag'] ?? 'none').']' : '';
+        Log::info("[PUSH] to {$token}: {$title} - {$body}{$suffix}", $data);
 
         return PushSendResult::success();
     }

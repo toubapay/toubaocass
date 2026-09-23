@@ -30,7 +30,7 @@ class FcmChannel
 
         $payload = $notification->toFcm($notifiable);
 
-        $result = $this->gateway->send($token, $payload['title'], $payload['body'], $payload['data'] ?? []);
+        $result = $this->gateway->send($token, $payload['title'], $payload['body'], $payload['data'] ?? [], $payload['os_display'] ?? null);
 
         Log::info($result->sent ? 'FCM push sent' : 'FCM push not sent', [
             'notifiable_type' => get_class($notifiable),

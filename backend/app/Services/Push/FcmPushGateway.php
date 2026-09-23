@@ -27,7 +27,7 @@ class FcmPushGateway implements PushGateway
         private readonly array $credentials,
     ) {}
 
-    public function send(string $token, string $title, string $body, array $data = []): PushSendResult
+    public function send(string $token, string $title, string $body, array $data = [], ?array $osDisplay = null): PushSendResult
     {
         $accessToken = $this->getAccessToken();
 
@@ -37,20 +37,46 @@ class FcmPushGateway implements PushGateway
             return PushSendResult::failed();
         }
 
-        // Data-only message (no top-level "notification" key) on purpose:
-        // when FCM sees a "notification" payload, the browser/OS displays
-        // it itself, on top of whichever handler the app registers
-        // (onMessage in the foreground, the service worker's
-        // onBackgroundMessage otherwise) — the classic "web push shows
-        // twice" bug. Keeping title/body inside "data" instead means only
-        // our own handler ever calls Notification()/showNotification(), so
-        // each push renders exactly once.
+        $message = [
+            'token' => $token,
+            // Always included, data-only or not — every client (web,
+            // Expo, Flutter) keys its own handling off this rather than
+            // the native notification block, which not every platform/app
+            // build parses the same way.
+            'data' => array_map('strval', [...$data, 'title' => $title, 'body' => $body]),
+        ];
+
+        if ($osDisplay !== null) {
+            // Native/OS-displayed block: the OS shows and updates this
+            // itself without the app needing to be running — the whole
+            // point for something that must appear on a locked/killed
+            // phone. `tag`/`apns-collapse-id` make repeated sends replace
+            // the previous notification instead of stacking.
+            $tag = $osDisplay['tag'] ?? null;
+            $message['notification'] = ['title' => $title, 'body' => $body];
+            $message['android'] = array_filter([
+                'notification' => $tag ? ['tag' => $tag] : null,
+                'collapse_key' => $tag,
+            ]);
+            $message['apns'] = [
+                'headers' => array_filter(['apns-collapse-id' => $tag]),
+                'payload' => ['aps' => ['alert' => ['title' => $title, 'body' => $body]]],
+            ];
+        } else {
+            // Data-only message (no top-level "notification" key) on
+            // purpose: when FCM sees a "notification" payload, the
+            // browser/OS displays it itself, on top of whichever handler
+            // the app registers (onMessage in the foreground, the service
+            // worker's onBackgroundMessage otherwise) — the classic "web
+            // push shows twice" bug. Keeping title/body inside "data"
+            // instead means only our own handler ever calls
+            // Notification()/showNotification(), so each push renders
+            // exactly once.
+        }
+
         $response = Http::withToken($accessToken)
             ->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", [
-                'message' => [
-                    'token' => $token,
-                    'data' => array_map('strval', [...$data, 'title' => $title, 'body' => $body]),
-                ],
+                'message' => $message,
             ]);
 
         if ($response->failed()) {
