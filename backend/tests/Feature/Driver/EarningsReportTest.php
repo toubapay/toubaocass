@@ -58,5 +58,12 @@ class EarningsReportTest extends TestCase
         $byVehicle = collect($response->json('by_vehicle'))->keyBy('car_id');
         $this->assertSame(3400, $byVehicle[$carA->id]['earnings']);
         $this->assertSame(1700, $byVehicle[$carB->id]['earnings']);
+
+        $items = collect($response->json('items'));
+        $this->assertCount(2, $items);
+        $amounts = $items->pluck('amount')->sort()->values()->all();
+        $this->assertSame([1700, 3400], $amounts);
+        $this->assertTrue($items->every(fn ($item) => $item['counterparty_name'] === $rider->name));
+        $this->assertTrue($items->every(fn ($item) => $item['type'] === 'trip'));
     }
 }

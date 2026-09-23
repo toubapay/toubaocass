@@ -477,6 +477,22 @@ export interface FinancialReportVehicleRow {
 }
 
 /**
+ * One individual completed trip/delivery/ride — the fee a rider paid, or a
+ * driver was paid, for that one course, with when it happened and who the
+ * other party was. `id` is a composite "{type}:{record_id}" string, unique
+ * within one report but not a real resource id.
+ */
+export interface FinancialReportItem {
+  id: string;
+  type: 'trip' | 'dem_legui' | 'delivery' | 'anando';
+  type_label: string;
+  destination: string | null;
+  counterparty_name: string | null;
+  amount: number;
+  completed_at: string;
+}
+
+/**
  * Normalized shape both the rider "spending" and driver "earnings"
  * mini-reports map their own endpoint's response into — see
  * MiniFinancialReportCard, which renders from this shape alone so the same
@@ -489,4 +505,5 @@ export interface MiniFinancialReport {
   by_period: FinancialReportPeriodRow[];
   by_service: FinancialReportServiceAmountRow[];
   by_vehicle?: FinancialReportVehicleRow[];
+  items: FinancialReportItem[];
 }

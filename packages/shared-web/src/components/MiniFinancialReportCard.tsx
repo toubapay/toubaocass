@@ -140,6 +140,37 @@ export function MiniFinancialReportCard({
             </div>
           )}
 
+          {report.items.length > 0 && (
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, textTransform: 'uppercase', margin: `0 0 ${spacing.sm}px` }}>
+                {t('financialReport.details')}
+              </p>
+              {report.items.map((item) => {
+                const at = new Date(item.completed_at);
+                const date = at.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                const time = at.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '6px 0', borderTop: `1px solid ${colors.background}` }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 13.5, fontWeight: 700, color: colors.text, margin: 0 }}>
+                        {item.destination ? t('financialReport.itemWithDestination', { type: item.type_label, destination: item.destination }) : item.type_label}
+                      </p>
+                      <p style={{ fontSize: 12, color: colors.textMuted, margin: '2px 0 0' }}>
+                        {item.counterparty_name
+                          ? t('financialReport.itemMetaWithName', { name: item.counterparty_name, date, time })
+                          : t('financialReport.itemMeta', { date, time })}
+                      </p>
+                    </div>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: colors.text, whiteSpace: 'nowrap', marginLeft: spacing.sm }}>
+                      {item.amount.toLocaleString()} F
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {report.items_count === 0 && (
             <p style={{ fontSize: 13.5, color: colors.textMuted, margin: 0 }}>{t('financialReport.empty')}</p>
           )}

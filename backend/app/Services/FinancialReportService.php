@@ -90,6 +90,7 @@ class FinancialReportService
             'items_count' => $rows->count(),
             'by_period' => $this->groupByPeriod($rows, $from, $to, $bucket, 'gross'),
             'by_service' => $this->groupByServiceAmount($rows, 'gross'),
+            'items' => $this->itemize($rows, 'gross', 'driver_id'),
         ];
     }
 
@@ -109,6 +110,7 @@ class FinancialReportService
             'by_period' => $this->groupByPeriod($rows, $from, $to, $bucket, 'driver_earnings'),
             'by_service' => $this->groupByServiceAmount($rows, 'driver_earnings'),
             'by_vehicle' => $this->groupByCar($rows, $driver),
+            'items' => $this->itemize($rows, 'driver_earnings', 'rider_id'),
         ];
     }
 
@@ -133,6 +135,7 @@ class FinancialReportService
             $trip = $booking->trip;
             $rows->push((object) [
                 'type' => self::SERVICE_TRIP,
+                'record_id' => $booking->id,
                 'gross' => (int) $booking->fare_total,
                 'commission' => (int) ($booking->commission_amount ?? 0),
                 'driver_earnings' => (int) $booking->fare_total - (int) ($booking->commission_amount ?? 0),
@@ -158,6 +161,7 @@ class FinancialReportService
             $trip = $request->trip;
             $rows->push((object) [
                 'type' => self::SERVICE_DEM_LEGUI,
+                'record_id' => $request->id,
                 'gross' => (int) $request->fare_total,
                 'commission' => (int) ($request->commission_amount ?? 0),
                 'driver_earnings' => (int) $request->fare_total - (int) ($request->commission_amount ?? 0),
@@ -181,6 +185,7 @@ class FinancialReportService
         foreach ($deliveries as $delivery) {
             $rows->push((object) [
                 'type' => self::SERVICE_DELIVERY,
+                'record_id' => $delivery->id,
                 'gross' => (int) $delivery->fee,
                 'commission' => (int) ($delivery->commission_amount ?? 0),
                 'driver_earnings' => (int) $delivery->fee - (int) ($delivery->commission_amount ?? 0),
@@ -206,6 +211,7 @@ class FinancialReportService
             $ride = $booking->anandoRide;
             $rows->push((object) [
                 'type' => self::SERVICE_ANANDO,
+                'record_id' => $booking->id,
                 'gross' => (int) $booking->price_total,
                 'commission' => (int) ($booking->commission_amount ?? 0),
                 'driver_earnings' => (int) $booking->price_total - (int) ($booking->commission_amount ?? 0),
@@ -301,31 +307,12 @@ class FinancialReportService
      */
     private function groupByDestination(Collection $rows): array
     {
-        $cities = City::query()
-            ->select('id', 'name', 'latitude', 'longitude')
-            ->get()
-            ->keyBy('id');
-
-        $citiesWithCoords = $cities->filter(fn (City $c) => $c->latitude !== null && $c->longitude !== null);
+        [$cities, $citiesWithCoords] = $this->loadCities();
 
         $buckets = [];
 
         foreach ($rows as $row) {
-            $cityName = null;
-
-            if ($row->destination_city_id !== null) {
-                $cityName = $cities->get($row->destination_city_id)?->name;
-            } elseif ($row->destination_lat !== null && $row->destination_lng !== null && $citiesWithCoords->isNotEmpty()) {
-                $nearest = $citiesWithCoords->sortBy(fn (City $c) => Geo::haversineKm(
-                    (float) $row->destination_lat,
-                    (float) $row->destination_lng,
-                    (float) $c->latitude,
-                    (float) $c->longitude,
-                ))->first();
-                $cityName = $nearest?->name;
-            }
-
-            $cityName ??= 'Non déterminée';
+            $cityName = $this->destinationNameFor($row, $cities, $citiesWithCoords) ?? 'Non déterminée';
 
             $buckets[$cityName] ??= ['count' => 0, 'gross' => 0, 'commission' => 0, 'driver_earnings' => 0];
             $buckets[$cityName]['count']++;
@@ -340,6 +327,46 @@ class FinancialReportService
             ->take(15)
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array{0: Collection<int, City>, 1: Collection<int, City>}
+     */
+    private function loadCities(): array
+    {
+        $cities = City::query()
+            ->select('id', 'name', 'latitude', 'longitude')
+            ->get()
+            ->keyBy('id');
+
+        $citiesWithCoords = $cities->filter(fn (City $c) => $c->latitude !== null && $c->longitude !== null);
+
+        return [$cities, $citiesWithCoords];
+    }
+
+    /**
+     * Trip/Dem Légui/Anando rows carry a destination_city_id directly;
+     * Delivery has no city column (only free-text address + lat/lng), so
+     * it's bucketed to the nearest known City by Haversine distance instead.
+     */
+    private function destinationNameFor(object $row, Collection $cities, Collection $citiesWithCoords): ?string
+    {
+        if ($row->destination_city_id !== null) {
+            return $cities->get($row->destination_city_id)?->name;
+        }
+
+        if ($row->destination_lat !== null && $row->destination_lng !== null && $citiesWithCoords->isNotEmpty()) {
+            $nearest = $citiesWithCoords->sortBy(fn (City $c) => Geo::haversineKm(
+                (float) $row->destination_lat,
+                (float) $row->destination_lng,
+                (float) $c->latitude,
+                (float) $c->longitude,
+            ))->first();
+
+            return $nearest?->name;
+        }
+
+        return null;
     }
 
     /**
@@ -480,5 +507,38 @@ class FinancialReportService
         unset($b);
 
         return array_map(fn (array $b) => ['label' => $b['label'], 'amount' => $b['amount'], 'count' => $b['count']], $buckets);
+    }
+
+    /**
+     * One row per individual completed trip/delivery/ride, most recent
+     * first — the detailed "fee paid/received per trip, with date, time,
+     * and who the other party was" list on a rider's or driver's own
+     * mini-report, as opposed to the aggregated by_period/by_service
+     * summaries above. $counterpartyField is 'driver_id' for a rider's own
+     * report (who they paid) or 'rider_id' for a driver's own report (who
+     * they were paid by).
+     */
+    private function itemize(Collection $rows, string $amountField, string $counterpartyField): array
+    {
+        [$cities, $citiesWithCoords] = $this->loadCities();
+
+        $counterparties = User::query()
+            ->whereIn('id', $rows->pluck($counterpartyField)->filter()->unique())
+            ->get(['id', 'name'])
+            ->keyBy('id');
+
+        return $rows
+            ->sortByDesc(fn ($row) => $row->completed_at)
+            ->map(fn ($row) => [
+                'id' => "{$row->type}:{$row->record_id}",
+                'type' => $row->type,
+                'type_label' => self::SERVICE_LABELS[$row->type],
+                'destination' => $this->destinationNameFor($row, $cities, $citiesWithCoords),
+                'counterparty_name' => $counterparties->get($row->{$counterpartyField})?->name,
+                'amount' => (int) $row->{$amountField},
+                'completed_at' => $row->completed_at,
+            ])
+            ->values()
+            ->all();
     }
 }

@@ -51,6 +51,15 @@ class SpendingReportTest extends TestCase
         $this->assertSame(0, $byService['anando']['amount']);
 
         $this->assertNotEmpty($response->json('by_period'));
+
+        $items = collect($response->json('items'))->keyBy('type');
+        $this->assertCount(2, $items);
+        $this->assertSame(3000, $items['trip']['amount']);
+        $this->assertSame($driver->name, $items['trip']['counterparty_name']);
+        $this->assertSame($destination->name, $items['trip']['destination']);
+        $this->assertNotNull($items['trip']['completed_at']);
+        $this->assertSame(1500, $items['delivery']['amount']);
+        $this->assertSame($driver->name, $items['delivery']['counterparty_name']);
     }
 
     public function test_week_and_year_ranges_are_accepted(): void

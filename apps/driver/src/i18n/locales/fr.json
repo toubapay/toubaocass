@@ -526,5 +526,24 @@
     "sosAlertAdmin": "Alerte SOS à l'administrateur",
     "sosAlertConfirm": "Envoyer une alerte SOS à l'équipe de sécurité ? Utilisez ceci uniquement en cas d'urgence réelle.",
     "sosAlertSent": "Alerte SOS envoyée. Notre équipe a été prévenue."
+  },
+  "financialReport": {
+    "range": {
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "byPeriod": "Par période",
+    "byService": "Par service",
+    "byVehicle": "Par véhicule (flotte)",
+    "details": "Détail des trajets",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} à {{time}}",
+    "itemMeta": "{{date}} à {{time}}",
+    "empty": "Rien à afficher pour cette période."
+  },
+  "earningsReport": {
+    "title": "💰 Mes revenus",
+    "totalLabel": "Total gagné"
   }
 }

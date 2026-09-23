@@ -1047,3 +1047,107 @@ class DemLeguiTrip {
             : (json['requests'] as List).map((e) => DemLeguiRequest.fromJson(e as Map<String, dynamic>)).toList(),
       );
 }
+
+class FinancialReportPeriodRow {
+  final String label;
+  final int amount;
+  final int count;
+
+  FinancialReportPeriodRow({required this.label, required this.amount, required this.count});
+
+  factory FinancialReportPeriodRow.fromJson(Map<String, dynamic> json) => FinancialReportPeriodRow(
+        label: json['label'] as String,
+        amount: json['amount'] as int,
+        count: json['count'] as int,
+      );
+}
+
+class FinancialReportServiceAmountRow {
+  final String service;
+  final String label;
+  final int count;
+  final int amount;
+
+  FinancialReportServiceAmountRow({required this.service, required this.label, required this.count, required this.amount});
+
+  factory FinancialReportServiceAmountRow.fromJson(Map<String, dynamic> json) => FinancialReportServiceAmountRow(
+        service: json['service'] as String,
+        label: json['label'] as String,
+        count: json['count'] as int,
+        amount: json['amount'] as int,
+      );
+}
+
+class FinancialReportVehicleRow {
+  final int? carId;
+  final String label;
+  final int count;
+  final int earnings;
+
+  FinancialReportVehicleRow({required this.carId, required this.label, required this.count, required this.earnings});
+
+  factory FinancialReportVehicleRow.fromJson(Map<String, dynamic> json) => FinancialReportVehicleRow(
+        carId: json['car_id'] as int?,
+        label: json['label'] as String,
+        count: json['count'] as int,
+        earnings: json['earnings'] as int,
+      );
+}
+
+/// One individual completed trip/delivery/ride — the fee a rider paid, or a
+/// driver was paid, for that one course, with when it happened and who the
+/// other party was. [id] is a composite "{type}:{recordId}" string, unique
+/// within one report but not a real resource id.
+class FinancialReportItem {
+  final String id;
+  final String type;
+  final String typeLabel;
+  final String? destination;
+  final String? counterpartyName;
+  final int amount;
+  final String completedAt;
+
+  FinancialReportItem({
+    required this.id,
+    required this.type,
+    required this.typeLabel,
+    required this.destination,
+    required this.counterpartyName,
+    required this.amount,
+    required this.completedAt,
+  });
+
+  factory FinancialReportItem.fromJson(Map<String, dynamic> json) => FinancialReportItem(
+        id: json['id'] as String,
+        type: json['type'] as String,
+        typeLabel: json['type_label'] as String,
+        destination: json['destination'] as String?,
+        counterpartyName: json['counterparty_name'] as String?,
+        amount: json['amount'] as int,
+        completedAt: json['completed_at'] as String,
+      );
+}
+
+/// Normalized shape both the rider "spending" and driver "earnings"
+/// mini-reports map their own endpoint's response into — see
+/// MiniFinancialReportCard, which renders from this shape alone so the same
+/// widget serves both rider and driver profile screens.
+class MiniFinancialReport {
+  final String range;
+  final int total;
+  final int itemsCount;
+  final List<FinancialReportPeriodRow> byPeriod;
+  final List<FinancialReportServiceAmountRow> byService;
+  final List<FinancialReportVehicleRow>? byVehicle;
+  final List<FinancialReportItem> items;
+
+  MiniFinancialReport({
+    required this.range,
+    required this.total,
+    required this.itemsCount,
+    required this.byPeriod,
+    required this.byService,
+    this.byVehicle,
+    required this.items,
+  });
+}

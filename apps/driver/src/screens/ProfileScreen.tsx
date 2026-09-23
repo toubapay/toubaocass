@@ -5,10 +5,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { deleteProfilePhoto, uploadProfilePhoto } from '../api/auth';
+import { fetchEarningsReport } from '../api/reports';
 import { fetchWallet } from '../api/wallet';
 import { useAuth } from '../context/AuthContext';
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { Button } from '../components/Button';
+import { MiniFinancialReportCard } from '../components/MiniFinancialReportCard';
 import { ProfileDashboard } from '../components/ProfileDashboard';
 import { ProfilePhotoUploader } from '../components/ProfilePhotoUploader';
 import { Screen } from '../components/Screen';
@@ -87,6 +89,12 @@ export function ProfileScreen({ navigation }: Props) {
       </Pressable>
 
       <ProfileDashboard />
+
+      <MiniFinancialReportCard
+        title={t('earningsReport.title')}
+        totalLabel={t('earningsReport.totalLabel')}
+        fetchReport={fetchEarningsReport}
+      />
 
       {isModuleEnabled('assurance') && (
         <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('Insurance')}>

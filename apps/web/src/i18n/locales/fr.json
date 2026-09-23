@@ -623,6 +623,10 @@
     "byPeriod": "Par période",
     "byService": "Par service",
     "byVehicle": "Par véhicule",
+    "details": "Détail des trajets",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} à {{time}}",
+    "itemMeta": "{{date}} à {{time}}",
     "empty": "Rien à afficher pour cette période."
   },
   "spendingReport": {

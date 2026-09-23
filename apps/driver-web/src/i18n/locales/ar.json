@@ -601,6 +601,10 @@
     "byPeriod": "حسب الفترة",
     "byService": "حسب الخدمة",
     "byVehicle": "حسب المركبة (الأسطول)",
+    "details": "تفاصيل الرحلات",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} في {{time}}",
+    "itemMeta": "{{date}} في {{time}}",
     "empty": "لا شيء لعرضه لهذه الفترة."
   },
   "earningsReport": {

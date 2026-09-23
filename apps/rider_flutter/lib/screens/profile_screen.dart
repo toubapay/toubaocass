@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_flutter/api/auth_api.dart' as auth_api;
+import 'package:shared_flutter/widgets/mini_financial_report_card.dart';
 import 'package:shared_flutter/widgets/profile_photo_uploader.dart';
 
+import '../api/reports_api.dart';
 import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
@@ -119,6 +121,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+            ),
+            const MiniFinancialReportCard(
+              title: '💳 Mes dépenses',
+              totalLabel: 'Total dépensé',
+              fetchReport: fetchSpendingReport,
             ),
             InkWell(
               onTap: widget.onOpenDeliveries,
