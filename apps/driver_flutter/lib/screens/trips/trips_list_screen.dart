@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,8 @@ import '../../theme.dart';
 import '../../widgets/delivery_available_tile.dart';
 import '../../widgets/dem_legui_available_tile.dart';
 import '../../widgets/inbox_icon.dart';
+
+const _pollInterval = Duration(seconds: 20);
 
 const _statusColor = {
   'scheduled': AppColors.success,
@@ -61,6 +65,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
   List<Trip> trips = [];
   bool loading = true;
   int? walletBalance;
+  Timer? _pollTimer;
 
   @override
   void initState() {
@@ -68,15 +73,24 @@ class _TripsListScreenState extends State<TripsListScreen> {
     _load();
     registerPushToken();
     fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
+    // Seats fill up as riders book, so this list would otherwise sit stale
+    // until the driver leaves and returns — poll silently while open.
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _load(silent: true));
   }
 
-  Future<void> _load() async {
-    setState(() => loading = true);
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => loading = true);
     try {
       final result = await fetchMyTrips();
-      setState(() => trips = result.data);
+      if (mounted) setState(() => trips = result.data);
     } finally {
-      setState(() => loading = false);
+      if (!silent && mounted) setState(() => loading = false);
     }
   }
 

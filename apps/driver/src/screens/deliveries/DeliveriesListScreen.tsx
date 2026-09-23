@@ -13,6 +13,8 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<DeliveriesStackParamList, 'DeliveriesList'>;
 
+const POLL_INTERVAL_MS = 20000;
+
 const STATUS_COLOR: Record<string, string> = {
   pending: colors.textMuted,
   accepted: colors.accent,
@@ -30,16 +32,29 @@ export function DeliveriesListScreen({ navigation }: Props) {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
-    if (!kycApproved) return;
-    setLoading(true);
-    const fetcher = tab === 'available' ? fetchAvailableDeliveries : fetchMyDeliveries;
-    fetcher()
-      .then((res) => setDeliveries(res.data))
-      .finally(() => setLoading(false));
-  }, [tab, kycApproved]);
+  const load = useCallback(
+    (opts?: { silent?: boolean }) => {
+      if (!kycApproved) return;
+      if (!opts?.silent) setLoading(true);
+      const fetcher = tab === 'available' ? fetchAvailableDeliveries : fetchMyDeliveries;
+      fetcher()
+        .then((res) => setDeliveries(res.data))
+        .finally(() => {
+          if (!opts?.silent) setLoading(false);
+        });
+    },
+    [tab, kycApproved],
+  );
 
-  useFocusEffect(load);
+  // Refetches on focus, plus polls silently while this screen stays open so
+  // a newly available delivery shows up without the driver switching tabs.
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      const interval = setInterval(() => load({ silent: true }), POLL_INTERVAL_MS);
+      return () => clearInterval(interval);
+    }, [load]),
+  );
 
   if (!kycApproved) {
     return (

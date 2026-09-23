@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../api/client.dart';
 import '../../api/deliveries_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+
+const _pollInterval = Duration(seconds: 20);
 
 const _packageLabel = {
   'document': 'Document',
@@ -27,23 +31,35 @@ class _DeliveriesListScreenState extends State<DeliveriesListScreen> {
   List<Delivery> mine = [];
   bool loading = true;
   int? acceptingId;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
     _load();
+    // A rider posting a new delivery is already pushed to nearby online
+    // drivers, but this list itself polls too, silently, so it stays
+    // current for anyone who has it open.
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _load(silent: true));
   }
 
-  Future<void> _load() async {
-    setState(() => loading = true);
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => loading = true);
     try {
       final results = await Future.wait([fetchAvailableDeliveries(), fetchMyDeliveries()]);
+      if (!mounted) return;
       setState(() {
         available = results[0].data;
         mine = results[1].data;
       });
     } finally {
-      setState(() => loading = false);
+      if (!silent && mounted) setState(() => loading = false);
     }
   }
 
