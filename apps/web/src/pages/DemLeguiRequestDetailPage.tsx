@@ -8,6 +8,7 @@ import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import type { NearbyDriver } from '../api/demLegui';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { DemLeguiEnRouteTracker } from '../components/DemLeguiEnRouteTracker';
 import { DriverTierBadge } from '../components/DriverTierBadge';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { RateDriverCard } from '../components/RateDriverCard';
@@ -129,6 +130,26 @@ export function DemLeguiRequestDetailPage() {
       ? { lat: trip.current_latitude, lng: trip.current_longitude, updatedAt: trip.current_location_updated_at }
       : { lat: trip.driver.current_latitude, lng: trip.driver.current_longitude, updatedAt: trip.driver.last_seen_at }
     : null;
+
+  // Driver has accepted and is on the way to pickup (or has arrived, still
+  // waiting to start) — the full-screen tracking view, matching how
+  // mainstream ride-hailing apps show this exact moment. Gated on the
+  // *request's* own status too, not just the trip's — the trip can stay
+  // 'open' (other riders still matched to it) even after this rider's own
+  // request is cancelled, and that must fall through to the normal page
+  // instead of showing a stale "driver is on the way" screen.
+  if (trip && trip.status === 'open' && request.status === 'matched') {
+    return (
+      <DemLeguiEnRouteTracker
+        request={request}
+        trip={trip}
+        onClose={() => navigate(-1)}
+        onChat={() => navigate(`/services/dem-legui/${request.id}/chat`)}
+        onCancel={handleCancel}
+        cancelling={cancelling}
+      />
+    );
+  }
 
   return (
     <div>
