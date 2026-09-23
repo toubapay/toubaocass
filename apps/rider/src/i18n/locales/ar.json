@@ -121,6 +121,8 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "changePhoto": "تغيير الصورة",
+    "removePhoto": "حذف الصورة",
     "dashboard": {
       "trips": "الرحلات",
       "bookings": "الحجوزات",

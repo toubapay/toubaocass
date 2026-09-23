@@ -19,6 +19,7 @@ class TripResource extends JsonResource
                 'id' => $this->driver->id,
                 'name' => $this->driver->name,
                 'phone' => $this->driver->phone,
+                'photo_url' => $this->driver->photo_url,
                 'rating' => (float) $this->driver->driverProfile?->rating,
                 'tier' => $this->driver->driverProfile?->tier,
             ],

@@ -93,6 +93,9 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "Déconnexion",
+    "changePhoto": "Changer la photo",
+    "removePhoto": "Supprimer la photo",
+    "photoUploadError": "Impossible d'envoyer la photo. Vérifiez le format (image, 5 Mo max).",
     "dashboard": {
       "trips": "Trajets",
       "bookings": "Réservations",

@@ -121,6 +121,8 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "Déconnexion",
+    "changePhoto": "Changer la photo",
+    "removePhoto": "Supprimer la photo",
     "dashboard": {
       "trips": "Trajets",
       "bookings": "Réservations",

@@ -15,6 +15,7 @@ class DemLeguiRequestResource extends JsonResource
                 'id' => $this->rider->id,
                 'name' => $this->rider->name,
                 'phone' => $this->rider->phone,
+                'photo_url' => $this->rider->photo_url,
             ],
             'pickup_latitude' => $this->pickup_latitude,
             'pickup_longitude' => $this->pickup_longitude,

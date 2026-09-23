@@ -160,16 +160,43 @@ export function DemLeguiEnRouteTracker({
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md }}>
-          <div>
-            <p style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0 }}>
-              {trip.driver.name} <span style={{ fontWeight: 600, color: colors.textMuted }}>★{trip.driver.rating.toFixed(2)}</span>
-            </p>
-            {trip.car && (
-              <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>
-                {trip.car.color ? `${trip.car.color} ` : ''}
-                {trip.car.make} {trip.car.model}
-              </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+            {trip.driver.photo_url ? (
+              <img
+                src={trip.driver.photo_url}
+                alt=""
+                style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  backgroundColor: colors.accentSoft,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: colors.primary,
+                  flexShrink: 0,
+                }}
+              >
+                {(trip.driver.name ?? '').trim().charAt(0).toUpperCase() || '?'}
+              </div>
             )}
+            <div>
+              <p style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0 }}>
+                {trip.driver.name} <span style={{ fontWeight: 600, color: colors.textMuted }}>★{trip.driver.rating.toFixed(2)}</span>
+              </p>
+              {trip.car && (
+                <p style={{ fontSize: 14, color: colors.textMuted, margin: '2px 0 0' }}>
+                  {trip.car.color ? `${trip.car.color} ` : ''}
+                  {trip.car.make} {trip.car.model}
+                </p>
+              )}
+            </div>
           </div>
           {trip.car?.photo_url ? (
             <img src={trip.car.photo_url} alt="" style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: radius.sm }} />

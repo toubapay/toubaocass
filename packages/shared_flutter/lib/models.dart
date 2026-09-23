@@ -42,6 +42,7 @@ class User {
   final String? name;
   final String phone;
   final String? email;
+  final String? photoUrl;
   final String role;
   final bool phoneVerified;
   final bool profileComplete;
@@ -54,6 +55,7 @@ class User {
     required this.name,
     required this.phone,
     required this.email,
+    required this.photoUrl,
     required this.role,
     required this.phoneVerified,
     required this.profileComplete,
@@ -67,6 +69,7 @@ class User {
         name: json['name'] as String?,
         phone: json['phone'] as String,
         email: json['email'] as String?,
+        photoUrl: json['photo_url'] as String?,
         role: json['role'] as String,
         phoneVerified: json['phone_verified'] as bool? ?? false,
         profileComplete: json['profile_complete'] as bool? ?? false,
@@ -82,6 +85,7 @@ class User {
         name: name,
         phone: phone,
         email: email,
+        photoUrl: photoUrl,
         role: role,
         phoneVerified: phoneVerified,
         profileComplete: profileComplete,
@@ -157,6 +161,7 @@ class TripDriver {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final double rating;
   final String? tier;
   final double? currentLatitude;
@@ -167,6 +172,7 @@ class TripDriver {
     required this.id,
     required this.name,
     required this.phone,
+    this.photoUrl,
     required this.rating,
     this.tier,
     this.currentLatitude,
@@ -178,6 +184,7 @@ class TripDriver {
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         rating: (json['rating'] as num?)?.toDouble() ?? 0,
         tier: json['tier'] as String?,
         currentLatitude: (json['current_latitude'] as num?)?.toDouble(),
@@ -315,11 +322,16 @@ class BookingRider {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
 
-  BookingRider({required this.id, required this.name, required this.phone});
+  BookingRider({required this.id, required this.name, required this.phone, this.photoUrl});
 
-  factory BookingRider.fromJson(Map<String, dynamic> json) =>
-      BookingRider(id: json['id'] as int, name: json['name'] as String?, phone: json['phone'] as String);
+  factory BookingRider.fromJson(Map<String, dynamic> json) => BookingRider(
+        id: json['id'] as int,
+        name: json['name'] as String?,
+        phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
+      );
 }
 
 class Booking {
@@ -631,15 +643,17 @@ class DeliveryParty {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final double? rating;
   final String? tier;
 
-  DeliveryParty({required this.id, required this.name, required this.phone, this.rating, this.tier});
+  DeliveryParty({required this.id, required this.name, required this.phone, this.photoUrl, this.rating, this.tier});
 
   factory DeliveryParty.fromJson(Map<String, dynamic> json) => DeliveryParty(
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         rating: (json['rating'] as num?)?.toDouble(),
         tier: json['tier'] as String?,
       );
@@ -733,6 +747,7 @@ class AnandoPoster {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final String role;
   final double? anandoRating;
   final int anandoRatingsCount;
@@ -741,6 +756,7 @@ class AnandoPoster {
     required this.id,
     required this.name,
     required this.phone,
+    this.photoUrl,
     required this.role,
     required this.anandoRating,
     required this.anandoRatingsCount,
@@ -750,6 +766,7 @@ class AnandoPoster {
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         role: json['role'] as String? ?? '',
         anandoRating: (json['anando_rating'] as num?)?.toDouble(),
         anandoRatingsCount: json['anando_ratings_count'] as int? ?? 0,

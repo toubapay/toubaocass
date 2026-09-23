@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../models.dart';
 import 'client.dart';
 
@@ -42,6 +44,17 @@ Future<User> updateProfile({required String name, String? email}) async {
     'name': name,
     if (email != null && email.isNotEmpty) 'email': email,
   });
+  return User.fromJson(response.data as Map<String, dynamic>);
+}
+
+Future<User> uploadProfilePhoto(String photoPath) async {
+  final form = FormData.fromMap({'photo': await MultipartFile.fromFile(photoPath)});
+  final response = await ApiClient.instance.dio.post('/profile/photo', data: form);
+  return User.fromJson(response.data as Map<String, dynamic>);
+}
+
+Future<User> deleteProfilePhoto() async {
+  final response = await ApiClient.instance.dio.delete('/profile/photo');
   return User.fromJson(response.data as Map<String, dynamic>);
 }
 

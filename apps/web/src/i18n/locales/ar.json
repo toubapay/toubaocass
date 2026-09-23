@@ -93,6 +93,9 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "changePhoto": "تغيير الصورة",
+    "removePhoto": "حذف الصورة",
+    "photoUploadError": "تعذر إرسال الصورة. تحقق من الصيغة (صورة، 5 ميغابايت كحد أقصى).",
     "dashboard": {
       "trips": "الرحلات",
       "bookings": "الحجوزات",

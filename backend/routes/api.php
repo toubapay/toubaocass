@@ -69,6 +69,8 @@ Route::get('track/{type}/{id}', [TrackingController::class, 'show'])
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::put('profile', [AuthController::class, 'updateProfile']);
+    Route::post('profile/photo', [AuthController::class, 'updatePhoto']);
+    Route::delete('profile/photo', [AuthController::class, 'deletePhoto']);
     Route::post('fcm-token', [AuthController::class, 'updateFcmToken']);
     Route::post('logout', [AuthController::class, 'logout']);
     // Set (or change) the PIN used by auth/pin/login above — prompted right

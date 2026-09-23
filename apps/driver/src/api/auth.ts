@@ -24,6 +24,27 @@ export async function updateProfile(input: { name: string; email?: string }): Pr
   return data;
 }
 
+export interface ProfilePhotoFile {
+  uri: string;
+  name: string;
+  mimeType: string;
+}
+
+export async function uploadProfilePhoto(photo: ProfilePhotoFile): Promise<User> {
+  const form = new FormData();
+  form.append('photo', { uri: photo.uri, name: photo.name, type: photo.mimeType } as unknown as Blob);
+
+  const { data } = await apiClient.post('/profile/photo', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function deleteProfilePhoto(): Promise<User> {
+  const { data } = await apiClient.delete('/profile/photo');
+  return data;
+}
+
 export async function registerPushToken(fcm_token: string): Promise<void> {
   await apiClient.post('/fcm-token', { fcm_token });
 }

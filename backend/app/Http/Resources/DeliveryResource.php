@@ -15,11 +15,13 @@ class DeliveryResource extends JsonResource
                 'id' => $this->sender->id,
                 'name' => $this->sender->name,
                 'phone' => $this->sender->phone,
+                'photo_url' => $this->sender->photo_url,
             ],
             'driver' => $this->driver ? [
                 'id' => $this->driver->id,
                 'name' => $this->driver->name,
                 'phone' => $this->driver->phone,
+                'photo_url' => $this->driver->photo_url,
                 'rating' => $this->driver->driverProfile?->rating,
                 'tier' => $this->driver->driverProfile?->tier,
             ] : null,

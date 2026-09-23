@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\PinLoginRequest;
 use App\Http\Requests\Auth\RequestOtpRequest;
 use App\Http\Requests\Auth\SetPinRequest;
+use App\Http\Requests\Auth\UpdateProfilePhotoRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
 use App\Http\Resources\UserResource;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Services\OtpService;
 use App\Services\PinService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -83,6 +85,31 @@ class AuthController extends Controller
         $request->user()->update($request->only('name', 'email'));
 
         return new UserResource($request->user()->fresh()->load('driverProfile'));
+    }
+
+    public function updatePhoto(UpdateProfilePhotoRequest $request)
+    {
+        $user = $request->user();
+
+        if ($user->photo_path) {
+            Storage::delete($user->photo_path);
+        }
+
+        $user->update(['photo_path' => $request->file('photo')->store('profile-photos')]);
+
+        return new UserResource($user->fresh()->load('driverProfile'));
+    }
+
+    public function deletePhoto(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->photo_path) {
+            Storage::delete($user->photo_path);
+            $user->update(['photo_path' => null]);
+        }
+
+        return new UserResource($user->fresh()->load('driverProfile'));
     }
 
     public function updateFcmToken(Request $request)

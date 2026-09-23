@@ -19,6 +19,7 @@ class AnandoRideResource extends JsonResource
                 'id' => $this->poster->id,
                 'name' => $this->poster->name,
                 'phone' => $this->poster->phone,
+                'photo_url' => $this->poster->photo_url,
                 'role' => $this->poster->role,
                 'anando_rating' => $this->poster->anando_rating,
                 'anando_ratings_count' => $this->poster->anando_ratings_count,

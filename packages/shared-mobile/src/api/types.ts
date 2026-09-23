@@ -33,6 +33,7 @@ export interface User {
   name: string | null;
   phone: string;
   email: string | null;
+  photo_url: string | null;
   role: Role;
   phone_verified: boolean;
   profile_complete: boolean;
@@ -67,6 +68,7 @@ export interface Trip {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     rating: number;
     tier: DriverTier | null;
   };
@@ -106,6 +108,7 @@ export interface Booking {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
   };
   seats_booked: number;
   fare_total: number;
@@ -157,8 +160,8 @@ export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' 
 
 export interface Delivery {
   id: number;
-  sender: { id: number; name: string | null; phone: string };
-  driver: { id: number; name: string | null; phone: string; rating: number | null; tier: DriverTier | null } | null;
+  sender: { id: number; name: string | null; phone: string; photo_url: string | null };
+  driver: { id: number; name: string | null; phone: string; photo_url: string | null; rating: number | null; tier: DriverTier | null } | null;
   receiver_name: string;
   receiver_phone: string;
   receiver_address_line: string;
@@ -197,6 +200,7 @@ export interface AnandoRide {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     role: Role;
     anando_rating: number | null;
     anando_ratings_count: number;
@@ -240,6 +244,7 @@ export interface AnandoRideBooking {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     anando_rating: number | null;
     anando_ratings_count: number;
   };
@@ -260,6 +265,7 @@ export interface DemLeguiRequest {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
   };
   pickup_latitude: number;
   pickup_longitude: number;
@@ -281,6 +287,7 @@ export interface DemLeguiTrip {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     rating: number;
     tier: DriverTier | null;
     current_latitude: number | null;
