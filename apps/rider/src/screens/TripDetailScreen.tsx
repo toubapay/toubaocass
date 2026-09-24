@@ -15,7 +15,9 @@ import { DepartureMap } from '../components/DepartureMap';
 import { RouteMap } from '../components/RouteMap';
 import { Screen } from '../components/Screen';
 import { SosShareModal } from '../components/SosShareModal';
+import { TripProgressBar } from '../components/TripProgressBar';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
+import { useTripProgress } from '../hooks/useTripProgress';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 import { formatDuration, hasDeparted } from '../utils/trip';
@@ -64,6 +66,7 @@ export function TripDetailScreen({ route, navigation }: Props) {
   }, [trip?.status, tripId]);
 
   const editing = trip?.my_booking != null;
+  const { elapsedLabel, progress, distanceLabel } = useTripProgress(trip);
 
   const handleBook = async () => {
     if (!trip) return;
@@ -130,6 +133,25 @@ export function TripDetailScreen({ route, navigation }: Props) {
         <TripUrgencyBadge trip={trip} />
         {editing && trip.arrived_at != null && ['scheduled', 'full'].includes(trip.status) && (
           <Text style={styles.arrivedBadge}>🚩 {t('tripDetail.driverArrivedBadge')}</Text>
+        )}
+        {editing && trip.status === 'in_progress' && (
+          <View style={styles.progressCard}>
+            <Text style={styles.progressTitle}>{t('tripDetail.inProgressTitle')}</Text>
+            <View style={styles.progressBarWrap}>
+              <TripProgressBar progress={progress} />
+            </View>
+            <View style={styles.progressStatsRow}>
+              <Text style={styles.progressDriver} numberOfLines={1}>
+                {trip.driver.name ?? t('common.driverFallback')}
+              </Text>
+              {elapsedLabel && (
+                <Text style={styles.progressStat}>{t('tripDetail.elapsedTime', { time: elapsedLabel })}</Text>
+              )}
+              {distanceLabel && (
+                <Text style={styles.progressStat}>{t('tripDetail.distanceCovered', { distance: distanceLabel })}</Text>
+              )}
+            </View>
+          </View>
         )}
         {editing && trip.status === 'in_progress' && (
           <View style={styles.sosButtonWrap}>
@@ -320,6 +342,19 @@ const styles = StyleSheet.create({
   sosButtonWrap: { marginBottom: spacing.md },
   arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginBottom: spacing.sm },
   liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  progressCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  progressTitle: { fontSize: 12, fontWeight: '700', color: colors.accent, textTransform: 'uppercase', marginBottom: spacing.sm },
+  progressBarWrap: { marginBottom: spacing.sm },
+  progressStatsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  progressDriver: { fontSize: 14, fontWeight: '700', color: colors.text, flexShrink: 1 },
+  progressStat: { fontSize: 13, color: colors.textMuted, fontWeight: '600' },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

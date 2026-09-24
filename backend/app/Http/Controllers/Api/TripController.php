@@ -283,7 +283,7 @@ class TripController extends Controller
                     throw new \RuntimeException('Seul un trajet programmé peut être démarré.');
                 }
 
-                $locked->update(['status' => Trip::STATUS_IN_PROGRESS]);
+                $locked->update(['status' => Trip::STATUS_IN_PROGRESS, 'started_at' => now()]);
             });
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);

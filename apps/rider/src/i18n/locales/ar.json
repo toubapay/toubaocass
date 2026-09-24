@@ -105,7 +105,11 @@
     "anandoMiniTitle": "⚡ أناندو",
     "anandoMiniViewAll": "عرض الكل ←",
     "anandoMiniFlash": "⚡ مغادرة فورية",
-    "myAnandoRideTitle": "رحلتك في أناندو"
+    "myAnandoRideTitle": "رحلتك في أناندو",
+    "activeTripTitle": "رحلة جارية",
+    "activeTripElapsed": "⏱ {{time}}",
+    "activeTripDistance": "📍 {{distance}}",
+    "activeTripView": "متابعة الرحلة ←"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -176,6 +180,9 @@
     "chatWithDriver": "💬 التحدث مع السائق",
     "driverArrivedBadge": "وصل السائق إلى نقطة الالتقاء",
     "liveMapWaiting": "في انتظار موقع السائق…",
+    "inProgressTitle": "الرحلة جارية",
+    "elapsedTime": "منذ {{time}}",
+    "distanceCovered": "{{distance}} مقطوعة",
     "itinerary": "المسار",
     "drivingDuration": " · ~{{duration}} من القيادة",
     "departurePoint": "نقطة الانطلاق",

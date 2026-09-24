@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchCities } from '../api/cities';
 import { searchTrips } from '../api/trips';
 import { City, Trip } from '../api/types';
+import { ActiveTripCard } from '../components/ActiveTripCard';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { AnandoMiniList } from '../components/AnandoMiniList';
 import { CityPicker } from '../components/CityPicker';
@@ -105,6 +106,7 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       {isModuleEnabled('dem_legui') && <DemLeguiStatusWidget />}
+      <ActiveTripCard />
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
       {isModuleEnabled('anando') && <MyAnandoRideCard />}
       <View style={styles.filters}>

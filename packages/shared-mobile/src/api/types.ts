@@ -85,6 +85,7 @@ export interface Trip {
   distance_km?: number;
   route_distance_km: number | null;
   route_duration_minutes: number | null;
+  distance_traveled_km?: number | null;
   bookings?: Booking[];
   bookings_count?: number;
   my_booking?: { id: number; seats_booked: number; fare_total: number; status: BookingStatus } | null;
@@ -92,6 +93,7 @@ export interface Trip {
   current_longitude: number | null;
   current_location_updated_at: string | null;
   arrived_at: string | null;
+  started_at: string | null;
 }
 
 export interface Booking {

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'departure_date', 'departure_time', 'fare', 'ride_type',
     'total_seats', 'available_seats', 'status', 'is_instant', 'notes',
     'current_latitude', 'current_longitude', 'current_location_updated_at',
-    'arrived_at',
+    'arrived_at', 'started_at',
 ])]
 class Trip extends Model
 {
@@ -51,6 +51,7 @@ class Trip extends Model
             'current_longitude' => 'float',
             'current_location_updated_at' => 'datetime',
             'arrived_at' => 'datetime',
+            'started_at' => 'datetime',
         ];
     }
 

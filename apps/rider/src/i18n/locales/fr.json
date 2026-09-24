@@ -105,7 +105,11 @@
     "anandoMiniTitle": "⚡ Anando",
     "anandoMiniViewAll": "Voir tout →",
     "anandoMiniFlash": "⚡ Départ immédiat",
-    "myAnandoRideTitle": "Votre trajet Anando"
+    "myAnandoRideTitle": "Votre trajet Anando",
+    "activeTripTitle": "Trajet en cours",
+    "activeTripElapsed": "⏱ {{time}}",
+    "activeTripDistance": "📍 {{distance}}",
+    "activeTripView": "Suivre le trajet →"
   },
   "profile": {
     "title": "Mon profil",
@@ -172,6 +176,9 @@
     "chatWithDriver": "💬 Discuter avec le conducteur",
     "driverArrivedBadge": "Le conducteur est arrivé au point de rendez-vous",
     "liveMapWaiting": "En attente de la position du conducteur…",
+    "inProgressTitle": "Trajet en cours",
+    "elapsedTime": "Depuis {{time}}",
+    "distanceCovered": "{{distance}} parcourus",
     "itinerary": "Itinéraire",
     "drivingDuration": " · ~{{duration}} de route",
     "departurePoint": "Point de départ",

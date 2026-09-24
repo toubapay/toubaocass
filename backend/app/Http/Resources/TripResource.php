@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Services\Geo\CityDistanceService;
+use App\Support\Geo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,6 +34,7 @@ class TripResource extends JsonResource
             'current_longitude' => $this->current_longitude,
             'current_location_updated_at' => $this->current_location_updated_at,
             'arrived_at' => $this->arrived_at,
+            'started_at' => $this->started_at,
             'fare' => $this->fare,
             'ride_type' => $this->ride_type,
             'total_seats' => $this->total_seats,
@@ -50,6 +52,29 @@ class TripResource extends JsonResource
             'route_duration_minutes' => $this->when(
                 $hasRoute,
                 fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->duration_minutes,
+            ),
+            // Straight-line distance from the departure point (the driver's dropped pin, or
+            // the origin city's coordinates if no pin) to the last reported position — an
+            // honest lower bound on ground actually covered, same "recent position on an
+            // interval, not a continuous track" caveat as everywhere else current_latitude/
+            // current_longitude is used. Only meaningful once the trip is under way and a
+            // position has come in, so it's omitted (not null) otherwise.
+            'distance_traveled_km' => $this->when(
+                $this->current_latitude !== null && $this->current_longitude !== null,
+                function () {
+                    $originLat = $this->departure_latitude ?? $this->originCity?->latitude;
+                    $originLng = $this->departure_longitude ?? $this->originCity?->longitude;
+                    if ($originLat === null || $originLng === null) {
+                        return null;
+                    }
+
+                    return round(Geo::haversineKm(
+                        (float) $originLat,
+                        (float) $originLng,
+                        (float) $this->current_latitude,
+                        (float) $this->current_longitude,
+                    ), 1);
+                },
             ),
             'bookings' => BookingResource::collection($this->whenLoaded('bookings')),
             'bookings_count' => $this->whenCounted('bookings'),
