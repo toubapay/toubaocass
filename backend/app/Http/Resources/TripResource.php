@@ -13,6 +13,9 @@ class TripResource extends JsonResource
         $hasRoute = $this->relationLoaded('originCity') && $this->relationLoaded('destinationCity')
             && $this->originCity && $this->destinationCity;
 
+        $routeDistanceKm = $hasRoute ? app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->distance_km : null;
+        $progress = $this->progress($routeDistanceKm);
+
         return [
             'id' => $this->id,
             'driver' => [
@@ -35,6 +38,9 @@ class TripResource extends JsonResource
             'current_longitude' => $this->current_longitude,
             'current_location_updated_at' => $this->current_location_updated_at,
             'arrived_at' => $this->arrived_at,
+            'started_at' => $this->started_at,
+            'progress_percent' => $progress['percent'] ?? null,
+            'distance_covered_km' => $progress['distance_covered_km'] ?? null,
             'fare' => $this->fare,
             'ride_type' => $this->ride_type,
             'total_seats' => $this->total_seats,
@@ -45,10 +51,7 @@ class TripResource extends JsonResource
             'notes' => $this->notes,
             'created_at' => $this->created_at,
             'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 1)),
-            'route_distance_km' => $this->when(
-                $hasRoute,
-                fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->distance_km,
-            ),
+            'route_distance_km' => $this->when($hasRoute, fn () => $routeDistanceKm),
             'route_duration_minutes' => $this->when(
                 $hasRoute,
                 fn () => app(CityDistanceService::class)->between($this->originCity, $this->destinationCity)->duration_minutes,

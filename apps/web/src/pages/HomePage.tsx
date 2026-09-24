@@ -11,6 +11,7 @@ import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { CityPicker } from '../components/CityPicker';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { MyAnandoRideCard } from '../components/MyAnandoRideCard';
+import { MyTripStatusWidget } from '../components/MyTripStatusWidget';
 import { PostTripRatingModal } from '../components/PostTripRatingModal';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
@@ -147,6 +148,7 @@ export function HomePage() {
   return (
     <div>
       {isModuleEnabled('dem_legui') && <DemLeguiStatusWidget />}
+      <MyTripStatusWidget />
 
       <h1 style={{ fontSize: 17, fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.sm }}>
         {t('home.title')}

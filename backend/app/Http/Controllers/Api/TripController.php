@@ -129,6 +129,29 @@ class TripController extends Controller
     }
 
     /**
+     * Rider-facing: the rider's currently in-progress trip with a confirmed
+     * booking, if any — powers a persistent status widget shown on Home
+     * without the caller needing to already know a trip id, same pattern as
+     * DemLeguiController::myActiveRequest().
+     */
+    public function myActiveTrip(Request $request)
+    {
+        $rider = $request->user();
+
+        $trip = Trip::query()
+            ->where('status', Trip::STATUS_IN_PROGRESS)
+            ->whereHas('bookings', fn ($q) => $q->where('rider_id', $rider->id)->where('status', Booking::STATUS_CONFIRMED))
+            ->with([
+                'driver.driverProfile', 'car', 'originCity', 'destinationCity',
+                'riderBooking' => fn ($q) => $q->where('rider_id', $rider->id)->where('status', Booking::STATUS_CONFIRMED),
+            ])
+            ->latest('started_at')
+            ->first();
+
+        return response()->json(['data' => $trip ? new TripResource($trip) : null]);
+    }
+
+    /**
      * SOS "share my live position" link, available to the driver and any
      * rider with a confirmed seat — anyone actually on the trip may want to
      * let their own family follow along, not just the driver.
@@ -291,7 +314,7 @@ class TripController extends Controller
                     throw new \RuntimeException('Seul un trajet programmé peut être démarré.');
                 }
 
-                $locked->update(['status' => Trip::STATUS_IN_PROGRESS]);
+                $locked->update(['status' => Trip::STATUS_IN_PROGRESS, 'started_at' => now()]);
             });
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);

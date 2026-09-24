@@ -173,6 +173,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('trips', [TripController::class, 'search']);
         Route::get('trips/instant', [TripController::class, 'instantIndex']);
+        // Must precede trips/{trip} — otherwise route model binding would
+        // try (and fail) to resolve "mine" as a trip id.
+        Route::get('trips/mine/active', [TripController::class, 'myActiveTrip']);
         Route::get('trips/{trip}', [TripController::class, 'show']);
         Route::post('trips/{trip}/bookings', [BookingController::class, 'store']);
         Route::get('bookings', [BookingController::class, 'index']);

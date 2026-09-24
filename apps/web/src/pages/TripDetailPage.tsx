@@ -21,6 +21,7 @@ import { colors, radius, spacing } from '../theme';
 import { formatDuration, hasDeparted } from '../utils/trip';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
+const ELAPSED_TICK_MS = 30000;
 
 export function TripDetailPage() {
   const { t } = useTranslation();
@@ -63,6 +64,15 @@ export function TripDetailPage() {
   }, [trip?.status, id]);
 
   const editing = trip?.my_booking != null;
+
+  // Ticks the elapsed-time-since-departure display forward without needing
+  // a fresh server response — the trip poll above still owns position/status.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (trip?.status !== 'in_progress') return;
+    const interval = setInterval(() => setNow(Date.now()), ELAPSED_TICK_MS);
+    return () => clearInterval(interval);
+  }, [trip?.status]);
 
   const handleBook = async () => {
     if (!trip) return;
@@ -189,18 +199,56 @@ export function TripDetailPage() {
       )}
 
       {editing && trip.status === 'in_progress' && (
-        trip.current_latitude != null && trip.current_longitude != null ? (
-          <AnandoLiveMap
-            currentLatitude={trip.current_latitude}
-            currentLongitude={trip.current_longitude}
-            destinationLatitude={trip.destination_city?.latitude}
-            destinationLongitude={trip.destination_city?.longitude}
-            destinationName={trip.destination_city?.name}
-            updatedAt={trip.current_location_updated_at}
-          />
-        ) : (
-          <p style={{ fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md }}>{t('tripDetail.liveMapWaiting')}</p>
-        )
+        <div style={cardStyle}>
+          <p style={{ fontSize: 15, fontWeight: 800, color: colors.primary, margin: `0 0 ${spacing.sm}px` }}>
+            🚗 {t('tripDetail.inProgressStatus')}
+          </p>
+
+          {trip.progress_percent !== null && (
+            <div style={{ marginBottom: spacing.sm }}>
+              <div style={{ height: 8, borderRadius: radius.sm, backgroundColor: colors.border, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${trip.progress_percent}%`,
+                    backgroundColor: colors.primary,
+                    borderRadius: radius.sm,
+                    transition: 'width 0.5s ease',
+                  }}
+                />
+              </div>
+              <p style={{ fontSize: 13, color: colors.textMuted, margin: `${spacing.xs}px 0 0` }}>
+                {t('tripDetail.progressPercent', { percent: trip.progress_percent })}
+                {trip.distance_covered_km !== null && (
+                  trip.route_distance_km !== null
+                    ? ` · ${t('tripDetail.distanceProgress', { covered: trip.distance_covered_km, total: trip.route_distance_km })}`
+                    : ` · ${t('tripDetail.distanceCoveredOnly', { covered: trip.distance_covered_km })}`
+                )}
+              </p>
+            </div>
+          )}
+
+          {trip.started_at && (
+            <p style={{ fontSize: 13.5, color: colors.text, margin: `0 0 ${spacing.sm}px` }}>
+              ⏱️ {t('tripDetail.elapsedTime', {
+                duration: formatDuration(Math.max(0, Math.round((now - new Date(trip.started_at).getTime()) / 60000))),
+              })}
+            </p>
+          )}
+
+          {trip.current_latitude != null && trip.current_longitude != null ? (
+            <AnandoLiveMap
+              currentLatitude={trip.current_latitude}
+              currentLongitude={trip.current_longitude}
+              destinationLatitude={trip.destination_city?.latitude}
+              destinationLongitude={trip.destination_city?.longitude}
+              destinationName={trip.destination_city?.name}
+              updatedAt={trip.current_location_updated_at}
+            />
+          ) : (
+            <p style={{ fontSize: 13.5, color: colors.textMuted, margin: 0 }}>{t('tripDetail.liveMapWaiting')}</p>
+          )}
+        </div>
       )}
 
       {editing && (

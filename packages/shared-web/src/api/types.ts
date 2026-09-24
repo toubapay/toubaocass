@@ -102,6 +102,9 @@ export interface Trip {
   current_longitude: number | null;
   current_location_updated_at: string | null;
   arrived_at: string | null;
+  started_at: string | null;
+  progress_percent: number | null;
+  distance_covered_km: number | null;
 }
 
 export interface Booking {
