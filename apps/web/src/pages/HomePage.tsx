@@ -20,6 +20,7 @@ import { useModuleStatus } from '../context/ModuleStatusContext';
 import { useMyLocation } from '../hooks/useMyLocation';
 import type { Coordinates } from '../hooks/useMyLocation';
 import { colors, radius, spacing } from '../theme';
+import { hasSeenRatingPrompt, markRatingPromptSeen } from '../utils/ratingPromptSeen';
 
 const NEARBY_RADIUS_KM = 25;
 const POLL_INTERVAL_MS = 20000;
@@ -50,7 +51,13 @@ export function HomePage() {
   const [pendingRating, setPendingRating] = useState<PendingRating | null>(null);
 
   useEffect(() => {
-    fetchPendingRating().then(setPendingRating).catch(() => setPendingRating(null));
+    fetchPendingRating()
+      .then((pending) => {
+        if (!pending || hasSeenRatingPrompt(pending.type, pending.id)) return;
+        markRatingPromptSeen(pending.type, pending.id);
+        setPendingRating(pending);
+      })
+      .catch(() => setPendingRating(null));
   }, []);
 
   const hasFilters = origin || destination || date || nearMe;
