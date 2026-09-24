@@ -33,6 +33,14 @@ Future<Trip> fetchTrip(int tripId) async {
   return Trip.fromJson(response.data as Map<String, dynamic>);
 }
 
+/// The rider's currently in-progress booked trip, if any — powers the
+/// Home-screen status widget.
+Future<Trip?> fetchMyActiveTrip() async {
+  final response = await ApiClient.instance.dio.get('/trips/mine/active');
+  final data = (response.data as Map<String, dynamic>)['data'];
+  return data == null ? null : Trip.fromJson(data as Map<String, dynamic>);
+}
+
 /// Post-trip driver feedback — only once the trip is completed; re-rating
 /// updates the existing review.
 Future<void> rateTrip(int tripId, {required int score, String? comment}) async {

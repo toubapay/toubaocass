@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,9 +15,13 @@ import '../api/wallet_api.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../utils/trip.dart' as trip_utils;
+import '../widgets/live_map.dart';
 import '../widgets/route_map.dart';
 import '../widgets/sos_share_sheet.dart';
 import '../widgets/trip_urgency_badge.dart';
+
+const _liveLocationPollInterval = Duration(seconds: 12);
+const _elapsedTickInterval = Duration(seconds: 30);
 
 class TripDetailScreen extends StatefulWidget {
   const TripDetailScreen({super.key, required this.tripId, required this.onOpenChat});
@@ -34,12 +40,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   bool booking = false;
   String paymentMethod = 'cash';
   int? walletBalance;
+  Timer? _positionPollTimer;
+  Timer? _elapsedTickTimer;
+  DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _load();
     fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
+  }
+
+  @override
+  void dispose() {
+    _positionPollTimer?.cancel();
+    _elapsedTickTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -50,9 +66,34 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         trip = result;
         seats = result.myBooking?.seatsBooked ?? 1;
       });
+      _syncTimers();
     } finally {
       setState(() => loading = false);
     }
+  }
+
+  // While the trip is under way, poll for the driver's latest reported
+  // position rather than holding a live connection — same "recent position
+  // on an interval" honesty as the other live maps (Anando/Dem Légui/Delivery).
+  // A second timer ticks the elapsed-time display forward without needing a
+  // fresh server response.
+  void _syncTimers() {
+    if (trip?.status != 'in_progress') {
+      _positionPollTimer?.cancel();
+      _positionPollTimer = null;
+      _elapsedTickTimer?.cancel();
+      _elapsedTickTimer = null;
+      return;
+    }
+    _positionPollTimer ??= Timer.periodic(_liveLocationPollInterval, (_) => _load());
+    _elapsedTickTimer ??= Timer.periodic(_elapsedTickInterval, (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  int _elapsedMinutesSince(String startedAt) {
+    final minutes = _now.difference(DateTime.parse(startedAt)).inMinutes;
+    return minutes < 0 ? 0 : minutes;
   }
 
   bool get editing => trip?.myBooking != null;
@@ -167,6 +208,63 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             ),
           if (editing && t.status == 'completed')
             RateDriverCard(onSubmit: (score, comment) => rateTrip(t.id, score: score, comment: comment)),
+          if (editing && t.status == 'in_progress')
+            Container(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text('🚗 Trajet en cours',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  ),
+                  if (t.progressPercent != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    child: LinearProgressIndicator(
+                      value: t.progressPercent! / 100,
+                      minHeight: 8,
+                      backgroundColor: AppColors.border,
+                      valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${t.progressPercent}% du trajet effectué'
+                    '${t.distanceCoveredKm != null ? (t.routeDistanceKm != null ? ' · ${t.distanceCoveredKm} km parcourus sur ${t.routeDistanceKm} km' : ' · ${t.distanceCoveredKm} km parcourus') : ''}',
+                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                if (t.startedAt != null) ...[
+                  Text(
+                    '⏱️ En route depuis ${trip_utils.formatDuration(_elapsedMinutesSince(t.startedAt!))}',
+                    style: const TextStyle(fontSize: 13.5),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                if (t.currentLatitude != null && t.currentLongitude != null)
+                  LiveMap(
+                    currentLatitude: t.currentLatitude!,
+                    currentLongitude: t.currentLongitude!,
+                    destinationLatitude: t.destinationCity?.latitude,
+                    destinationLongitude: t.destinationCity?.longitude,
+                    destinationName: t.destinationCity?.name,
+                    updatedAt: t.currentLocationUpdatedAt,
+                  )
+                else
+                  const Text('En attente de la position du conducteur…',
+                      style: TextStyle(fontSize: 13.5, color: AppColors.textMuted)),
+                ],
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
           if (t.routeDistanceKm != null)
             _Card(

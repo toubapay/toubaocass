@@ -25,6 +25,7 @@ import { formatDuration, hasDeparted } from '../utils/trip';
 type Props = NativeStackScreenProps<HomeStackParamList, 'TripDetail'>;
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
+const ELAPSED_TICK_MS = 30000;
 
 export function TripDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
@@ -66,6 +67,15 @@ export function TripDetailScreen({ route, navigation }: Props) {
   }, [trip?.status, tripId]);
 
   const editing = trip?.my_booking != null;
+
+  // Ticks the elapsed-time-since-departure display forward without needing
+  // a fresh server response — the trip poll above still owns position/status.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (trip?.status !== 'in_progress') return;
+    const interval = setInterval(() => setNow(Date.now()), ELAPSED_TICK_MS);
+    return () => clearInterval(interval);
+  }, [trip?.status]);
 
   const handleBook = async () => {
     if (!trip) return;
@@ -143,18 +153,45 @@ export function TripDetailScreen({ route, navigation }: Props) {
           <RateDriverCard onSubmit={(score, comment) => rateTrip(trip.id, score, comment)} />
         )}
         {editing && trip.status === 'in_progress' && (
-          trip.current_latitude != null && trip.current_longitude != null ? (
-            <AnandoLiveMap
-              currentLatitude={trip.current_latitude}
-              currentLongitude={trip.current_longitude}
-              destinationLatitude={trip.destination_city?.latitude}
-              destinationLongitude={trip.destination_city?.longitude}
-              destinationName={trip.destination_city?.name}
-              updatedAt={trip.current_location_updated_at}
-            />
-          ) : (
-            <Text style={styles.liveMapWaiting}>{t('tripDetail.liveMapWaiting')}</Text>
-          )
+          <View style={styles.card}>
+            <Text style={styles.inProgressTitle}>🚗 {t('tripDetail.inProgressStatus')}</Text>
+
+            {trip.progress_percent !== null && (
+              <View style={styles.progressWrap}>
+                <View style={styles.progressTrack}>
+                  <View style={[styles.progressFill, { width: `${trip.progress_percent}%` }]} />
+                </View>
+                <Text style={styles.progressLabel}>
+                  {t('tripDetail.progressPercent', { percent: trip.progress_percent })}
+                  {trip.distance_covered_km !== null &&
+                    (trip.route_distance_km !== null
+                      ? ` · ${t('tripDetail.distanceProgress', { covered: trip.distance_covered_km, total: trip.route_distance_km })}`
+                      : ` · ${t('tripDetail.distanceCoveredOnly', { covered: trip.distance_covered_km })}`)}
+                </Text>
+              </View>
+            )}
+
+            {trip.started_at && (
+              <Text style={styles.elapsedLabel}>
+                ⏱️ {t('tripDetail.elapsedTime', {
+                  duration: formatDuration(Math.max(0, Math.round((now - new Date(trip.started_at).getTime()) / 60000))),
+                })}
+              </Text>
+            )}
+
+            {trip.current_latitude != null && trip.current_longitude != null ? (
+              <AnandoLiveMap
+                currentLatitude={trip.current_latitude}
+                currentLongitude={trip.current_longitude}
+                destinationLatitude={trip.destination_city?.latitude}
+                destinationLongitude={trip.destination_city?.longitude}
+                destinationName={trip.destination_city?.name}
+                updatedAt={trip.current_location_updated_at}
+              />
+            ) : (
+              <Text style={styles.liveMapWaiting}>{t('tripDetail.liveMapWaiting')}</Text>
+            )}
+          </View>
         )}
         {editing && (
           <View style={styles.bookedRow}>
@@ -327,7 +364,13 @@ const styles = StyleSheet.create({
   meta: { color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.lg },
   sosButtonWrap: { marginBottom: spacing.md },
   arrivedBadge: { fontSize: 13.5, fontWeight: '700', color: colors.primary, marginBottom: spacing.sm },
-  liveMapWaiting: { fontSize: 13.5, color: colors.textMuted, marginBottom: spacing.md },
+  liveMapWaiting: { fontSize: 13.5, color: colors.textMuted },
+  inProgressTitle: { fontSize: 15, fontWeight: '800', color: colors.primary, marginBottom: spacing.sm },
+  progressWrap: { marginBottom: spacing.sm },
+  progressTrack: { height: 8, borderRadius: radius.sm, backgroundColor: colors.border, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: radius.sm },
+  progressLabel: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs },
+  elapsedLabel: { fontSize: 13.5, color: colors.text, marginBottom: spacing.sm },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

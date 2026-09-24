@@ -13,6 +13,7 @@ import { DateField } from '../components/DateField';
 import { DemLeguiStatusWidget } from '../components/DemLeguiStatusWidget';
 import { InstantDeparturesBanner } from '../components/InstantDeparturesBanner';
 import { MyAnandoRideCard } from '../components/MyAnandoRideCard';
+import { MyTripStatusWidget } from '../components/MyTripStatusWidget';
 import { Screen } from '../components/Screen';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
 import { TripCard } from '../components/TripCard';
@@ -127,6 +128,7 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <Screen>
       {isModuleEnabled('dem_legui') && <DemLeguiStatusWidget />}
+      <MyTripStatusWidget />
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
       {isModuleEnabled('anando') && <MyAnandoRideCard />}
       <View style={styles.filters}>

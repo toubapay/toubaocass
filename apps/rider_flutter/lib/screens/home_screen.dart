@@ -11,6 +11,7 @@ import '../theme.dart';
 import '../utils/my_location.dart';
 import '../widgets/city_picker.dart';
 import '../widgets/inbox_icon.dart';
+import '../widgets/my_trip_status_widget.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trips_map.dart';
 import '../widgets/voice_search_button.dart';
@@ -163,6 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            MyTripStatusWidget(onTap: widget.onOpenTrip),
             TextField(
               controller: searchController,
               decoration: InputDecoration(
