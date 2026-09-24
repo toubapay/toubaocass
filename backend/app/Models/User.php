@@ -5,14 +5,16 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'phone', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token', 'anando_rating', 'anando_ratings_count', 'pin_hash', 'pin_failed_attempts', 'pin_locked_until'])]
+#[Fillable(['name', 'email', 'phone', 'photo_path', 'role', 'status', 'password', 'phone_verified_at', 'fcm_token', 'anando_rating', 'anando_ratings_count', 'pin_hash', 'pin_failed_attempts', 'pin_locked_until'])]
 #[Hidden(['password', 'remember_token', 'pin_hash'])]
 class User extends Authenticatable
 {
@@ -37,6 +39,18 @@ class User extends Authenticatable
             'pin_hash' => 'hashed',
             'pin_locked_until' => 'datetime',
         ];
+    }
+
+    /**
+     * Public profile photo — stored on the default (public) disk, unlike a
+     * driver's KYC selfie which lives on the private 'kyc' disk and is
+     * never exposed this way. Computed rather than stored so every place
+     * that already loads a User (driver blocks on Trip/Delivery/Dem Légui
+     * resources, the Anando poster block, etc.) gets it for free.
+     */
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->photo_path ? Storage::url($this->photo_path) : null);
     }
 
     public function hasPin(): bool

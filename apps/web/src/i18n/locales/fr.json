@@ -16,6 +16,7 @@
     "cash": "Espèces",
     "wallet": "Portefeuille",
     "insufficientFunds": "Solde insuffisant pour ce paiement.",
+    "useCashInstead": "Utiliser les espèces à la place",
     "topUp": "Recharger",
     "selectCity": "Sélectionner une ville",
     "rideType": {
@@ -92,6 +93,9 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "Déconnexion",
+    "changePhoto": "Changer la photo",
+    "removePhoto": "Supprimer la photo",
+    "photoUploadError": "Impossible d'envoyer la photo. Vérifiez le format (image, 5 Mo max).",
     "dashboard": {
       "trips": "Trajets",
       "bookings": "Réservations",
@@ -149,6 +153,12 @@
     "thanks": "Merci pour votre avis !",
     "rateButton": "⭐ Noter le chauffeur"
   },
+  "postTripRating": {
+    "title": "Votre trajet est terminé",
+    "later": "Plus tard",
+    "thanksTitle": "Merci pour votre avis !",
+    "thanksBody": "Votre évaluation aide les autres passagers à choisir un bon chauffeur."
+  },
   "tripDetail": {
     "departureAt": "{{date}} à {{time}}",
     "reserveButton": "⚡ Réserver — {{amount}} FCFA",
@@ -156,6 +166,12 @@
     "chatWithDriver": "💬 Discuter avec le conducteur",
     "driverArrivedBadge": "Le conducteur est arrivé au point de rendez-vous",
     "liveMapWaiting": "En attente de la position du conducteur…",
+    "inProgressStatus": "Trajet en cours",
+    "inProgressBadge": "🚗 Trajet en cours",
+    "progressPercent": "{{percent}}% du trajet effectué",
+    "distanceProgress": "{{covered}} km parcourus sur {{total}} km",
+    "distanceCoveredOnly": "{{covered}} km parcourus",
+    "elapsedTime": "En route depuis {{duration}}",
     "itinerary": "Itinéraire",
     "drivingDuration": " · ~{{duration}} de route",
     "departurePoint": "Point de départ",
@@ -603,5 +619,24 @@
     "deliverySosSheetTitle": "Partager le suivi de la livraison",
     "deliverySosSheetSubtitle": "Envoyez ce lien au destinataire pour qu'il puisse suivre le colis en direct pendant 24 heures.",
     "deliverySosMessage": "Suivez ma livraison en direct sur Intercity : {{url}}"
+  },
+  "financialReport": {
+    "range": {
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "byPeriod": "Par période",
+    "byService": "Par service",
+    "byVehicle": "Par véhicule",
+    "details": "Détail des trajets",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} à {{time}}",
+    "itemMeta": "{{date}} à {{time}}",
+    "empty": "Rien à afficher pour cette période."
+  },
+  "spendingReport": {
+    "title": "💳 Mes dépenses",
+    "totalLabel": "Total dépensé"
   }
 }

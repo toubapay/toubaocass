@@ -27,6 +27,7 @@ type Props = NativeStackScreenProps<TripsStackParamList, 'Anando'>;
 type Tab = 'available' | 'mine';
 
 const ACTIVE_RIDE_STATUSES = ['open', 'full', 'in_progress'];
+const POLL_INTERVAL_MS = 20000;
 
 function RideCard({ ride, onPress }: { ride: AnandoRide; onPress: () => void }) {
   const { t } = useTranslation();
@@ -105,7 +106,14 @@ export function AnandoScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', load);
-    return unsubscribe;
+    // Other riders/drivers post, join, start, and complete Anando rides at
+    // any time — poll while this screen stays mounted, not just on focus,
+    // so it stays current without the driver needing to leave and return.
+    const interval = setInterval(load, POLL_INTERVAL_MS);
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+    };
   }, [navigation]);
 
   const canSubmit = origin != null && destination != null && origin.id !== destination.id && Number(pricePerSeat) > 0 && Number(seats) > 0;

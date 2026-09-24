@@ -16,6 +16,7 @@
     "cash": "نقداً",
     "wallet": "المحفظة",
     "insufficientFunds": "الرصيد غير كافٍ لإتمام هذه العملية.",
+    "useCashInstead": "استخدام النقد بدلاً من ذلك",
     "topUp": "شحن الرصيد",
     "selectCity": "اختر مدينة",
     "rideType": {
@@ -92,6 +93,9 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "changePhoto": "تغيير الصورة",
+    "removePhoto": "حذف الصورة",
+    "photoUploadError": "تعذر إرسال الصورة. تحقق من الصيغة (صورة، 5 ميغابايت كحد أقصى).",
     "dashboard": {
       "trips": "الرحلات",
       "bookings": "الحجوزات",
@@ -153,6 +157,12 @@
     "thanks": "شكراً على تقييمك!",
     "rateButton": "⭐ قيّم السائق"
   },
+  "postTripRating": {
+    "title": "اكتملت رحلتك",
+    "later": "لاحقاً",
+    "thanksTitle": "شكراً على تقييمك!",
+    "thanksBody": "تقييمك يساعد الركاب الآخرين على اختيار سائق جيد."
+  },
   "tripDetail": {
     "departureAt": "{{date}} في {{time}}",
     "reserveButton": "⚡ حجز — {{amount}} فرنك",
@@ -160,6 +170,12 @@
     "chatWithDriver": "💬 التحدث مع السائق",
     "driverArrivedBadge": "وصل السائق إلى نقطة الالتقاء",
     "liveMapWaiting": "في انتظار موقع السائق…",
+    "inProgressStatus": "الرحلة جارية",
+    "inProgressBadge": "🚗 الرحلة جارية",
+    "progressPercent": "{{percent}}% من الرحلة تم قطعها",
+    "distanceProgress": "{{covered}} كم مقطوعة من أصل {{total}} كم",
+    "distanceCoveredOnly": "{{covered}} كم مقطوعة",
+    "elapsedTime": "في الطريق منذ {{duration}}",
     "itinerary": "المسار",
     "drivingDuration": " · ~{{duration}} من القيادة",
     "departurePoint": "نقطة الانطلاق",
@@ -620,5 +636,24 @@
     "deliverySosSheetTitle": "مشاركة تتبع التوصيل",
     "deliverySosSheetSubtitle": "أرسل هذا الرابط للمستلم ليتمكن من تتبع الطرد مباشرة لمدة 24 ساعة.",
     "deliverySosMessage": "تابع توصيلي مباشرة على Intercity: {{url}}"
+  },
+  "financialReport": {
+    "range": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "byPeriod": "حسب الفترة",
+    "byService": "حسب الخدمة",
+    "byVehicle": "حسب المركبة",
+    "details": "تفاصيل الرحلات",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} في {{time}}",
+    "itemMeta": "{{date}} في {{time}}",
+    "empty": "لا شيء لعرضه لهذه الفترة."
+  },
+  "spendingReport": {
+    "title": "💳 مصاريفي",
+    "totalLabel": "إجمالي المصاريف"
   }
 }

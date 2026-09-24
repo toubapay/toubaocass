@@ -16,6 +16,7 @@ class AnandoRideBookingResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
                 'phone' => $this->user->phone,
+                'photo_url' => $this->user->photo_url,
                 'anando_rating' => $this->user->anando_rating,
                 'anando_ratings_count' => $this->user->anando_ratings_count,
             ],

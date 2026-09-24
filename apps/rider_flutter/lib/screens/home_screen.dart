@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../api/cities_api.dart';
@@ -14,6 +16,7 @@ import '../widgets/trips_map.dart';
 import '../widgets/voice_search_button.dart';
 
 const _nearbyRadiusKm = 25.0;
+const _pollInterval = Duration(seconds: 20);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.onOpenTrip, required this.onOpenWallet, required this.onOpenInbox});
@@ -40,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool loading = true;
   String? error;
   final searchController = TextEditingController();
+  Timer? _pollTimer;
 
   @override
   void initState() {
@@ -48,17 +52,28 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
     _load();
     registerPushToken();
+    // Trips are posted by other drivers at any time, so this list would
+    // otherwise go stale until the rider pulls to refresh — poll silently.
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _load(silent: true));
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
   }
 
   bool get hasFilters => origin != null || destination != null || date != null || nearMe != null;
   bool get invalidRoute => origin != null && destination != null && origin!.id == destination!.id;
 
-  Future<void> _load() async {
+  Future<void> _load({bool silent = false}) async {
     if (invalidRoute) return;
-    setState(() {
-      loading = true;
-      error = null;
-    });
+    if (!silent) {
+      setState(() {
+        loading = true;
+        error = null;
+      });
+    }
     try {
       final result = await searchTrips(
         originCityId: origin?.id,
@@ -69,11 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
         lng: nearMe?.longitude,
         radiusKm: nearMe != null ? _nearbyRadiusKm : null,
       );
-      setState(() => trips = result.data);
+      if (mounted) setState(() => trips = result.data);
     } catch (_) {
-      setState(() => error = 'Impossible de charger les trajets. Tirez pour actualiser.');
+      if (!silent && mounted) setState(() => error = 'Impossible de charger les trajets. Tirez pour actualiser.');
     } finally {
-      setState(() => loading = false);
+      if (!silent && mounted) setState(() => loading = false);
     }
   }
 

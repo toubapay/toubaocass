@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../api/anando_api.dart';
@@ -8,6 +10,7 @@ import '../../models.dart';
 import '../../theme.dart';
 
 const _activeRideStatuses = {'open', 'full', 'in_progress'};
+const _pollInterval = Duration(seconds: 20);
 
 const _statusLabel = {
   'open': 'Disponible',
@@ -42,6 +45,7 @@ class _AnandoScreenState extends State<AnandoScreen> {
   bool posting = false;
   String? error;
   bool rideActionLoading = false;
+  Timer? _pollTimer;
 
   AnandoRide? get activeRide {
     for (final ride in myRides) {
@@ -55,27 +59,32 @@ class _AnandoScreenState extends State<AnandoScreen> {
     super.initState();
     fetchCities().then((value) => setState(() => cities = value)).catchError((_) {});
     _load();
+    // Other riders/drivers post, join, start, and complete Anando rides at
+    // any time — poll silently while this screen stays mounted.
+    _pollTimer = Timer.periodic(_pollInterval, (_) => _load(silent: true));
   }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     departureController.dispose();
     priceController.dispose();
     seatsController.dispose();
     super.dispose();
   }
 
-  Future<void> _load() async {
-    setState(() => loading = true);
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) setState(() => loading = true);
     try {
       final results = await Future.wait([fetchAnandoRides(), fetchMyAnandoRides(), fetchMyAnandoBookings()]);
+      if (!mounted) return;
       setState(() {
         rides = (results[0] as Paginated<AnandoRide>).data.where((r) => !isAnandoRideStale(r)).toList();
         myRides = (results[1] as Paginated<AnandoRide>).data;
         myBookings = (results[2] as Paginated<AnandoRideBooking>).data;
       });
     } finally {
-      setState(() => loading = false);
+      if (!silent && mounted) setState(() => loading = false);
     }
   }
 

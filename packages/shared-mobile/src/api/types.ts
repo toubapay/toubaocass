@@ -33,6 +33,7 @@ export interface User {
   name: string | null;
   phone: string;
   email: string | null;
+  photo_url: string | null;
   role: Role;
   phone_verified: boolean;
   profile_complete: boolean;
@@ -67,6 +68,7 @@ export interface Trip {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     rating: number;
     tier: DriverTier | null;
   };
@@ -106,6 +108,7 @@ export interface Booking {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
   };
   seats_booked: number;
   fare_total: number;
@@ -157,8 +160,8 @@ export type DeliveryStatus = 'pending' | 'accepted' | 'picked_up' | 'delivered' 
 
 export interface Delivery {
   id: number;
-  sender: { id: number; name: string | null; phone: string };
-  driver: { id: number; name: string | null; phone: string; rating: number | null; tier: DriverTier | null } | null;
+  sender: { id: number; name: string | null; phone: string; photo_url: string | null };
+  driver: { id: number; name: string | null; phone: string; photo_url: string | null; rating: number | null; tier: DriverTier | null } | null;
   receiver_name: string;
   receiver_phone: string;
   receiver_address_line: string;
@@ -197,6 +200,7 @@ export interface AnandoRide {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     role: Role;
     anando_rating: number | null;
     anando_ratings_count: number;
@@ -240,6 +244,7 @@ export interface AnandoRideBooking {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     anando_rating: number | null;
     anando_ratings_count: number;
   };
@@ -260,6 +265,7 @@ export interface DemLeguiRequest {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
   };
   pickup_latitude: number;
   pickup_longitude: number;
@@ -281,6 +287,7 @@ export interface DemLeguiTrip {
     id: number;
     name: string | null;
     phone: string;
+    photo_url: string | null;
     rating: number;
     tier: DriverTier | null;
     current_latitude: number | null;
@@ -401,4 +408,58 @@ export interface VehicleInsuranceInput {
 export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
+}
+
+export type FinancialReportRange = 'week' | 'month' | 'year';
+
+export interface FinancialReportPeriodRow {
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface FinancialReportServiceAmountRow {
+  service: 'trip' | 'dem_legui' | 'delivery' | 'anando';
+  label: string;
+  count: number;
+  amount: number;
+}
+
+export interface FinancialReportVehicleRow {
+  car_id: number | null;
+  label: string;
+  count: number;
+  earnings: number;
+}
+
+/**
+ * One individual completed trip/delivery/ride — the fee a rider paid, or a
+ * driver was paid, for that one course, with when it happened and who the
+ * other party was. `id` is a composite "{type}:{record_id}" string, unique
+ * within one report but not a real resource id.
+ */
+export interface FinancialReportItem {
+  id: string;
+  type: 'trip' | 'dem_legui' | 'delivery' | 'anando';
+  type_label: string;
+  destination: string | null;
+  counterparty_name: string | null;
+  amount: number;
+  completed_at: string;
+}
+
+/**
+ * Normalized shape both the rider "spending" and driver "earnings"
+ * mini-reports map their own endpoint's response into — see
+ * MiniFinancialReportCard, which renders from this shape alone so the same
+ * component serves both rider and driver profile screens.
+ */
+export interface MiniFinancialReport {
+  range: FinancialReportRange;
+  total: number;
+  items_count: number;
+  by_period: FinancialReportPeriodRow[];
+  by_service: FinancialReportServiceAmountRow[];
+  by_vehicle?: FinancialReportVehicleRow[];
+  items: FinancialReportItem[];
 }

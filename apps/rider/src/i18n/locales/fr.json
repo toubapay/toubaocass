@@ -121,6 +121,8 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "Déconnexion",
+    "changePhoto": "Changer la photo",
+    "removePhoto": "Supprimer la photo",
     "dashboard": {
       "trips": "Trajets",
       "bookings": "Réservations",
@@ -624,5 +626,24 @@
     "deliverySosSheetTitle": "Partager le suivi de la livraison",
     "deliverySosSheetSubtitle": "Envoyez ce lien au destinataire pour qu'il puisse suivre le colis en direct pendant 24 heures.",
     "deliverySosMessage": "Suivez ma livraison en direct sur Intercity : {{url}}"
+  },
+  "financialReport": {
+    "range": {
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "byPeriod": "Par période",
+    "byService": "Par service",
+    "byVehicle": "Par véhicule",
+    "details": "Détail des trajets",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} à {{time}}",
+    "itemMeta": "{{date}} à {{time}}",
+    "empty": "Rien à afficher pour cette période."
+  },
+  "spendingReport": {
+    "title": "💳 Mes dépenses",
+    "totalLabel": "Total dépensé"
   }
 }

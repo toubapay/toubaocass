@@ -31,6 +31,7 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
   int? acceptingId;
   bool? _wasOnline;
   Timer? _myTripsTimer;
+  Timer? _requestsTimer;
 
   bool get isOnline => context.read<AuthProvider>().user?.driverProfile?.isOnline ?? false;
 
@@ -40,11 +41,16 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
     _load();
     _loadMyTrips();
     _myTripsTimer = Timer.periodic(_myTripsPollInterval, (_) => _loadMyTrips());
+    // A rider posting a request is already pushed to nearby online drivers,
+    // but this board itself never re-fetched on its own — poll it too,
+    // silently, so it stays current for anyone who has it open.
+    _requestsTimer = Timer.periodic(_myTripsPollInterval, (_) => _load(silent: true));
   }
 
   @override
   void dispose() {
     _myTripsTimer?.cancel();
+    _requestsTimer?.cancel();
     super.dispose();
   }
 
@@ -58,20 +64,21 @@ class _DemLeguiRequestsScreenState extends State<DemLeguiRequestsScreen> {
     }
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool silent = false}) async {
     if (!isOnline) {
-      setState(() => loading = false);
+      if (!silent) setState(() => loading = false);
       return;
     }
-    setState(() => loading = true);
+    if (!silent) setState(() => loading = true);
     try {
       final results = await Future.wait([fetchAvailableDemLeguiRequests(), fetchMyCars()]);
+      if (!mounted) return;
       setState(() {
         requests = (results[0] as Paginated<DemLeguiRequest>).data;
         cars = (results[1] as List<Car>).where((c) => c.isActive).toList();
       });
     } finally {
-      setState(() => loading = false);
+      if (!silent && mounted) setState(() => loading = false);
     }
   }
 

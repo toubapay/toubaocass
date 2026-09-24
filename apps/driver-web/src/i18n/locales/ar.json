@@ -220,6 +220,9 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "changePhoto": "تغيير الصورة",
+    "removePhoto": "حذف الصورة",
+    "photoUploadError": "تعذر إرسال الصورة. تحقق من الصيغة (صورة، 5 ميغابايت كحد أقصى).",
     "assuranceLink": "🛡️ التأمين",
     "demLeguiHistory": "🚕 سجل رحلات Dem Légui",
     "dashboard": {
@@ -588,5 +591,24 @@
     "sosAlertAdmin": "إرسال تنبيه SOS إلى المسؤول",
     "sosAlertConfirm": "هل تريد إرسال تنبيه SOS إلى فريق الأمان؟ استخدم هذا فقط في حالة طوارئ حقيقية.",
     "sosAlertSent": "تم إرسال تنبيه SOS. تم إخطار فريقنا."
+  },
+  "financialReport": {
+    "range": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "byPeriod": "حسب الفترة",
+    "byService": "حسب الخدمة",
+    "byVehicle": "حسب المركبة (الأسطول)",
+    "details": "تفاصيل الرحلات",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} في {{time}}",
+    "itemMeta": "{{date}} في {{time}}",
+    "empty": "لا شيء لعرضه لهذه الفترة."
+  },
+  "earningsReport": {
+    "title": "💰 أرباحي",
+    "totalLabel": "إجمالي الأرباح"
   }
 }

@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { deleteProfilePhoto, uploadProfilePhoto } from '../api/auth';
+import { fetchEarningsReport } from '../api/reports';
 import { fetchWallet } from '../api/wallet';
 import { Button } from '../components/Button';
+import { MiniFinancialReportCard } from '../components/MiniFinancialReportCard';
 import { ProfileDashboard } from '../components/ProfileDashboard';
+import { ProfilePhotoUploader } from '../components/ProfilePhotoUploader';
 import { WalletIcon } from '../components/WalletIcon';
 import { useAuth } from '../context/AuthContext';
 import { useModuleStatus } from '../context/ModuleStatusContext';
@@ -15,7 +19,7 @@ import { colors, radius, spacing } from '../theme';
 export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushNotifications }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, setUser, signOut } = useAuth();
   const { isModuleEnabled } = useModuleStatus();
   const { permission, loading, error, enable } = pushNotifications;
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -55,6 +59,12 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
           border: `1px solid ${colors.border}`,
         }}
       >
+        <ProfilePhotoUploader
+          photoUrl={user?.photo_url ?? null}
+          name={user?.name ?? null}
+          onUpload={async (file) => setUser(await uploadProfilePhoto(file))}
+          onRemove={async () => setUser(await deleteProfilePhoto())}
+        />
         <p style={{ fontSize: 21, fontWeight: 700, color: colors.text, margin: `0 0 ${spacing.xs}px` }}>{user?.name}</p>
         <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{user?.phone}</p>
         {user?.email && <p style={{ fontSize: 16, color: colors.textMuted, margin: 0 }}>{user.email}</p>}
@@ -119,6 +129,12 @@ export function ProfilePage({ pushNotifications }: { pushNotifications: UsePushN
       </button>
 
       <ProfileDashboard />
+
+      <MiniFinancialReportCard
+        title={t('earningsReport.title')}
+        totalLabel={t('earningsReport.totalLabel')}
+        fetchReport={fetchEarningsReport}
+      />
 
       {isModuleEnabled('dem_legui') && (
         <button

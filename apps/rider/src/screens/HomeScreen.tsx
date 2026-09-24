@@ -25,6 +25,7 @@ import { colors, radius, spacing } from '../theme';
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 const NEARBY_RADIUS_KM = 25;
+const POLL_INTERVAL_MS = 20000;
 
 export function HomeScreen({ navigation }: Props) {
   const { t } = useTranslation();
@@ -51,11 +52,13 @@ export function HomeScreen({ navigation }: Props) {
   const invalidRoute = origin && destination && origin.id === destination.id;
 
   const load = useCallback(
-    (isRefresh = false) => {
+    (isRefresh = false, opts?: { silent?: boolean }) => {
       if (invalidRoute) return;
 
-      isRefresh ? setRefreshing(true) : setLoading(true);
-      setError(undefined);
+      if (!opts?.silent) {
+        isRefresh ? setRefreshing(true) : setLoading(true);
+        setError(undefined);
+      }
       searchTrips({
         origin_city_id: origin?.id,
         destination_city_id: destination?.id,
@@ -66,10 +69,14 @@ export function HomeScreen({ navigation }: Props) {
         radius_km: nearMe ? NEARBY_RADIUS_KM : undefined,
       })
         .then((res) => setTrips(res.data))
-        .catch(() => setError(t('home.loadError')))
+        .catch(() => {
+          if (!opts?.silent) setError(t('home.loadError'));
+        })
         .finally(() => {
-          setLoading(false);
-          setRefreshing(false);
+          if (!opts?.silent) {
+            setLoading(false);
+            setRefreshing(false);
+          }
         });
     },
     [origin, destination, date, seats, nearMe, invalidRoute],
@@ -79,6 +86,21 @@ export function HomeScreen({ navigation }: Props) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origin, destination, date, seats, nearMe]);
+
+  // Trips are posted by other drivers at any time, so the list would
+  // otherwise go stale until the rider pulls to refresh — poll silently
+  // (plus refetch on screen focus), same pattern as AnandoMiniList right
+  // below this list.
+  useEffect(() => {
+    const poll = () => load(false, { silent: true });
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const unsubscribeFocus = navigation.addListener('focus', poll);
+    return () => {
+      clearInterval(interval);
+      unsubscribeFocus();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [load, navigation]);
 
   const clearFilters = () => {
     setOrigin(null);

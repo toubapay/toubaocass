@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Geo;
 use Carbon\Carbon;
 use Database\Factories\TripFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'departure_date', 'departure_time', 'fare', 'ride_type',
     'total_seats', 'available_seats', 'status', 'is_instant', 'notes',
     'current_latitude', 'current_longitude', 'current_location_updated_at',
-    'arrived_at',
+    'arrived_at', 'started_at',
 ])]
 class Trip extends Model
 {
@@ -52,12 +53,61 @@ class Trip extends Model
             'current_longitude' => 'float',
             'current_location_updated_at' => 'datetime',
             'arrived_at' => 'datetime',
+            'started_at' => 'datetime',
         ];
     }
 
     public function hasDepartureLocation(): bool
     {
         return $this->departure_latitude !== null && $this->departure_longitude !== null;
+    }
+
+    /**
+     * How far along the route the driver's last reported position is, while
+     * the trip is under way — null whenever it can't be computed (not
+     * in_progress yet, no position reported, or missing origin/destination
+     * coordinates). Measured as straight-line (Haversine) progress from
+     * origin to destination rather than real driving distance, same
+     * approximation DemLeguiRequest::etaMinutes() already makes elsewhere —
+     * no turn-by-turn routing data exists to do better. `distanceCoveredKm`
+     * scales that same ratio onto the real driving distance passed in (from
+     * CityDistanceService), so it reads as an actual km figure rather than
+     * an abstract percentage alone.
+     *
+     * @return array{percent: int, distance_covered_km: float}|null
+     */
+    public function progress(?float $routeDistanceKm): ?array
+    {
+        if ($this->status !== self::STATUS_IN_PROGRESS) {
+            return null;
+        }
+
+        if ($this->current_latitude === null || $this->current_longitude === null) {
+            return null;
+        }
+
+        $originLat = $this->departure_latitude ?? $this->originCity?->latitude;
+        $originLng = $this->departure_longitude ?? $this->originCity?->longitude;
+        $destLat = $this->destinationCity?->latitude;
+        $destLng = $this->destinationCity?->longitude;
+
+        if ($originLat === null || $originLng === null || $destLat === null || $destLng === null) {
+            return null;
+        }
+
+        $totalKm = Geo::haversineKm((float) $originLat, (float) $originLng, (float) $destLat, (float) $destLng);
+
+        if ($totalKm <= 0) {
+            return null;
+        }
+
+        $remainingKm = Geo::haversineKm((float) $this->current_latitude, (float) $this->current_longitude, (float) $destLat, (float) $destLng);
+        $ratio = max(0.0, min(1.0, 1 - ($remainingKm / $totalKm)));
+
+        return [
+            'percent' => (int) round($ratio * 100),
+            'distance_covered_km' => round(($routeDistanceKm ?? $totalKm) * $ratio, 1),
+        ];
     }
 
     public function driver(): BelongsTo

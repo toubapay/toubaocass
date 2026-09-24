@@ -5,8 +5,10 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Notifications\OtpCodeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OtpAuthTest extends TestCase
@@ -99,6 +101,60 @@ class OtpAuthTest extends TestCase
             ->assertOk();
 
         $this->assertDatabaseHas('users', ['id' => $user->id, 'fcm_token' => 'device-token-123']);
+    }
+
+    public function test_authenticated_user_can_upload_and_replace_a_profile_photo(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $first = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/profile/photo', ['photo' => UploadedFile::fake()->image('me.jpg')])
+            ->assertOk()
+            ->json();
+
+        $this->assertNotNull($first['photo_url']);
+        $firstPath = $user->fresh()->photo_path;
+        Storage::disk('public')->assertExists($firstPath);
+
+        // Uploading a new photo replaces the old file rather than leaving
+        // it orphaned on disk.
+        $this->actingAs($user->fresh(), 'sanctum')
+            ->postJson('/api/profile/photo', ['photo' => UploadedFile::fake()->image('me-again.jpg')])
+            ->assertOk();
+
+        Storage::disk('public')->assertMissing($firstPath);
+        $this->assertNotEquals($firstPath, $user->fresh()->photo_path);
+    }
+
+    public function test_authenticated_user_can_delete_their_profile_photo(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/profile/photo', ['photo' => UploadedFile::fake()->image('me.jpg')])
+            ->assertOk();
+
+        $path = $user->fresh()->photo_path;
+
+        $this->actingAs($user->fresh(), 'sanctum')
+            ->deleteJson('/api/profile/photo')
+            ->assertOk()
+            ->assertJson(['photo_url' => null]);
+
+        Storage::disk('public')->assertMissing($path);
+        $this->assertNull($user->fresh()->photo_path);
+    }
+
+    public function test_profile_photo_upload_rejects_a_non_image_file(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/profile/photo', ['photo' => UploadedFile::fake()->create('doc.pdf', 100)])
+            ->assertUnprocessable();
     }
 
     private function capturedOtpCode(): string

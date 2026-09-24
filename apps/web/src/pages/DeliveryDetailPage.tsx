@@ -11,6 +11,7 @@ import { DriverTierBadge } from '../components/DriverTierBadge';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
+import { SuccessModal } from '../components/SuccessModal';
 import { colors, radius, spacing } from '../theme';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
@@ -47,6 +48,7 @@ export function DeliveryDetailPage() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showSos, setShowSos] = useState(false);
+  const [rated, setRated] = useState(false);
 
   const load = () => {
     if (!id) return;
@@ -224,7 +226,21 @@ export function DeliveryDetailPage() {
       )}
 
       {delivery.status === 'delivered' && delivery.driver && (
-        <RateDriverCard onSubmit={(score, comment) => rateDelivery(delivery.id, score, comment)} />
+        <RateDriverCard
+          onSubmit={async (score, comment) => {
+            await rateDelivery(delivery.id, score, comment);
+            setRated(true);
+          }}
+        />
+      )}
+
+      {rated && (
+        <SuccessModal
+          title={t('postTripRating.thanksTitle')}
+          body={t('postTripRating.thanksBody')}
+          buttonLabel={t('common.ok')}
+          onClose={() => navigate('/')}
+        />
       )}
 
       {delivery.status === 'pending' && (

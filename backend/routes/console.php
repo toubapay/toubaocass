@@ -13,3 +13,4 @@ Schedule::command('backup:clean')->daily()->at('02:30');
 Schedule::command('trips:finish-stale')->hourly();
 Schedule::command('anando:terminate-stale')->everyThirtyMinutes();
 Schedule::command('dem-legui:expire-stale-requests')->everyThirtyMinutes();
+Schedule::command('dem-legui:notify-eta')->everyMinute();

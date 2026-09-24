@@ -16,6 +16,8 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'DemLeguiRequests'>;
 
+const POLL_INTERVAL_MS = 20000;
+
 export function DemLeguiRequestsScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -26,21 +28,33 @@ export function DemLeguiRequestsScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
+  const load = useCallback(
+    (opts?: { silent?: boolean }) => {
       if (!isOnline) {
         setLoading(false);
         return;
       }
-      setLoading(true);
+      if (!opts?.silent) setLoading(true);
       Promise.all([fetchAvailableDemLeguiRequests(), fetchMyCars()])
         .then(([reqs, myCars]) => {
           setRequests(reqs.data);
           setCars(myCars.filter((c) => c.is_active));
         })
-        .finally(() => setLoading(false));
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOnline]),
+        .finally(() => {
+          if (!opts?.silent) setLoading(false);
+        });
+    },
+    [isOnline],
+  );
+
+  // Refetches on focus, plus polls silently while this screen stays open
+  // so a newly posted request shows up without the driver switching tabs.
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      const interval = setInterval(() => load({ silent: true }), POLL_INTERVAL_MS);
+      return () => clearInterval(interval);
+    }, [load]),
   );
 
   const doAccept = async (requestId: number, carId?: number) => {

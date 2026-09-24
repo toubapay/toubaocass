@@ -36,7 +36,7 @@ class FcmChannelTest extends TestCase
 
         $this->app->bind(PushGateway::class, fn () => new class implements PushGateway
         {
-            public function send(string $token, string $title, string $body, array $data = []): PushSendResult
+            public function send(string $token, string $title, string $body, array $data = [], ?array $osDisplay = null): PushSendResult
             {
                 return PushSendResult::failed(tokenInvalid: true);
             }
@@ -53,7 +53,7 @@ class FcmChannelTest extends TestCase
 
         $this->app->bind(PushGateway::class, fn () => new class implements PushGateway
         {
-            public function send(string $token, string $title, string $body, array $data = []): PushSendResult
+            public function send(string $token, string $title, string $body, array $data = [], ?array $osDisplay = null): PushSendResult
             {
                 return PushSendResult::failed(tokenInvalid: false);
             }

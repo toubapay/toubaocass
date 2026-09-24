@@ -179,6 +179,8 @@
     "languageFrench": "Français",
     "languageArabic": "العربية",
     "signOut": "تسجيل الخروج",
+    "changePhoto": "تغيير الصورة",
+    "removePhoto": "حذف الصورة",
     "dashboard": {
       "trips": "الرحلات",
       "bookings": "الحجوزات",
@@ -534,5 +536,24 @@
     "sosAlertAdmin": "إرسال تنبيه SOS إلى المسؤول",
     "sosAlertConfirm": "هل تريد إرسال تنبيه SOS إلى فريق الأمان؟ استخدم هذا فقط في حالة طوارئ حقيقية.",
     "sosAlertSent": "تم إرسال تنبيه SOS. تم إخطار فريقنا."
+  },
+  "financialReport": {
+    "range": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "byPeriod": "حسب الفترة",
+    "byService": "حسب الخدمة",
+    "byVehicle": "حسب المركبة (الأسطول)",
+    "details": "تفاصيل الرحلات",
+    "itemWithDestination": "{{type}} · {{destination}}",
+    "itemMetaWithName": "{{name}} · {{date}} في {{time}}",
+    "itemMeta": "{{date}} في {{time}}",
+    "empty": "لا يوجد ما يُعرض لهذه الفترة."
+  },
+  "earningsReport": {
+    "title": "💰 أرباحي",
+    "totalLabel": "إجمالي الأرباح"
   }
 }

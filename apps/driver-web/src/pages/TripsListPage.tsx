@@ -21,6 +21,8 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: colors.danger,
 };
 
+const POLL_INTERVAL_MS = 20000;
+
 export function TripsListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -28,14 +30,22 @@ export function TripsListPage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
-    setLoading(true);
+  const load = useCallback((opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     fetchMyTrips()
       .then((res) => setTrips(res.data))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!opts?.silent) setLoading(false);
+      });
   }, []);
 
-  useEffect(load, [load]);
+  useEffect(() => {
+    load();
+    // Seats fill up as riders book, so this list would otherwise sit stale
+    // until the driver manually reloads — poll silently while it's open.
+    const interval = setInterval(() => load({ silent: true }), POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [load]);
 
   if (loading) return <CenteredSpinner />;
 

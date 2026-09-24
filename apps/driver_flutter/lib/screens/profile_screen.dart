@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_flutter/api/auth_api.dart' as auth_api;
 import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/mini_financial_report_card.dart';
+import 'package:shared_flutter/widgets/profile_photo_uploader.dart';
 
+import '../api/reports_api.dart';
 import '../api/wallet_api.dart';
 import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
@@ -73,6 +77,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  ProfilePhotoUploader(
+                    photoUrl: user?.photoUrl,
+                    name: user?.name,
+                    onUpload: (path) async {
+                      final updated = await auth_api.uploadProfilePhoto(path);
+                      if (context.mounted) context.read<AuthProvider>().setUser(updated);
+                    },
+                    onRemove: () async {
+                      final updated = await auth_api.deleteProfilePhoto();
+                      if (context.mounted) context.read<AuthProvider>().setUser(updated);
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(user?.name ?? '', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700)),
                   const SizedBox(height: AppSpacing.xs),
                   Text(user?.phone ?? '', style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
@@ -129,6 +146,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+            ),
+            const MiniFinancialReportCard(
+              title: '💰 Mes revenus',
+              totalLabel: 'Total gagné',
+              fetchReport: fetchEarningsReport,
             ),
             if (moduleStatus.isEnabled('assurance'))
               InkWell(

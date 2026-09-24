@@ -4,11 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { deleteProfilePhoto, uploadProfilePhoto } from '../api/auth';
+import { fetchSpendingReport } from '../api/reports';
 import { fetchWallet } from '../api/wallet';
 import { useAuth } from '../context/AuthContext';
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { Button } from '../components/Button';
+import { MiniFinancialReportCard } from '../components/MiniFinancialReportCard';
 import { ProfileDashboard } from '../components/ProfileDashboard';
+import { ProfilePhotoUploader } from '../components/ProfilePhotoUploader';
 import { Screen } from '../components/Screen';
 import { setStoredLanguage, type SupportedLanguage } from '../i18n/i18n';
 import { ProfileStackParamList } from '../navigation/types';
@@ -18,7 +22,7 @@ type Props = NativeStackScreenProps<ProfileStackParamList, 'Profile'>;
 
 export function ProfileScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
-  const { user, signOut } = useAuth();
+  const { user, setUser, signOut } = useAuth();
   const { isModuleEnabled } = useModuleStatus();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
@@ -36,6 +40,12 @@ export function ProfileScreen({ navigation }: Props) {
       <Text style={styles.title}>{t('profile.title')}</Text>
 
       <View style={styles.card}>
+        <ProfilePhotoUploader
+          photoUrl={user?.photo_url ?? null}
+          name={user?.name ?? null}
+          onUpload={async (file) => setUser(await uploadProfilePhoto(file))}
+          onRemove={async () => setUser(await deleteProfilePhoto())}
+        />
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.meta}>{user?.phone}</Text>
         {user?.email ? <Text style={styles.meta}>{user.email}</Text> : null}
@@ -53,6 +63,12 @@ export function ProfileScreen({ navigation }: Props) {
       </Pressable>
 
       <ProfileDashboard />
+
+      <MiniFinancialReportCard
+        title={t('spendingReport.title')}
+        totalLabel={t('spendingReport.totalLabel')}
+        fetchReport={fetchSpendingReport}
+      />
 
       <Pressable style={styles.settingsRow} onPress={() => navigation.navigate('MyDeliveries')}>
         <Text style={styles.settingsLabel}>{t('profile.myDeliveries')}</Text>

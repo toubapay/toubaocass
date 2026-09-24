@@ -16,6 +16,8 @@ import { colors, radius, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'TripsList'>;
 
+const POLL_INTERVAL_MS = 20000;
+
 const STATUS_COLOR: Record<string, string> = {
   scheduled: colors.success,
   full: colors.accent,
@@ -30,13 +32,24 @@ export function TripsListScreen({ navigation }: Props) {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const load = useCallback((opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
+    fetchMyTrips()
+      .then((res) => setTrips(res.data))
+      .finally(() => {
+        if (!opts?.silent) setLoading(false);
+      });
+  }, []);
+
+  // Seats fill up as riders book, so this list would otherwise sit stale
+  // until the driver leaves and returns — refetch on focus, plus poll
+  // silently while it stays open.
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
-      fetchMyTrips()
-        .then((res) => setTrips(res.data))
-        .finally(() => setLoading(false));
-    }, []),
+      load();
+      const interval = setInterval(() => load({ silent: true }), POLL_INTERVAL_MS);
+      return () => clearInterval(interval);
+    }, [load]),
   );
 
   if (loading) {

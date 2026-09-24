@@ -42,6 +42,7 @@ class User {
   final String? name;
   final String phone;
   final String? email;
+  final String? photoUrl;
   final String role;
   final bool phoneVerified;
   final bool profileComplete;
@@ -54,6 +55,7 @@ class User {
     required this.name,
     required this.phone,
     required this.email,
+    required this.photoUrl,
     required this.role,
     required this.phoneVerified,
     required this.profileComplete,
@@ -67,6 +69,7 @@ class User {
         name: json['name'] as String?,
         phone: json['phone'] as String,
         email: json['email'] as String?,
+        photoUrl: json['photo_url'] as String?,
         role: json['role'] as String,
         phoneVerified: json['phone_verified'] as bool? ?? false,
         profileComplete: json['profile_complete'] as bool? ?? false,
@@ -82,6 +85,7 @@ class User {
         name: name,
         phone: phone,
         email: email,
+        photoUrl: photoUrl,
         role: role,
         phoneVerified: phoneVerified,
         profileComplete: profileComplete,
@@ -157,6 +161,7 @@ class TripDriver {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final double rating;
   final String? tier;
   final double? currentLatitude;
@@ -167,6 +172,7 @@ class TripDriver {
     required this.id,
     required this.name,
     required this.phone,
+    this.photoUrl,
     required this.rating,
     this.tier,
     this.currentLatitude,
@@ -178,6 +184,7 @@ class TripDriver {
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         rating: (json['rating'] as num?)?.toDouble() ?? 0,
         tier: json['tier'] as String?,
         currentLatitude: (json['current_latitude'] as num?)?.toDouble(),
@@ -315,11 +322,16 @@ class BookingRider {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
 
-  BookingRider({required this.id, required this.name, required this.phone});
+  BookingRider({required this.id, required this.name, required this.phone, this.photoUrl});
 
-  factory BookingRider.fromJson(Map<String, dynamic> json) =>
-      BookingRider(id: json['id'] as int, name: json['name'] as String?, phone: json['phone'] as String);
+  factory BookingRider.fromJson(Map<String, dynamic> json) => BookingRider(
+        id: json['id'] as int,
+        name: json['name'] as String?,
+        phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
+      );
 }
 
 class Booking {
@@ -631,15 +643,17 @@ class DeliveryParty {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final double? rating;
   final String? tier;
 
-  DeliveryParty({required this.id, required this.name, required this.phone, this.rating, this.tier});
+  DeliveryParty({required this.id, required this.name, required this.phone, this.photoUrl, this.rating, this.tier});
 
   factory DeliveryParty.fromJson(Map<String, dynamic> json) => DeliveryParty(
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         rating: (json['rating'] as num?)?.toDouble(),
         tier: json['tier'] as String?,
       );
@@ -733,6 +747,7 @@ class AnandoPoster {
   final int id;
   final String? name;
   final String phone;
+  final String? photoUrl;
   final String role;
   final double? anandoRating;
   final int anandoRatingsCount;
@@ -741,6 +756,7 @@ class AnandoPoster {
     required this.id,
     required this.name,
     required this.phone,
+    this.photoUrl,
     required this.role,
     required this.anandoRating,
     required this.anandoRatingsCount,
@@ -750,6 +766,7 @@ class AnandoPoster {
         id: json['id'] as int,
         name: json['name'] as String?,
         phone: json['phone'] as String,
+        photoUrl: json['photo_url'] as String?,
         role: json['role'] as String? ?? '',
         anandoRating: (json['anando_rating'] as num?)?.toDouble(),
         anandoRatingsCount: json['anando_ratings_count'] as int? ?? 0,
@@ -1029,4 +1046,108 @@ class DemLeguiTrip {
             ? null
             : (json['requests'] as List).map((e) => DemLeguiRequest.fromJson(e as Map<String, dynamic>)).toList(),
       );
+}
+
+class FinancialReportPeriodRow {
+  final String label;
+  final int amount;
+  final int count;
+
+  FinancialReportPeriodRow({required this.label, required this.amount, required this.count});
+
+  factory FinancialReportPeriodRow.fromJson(Map<String, dynamic> json) => FinancialReportPeriodRow(
+        label: json['label'] as String,
+        amount: json['amount'] as int,
+        count: json['count'] as int,
+      );
+}
+
+class FinancialReportServiceAmountRow {
+  final String service;
+  final String label;
+  final int count;
+  final int amount;
+
+  FinancialReportServiceAmountRow({required this.service, required this.label, required this.count, required this.amount});
+
+  factory FinancialReportServiceAmountRow.fromJson(Map<String, dynamic> json) => FinancialReportServiceAmountRow(
+        service: json['service'] as String,
+        label: json['label'] as String,
+        count: json['count'] as int,
+        amount: json['amount'] as int,
+      );
+}
+
+class FinancialReportVehicleRow {
+  final int? carId;
+  final String label;
+  final int count;
+  final int earnings;
+
+  FinancialReportVehicleRow({required this.carId, required this.label, required this.count, required this.earnings});
+
+  factory FinancialReportVehicleRow.fromJson(Map<String, dynamic> json) => FinancialReportVehicleRow(
+        carId: json['car_id'] as int?,
+        label: json['label'] as String,
+        count: json['count'] as int,
+        earnings: json['earnings'] as int,
+      );
+}
+
+/// One individual completed trip/delivery/ride — the fee a rider paid, or a
+/// driver was paid, for that one course, with when it happened and who the
+/// other party was. [id] is a composite "{type}:{recordId}" string, unique
+/// within one report but not a real resource id.
+class FinancialReportItem {
+  final String id;
+  final String type;
+  final String typeLabel;
+  final String? destination;
+  final String? counterpartyName;
+  final int amount;
+  final String completedAt;
+
+  FinancialReportItem({
+    required this.id,
+    required this.type,
+    required this.typeLabel,
+    required this.destination,
+    required this.counterpartyName,
+    required this.amount,
+    required this.completedAt,
+  });
+
+  factory FinancialReportItem.fromJson(Map<String, dynamic> json) => FinancialReportItem(
+        id: json['id'] as String,
+        type: json['type'] as String,
+        typeLabel: json['type_label'] as String,
+        destination: json['destination'] as String?,
+        counterpartyName: json['counterparty_name'] as String?,
+        amount: json['amount'] as int,
+        completedAt: json['completed_at'] as String,
+      );
+}
+
+/// Normalized shape both the rider "spending" and driver "earnings"
+/// mini-reports map their own endpoint's response into — see
+/// MiniFinancialReportCard, which renders from this shape alone so the same
+/// widget serves both rider and driver profile screens.
+class MiniFinancialReport {
+  final String range;
+  final int total;
+  final int itemsCount;
+  final List<FinancialReportPeriodRow> byPeriod;
+  final List<FinancialReportServiceAmountRow> byService;
+  final List<FinancialReportVehicleRow>? byVehicle;
+  final List<FinancialReportItem> items;
+
+  MiniFinancialReport({
+    required this.range,
+    required this.total,
+    required this.itemsCount,
+    required this.byPeriod,
+    required this.byService,
+    this.byVehicle,
+    required this.items,
+  });
 }

@@ -16,6 +16,7 @@ class BookingResource extends JsonResource
                 'id' => $this->rider->id,
                 'name' => $this->rider->name,
                 'phone' => $this->rider->phone,
+                'photo_url' => $this->rider->photo_url,
             ],
             'seats_booked' => $this->seats_booked,
             'fare_total' => $this->fare_total,
