@@ -261,6 +261,8 @@
       "passengerFallback": "Passager",
       "seatsCount": "{{count}} place(s)",
       "meetingPoint": "Point de rendez-vous",
+      "navigateToMeetingPoint": "Naviguer vers le point de rendez-vous",
+      "navigateToDestination": "Naviguer vers la destination",
       "tripSection": "Trajet",
       "seatsAvailable": "{{available}} place(s) disponible(s) sur {{total}}",
       "chat": "💬 Discuter",
@@ -291,6 +293,8 @@
     "chooseCarTitle": "Choisissez le véhicule",
     "acceptRequest": "Accepter",
     "tripToLabel": "Vers {{city}}",
+    "navigateToPickup": "Naviguer vers le point de ramassage",
+    "navigateToDestination": "Naviguer vers la destination",
     "tripStatus": {
       "open": "Ouvert",
       "in_progress": "En cours",
@@ -392,6 +396,8 @@
     "detail": {
       "titleWithId": "Livraison #{{id}}",
       "pickupSection": "Ramassage",
+      "navigateToPickup": "Naviguer vers le point de ramassage",
+      "navigateToReceiver": "Naviguer vers le destinataire",
       "receiverSection": "Destinataire",
       "packageSection": "Colis",
       "feeSection": "Frais",

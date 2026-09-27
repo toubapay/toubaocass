@@ -170,6 +170,8 @@
     "chatWithDriver": "💬 التحدث مع السائق",
     "driverArrivedBadge": "وصل السائق إلى نقطة الالتقاء",
     "liveMapWaiting": "في انتظار موقع السائق…",
+    "navigateToPickup": "التوجه إلى نقطة الالتقاء",
+    "navigateToDestination": "التوجه إلى الوجهة",
     "inProgressStatus": "الرحلة جارية",
     "inProgressBadge": "🚗 الرحلة جارية",
     "progressPercent": "{{percent}}% من الرحلة تم قطعها",
@@ -253,6 +255,8 @@
   },
   "deliveryDetail": {
     "titleWithId": "توصيل #{{id}}",
+    "navigateToPickup": "التوجه إلى نقطة الاستلام",
+    "navigateToReceiver": "التوجه إلى المستلم",
     "pickup": "الاستلام",
     "receiver": "المستلم",
     "package": "الطرد",
@@ -391,6 +395,8 @@
   "demLegui": {
     "title": "Dem Légui",
     "subtitle": "أخبرنا بموقعك ووجهتك — سيقبل سائق متصل قريب طلبك.",
+    "navigateToPickup": "التوجه إلى نقطة الانطلاق",
+    "navigateToDestination": "التوجه إلى الوجهة",
     "pickup": "نقطة الانطلاق",
     "destination": "الوجهة",
     "seats": "المقاعد",

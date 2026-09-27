@@ -13,6 +13,7 @@ import 'screens/auth/profile_setup_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/dem_legui/dem_legui_requests_screen.dart';
 import 'screens/dem_legui/dem_legui_trip_detail_screen.dart';
+import 'screens/dem_legui/dem_legui_trip_history_screen.dart';
 import 'screens/deliveries/deliveries_list_screen.dart';
 import 'screens/deliveries/delivery_detail_screen.dart';
 import 'screens/fleet/add_car_screen.dart';
@@ -22,8 +23,10 @@ import 'screens/insurance/insurance_screen.dart';
 import 'screens/insurance/my_policies_screen.dart';
 import 'screens/kyc/kyc_form_screen.dart';
 import 'screens/kyc/kyc_status_screen.dart';
+import 'screens/my_ratings_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/trips/post_instant_trip_screen.dart';
 import 'screens/trips/post_trip_screen.dart';
 import 'screens/trips/trip_detail_screen.dart';
 import 'screens/trips/trips_list_screen.dart';
@@ -97,6 +100,11 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/create-pin', builder: (context, state) => const CreatePinScreen()),
       GoRoute(path: '/profile-setup', builder: (context, state) => const ProfileSetupScreen()),
       GoRoute(path: '/wallet', builder: (context, state) => const WalletScreen()),
+      GoRoute(path: '/ratings', builder: (context, state) => const MyRatingsScreen()),
+      GoRoute(
+        path: '/dem-legui/history',
+        builder: (context, state) => DemLeguiTripHistoryScreen(onOpenTrip: (id) => context.push('/dem-legui/trips/$id')),
+      ),
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
       GoRoute(
         path: '/trips/:id',
@@ -119,6 +127,7 @@ GoRouter buildRouter(AuthProvider auth) {
         },
       ),
       GoRoute(path: '/post-trip', builder: (context, state) => PostTripScreen(onCreated: () => context.pop())),
+      GoRoute(path: '/post-instant-trip', builder: (context, state) => PostInstantTripScreen(onCreated: () => context.pop())),
       GoRoute(
         path: '/anando',
         builder: (context, state) => AnandoScreen(onOpenRide: (id) => context.push('/anando/$id')),
@@ -203,6 +212,7 @@ GoRouter buildRouter(AuthProvider auth) {
               builder: (context, state) => TripsListScreen(
                 onOpenTrip: (id) => context.push('/trips/$id'),
                 onPostTrip: () => context.push('/post-trip'),
+                onPostInstantTrip: () => context.push('/post-instant-trip'),
                 onOpenWallet: () => context.push('/wallet'),
                 onOpenDemLegui: () => context.push('/dem-legui'),
                 onOpenDemLeguiTrip: (id) => context.push('/dem-legui/trips/$id'),
@@ -237,6 +247,9 @@ GoRouter buildRouter(AuthProvider auth) {
                       onOpenSettings: () => context.push('/settings'),
                       onOpenInsurance: () => context.push('/insurance'),
                       onOpenInbox: () => context.push('/inbox'),
+                      onOpenRatings: () => context.push('/ratings'),
+                      onOpenDemLeguiHistory: () => context.push('/dem-legui/history'),
+                      onOpenTrip: (id) => context.push('/trips/$id'),
                     )),
           ]),
         ],

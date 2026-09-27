@@ -1,3 +1,5 @@
+import 'package:shared_flutter/api/pagination.dart';
+
 import '../models.dart';
 import 'client.dart';
 
@@ -63,6 +65,14 @@ Future<DemLeguiRequest?> fetchMyActiveDemLeguiRequest() async {
 
 Future<void> cancelDemLeguiRequest(int requestId) async {
   await ApiClient.instance.dio.delete('/dem-legui/requests/$requestId');
+}
+
+/// Full history (past + active) of the rider's own Dem Légui requests —
+/// powers DemLeguiHistoryScreen, unlike fetchMyActiveDemLeguiRequest which
+/// only ever returns the single currently-active one.
+Future<Paginated<DemLeguiRequest>> fetchMyDemLeguiRequests() async {
+  final response = await ApiClient.instance.dio.get('/dem-legui/requests/mine');
+  return Paginated.fromJson(response.data as Map<String, dynamic>, DemLeguiRequest.fromJson);
 }
 
 Future<DemLeguiTrip> fetchDemLeguiTrip(int tripId) async {

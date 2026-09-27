@@ -11,6 +11,7 @@ import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
 import '../theme.dart';
 import '../widgets/inbox_icon.dart';
+import '../widgets/profile_dashboard.dart';
 
 const _kycLabel = {
   'pending': 'Non soumis',
@@ -26,12 +27,18 @@ class ProfileScreen extends StatefulWidget {
     required this.onOpenSettings,
     required this.onOpenInsurance,
     required this.onOpenInbox,
+    required this.onOpenRatings,
+    required this.onOpenDemLeguiHistory,
+    required this.onOpenTrip,
   });
 
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenSettings;
   final VoidCallback onOpenInsurance;
   final VoidCallback onOpenInbox;
+  final VoidCallback onOpenRatings;
+  final VoidCallback onOpenDemLeguiHistory;
+  final void Function(int tripId) onOpenTrip;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -106,9 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    ratingsCount == 0 ? "Aucun avis pour l'instant" : '$ratingsCount avis',
-                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  InkWell(
+                    onTap: widget.onOpenRatings,
+                    child: Text(
+                      ratingsCount == 0 ? "Aucun avis pour l'instant" : '$ratingsCount avis',
+                      style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                    ),
                   ),
                 ],
               ),
@@ -147,11 +157,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            ProfileDashboard(onOpenTrip: widget.onOpenTrip),
             const MiniFinancialReportCard(
               title: '💰 Mes revenus',
               totalLabel: 'Total gagné',
               fetchReport: fetchEarningsReport,
             ),
+            if (moduleStatus.isEnabled('dem_legui'))
+              InkWell(
+                onTap: widget.onOpenDemLeguiHistory,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('🚕 Historique Dem Légui', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
+                      Icon(Icons.arrow_forward, color: AppColors.textMuted),
+                    ],
+                  ),
+                ),
+              ),
             if (moduleStatus.isEnabled('assurance'))
               InkWell(
                 onTap: widget.onOpenInsurance,

@@ -9,6 +9,7 @@ import { extractErrorMessage } from '../../api/client';
 import { arriveTrip, cancelTrip, completeTrip, fetchMyTrip, startTrip, updateTripLocation } from '../../api/trips';
 import { Trip } from '../../api/types';
 import { Button } from '../../components/Button';
+import { NavigateFab } from '../../components/NavigateFab';
 import { Screen } from '../../components/Screen';
 import { SosShareModal } from '../../components/SosShareModal';
 import { TripUrgencyBadge } from '../../components/TripUrgencyBadge';
@@ -100,8 +101,18 @@ export function TripDetailScreen({ route, navigation }: Props) {
 
   const confirmedBookings = (trip.bookings ?? []).filter((b) => b.status === 'confirmed');
 
+  const navTarget =
+    trip.status === 'in_progress'
+      ? trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+        ? { latitude: trip.destination_city.latitude, longitude: trip.destination_city.longitude, label: t('trips.detail.navigateToDestination') }
+        : null
+      : trip.departure_latitude !== null && trip.departure_longitude !== null
+        ? { latitude: trip.departure_latitude, longitude: trip.departure_longitude, label: t('trips.detail.navigateToMeetingPoint') }
+        : null;
+
   return (
     <Screen>
+      {navTarget && <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={navTarget.label} />}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.routeRow}>
           <Text style={styles.city}>{trip.origin_city?.name}</Text>

@@ -261,6 +261,8 @@
       "passengerFallback": "راكب",
       "seatsCount": "{{count}} مقعد",
       "meetingPoint": "نقطة اللقاء",
+      "navigateToMeetingPoint": "التنقل إلى نقطة اللقاء",
+      "navigateToDestination": "التنقل إلى الوجهة",
       "tripSection": "الرحلة",
       "seatsAvailable": "{{available}} مقعد متاح من أصل {{total}}",
       "chat": "💬 محادثة",
@@ -291,6 +293,8 @@
     "chooseCarTitle": "اختر المركبة",
     "acceptRequest": "قبول",
     "tripToLabel": "إلى {{city}}",
+    "navigateToPickup": "التنقل إلى نقطة الاستلام",
+    "navigateToDestination": "التنقل إلى الوجهة",
     "tripStatus": {
       "open": "مفتوحة",
       "in_progress": "جارية",
@@ -402,6 +406,8 @@
     "detail": {
       "titleWithId": "توصيل #{{id}}",
       "pickupSection": "الاستلام",
+      "navigateToPickup": "التنقل إلى نقطة الاستلام",
+      "navigateToReceiver": "التنقل إلى المستلم",
       "receiverSection": "المستلم",
       "packageSection": "الطرد",
       "feeSection": "الرسوم",

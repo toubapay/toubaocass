@@ -9,6 +9,7 @@ import { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DriverTierBadge } from '../components/DriverTierBadge';
+import { NavigateFab } from '../components/NavigateFab';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { Screen } from '../components/Screen';
@@ -113,8 +114,19 @@ export function DemLeguiRequestDetailScreen({ route, navigation }: Props) {
       : { lat: trip.driver.current_latitude, lng: trip.driver.current_longitude, updatedAt: trip.driver.last_seen_at }
     : null;
 
+  const rideOngoing =
+    request.status === 'pending' || (request.status === 'matched' && (trip == null || ['open', 'in_progress'].includes(trip.status)));
+  const navTarget = !rideOngoing
+    ? null
+    : trip?.status === 'in_progress'
+      ? request.destination_city?.latitude != null && request.destination_city?.longitude != null
+        ? { latitude: request.destination_city.latitude, longitude: request.destination_city.longitude, label: t('demLegui.navigateToDestination') }
+        : null
+      : { latitude: request.pickup_latitude, longitude: request.pickup_longitude, label: t('demLegui.navigateToPickup') };
+
   return (
     <Screen>
+      {navTarget && <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={navTarget.label} />}
       <ScrollView showsVerticalScrollIndicator={false}>
         {justMatched && (
           <View style={styles.matchedBanner}>

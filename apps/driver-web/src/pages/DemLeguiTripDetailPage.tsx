@@ -7,9 +7,11 @@ import { arriveAtDemLeguiPickup, completeDemLeguiTrip, fetchDemLeguiTrip, startD
 import type { DemLeguiTrip } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
+import { NavigateFab } from '../components/NavigateFab';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
+import { openNavigation } from '../utils/navigation';
 import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 const LIVE_LOCATION_INTERVAL_MS = 12000;
@@ -120,8 +122,15 @@ export function DemLeguiTripDetailPage() {
     }
   };
 
+  const destinationNavTarget = trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+    ? { lat: trip.destination_city.latitude, lng: trip.destination_city.longitude }
+    : null;
+
   return (
     <div>
+      {trip.status === 'in_progress' && destinationNavTarget && (
+        <NavigateFab latitude={destinationNavTarget.lat} longitude={destinationNavTarget.lng} label={t('demLegui.navigateToDestination')} />
+      )}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}
@@ -176,22 +185,40 @@ export function DemLeguiTripDetailPage() {
                 {r.rider.phone} · 📍 {r.pickup_address}
               </p>
               <p style={{ fontSize: 13.5, color: colors.textMuted, margin: '2px 0 0' }}>{t('anando.seatsBooked', { count: r.seats_requested })}</p>
-              <button
-                onClick={() => navigate(`/dem-legui/requests/${r.id}/chat`)}
-                style={{
-                  marginTop: spacing.xs,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: radius.sm,
-                  padding: `4px ${spacing.sm}px`,
-                  backgroundColor: colors.surface,
-                  color: colors.text,
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: 'pointer',
-                }}
-              >
-                💬 {t('demLegui.chat')}
-              </button>
+              <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.xs }}>
+                {trip.status === 'open' && (
+                  <button
+                    onClick={() => openNavigation(r.pickup_latitude, r.pickup_longitude)}
+                    style={{
+                      border: `1px solid ${colors.primary}`,
+                      borderRadius: radius.sm,
+                      padding: `4px ${spacing.sm}px`,
+                      backgroundColor: colors.surface,
+                      color: colors.primary,
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    🧭 {t('demLegui.navigateToPickup')}
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate(`/dem-legui/requests/${r.id}/chat`)}
+                  style={{
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: radius.sm,
+                    padding: `4px ${spacing.sm}px`,
+                    backgroundColor: colors.surface,
+                    color: colors.text,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                  }}
+                >
+                  💬 {t('demLegui.chat')}
+                </button>
+              </div>
             </div>
           ))
         )}

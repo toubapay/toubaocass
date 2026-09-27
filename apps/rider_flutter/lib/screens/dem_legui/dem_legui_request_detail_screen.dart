@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/navigate_fab.dart';
 import 'package:shared_flutter/widgets/rate_driver_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,6 +11,7 @@ import '../../api/dem_legui_api.dart';
 import '../../api/tracking_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/dem_legui_en_route_tracker.dart';
 import '../../widgets/live_map.dart';
 import '../../widgets/sos_share_sheet.dart';
 import '../chat_screen.dart';
@@ -24,16 +26,22 @@ const _statusLabel = {
 };
 
 class DemLeguiRequestDetailScreen extends StatefulWidget {
-  const DemLeguiRequestDetailScreen({super.key, required this.requestId, required this.onOpenChat});
+  const DemLeguiRequestDetailScreen({
+    super.key,
+    required this.requestId,
+    required this.onOpenChat,
+  });
 
   final int requestId;
   final void Function(int requestId, String title, String subtitle) onOpenChat;
 
   @override
-  State<DemLeguiRequestDetailScreen> createState() => _DemLeguiRequestDetailScreenState();
+  State<DemLeguiRequestDetailScreen> createState() =>
+      _DemLeguiRequestDetailScreenState();
 }
 
-class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScreen> {
+class _DemLeguiRequestDetailScreenState
+    extends State<DemLeguiRequestDetailScreen> {
   DemLeguiRequest? request;
   DemLeguiTrip? trip;
   bool loading = true;
@@ -91,8 +99,14 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
         title: const Text('Annuler la demande'),
         content: const Text('Voulez-vous vraiment annuler cette demande ?'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Non')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Oui, annuler')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Non'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Oui, annuler'),
+          ),
         ],
       ),
     );
@@ -102,7 +116,10 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
       await cancelDemLeguiRequest(widget.requestId);
       await _load();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
     } finally {
       if (mounted) setState(() => cancelling = false);
     }
@@ -111,140 +128,293 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
   @override
   Widget build(BuildContext context) {
     if (loading || request == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
     }
     final r = request!;
     final t = trip;
-    final canCancel = r.status == 'pending' || (r.status == 'matched' && t?.status == 'open');
+    final canCancel =
+        r.status == 'pending' || (r.status == 'matched' && t?.status == 'open');
+
+    // Between "driver accepted" and "trip started" — the full-screen
+    // Uber-style tracker replaces the regular detail layout, matching
+    // rider-web's DemLeguiEnRouteTracker for this exact window.
+    if (r.status == 'matched' && t != null && t.status == 'open') {
+      return DemLeguiEnRouteTracker(
+        request: r,
+        trip: t,
+        onChat: () => widget.onOpenChat(
+          r.id,
+          t.driver.name ?? 'Chauffeur',
+          'Vers ${r.destinationCity?.name ?? '?'}',
+        ),
+        onCancel: _cancel,
+        cancelling: cancelling,
+      );
+    }
+
+    NavigateFab? navigateFab;
+    if (t != null && t.status == 'in_progress') {
+      final destLat = r.destinationCity?.latitude;
+      final destLng = r.destinationCity?.longitude;
+      if (destLat != null && destLng != null) {
+        navigateFab = NavigateFab(
+          latitude: destLat,
+          longitude: destLng,
+          label: 'Naviguer vers la destination',
+        );
+      }
+    } else if (r.status == 'pending') {
+      navigateFab = NavigateFab(
+        latitude: r.pickupLatitude,
+        longitude: r.pickupLongitude,
+        label: 'Naviguer vers le point de ramassage',
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text('Vers ${r.destinationCity?.name ?? '?'}')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: Stack(
         children: [
-          Text(_statusLabel[r.status] ?? r.status, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-          const SizedBox(height: AppSpacing.md),
-          if (t != null && t.status == 'in_progress')
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: OutlinedButton(
-                onPressed: () => showSosShareSheet(context, kind: ShareableRideKind.demLeguiTrips, rideId: t.id),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-                child: const Text('🆘 Partager ma position'),
+          ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            children: [
+              Text(
+                _statusLabel[r.status] ?? r.status,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                ),
               ),
-            ),
-          if (t != null && t.currentLatitude != null && t.currentLongitude != null && t.status == 'in_progress')
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: LiveMap(
-                currentLatitude: t.currentLatitude!,
-                currentLongitude: t.currentLongitude!,
-                destinationLatitude: r.destinationCity?.latitude,
-                destinationLongitude: r.destinationCity?.longitude,
-                destinationName: r.destinationCity?.name,
-                updatedAt: t.currentLocationUpdatedAt,
-              ),
-            ),
-          if (t != null && t.status == 'completed')
-            RateDriverCard(onSubmit: (score, comment) => rateDemLeguiTrip(t.id, score: score, comment: comment)),
-          if (t?.arrivedAt != null && t?.status == 'open')
-            const Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text('🚩 Votre chauffeur est arrivé au point de rendez-vous',
-                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13.5)),
-            ),
-          if (t != null)
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('VOTRE CHAUFFEUR', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(t.driver.name ?? '', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                  Text(t.driver.phone, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                  Row(
-                    children: [
-                      Text('★ ${t.driver.rating.toStringAsFixed(1)}', style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                      const SizedBox(width: AppSpacing.xs),
-                      DriverTierBadge(tier: t.driver.tier),
-                    ],
+              const SizedBox(height: AppSpacing.md),
+              if (t != null && t.status == 'in_progress')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: OutlinedButton(
+                    onPressed: () => showSosShareSheet(
+                      context,
+                      kind: ShareableRideKind.demLeguiTrips,
+                      rideId: t.id,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.danger,
+                      side: const BorderSide(color: AppColors.danger),
+                    ),
+                    child: const Text('🆘 Partager ma position'),
                   ),
-                  if (t.car != null)
-                    Text('🚗 ${t.car!.make} ${t.car!.model} · ${t.car!.plateNumber}',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                  if (r.etaMinutes != null)
-                    Text('⏱ ${r.etaMinutes} min', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
+                ),
+              if (t != null &&
+                  t.currentLatitude != null &&
+                  t.currentLongitude != null &&
+                  t.status == 'in_progress')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: LiveMap(
+                    currentLatitude: t.currentLatitude!,
+                    currentLongitude: t.currentLongitude!,
+                    destinationLatitude: r.destinationCity?.latitude,
+                    destinationLongitude: r.destinationCity?.longitude,
+                    destinationName: r.destinationCity?.name,
+                    updatedAt: t.currentLocationUpdatedAt,
+                  ),
+                ),
+              if (t != null && t.status == 'completed')
+                RateDriverCard(
+                  onSubmit: (score, comment) =>
+                      rateDemLeguiTrip(t.id, score: score, comment: comment),
+                ),
+              if (t?.arrivedAt != null && t?.status == 'open')
+                const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    '🚩 Votre chauffeur est arrivé au point de rendez-vous',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              if (t != null)
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => launchUrl(Uri.parse('tel:${t.driver.phone}')),
-                          child: const Text('📞 Appeler'),
+                      const Text(
+                        'VOTRE CHAUFFEUR',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textMuted,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => widget.onOpenChat(r.id, t.driver.name ?? 'Chauffeur', 'Vers ${r.destinationCity?.name ?? '?'}'),
-                          child: const Text('💬 Discuter'),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        t.driver.name ?? '',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      Text(
+                        t.driver.phone,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            '★ ${t.driver.rating.toStringAsFixed(1)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          DriverTierBadge(tier: t.driver.tier),
+                        ],
+                      ),
+                      if (t.car != null)
+                        Text(
+                          '🚗 ${t.car!.make} ${t.car!.model} · ${t.car!.plateNumber}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      if (r.etaMinutes != null)
+                        Text(
+                          '⏱ ${r.etaMinutes} min',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  launchUrl(Uri.parse('tel:${t.driver.phone}')),
+                              child: const Text('📞 Appeler'),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => widget.onOpenChat(
+                                r.id,
+                                t.driver.name ?? 'Chauffeur',
+                                'Vers ${r.destinationCity?.name ?? '?'}',
+                              ),
+                              child: const Text('💬 Discuter'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'RAMASSAGE',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      r.pickupAddress ?? '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('RAMASSAGE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                const SizedBox(height: AppSpacing.xs),
-                Text(r.pickupAddress ?? '', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-              ],
-            ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'TARIF',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '${r.fareTotal} FCFA',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    Text(
+                      '${r.seatsRequested} place(s)',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (canCancel)
+                OutlinedButton(
+                  onPressed: cancelling ? null : _cancel,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    side: const BorderSide(color: AppColors.danger),
+                  ),
+                  child: cancelling
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Annuler la demande'),
+                ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('TARIF', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                const SizedBox(height: AppSpacing.xs),
-                Text('${r.fareTotal} FCFA', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                Text('${r.seatsRequested} place(s)', style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-              ],
-            ),
-          ),
-          if (canCancel)
-            OutlinedButton(
-              onPressed: cancelling ? null : _cancel,
-              style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-              child: cancelling
-                  ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Annuler la demande'),
-            ),
+          if (navigateFab != null) navigateFab,
         ],
       ),
     );
@@ -252,7 +422,12 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
 }
 
 class DemLeguiChatScreen extends StatelessWidget {
-  const DemLeguiChatScreen({super.key, required this.requestId, this.title, this.subtitle});
+  const DemLeguiChatScreen({
+    super.key,
+    required this.requestId,
+    this.title,
+    this.subtitle,
+  });
 
   final int requestId;
   final String? title;

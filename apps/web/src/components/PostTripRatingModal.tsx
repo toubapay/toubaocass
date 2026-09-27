@@ -19,7 +19,10 @@ import { SuccessModal } from './SuccessModal';
  * Disappears once the rider submits a rating, or if they dismiss it —
  * either way the parent (HomePage) just stops rendering it; re-fetching
  * pending-rating on next load won't bring it back once rated, since the
- * backend excludes already-rated items.
+ * backend excludes already-rated items. HomePage also marks the prompt
+ * "seen" in localStorage (see utils/ratingPromptSeen.ts) the moment it's
+ * shown, so dismissing without rating doesn't bring it back either — a
+ * rider who closes it can still rate from their history list later.
  */
 export function PostTripRatingModal({ pending, onClose }: { pending: PendingRating; onClose: () => void }) {
   const { t } = useTranslation();

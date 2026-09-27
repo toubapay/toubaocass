@@ -15,10 +15,12 @@ import {
 import { DemLeguiTrip } from '../../api/types';
 import { AnandoLiveMap } from '../../components/AnandoLiveMap';
 import { Button } from '../../components/Button';
+import { NavigateFab } from '../../components/NavigateFab';
 import { Screen } from '../../components/Screen';
 import { SosShareModal } from '../../components/SosShareModal';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
+import { openNavigation } from '../../utils/navigation';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'DemLeguiTripDetail'>;
 
@@ -121,8 +123,16 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
     }
   };
 
+  const navTarget =
+    trip.status === 'in_progress' && trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+      ? { latitude: trip.destination_city.latitude, longitude: trip.destination_city.longitude }
+      : null;
+
   return (
     <Screen>
+      {navTarget && (
+        <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={t('demLegui.navigateToDestination')} />
+      )}
       <ScrollView showsVerticalScrollIndicator={false}>
         {trip.status === 'in_progress' &&
           (trip.current_latitude != null && trip.current_longitude != null ? (
@@ -166,9 +176,16 @@ export function DemLeguiTripDetailScreen({ route, navigation }: Props) {
                   {r.rider.phone} · 📍 {r.pickup_address}
                 </Text>
                 <Text style={styles.lineMuted}>{t('anando.seatsBooked', { count: r.seats_requested })}</Text>
-                <Pressable style={styles.chatButton} onPress={() => navigation.navigate('DemLeguiChat', { requestId: r.id })}>
-                  <Text style={styles.chatButtonText}>💬 {t('demLegui.chat')}</Text>
-                </Pressable>
+                <View style={styles.passengerActionsRow}>
+                  <Pressable style={styles.chatButton} onPress={() => navigation.navigate('DemLeguiChat', { requestId: r.id })}>
+                    <Text style={styles.chatButtonText}>💬 {t('demLegui.chat')}</Text>
+                  </Pressable>
+                  {trip.status === 'open' && (
+                    <Pressable style={styles.chatButton} onPress={() => openNavigation(r.pickup_latitude, r.pickup_longitude)}>
+                      <Text style={styles.chatButtonText}>🧭 {t('demLegui.navigateToPickup')}</Text>
+                    </Pressable>
+                  )}
+                </View>
               </View>
             ))
           )}
@@ -215,8 +232,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   passengerRow: { marginBottom: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+  passengerActionsRow: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xs },
   chatButton: {
-    marginTop: spacing.xs,
     alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: colors.border,

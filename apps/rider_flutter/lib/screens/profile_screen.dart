@@ -10,6 +10,7 @@ import '../state/auth_provider.dart';
 import '../state/module_status_provider.dart';
 import '../theme.dart';
 import '../widgets/inbox_icon.dart';
+import '../widgets/profile_dashboard.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -19,6 +20,8 @@ class ProfileScreen extends StatefulWidget {
     required this.onOpenDeliveries,
     required this.onOpenInsurance,
     required this.onOpenInbox,
+    required this.onOpenTrip,
+    required this.onOpenDemLeguiHistory,
   });
 
   final VoidCallback onOpenWallet;
@@ -26,6 +29,8 @@ class ProfileScreen extends StatefulWidget {
   final VoidCallback onOpenDeliveries;
   final VoidCallback onOpenInbox;
   final VoidCallback onOpenInsurance;
+  final void Function(int tripId) onOpenTrip;
+  final VoidCallback onOpenDemLeguiHistory;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -122,6 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            ProfileDashboard(onOpenTrip: widget.onOpenTrip),
             const MiniFinancialReportCard(
               title: '💳 Mes dépenses',
               totalLabel: 'Total dépensé',
@@ -148,6 +154,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            if (moduleStatus.isEnabled('dem_legui'))
+              InkWell(
+                onTap: widget.onOpenDemLeguiHistory,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('🚕 Historique Dem Légui', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
+                      Icon(Icons.arrow_forward, color: AppColors.textMuted),
+                    ],
+                  ),
+                ),
+              ),
             if (moduleStatus.isEnabled('assurance'))
               InkWell(
                 onTap: widget.onOpenInsurance,

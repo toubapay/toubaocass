@@ -233,6 +233,13 @@ class Trip {
   final List<Booking>? bookings;
   final int? bookingsCount;
   final RiderBookingSummary? myBooking;
+  final double? currentLatitude;
+  final double? currentLongitude;
+  final String? currentLocationUpdatedAt;
+  final String? arrivedAt;
+  final String? startedAt;
+  final int? progressPercent;
+  final double? distanceCoveredKm;
 
   Trip({
     required this.id,
@@ -258,6 +265,13 @@ class Trip {
     this.bookings,
     this.bookingsCount,
     this.myBooking,
+    this.currentLatitude,
+    this.currentLongitude,
+    this.currentLocationUpdatedAt,
+    this.arrivedAt,
+    this.startedAt,
+    this.progressPercent,
+    this.distanceCoveredKm,
   });
 
   Trip copyWithMyBooking(RiderBookingSummary? myBooking) => Trip(
@@ -284,6 +298,13 @@ class Trip {
         bookings: bookings,
         bookingsCount: bookingsCount,
         myBooking: myBooking,
+        currentLatitude: currentLatitude,
+        currentLongitude: currentLongitude,
+        currentLocationUpdatedAt: currentLocationUpdatedAt,
+        arrivedAt: arrivedAt,
+        startedAt: startedAt,
+        progressPercent: progressPercent,
+        distanceCoveredKm: distanceCoveredKm,
       );
 
   factory Trip.fromJson(Map<String, dynamic> json) => Trip(
@@ -315,6 +336,13 @@ class Trip {
         myBooking: json['my_booking'] == null
             ? null
             : RiderBookingSummary.fromJson(json['my_booking'] as Map<String, dynamic>),
+        currentLatitude: (json['current_latitude'] as num?)?.toDouble(),
+        currentLongitude: (json['current_longitude'] as num?)?.toDouble(),
+        currentLocationUpdatedAt: json['current_location_updated_at'] as String?,
+        arrivedAt: json['arrived_at'] as String?,
+        startedAt: json['started_at'] as String?,
+        progressPercent: json['progress_percent'] as int?,
+        distanceCoveredKm: (json['distance_covered_km'] as num?)?.toDouble(),
       );
 }
 
@@ -951,6 +979,8 @@ class DemLeguiRequest {
   final int? demLeguiTripId;
   final int? etaMinutes;
   final String createdAt;
+  final String? tripStatus;
+  final String? tripArrivedAt;
 
   DemLeguiRequest({
     required this.id,
@@ -967,6 +997,8 @@ class DemLeguiRequest {
     required this.demLeguiTripId,
     required this.etaMinutes,
     required this.createdAt,
+    this.tripStatus,
+    this.tripArrivedAt,
   });
 
   factory DemLeguiRequest.fromJson(Map<String, dynamic> json) => DemLeguiRequest(
@@ -985,6 +1017,8 @@ class DemLeguiRequest {
         demLeguiTripId: json['dem_legui_trip_id'] as int?,
         etaMinutes: json['eta_minutes'] as int?,
         createdAt: json['created_at'] as String? ?? '',
+        tripStatus: json['trip_status'] as String?,
+        tripArrivedAt: json['trip_arrived_at'] as String?,
       );
 }
 

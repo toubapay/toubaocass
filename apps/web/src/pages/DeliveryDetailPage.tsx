@@ -8,6 +8,7 @@ import type { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DriverTierBadge } from '../components/DriverTierBadge';
+import { NavigateFab } from '../components/NavigateFab';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
@@ -88,9 +89,15 @@ export function DeliveryDetailPage() {
   }
 
   const isCancellable = delivery.status === 'pending' || delivery.status === 'accepted';
+  const navTarget = delivery.status === 'picked_up'
+    ? { lat: delivery.receiver_latitude, lng: delivery.receiver_longitude, label: t('deliveryDetail.navigateToReceiver') }
+    : delivery.status === 'pending' || delivery.status === 'accepted'
+      ? { lat: delivery.pickup_latitude, lng: delivery.pickup_longitude, label: t('deliveryDetail.navigateToPickup') }
+      : null;
 
   return (
     <div>
+      {navTarget && <NavigateFab latitude={navTarget.lat} longitude={navTarget.lng} label={navTarget.label} />}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}

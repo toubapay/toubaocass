@@ -166,6 +166,8 @@
     "chatWithDriver": "💬 Discuter avec le conducteur",
     "driverArrivedBadge": "Le conducteur est arrivé au point de rendez-vous",
     "liveMapWaiting": "En attente de la position du conducteur…",
+    "navigateToPickup": "Naviguer vers le point de rendez-vous",
+    "navigateToDestination": "Naviguer vers la destination",
     "inProgressStatus": "Trajet en cours",
     "inProgressBadge": "🚗 Trajet en cours",
     "progressPercent": "{{percent}}% du trajet effectué",
@@ -249,6 +251,8 @@
   },
   "deliveryDetail": {
     "titleWithId": "Livraison #{{id}}",
+    "navigateToPickup": "Naviguer vers le point de ramassage",
+    "navigateToReceiver": "Naviguer vers le destinataire",
     "pickup": "Ramassage",
     "receiver": "Destinataire",
     "package": "Colis",
@@ -387,6 +391,8 @@
   "demLegui": {
     "title": "Dem Légui",
     "subtitle": "Indiquez où vous êtes et où vous allez — un conducteur en ligne à proximité accepte votre demande.",
+    "navigateToPickup": "Naviguer vers le point de ramassage",
+    "navigateToDestination": "Naviguer vers la destination",
     "pickup": "Point de ramassage",
     "destination": "Destination",
     "seats": "Places",

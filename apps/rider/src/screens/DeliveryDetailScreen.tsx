@@ -9,6 +9,7 @@ import { Delivery } from '../api/types';
 import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DriverTierBadge } from '../components/DriverTierBadge';
+import { NavigateFab } from '../components/NavigateFab';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { Screen } from '../components/Screen';
 import { SosShareModal } from '../components/SosShareModal';
@@ -86,8 +87,16 @@ export function DeliveryDetailScreen({ route, navigation }: Props) {
 
   const isCancellable = delivery.status === 'pending' || delivery.status === 'accepted';
 
+  const navTarget =
+    delivery.status === 'picked_up'
+      ? { latitude: delivery.receiver_latitude, longitude: delivery.receiver_longitude, label: t('deliveryDetail.navigateToReceiver') }
+      : delivery.status === 'pending' || delivery.status === 'accepted'
+        ? { latitude: delivery.pickup_latitude, longitude: delivery.pickup_longitude, label: t('deliveryDetail.navigateToPickup') }
+        : null;
+
   return (
     <Screen>
+      {navTarget && <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={navTarget.label} />}
       <ScrollView showsVerticalScrollIndicator={false}>
         {delivery.status === 'picked_up' &&
           (delivery.current_latitude != null && delivery.current_longitude != null ? (

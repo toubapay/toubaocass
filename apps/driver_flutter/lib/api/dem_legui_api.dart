@@ -31,6 +31,13 @@ Future<Paginated<DemLeguiTrip>> fetchMyDemLeguiTrips() async {
   return Paginated.fromJson(response.data as Map<String, dynamic>, DemLeguiTrip.fromJson);
 }
 
+/// Completed/cancelled Dem Légui trips only — powers the driver's trip
+/// history under Profile, kept separate from the active-only Home tile.
+Future<Paginated<DemLeguiTrip>> fetchMyDemLeguiTripHistory() async {
+  final response = await ApiClient.instance.dio.get('/driver/dem-legui/trips/mine', queryParameters: {'historic': 1});
+  return Paginated.fromJson(response.data as Map<String, dynamic>, DemLeguiTrip.fromJson);
+}
+
 /// The driver's single active (open or in_progress) trip, if any — a
 /// dedicated lookup rather than filtering fetchMyDemLeguiTrips() client-side,
 /// since that call is paginated by creation date and could miss an

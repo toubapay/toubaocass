@@ -40,6 +40,7 @@ class TripsListScreen extends StatefulWidget {
     super.key,
     required this.onOpenTrip,
     required this.onPostTrip,
+    required this.onPostInstantTrip,
     required this.onOpenWallet,
     required this.onOpenDemLegui,
     required this.onOpenDemLeguiTrip,
@@ -50,6 +51,7 @@ class TripsListScreen extends StatefulWidget {
 
   final void Function(int tripId) onOpenTrip;
   final VoidCallback onPostTrip;
+  final VoidCallback onPostInstantTrip;
   final VoidCallback onOpenWallet;
   final VoidCallback onOpenDemLegui;
   final void Function(int tripId) onOpenDemLeguiTrip;
@@ -163,6 +165,35 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       ),
                     ),
                   ),
+                  if (moduleStatus.isEnabled('instant_trips'))
+                    InkWell(
+                      onTap: widget.onPostInstantTrip,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: AppColors.dangerSoft,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Row(
+                          children: [
+                            Text('⚡', style: TextStyle(fontSize: 24)),
+                            SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Publier un départ immédiat', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700)),
+                                  Text('Partez tout de suite, sans date programmée', style: TextStyle(fontSize: 14.0, color: AppColors.textMuted)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (moduleStatus.isEnabled('dem_legui'))
                     DemLeguiAvailableTile(
                       onTap: widget.onOpenDemLegui,

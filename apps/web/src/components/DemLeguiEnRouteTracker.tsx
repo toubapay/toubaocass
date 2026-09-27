@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { DemLeguiRequest, DemLeguiTrip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { NavigateFab } from './NavigateFab';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
@@ -73,6 +74,7 @@ export function DemLeguiEnRouteTracker({
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: colors.background }}>
+      <NavigateFab latitude={pickupPos.lat} longitude={pickupPos.lng} label={t('demLegui.navigateToPickup')} />
       <div style={{ position: 'absolute', inset: 0 }}>
         {GOOGLE_MAPS_API_KEY && driverPos ? (
           <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
