@@ -10,6 +10,7 @@ import '../../api/dem_legui_api.dart';
 import '../../api/tracking_api.dart';
 import '../../models.dart';
 import '../../theme.dart';
+import '../../widgets/dem_legui_en_route_tracker.dart';
 import '../../widgets/live_map.dart';
 import '../../widgets/sos_share_sheet.dart';
 import '../chat_screen.dart';
@@ -116,6 +117,19 @@ class _DemLeguiRequestDetailScreenState extends State<DemLeguiRequestDetailScree
     final r = request!;
     final t = trip;
     final canCancel = r.status == 'pending' || (r.status == 'matched' && t?.status == 'open');
+
+    // Between "driver accepted" and "trip started" — the full-screen
+    // Uber-style tracker replaces the regular detail layout, matching
+    // rider-web's DemLeguiEnRouteTracker for this exact window.
+    if (r.status == 'matched' && t != null && t.status == 'open') {
+      return DemLeguiEnRouteTracker(
+        request: r,
+        trip: t,
+        onChat: () => widget.onOpenChat(r.id, t.driver.name ?? 'Chauffeur', 'Vers ${r.destinationCity?.name ?? '?'}'),
+        onCancel: _cancel,
+        cancelling: cancelling,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text('Vers ${r.destinationCity?.name ?? '?'}')),

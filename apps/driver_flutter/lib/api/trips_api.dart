@@ -44,6 +44,31 @@ Future<Trip> createTrip({
   return Trip.fromJson(response.data as Map<String, dynamic>);
 }
 
+Future<Trip> createInstantTrip({
+  required int carId,
+  required int originCityId,
+  required int destinationCityId,
+  double? departureLatitude,
+  double? departureLongitude,
+  String? departureAddress,
+  required int fare,
+  required String rideType,
+  String? notes,
+}) async {
+  final response = await ApiClient.instance.dio.post('/driver/trips/instant', data: {
+    'car_id': carId,
+    'origin_city_id': originCityId,
+    'destination_city_id': destinationCityId,
+    if (departureLatitude != null) 'departure_latitude': departureLatitude,
+    if (departureLongitude != null) 'departure_longitude': departureLongitude,
+    if (departureAddress != null) 'departure_address': departureAddress,
+    'fare': fare,
+    'ride_type': rideType,
+    if (notes != null) 'notes': notes,
+  });
+  return Trip.fromJson(response.data as Map<String, dynamic>);
+}
+
 Future<void> cancelTrip(int tripId) async {
   await ApiClient.instance.dio.delete('/driver/trips/$tripId');
 }

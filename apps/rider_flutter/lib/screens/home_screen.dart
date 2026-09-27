@@ -1,17 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../api/cities_api.dart';
+import '../api/ratings_api.dart';
 import '../api/trips_api.dart';
 import '../api/wallet_api.dart';
 import '../models.dart';
 import '../push/push_service.dart';
+import '../state/module_status_provider.dart';
 import '../theme.dart';
 import '../utils/my_location.dart';
+import '../utils/rating_prompt_seen.dart';
+import '../widgets/anando_available_toast.dart';
 import '../widgets/city_picker.dart';
+import '../widgets/dem_legui_status_widget.dart';
 import '../widgets/inbox_icon.dart';
+import '../widgets/instant_departures_banner.dart';
+import '../widgets/my_anando_ride_card.dart';
 import '../widgets/my_trip_status_widget.dart';
+import '../widgets/post_trip_rating_sheet.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trips_map.dart';
 import '../widgets/voice_search_button.dart';
@@ -53,9 +62,22 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
     _load();
     registerPushToken();
+    _checkPendingRating();
     // Trips are posted by other drivers at any time, so this list would
     // otherwise go stale until the rider pulls to refresh — poll silently.
     _pollTimer = Timer.periodic(_pollInterval, (_) => _load(silent: true));
+  }
+
+  Future<void> _checkPendingRating() async {
+    try {
+      final pending = await fetchPendingRating();
+      if (pending == null || !mounted) return;
+      if (await hasSeenRatingPrompt(pending.type, pending.id)) return;
+      await markRatingPromptSeen(pending.type, pending.id);
+      if (mounted) showPostTripRatingSheet(context, pending);
+    } catch (_) {
+      // Best-effort — a failed lookup just means no nudge this session.
+    }
   }
 
   @override
@@ -125,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final moduleStatus = context.watch<ModuleStatusProvider>();
     final query = searchController.text.trim().toLowerCase();
     final visibleTrips = query.isEmpty
         ? trips
@@ -164,7 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            if (moduleStatus.isEnabled('dem_legui')) const DemLeguiStatusWidget(),
             MyTripStatusWidget(onTap: widget.onOpenTrip),
+            if (moduleStatus.isEnabled('anando')) const AnandoAvailableToast(),
+            if (moduleStatus.isEnabled('anando')) const MyAnandoRideCard(),
+            if (moduleStatus.isEnabled('instant_trips')) const InstantDeparturesBanner(),
             TextField(
               controller: searchController,
               decoration: InputDecoration(

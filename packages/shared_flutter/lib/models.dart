@@ -979,6 +979,8 @@ class DemLeguiRequest {
   final int? demLeguiTripId;
   final int? etaMinutes;
   final String createdAt;
+  final String? tripStatus;
+  final String? tripArrivedAt;
 
   DemLeguiRequest({
     required this.id,
@@ -995,6 +997,8 @@ class DemLeguiRequest {
     required this.demLeguiTripId,
     required this.etaMinutes,
     required this.createdAt,
+    this.tripStatus,
+    this.tripArrivedAt,
   });
 
   factory DemLeguiRequest.fromJson(Map<String, dynamic> json) => DemLeguiRequest(
@@ -1013,6 +1017,8 @@ class DemLeguiRequest {
         demLeguiTripId: json['dem_legui_trip_id'] as int?,
         etaMinutes: json['eta_minutes'] as int?,
         createdAt: json['created_at'] as String? ?? '',
+        tripStatus: json['trip_status'] as String?,
+        tripArrivedAt: json['trip_arrived_at'] as String?,
       );
 }
 

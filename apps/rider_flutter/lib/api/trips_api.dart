@@ -33,6 +33,14 @@ Future<Trip> fetchTrip(int tripId) async {
   return Trip.fromJson(response.data as Map<String, dynamic>);
 }
 
+/// "Instant post" style departures (drivers leaving right away, no
+/// scheduled date/time). Not paginated on the backend, so the response is
+/// a plain array.
+Future<List<Trip>> fetchInstantTrips() async {
+  final response = await ApiClient.instance.dio.get('/trips/instant');
+  return (response.data as List).map((e) => Trip.fromJson(e as Map<String, dynamic>)).toList();
+}
+
 /// The rider's currently in-progress booked trip, if any — powers the
 /// Home-screen status widget.
 Future<Trip?> fetchMyActiveTrip() async {

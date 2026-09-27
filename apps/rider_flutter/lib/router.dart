@@ -11,6 +11,7 @@ import 'screens/auth/otp_verify_screen.dart';
 import 'screens/auth/phone_entry_screen.dart';
 import 'screens/auth/profile_setup_screen.dart';
 import 'screens/chat_screen.dart';
+import 'screens/dem_legui/dem_legui_history_screen.dart';
 import 'screens/dem_legui/dem_legui_request_detail_screen.dart';
 import 'screens/dem_legui/new_dem_legui_request_screen.dart';
 import 'screens/deliveries/delivery_detail_screen.dart';
@@ -18,6 +19,7 @@ import 'screens/deliveries/my_deliveries_screen.dart';
 import 'screens/deliveries/new_delivery_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/inbox_screen.dart';
+import 'screens/instant_departures_screen.dart';
 import 'screens/insurance/insurance_screen.dart';
 import 'screens/insurance/my_policies_screen.dart';
 import 'screens/my_bookings_screen.dart';
@@ -164,6 +166,14 @@ GoRouter buildRouter(AuthProvider auth) {
         builder: (context, state) => NewDemLeguiRequestScreen(onCreated: (id) => context.pushReplacement('/dem-legui/requests/$id')),
       ),
       GoRoute(
+        path: '/dem-legui/history',
+        builder: (context, state) => DemLeguiHistoryScreen(onOpenRequest: (id) => context.push('/dem-legui/requests/$id')),
+      ),
+      GoRoute(
+        path: '/instant',
+        builder: (context, state) => InstantDeparturesScreen(onOpenTrip: (id) => context.push('/trips/$id')),
+      ),
+      GoRoute(
         path: '/dem-legui/requests/:id',
         builder: (context, state) => DemLeguiRequestDetailScreen(
           requestId: int.parse(state.pathParameters['id']!),
@@ -252,6 +262,8 @@ GoRouter buildRouter(AuthProvider auth) {
                       onOpenDeliveries: () => context.push('/deliveries'),
                       onOpenInsurance: () => context.push('/insurance'),
                       onOpenInbox: () => context.push('/inbox'),
+                      onOpenTrip: (id) => context.push('/trips/$id'),
+                      onOpenDemLeguiHistory: () => context.push('/dem-legui/history'),
                     )),
           ]),
         ],
