@@ -6,6 +6,7 @@ import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp, updateDeliv
 import { extractErrorMessage } from '../api/client';
 import type { Delivery } from '../api/types';
 import { Button } from '../components/Button';
+import { NavigateFab } from '../components/NavigateFab';
 import { CenteredSpinner } from '../components/Spinner';
 import { colors, radius, spacing } from '../theme';
 
@@ -67,8 +68,15 @@ export function DeliveryDetailPage() {
 
   if (loading || !delivery) return <CenteredSpinner />;
 
+  const navTarget = delivery.status === 'picked_up'
+    ? { lat: delivery.receiver_latitude, lng: delivery.receiver_longitude, label: t('deliveries.detail.navigateToReceiver') }
+    : delivery.status === 'accepted'
+      ? { lat: delivery.pickup_latitude, lng: delivery.pickup_longitude, label: t('deliveries.detail.navigateToPickup') }
+      : null;
+
   return (
     <div>
+      {navTarget && <NavigateFab latitude={navTarget.lat} longitude={navTarget.lng} label={navTarget.label} />}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}

@@ -10,6 +10,7 @@ import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DemLeguiEnRouteTracker } from '../components/DemLeguiEnRouteTracker';
 import { DriverTierBadge } from '../components/DriverTierBadge';
+import { NavigateFab } from '../components/NavigateFab';
 import { NearbyDriversMap } from '../components/NearbyDriversMap';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { SearchingCarIndicator } from '../components/SearchingCarIndicator';
@@ -151,8 +152,17 @@ export function DemLeguiRequestDetailPage() {
     );
   }
 
+  const navTarget = trip?.status === 'in_progress'
+    ? (request.destination_city?.latitude != null && request.destination_city?.longitude != null
+        ? { lat: request.destination_city.latitude, lng: request.destination_city.longitude, label: t('demLegui.navigateToDestination') }
+        : null)
+    : request.status === 'pending'
+      ? { lat: request.pickup_latitude, lng: request.pickup_longitude, label: t('demLegui.navigateToPickup') }
+      : null;
+
   return (
     <div>
+      {navTarget && <NavigateFab latitude={navTarget.lat} longitude={navTarget.lng} label={navTarget.label} />}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}

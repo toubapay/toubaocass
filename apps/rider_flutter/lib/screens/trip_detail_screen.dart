@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:shared_flutter/widgets/driver_tier_badge.dart';
+import 'package:shared_flutter/widgets/navigate_fab.dart';
 import 'package:shared_flutter/widgets/rate_driver_card.dart';
 
 import '../api/bookings_api.dart';
@@ -24,10 +25,15 @@ const _liveLocationPollInterval = Duration(seconds: 12);
 const _elapsedTickInterval = Duration(seconds: 30);
 
 class TripDetailScreen extends StatefulWidget {
-  const TripDetailScreen({super.key, required this.tripId, required this.onOpenChat});
+  const TripDetailScreen({
+    super.key,
+    required this.tripId,
+    required this.onOpenChat,
+  });
 
   final int tripId;
-  final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
+  final void Function(int bookingId, String? title, String? subtitle)
+  onOpenChat;
 
   @override
   State<TripDetailScreen> createState() => _TripDetailScreenState();
@@ -48,7 +54,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   void initState() {
     super.initState();
     _load();
-    fetchWallet().then((w) => setState(() => walletBalance = w.balance)).catchError((_) {});
+    fetchWallet()
+        .then((w) => setState(() => walletBalance = w.balance))
+        .catchError((_) {});
   }
 
   @override
@@ -85,7 +93,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _elapsedTickTimer = null;
       return;
     }
-    _positionPollTimer ??= Timer.periodic(_liveLocationPollInterval, (_) => _load());
+    _positionPollTimer ??= Timer.periodic(
+      _liveLocationPollInterval,
+      (_) => _load(),
+    );
     _elapsedTickTimer ??= Timer.periodic(_elapsedTickInterval, (_) {
       if (mounted) setState(() => _now = DateTime.now());
     });
@@ -108,7 +119,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           return;
         }
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Réservation mise à jour.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Réservation mise à jour.')),
+          );
         }
         _load();
       } else {
@@ -122,7 +135,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               'Vous avez réservé $seats place(s). Bon voyage ! Vous pouvez la consulter dans Mes réservations.',
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
             ],
           ),
         );
@@ -130,7 +146,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
       }
       _load();
     } finally {
@@ -143,7 +161,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (loading || trip == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Détails du trajet')),
-        body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -151,276 +171,456 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     final isUnavailable = editing
         ? !['scheduled', 'full'].contains(t.status)
         : t.availableSeats <= 0 || t.status != 'scheduled';
-    final maxSeats = editing ? t.availableSeats + (t.myBooking?.seatsBooked ?? 0) : t.availableSeats;
+    final maxSeats = editing
+        ? t.availableSeats + (t.myBooking?.seatsBooked ?? 0)
+        : t.availableSeats;
     final hasPin = t.departureLatitude != null && t.departureLongitude != null;
     final currency = NumberFormat.decimalPattern('fr');
     final insufficientWalletFunds =
-        paymentMethod == 'wallet' && walletBalance != null && walletBalance! < t.fare * seats;
+        paymentMethod == 'wallet' &&
+        walletBalance != null &&
+        walletBalance! < t.fare * seats;
+
+    NavigateFab? navigateFab;
+    if (t.status == 'in_progress') {
+      final destLat = t.destinationCity?.latitude;
+      final destLng = t.destinationCity?.longitude;
+      if (destLat != null && destLng != null) {
+        navigateFab = NavigateFab(
+          latitude: destLat,
+          longitude: destLng,
+          label: 'Naviguer vers la destination',
+        );
+      }
+    } else if (hasPin) {
+      navigateFab = NavigateFab(
+        latitude: t.departureLatitude!,
+        longitude: t.departureLongitude!,
+        label: 'Naviguer vers le point de départ',
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Détails du trajet')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: Stack(
         children: [
-          Row(
+          ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 20)),
-              ),
-              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text('${t.departureDate} à ${t.departureTime}', style: const TextStyle(color: AppColors.textMuted)),
-          const SizedBox(height: AppSpacing.sm),
-          TripUrgencyBadge(trip: t),
-          if (editing && t.status == 'in_progress')
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: OutlinedButton(
-                onPressed: () => showSosShareSheet(context, kind: ShareableRideKind.trips, rideId: t.id),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-                child: const Text('🆘 Partager ma position'),
-              ),
-            ),
-          if (editing)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text('✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.success)),
-                  ),
-                  TextButton(
-                    onPressed: () => widget.onOpenChat(
-                      t.myBooking!.id,
-                      t.driver.name ?? 'Conducteur',
-                      '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
-                    ),
-                    child: const Text('💬 Discuter'),
-                  ),
-                ],
-              ),
-            ),
-          if (editing && t.status == 'completed')
-            RateDriverCard(onSubmit: (score, comment) => rateTrip(t.id, score: score, comment: comment)),
-          if (editing && t.status == 'in_progress')
-            Container(
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: Text('🚗 Trajet en cours',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                  ),
-                  if (t.progressPercent != null) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: LinearProgressIndicator(
-                      value: t.progressPercent! / 100,
-                      minHeight: 8,
-                      backgroundColor: AppColors.border,
-                      valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${t.progressPercent}% du trajet effectué'
-                    '${t.distanceCoveredKm != null ? (t.routeDistanceKm != null ? ' · ${t.distanceCoveredKm} km parcourus sur ${t.routeDistanceKm} km' : ' · ${t.distanceCoveredKm} km parcourus') : ''}',
-                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
-                if (t.startedAt != null) ...[
-                  Text(
-                    '⏱️ En route depuis ${trip_utils.formatDuration(_elapsedMinutesSince(t.startedAt!))}',
-                    style: const TextStyle(fontSize: 13.5),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
-                if (t.currentLatitude != null && t.currentLongitude != null)
-                  LiveMap(
-                    currentLatitude: t.currentLatitude!,
-                    currentLongitude: t.currentLongitude!,
-                    destinationLatitude: t.destinationCity?.latitude,
-                    destinationLongitude: t.destinationCity?.longitude,
-                    destinationName: t.destinationCity?.name,
-                    updatedAt: t.currentLocationUpdatedAt,
-                  )
-                else
-                  const Text('En attente de la position du conducteur…',
-                      style: TextStyle(fontSize: 13.5, color: AppColors.textMuted)),
-                ],
-              ),
-            ),
-          const SizedBox(height: AppSpacing.lg),
-          if (t.routeDistanceKm != null)
-            _Card(
-              title: 'Itinéraire',
-              children: [
-                Text(
-                  '🛣️ ${t.routeDistanceKm} km'
-                  '${t.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(t.routeDurationMinutes!)} de route' : ''}',
-                  style: const TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                RouteMap(trip: t),
-              ],
-            ),
-          if (hasPin) ...[
-            _Card(
-              title: 'Point de départ',
-              children: [
-                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 18)),
-                TextButton(
-                  onPressed: () => launchUrl(Uri.parse(
-                      'https://www.google.com/maps/search/?api=1&query=${t.departureLatitude},${t.departureLongitude}')),
-                  child: const Text('Ouvrir dans Google Maps'),
-                ),
-              ],
-            ),
-          ],
-          _Card(
-            title: 'Conducteur',
-            children: [
-              Text(t.driver.name ?? 'Conducteur', style: const TextStyle(fontSize: 18)),
               Row(
                 children: [
-                  Text('Note : ${t.driver.rating.toStringAsFixed(1)} ★',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                  const SizedBox(width: AppSpacing.xs),
-                  DriverTierBadge(tier: t.driver.tier),
+                  Text(
+                    t.originCity?.name ?? '?',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                    child: Text(
+                      '→',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    t.destinationCity?.name ?? '?',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '${t.departureDate} à ${t.departureTime}',
+                style: const TextStyle(color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => launchUrl(Uri.parse('tel:${t.driver.phone}')),
-                      child: const Text('📞 Appeler'),
+              TripUrgencyBadge(trip: t),
+              if (editing && t.status == 'in_progress')
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: OutlinedButton(
+                    onPressed: () => showSosShareSheet(
+                      context,
+                      kind: ShareableRideKind.trips,
+                      rideId: t.id,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => launchUrl(Uri.parse('sms:${t.driver.phone}')),
-                      child: const Text('💬 SMS'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.danger,
+                      side: const BorderSide(color: AppColors.danger),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          _Card(
-            title: 'Véhicule',
-            children: [
-              Text('${t.car?.make ?? ''} ${t.car?.model ?? ''} · ${t.car?.color ?? ''}',
-                  style: const TextStyle(fontSize: 18)),
-              Text(t.rideType.toUpperCase(), style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-            ],
-          ),
-          _Card(
-            title: 'Tarif',
-            children: [
-              Text('${currency.format(t.fare)} FCFA / place',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.primary)),
-              Text('${t.availableSeats} place(s) restante(s) sur ${t.totalSeats}',
-                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-            ],
-          ),
-          if (t.notes != null && t.notes!.isNotEmpty)
-            _Card(title: 'Remarques', children: [Text(t.notes!, style: const TextStyle(fontSize: 18))]),
-          if (isUnavailable)
-            const Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text("Ce trajet n'est plus disponible.",
-                  textAlign: TextAlign.center, style: TextStyle(color: AppColors.danger)),
-            )
-          else ...[
-            const Text('Mode de paiement', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Text('💵 Espèces'),
-                    selected: paymentMethod == 'cash',
-                    onSelected: (_) => setState(() => paymentMethod = 'cash'),
+                    child: const Text('🆘 Partager ma position'),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ChoiceChip(
-                    avatar: const Icon(Icons.account_balance_wallet, size: 16),
-                    label: Text('Portefeuille${walletBalance != null ? ' ($walletBalance F)' : ''}'),
-                    selected: paymentMethod == 'wallet',
-                    onSelected: (_) => setState(() => paymentMethod = 'wallet'),
+              if (editing)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '✓ Vous avez réservé ${t.myBooking!.seatsBooked} place(s) sur ce trajet',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => widget.onOpenChat(
+                          t.myBooking!.id,
+                          t.driver.name ?? 'Conducteur',
+                          '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
+                        ),
+                        child: const Text('💬 Discuter'),
+                      ),
+                    ],
                   ),
+                ),
+              if (editing && t.status == 'completed')
+                RateDriverCard(
+                  onSubmit: (score, comment) =>
+                      rateTrip(t.id, score: score, comment: comment),
+                ),
+              if (editing && t.status == 'in_progress')
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Text(
+                          '🚗 Trajet en cours',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                      if (t.progressPercent != null) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          child: LinearProgressIndicator(
+                            value: t.progressPercent! / 100,
+                            minHeight: 8,
+                            backgroundColor: AppColors.border,
+                            valueColor: const AlwaysStoppedAnimation(
+                              AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '${t.progressPercent}% du trajet effectué'
+                          '${t.distanceCoveredKm != null ? (t.routeDistanceKm != null ? ' · ${t.distanceCoveredKm} km parcourus sur ${t.routeDistanceKm} km' : ' · ${t.distanceCoveredKm} km parcourus') : ''}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
+                      if (t.startedAt != null) ...[
+                        Text(
+                          '⏱️ En route depuis ${trip_utils.formatDuration(_elapsedMinutesSince(t.startedAt!))}',
+                          style: const TextStyle(fontSize: 13.5),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
+                      if (t.currentLatitude != null &&
+                          t.currentLongitude != null)
+                        LiveMap(
+                          currentLatitude: t.currentLatitude!,
+                          currentLongitude: t.currentLongitude!,
+                          destinationLatitude: t.destinationCity?.latitude,
+                          destinationLongitude: t.destinationCity?.longitude,
+                          destinationName: t.destinationCity?.name,
+                          updatedAt: t.currentLocationUpdatedAt,
+                        )
+                      else
+                        const Text(
+                          'En attente de la position du conducteur…',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              if (t.routeDistanceKm != null)
+                _Card(
+                  title: 'Itinéraire',
+                  children: [
+                    Text(
+                      '🛣️ ${t.routeDistanceKm} km'
+                      '${t.routeDurationMinutes != null ? ' · ~${trip_utils.formatDuration(t.routeDurationMinutes!)} de route' : ''}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    RouteMap(trip: t),
+                  ],
+                ),
+              if (hasPin) ...[
+                _Card(
+                  title: 'Point de départ',
+                  children: [
+                    if (t.departureAddress != null)
+                      Text(
+                        t.departureAddress!,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    TextButton(
+                      onPressed: () => launchUrl(
+                        Uri.parse(
+                          'https://www.google.com/maps/search/?api=1&query=${t.departureLatitude},${t.departureLongitude}',
+                        ),
+                      ),
+                      child: const Text('Ouvrir dans Google Maps'),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            if (insufficientWalletFunds)
-              const Padding(
-                padding: EdgeInsets.only(top: AppSpacing.xs),
-                child: Text('Solde du portefeuille insuffisant pour ce trajet.',
-                    style: TextStyle(color: AppColors.danger, fontSize: 13)),
-              ),
-            const SizedBox(height: AppSpacing.md),
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              _Card(
+                title: 'Conducteur',
                 children: [
-                  Text(editing ? 'Nombre de places' : 'Places à réserver',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  Text(
+                    t.driver.name ?? 'Conducteur',
+                    style: const TextStyle(fontSize: 18),
+                  ),
                   Row(
                     children: [
-                      OutlinedButton(
-                        onPressed: () => setState(() => seats = (seats - 1).clamp(editing ? 0 : 1, maxSeats)),
-                        child: const Text('-'),
+                      Text(
+                        'Note : ${t.driver.rating.toStringAsFixed(1)} ★',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                        child: Text('$seats', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                      const SizedBox(width: AppSpacing.xs),
+                      DriverTierBadge(tier: t.driver.tier),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              launchUrl(Uri.parse('tel:${t.driver.phone}')),
+                          child: const Text('📞 Appeler'),
+                        ),
                       ),
-                      OutlinedButton(
-                        onPressed: () => setState(() => seats = (seats + 1).clamp(editing ? 0 : 1, maxSeats)),
-                        child: const Text('+'),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              launchUrl(Uri.parse('sms:${t.driver.phone}')),
+                          child: const Text('💬 SMS'),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
-            ),
-          ],
-          if (editing && seats == 0 && !isUnavailable)
-            const Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text('Réduire à 0 place annulera votre réservation.',
-                  style: TextStyle(color: AppColors.danger, fontSize: 13)),
-            ),
-          ElevatedButton(
-            onPressed: isUnavailable || booking || insufficientWalletFunds ? null : _handleBook,
-            style: editing && seats == 0 ? ElevatedButton.styleFrom(backgroundColor: AppColors.danger) : null,
-            child: booking
-                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text(editing
-                    ? (seats == 0 ? 'Annuler la réservation' : 'Enregistrer pour ${currency.format(t.fare * seats)} FCFA')
-                    : 'Réserver pour ${currency.format(t.fare * seats)} FCFA'),
+              _Card(
+                title: 'Véhicule',
+                children: [
+                  Text(
+                    '${t.car?.make ?? ''} ${t.car?.model ?? ''} · ${t.car?.color ?? ''}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    t.rideType.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              _Card(
+                title: 'Tarif',
+                children: [
+                  Text(
+                    '${currency.format(t.fare)} FCFA / place',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Text(
+                    '${t.availableSeats} place(s) restante(s) sur ${t.totalSeats}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              if (t.notes != null && t.notes!.isNotEmpty)
+                _Card(
+                  title: 'Remarques',
+                  children: [
+                    Text(t.notes!, style: const TextStyle(fontSize: 18)),
+                  ],
+                ),
+              if (isUnavailable)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    "Ce trajet n'est plus disponible.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.danger),
+                  ),
+                )
+              else ...[
+                const Text(
+                  'Mode de paiement',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('💵 Espèces'),
+                        selected: paymentMethod == 'cash',
+                        onSelected: (_) =>
+                            setState(() => paymentMethod = 'cash'),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: ChoiceChip(
+                        avatar: const Icon(
+                          Icons.account_balance_wallet,
+                          size: 16,
+                        ),
+                        label: Text(
+                          'Portefeuille${walletBalance != null ? ' ($walletBalance F)' : ''}',
+                        ),
+                        selected: paymentMethod == 'wallet',
+                        onSelected: (_) =>
+                            setState(() => paymentMethod = 'wallet'),
+                      ),
+                    ),
+                  ],
+                ),
+                if (insufficientWalletFunds)
+                  const Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.xs),
+                    child: Text(
+                      'Solde du portefeuille insuffisant pour ce trajet.',
+                      style: TextStyle(color: AppColors.danger, fontSize: 13),
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.md),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        editing ? 'Nombre de places' : 'Places à réserver',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          OutlinedButton(
+                            onPressed: () => setState(
+                              () => seats = (seats - 1).clamp(
+                                editing ? 0 : 1,
+                                maxSeats,
+                              ),
+                            ),
+                            child: const Text('-'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                            ),
+                            child: Text(
+                              '$seats',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => setState(
+                              () => seats = (seats + 1).clamp(
+                                editing ? 0 : 1,
+                                maxSeats,
+                              ),
+                            ),
+                            child: const Text('+'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (editing && seats == 0 && !isUnavailable)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    'Réduire à 0 place annulera votre réservation.',
+                    style: TextStyle(color: AppColors.danger, fontSize: 13),
+                  ),
+                ),
+              ElevatedButton(
+                onPressed: isUnavailable || booking || insufficientWalletFunds
+                    ? null
+                    : _handleBook,
+                style: editing && seats == 0
+                    ? ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.danger,
+                      )
+                    : null,
+                child: booking
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        editing
+                            ? (seats == 0
+                                  ? 'Annuler la réservation'
+                                  : 'Enregistrer pour ${currency.format(t.fare * seats)} FCFA')
+                            : 'Réserver pour ${currency.format(t.fare * seats)} FCFA',
+                      ),
+              ),
+            ],
           ),
+          if (navigateFab != null) navigateFab,
         ],
       ),
     );
@@ -446,8 +646,14 @@ class _Card extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title.toUpperCase(),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ),
+          ),
           const SizedBox(height: AppSpacing.xs),
           ...children,
         ],

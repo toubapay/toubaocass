@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:shared_flutter/widgets/navigate_fab.dart';
+
 import '../../api/client.dart';
 import '../../api/tracking_api.dart';
 import '../../api/trips_api.dart';
@@ -19,11 +21,17 @@ const _statusLabel = {
 };
 
 class TripDetailScreen extends StatefulWidget {
-  const TripDetailScreen({super.key, required this.tripId, required this.onCancelled, required this.onOpenChat});
+  const TripDetailScreen({
+    super.key,
+    required this.tripId,
+    required this.onCancelled,
+    required this.onOpenChat,
+  });
 
   final int tripId;
   final VoidCallback onCancelled;
-  final void Function(int bookingId, String? title, String? subtitle) onOpenChat;
+  final void Function(int bookingId, String? title, String? subtitle)
+  onOpenChat;
 
   @override
   State<TripDetailScreen> createState() => _TripDetailScreenState();
@@ -57,7 +65,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(extractErrorMessage(e))));
       }
     } finally {
       if (mounted) setState(() => actionLoading = false);
@@ -69,10 +79,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Annuler le trajet'),
-        content: const Text('Tous les passagers confirmés seront notifiés. Continuer ?'),
+        content: const Text(
+          'Tous les passagers confirmés seront notifiés. Continuer ?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Non')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Oui, annuler le trajet')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Non'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Oui, annuler le trajet'),
+          ),
         ],
       ),
     );
@@ -88,131 +106,232 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     if (loading || trip == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Détails du trajet')),
-        body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
     final t = trip!;
     final currency = NumberFormat.decimalPattern('fr');
-    final confirmedBookings = (t.bookings ?? []).where((b) => b.status == 'confirmed').toList();
+    final confirmedBookings = (t.bookings ?? [])
+        .where((b) => b.status == 'confirmed')
+        .toList();
+
+    NavigateFab? navigateFab;
+    if (t.status == 'in_progress') {
+      final destLat = t.destinationCity?.latitude;
+      final destLng = t.destinationCity?.longitude;
+      if (destLat != null && destLng != null) {
+        navigateFab = NavigateFab(
+          latitude: destLat,
+          longitude: destLng,
+          label: 'Naviguer vers la destination',
+        );
+      }
+    } else if (t.departureLatitude != null && t.departureLongitude != null) {
+      navigateFab = NavigateFab(
+        latitude: t.departureLatitude!,
+        longitude: t.departureLongitude!,
+        label: 'Naviguer vers le point de rendez-vous',
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Détails du trajet')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: Stack(
         children: [
-          Row(
+          ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              Text(t.originCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: Text('→', style: TextStyle(color: AppColors.textMuted, fontSize: 20)),
-              ),
-              Text(t.destinationCity?.name ?? '?', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text('${t.departureDate} à ${t.departureTime} · ${_statusLabel[t.status] ?? t.status}',
-              style: const TextStyle(color: AppColors.textMuted)),
-          if (t.status == 'in_progress')
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.md),
-              child: OutlinedButton(
-                onPressed: () => showSosShareSheet(context, kind: ShareableRideKind.trips, rideId: t.id),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-                child: const Text('🆘 Partager ma position'),
-              ),
-            ),
-          const SizedBox(height: AppSpacing.sm),
-          TripUrgencyBadge(trip: t),
-          const SizedBox(height: AppSpacing.lg),
-          _Card(
-            title: 'Trajet',
-            children: [
-              Text('${currency.format(t.fare)} FCFA / place', style: const TextStyle(fontSize: 18)),
-              Text('${t.availableSeats} place(s) disponible(s) sur ${t.totalSeats}',
-                  style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-            ],
-          ),
-          if (t.departureAddress != null || t.departureLatitude != null)
-            _Card(
-              title: 'Point de rendez-vous',
-              children: [
-                if (t.departureAddress != null) Text(t.departureAddress!, style: const TextStyle(fontSize: 18)),
-                if (t.departureLatitude != null)
-                  Text('${t.departureLatitude!.toStringAsFixed(5)}, ${t.departureLongitude!.toStringAsFixed(5)}',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-              ],
-            ),
-          Text('Passagers (${confirmedBookings.length})',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: AppSpacing.sm),
-          if (confirmedBookings.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text("Aucune réservation pour l'instant.", style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
-            )
-          else
-            ...confirmedBookings.map((booking) => _Card(
-                  title: '',
-                  children: [
-                    Text(booking.rider.name ?? 'Passager', style: const TextStyle(fontSize: 18)),
-                    Text('${booking.rider.phone} · ${booking.seatsBooked} place(s)',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                    const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => launchUrl(Uri.parse('tel:${booking.rider.phone}')),
-                            child: const Text('📞 Appeler'),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => launchUrl(Uri.parse('sms:${booking.rider.phone}')),
-                            child: const Text('💬 SMS'),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => widget.onOpenChat(
-                              booking.id,
-                              booking.rider.name ?? 'Passager',
-                              '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
-                            ),
-                            child: const Text('💬 Discuter'),
-                          ),
-                        ),
-                      ],
+              Row(
+                children: [
+                  Text(
+                    t.originCity?.name ?? '?',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
                     ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                    child: Text(
+                      '→',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    t.destinationCity?.name ?? '?',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '${t.departureDate} à ${t.departureTime} · ${_statusLabel[t.status] ?? t.status}',
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
+              if (t.status == 'in_progress')
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.md),
+                  child: OutlinedButton(
+                    onPressed: () => showSosShareSheet(
+                      context,
+                      kind: ShareableRideKind.trips,
+                      rideId: t.id,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.danger,
+                      side: const BorderSide(color: AppColors.danger),
+                    ),
+                    child: const Text('🆘 Partager ma position'),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.sm),
+              TripUrgencyBadge(trip: t),
+              const SizedBox(height: AppSpacing.lg),
+              _Card(
+                title: 'Trajet',
+                children: [
+                  Text(
+                    '${currency.format(t.fare)} FCFA / place',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    '${t.availableSeats} place(s) disponible(s) sur ${t.totalSeats}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              if (t.departureAddress != null || t.departureLatitude != null)
+                _Card(
+                  title: 'Point de rendez-vous',
+                  children: [
+                    if (t.departureAddress != null)
+                      Text(
+                        t.departureAddress!,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    if (t.departureLatitude != null)
+                      Text(
+                        '${t.departureLatitude!.toStringAsFixed(5)}, ${t.departureLongitude!.toStringAsFixed(5)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                   ],
-                )),
-          const SizedBox(height: AppSpacing.md),
-          if (t.status == 'scheduled' || t.status == 'full')
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: ElevatedButton(
-                onPressed: actionLoading ? null : () => _runAction(() => startTrip(widget.tripId)),
-                child: const Text('Démarrer le trajet'),
+                ),
+              Text(
+                'Passagers (${confirmedBookings.length})',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          if (t.status == 'in_progress')
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: ElevatedButton(
-                onPressed: actionLoading ? null : () => _runAction(() => completeTrip(widget.tripId)),
-                child: const Text('Terminer le trajet'),
-              ),
-            ),
-          if (t.status != 'completed' && t.status != 'cancelled')
-            OutlinedButton(
-              onPressed: actionLoading ? null : _handleCancel,
-              style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-              child: const Text('Annuler le trajet'),
-            ),
+              const SizedBox(height: AppSpacing.sm),
+              if (confirmedBookings.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: Text(
+                    "Aucune réservation pour l'instant.",
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                  ),
+                )
+              else
+                ...confirmedBookings.map(
+                  (booking) => _Card(
+                    title: '',
+                    children: [
+                      Text(
+                        booking.rider.name ?? 'Passager',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        '${booking.rider.phone} · ${booking.seatsBooked} place(s)',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => launchUrl(
+                                Uri.parse('tel:${booking.rider.phone}'),
+                              ),
+                              child: const Text('📞 Appeler'),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => launchUrl(
+                                Uri.parse('sms:${booking.rider.phone}'),
+                              ),
+                              child: const Text('💬 SMS'),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => widget.onOpenChat(
+                                booking.id,
+                                booking.rider.name ?? 'Passager',
+                                '${t.originCity?.name ?? '?'} → ${t.destinationCity?.name ?? '?'}',
+                              ),
+                              child: const Text('💬 Discuter'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.md),
+              if (t.status == 'scheduled' || t.status == 'full')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: ElevatedButton(
+                    onPressed: actionLoading
+                        ? null
+                        : () => _runAction(() => startTrip(widget.tripId)),
+                    child: const Text('Démarrer le trajet'),
+                  ),
+                ),
+              if (t.status == 'in_progress')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: ElevatedButton(
+                    onPressed: actionLoading
+                        ? null
+                        : () => _runAction(() => completeTrip(widget.tripId)),
+                    child: const Text('Terminer le trajet'),
+                  ),
+                ),
+              if (t.status != 'completed' && t.status != 'cancelled')
+                OutlinedButton(
+                  onPressed: actionLoading ? null : _handleCancel,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    side: const BorderSide(color: AppColors.danger),
+                  ),
+                  child: const Text('Annuler le trajet'),
+                ),
+            ],
+          ),
+          if (navigateFab != null) navigateFab,
         ],
       ),
     );
@@ -239,8 +358,14 @@ class _Card extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title.isNotEmpty) ...[
-            Text(title.toUpperCase(),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+            Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textMuted,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
           ],
           ...children,

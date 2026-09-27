@@ -6,6 +6,7 @@ import { extractErrorMessage } from '../api/client';
 import { arriveTrip, cancelTrip, completeTrip, fetchMyTrip, startTrip, updateTripLocation } from '../api/trips';
 import type { Trip } from '../api/types';
 import { Button } from '../components/Button';
+import { NavigateFab } from '../components/NavigateFab';
 import { SosShareModal } from '../components/SosShareModal';
 import { CenteredSpinner } from '../components/Spinner';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
@@ -80,9 +81,17 @@ export function TripDetailPage() {
   if (loading || !trip) return <CenteredSpinner />;
 
   const confirmedBookings = (trip.bookings ?? []).filter((b) => b.status === 'confirmed');
+  const navTarget = trip.status === 'in_progress'
+    ? (trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+        ? { lat: trip.destination_city.latitude, lng: trip.destination_city.longitude, label: t('trips.detail.navigateToDestination') }
+        : null)
+    : (trip.departure_latitude !== null && trip.departure_longitude !== null
+        ? { lat: trip.departure_latitude, lng: trip.departure_longitude, label: t('trips.detail.navigateToMeetingPoint') }
+        : null);
 
   return (
     <div>
+      {navTarget && <NavigateFab latitude={navTarget.lat} longitude={navTarget.lng} label={navTarget.label} />}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}

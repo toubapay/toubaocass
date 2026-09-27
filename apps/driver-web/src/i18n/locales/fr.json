@@ -300,6 +300,8 @@
       "successBody": "Les voyageurs à proximité viennent d'être notifiés."
     },
     "detail": {
+      "navigateToMeetingPoint": "Naviguer vers le point de rendez-vous",
+      "navigateToDestination": "Naviguer vers la destination",
       "passengers": "Passagers ({{count}})",
       "noBookings": "Aucune réservation pour l'instant.",
       "passengerFallback": "Passager",
@@ -321,6 +323,8 @@
     }
   },
   "demLegui": {
+    "navigateToPickup": "Naviguer vers le point de ramassage",
+    "navigateToDestination": "Naviguer vers la destination",
     "driverCardTitle": "Demandes Dem Légui",
     "driverCardSubtitle": "Acceptez des courses à la demande près de vous",
     "availableCardTitle": "{{count}} demande(s) Dem Légui disponible(s)",
@@ -449,6 +453,8 @@
     "emptyMine": "Vous n'avez pas encore de livraison.",
     "detail": {
       "titleWithId": "Livraison #{{id}}",
+      "navigateToPickup": "Naviguer vers le point de ramassage",
+      "navigateToReceiver": "Naviguer vers le destinataire",
       "pickupSection": "Ramassage",
       "receiverSection": "Destinataire",
       "packageSection": "Colis",

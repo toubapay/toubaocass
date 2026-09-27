@@ -9,6 +9,7 @@ import { acceptDelivery, fetchDelivery, markDelivered, markPickedUp, updateDeliv
 import { extractErrorMessage } from '../../api/client';
 import { Delivery } from '../../api/types';
 import { Button } from '../../components/Button';
+import { NavigateFab } from '../../components/NavigateFab';
 import { Screen } from '../../components/Screen';
 import { DeliveriesStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
@@ -80,8 +81,16 @@ export function DeliveryDetailScreen({ route }: Props) {
     );
   }
 
+  const navTarget =
+    delivery.status === 'picked_up'
+      ? { latitude: delivery.receiver_latitude, longitude: delivery.receiver_longitude, label: t('deliveries.detail.navigateToReceiver') }
+      : delivery.status === 'accepted'
+        ? { latitude: delivery.pickup_latitude, longitude: delivery.pickup_longitude, label: t('deliveries.detail.navigateToPickup') }
+        : null;
+
   return (
     <Screen>
+      {navTarget && <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={navTarget.label} />}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{t('deliveries.detail.titleWithId', { id: delivery.id })}</Text>

@@ -13,6 +13,7 @@ import { DriverTierBadge } from '../components/DriverTierBadge';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { RouteMap } from '../components/RouteMap';
 import { SosShareModal } from '../components/SosShareModal';
+import { NavigateFab } from '../components/NavigateFab';
 import { CenteredSpinner } from '../components/Spinner';
 import { SuccessModal } from '../components/SuccessModal';
 import { TripUrgencyBadge } from '../components/TripUrgencyBadge';
@@ -112,6 +113,15 @@ export function TripDetailPage() {
   const maxSeats = editing ? trip.available_seats + (trip.my_booking?.seats_booked ?? 0) : trip.available_seats;
   const hasPin = trip.departure_latitude !== null && trip.departure_longitude !== null;
 
+  // While the trip is under way there's no more "getting to the meeting
+  // point" to navigate — offer directions to the destination city instead
+  // (useful to the rider too, not just the driver, e.g. to meet up there).
+  const navTarget = trip.status === 'in_progress'
+    ? (trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+        ? { lat: trip.destination_city.latitude, lng: trip.destination_city.longitude, label: t('tripDetail.navigateToDestination') }
+        : null)
+    : (hasPin ? { lat: trip.departure_latitude as number, lng: trip.departure_longitude as number, label: t('tripDetail.navigateToPickup') } : null);
+
   const cardStyle: React.CSSProperties = {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -130,6 +140,7 @@ export function TripDetailPage() {
 
   return (
     <div>
+      {navTarget && <NavigateFab latitude={navTarget.lat} longitude={navTarget.lng} label={navTarget.label} />}
       <button
         onClick={() => navigate(-1)}
         style={{ border: 'none', background: 'none', color: colors.textMuted, fontSize: 22, cursor: 'pointer', padding: 0, marginBottom: spacing.sm }}

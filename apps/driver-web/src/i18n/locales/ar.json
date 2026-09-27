@@ -300,6 +300,8 @@
       "successBody": "تم للتو إشعار المسافرين القريبين."
     },
     "detail": {
+      "navigateToMeetingPoint": "التوجه إلى نقطة اللقاء",
+      "navigateToDestination": "التوجه إلى الوجهة",
       "passengers": "الركاب ({{count}})",
       "noBookings": "لا توجد حجوزات حتى الآن.",
       "passengerFallback": "راكب",
@@ -321,6 +323,8 @@
     }
   },
   "demLegui": {
+    "navigateToPickup": "التوجه إلى نقطة الاستلام",
+    "navigateToDestination": "التوجه إلى الوجهة",
     "driverCardTitle": "طلبات Dem Légui",
     "driverCardSubtitle": "اقبل طلبات الرحلات الفورية بالقرب منك",
     "availableCardTitle": "{{count}} طلب Dem Légui متاح",
@@ -459,6 +463,8 @@
     "emptyMine": "ليس لديك أي توصيل بعد.",
     "detail": {
       "titleWithId": "توصيل #{{id}}",
+      "navigateToPickup": "التوجه إلى نقطة الاستلام",
+      "navigateToReceiver": "التوجه إلى المستلم",
       "pickupSection": "الاستلام",
       "receiverSection": "المستلم",
       "packageSection": "الطرد",

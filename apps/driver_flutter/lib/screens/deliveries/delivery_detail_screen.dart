@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_flutter/widgets/navigate_fab.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api/client.dart';
@@ -67,7 +68,10 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
 
   void _syncPing(String status) {
     if (status == 'accepted' || status == 'picked_up') {
-      _locationTimer ??= Timer.periodic(_locationPingInterval, (_) => _reportLocation());
+      _locationTimer ??= Timer.periodic(
+        _locationPingInterval,
+        (_) => _reportLocation(),
+      );
     } else {
       _locationTimer?.cancel();
       _locationTimer = null;
@@ -77,7 +81,11 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
   Future<void> _reportLocation() async {
     try {
       final coords = await requestMyLocation();
-      await updateDeliveryLocation(widget.deliveryId, coords.latitude, coords.longitude);
+      await updateDeliveryLocation(
+        widget.deliveryId,
+        coords.latitude,
+        coords.longitude,
+      );
     } catch (_) {
       // best-effort
     }
@@ -104,76 +112,232 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (loading || delivery == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
     }
     final d = delivery!;
 
+    NavigateFab? navigateFab;
+    if (d.status == 'picked_up') {
+      navigateFab = NavigateFab(
+        latitude: d.receiverLatitude,
+        longitude: d.receiverLongitude,
+        label: 'Naviguer vers le destinataire',
+      );
+    } else if (d.status == 'accepted') {
+      navigateFab = NavigateFab(
+        latitude: d.pickupLatitude,
+        longitude: d.pickupLongitude,
+        label: 'Naviguer vers le point de ramassage',
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('Livraison #${d.id}')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: Stack(
         children: [
-          Row(
+          ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              Text(_packageLabel[d.packageType] ?? d.packageType, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              const Spacer(),
-              Text(_statusLabel[d.status] ?? d.status, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.accent)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadius.md), border: Border.all(color: AppColors.border)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('RAMASSAGE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                Text(d.pickupAddressLine, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                const SizedBox(height: AppSpacing.sm),
-                Text('EXPÉDITEUR', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                Text('${d.sender.name ?? ''} · ${d.sender.phone}', style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadius.md), border: Border.all(color: AppColors.border)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('DESTINATAIRE', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                Text(d.receiverName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                Row(
+              Row(
+                children: [
+                  Text(
+                    _packageLabel[d.packageType] ?? d.packageType,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _statusLabel[d.status] ?? d.status,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Text(d.receiverPhone, style: const TextStyle(fontSize: 14, color: AppColors.textMuted))),
-                    IconButton(icon: const Icon(Icons.call, size: 18, color: AppColors.primary), onPressed: () => launchUrl(Uri.parse('tel:${d.receiverPhone}'))),
+                    const Text(
+                      'RAMASSAGE',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      d.pickupAddressLine,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'EXPÉDITEUR',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      '${d.sender.name ?? ''} · ${d.sender.phone}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                   ],
                 ),
-                Text(d.receiverAddressLine, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                if (d.notes != null) Text(d.notes!, style: const TextStyle(fontSize: 13.5, color: AppColors.textMuted, fontStyle: FontStyle.italic)),
-              ],
-            ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'DESTINATAIRE',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      d.receiverName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            d.receiverPhone,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.call,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
+                          onPressed: () =>
+                              launchUrl(Uri.parse('tel:${d.receiverPhone}')),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      d.receiverAddressLine,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    if (d.notes != null)
+                      Text(
+                        d.notes!,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          color: AppColors.textMuted,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'FRAIS',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      '${d.fee} FCFA',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    Text(
+                      d.paymentMethod == 'wallet' ? 'Portefeuille' : 'Espèces',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Text(
+                    error!,
+                    style: const TextStyle(
+                      color: AppColors.danger,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              if (d.status == 'accepted')
+                ElevatedButton(
+                  onPressed: busy ? null : () => _run(() => markPickedUp(d.id)),
+                  child: const Text('Marquer récupéré'),
+                ),
+              if (d.status == 'picked_up')
+                ElevatedButton(
+                  onPressed: busy
+                      ? null
+                      : () => _run(() => markDelivered(d.id)),
+                  child: const Text('Marquer livré'),
+                ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadius.md), border: Border.all(color: AppColors.border)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('FRAIS', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                Text('${d.fee} FCFA', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                Text(d.paymentMethod == 'wallet' ? 'Portefeuille' : 'Espèces', style: const TextStyle(fontSize: 13.5, color: AppColors.textMuted)),
-              ],
-            ),
-          ),
-          if (error != null) Padding(padding: const EdgeInsets.only(bottom: AppSpacing.sm), child: Text(error!, style: const TextStyle(color: AppColors.danger, fontSize: 13.5))),
-          if (d.status == 'accepted')
-            ElevatedButton(onPressed: busy ? null : () => _run(() => markPickedUp(d.id)), child: const Text('Marquer récupéré')),
-          if (d.status == 'picked_up')
-            ElevatedButton(onPressed: busy ? null : () => _run(() => markDelivered(d.id)), child: const Text('Marquer livré')),
+          if (navigateFab != null) navigateFab,
         ],
       ),
     );

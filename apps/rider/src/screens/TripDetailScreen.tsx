@@ -13,6 +13,7 @@ import { AnandoLiveMap } from '../components/AnandoLiveMap';
 import { Button } from '../components/Button';
 import { DepartureMap } from '../components/DepartureMap';
 import { DriverTierBadge } from '../components/DriverTierBadge';
+import { NavigateFab } from '../components/NavigateFab';
 import { RateDriverCard } from '../components/RateDriverCard';
 import { RouteMap } from '../components/RouteMap';
 import { Screen } from '../components/Screen';
@@ -128,8 +129,18 @@ export function TripDetailScreen({ route, navigation }: Props) {
     Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${trip.departure_latitude},${trip.departure_longitude}`);
   };
 
+  const navTarget =
+    trip.status === 'in_progress'
+      ? trip.destination_city?.latitude != null && trip.destination_city?.longitude != null
+        ? { latitude: trip.destination_city.latitude, longitude: trip.destination_city.longitude, label: t('tripDetail.navigateToDestination') }
+        : null
+      : hasPin
+        ? { latitude: trip.departure_latitude as number, longitude: trip.departure_longitude as number, label: t('tripDetail.navigateToPickup') }
+        : null;
+
   return (
     <Screen>
+      {navTarget && <NavigateFab latitude={navTarget.latitude} longitude={navTarget.longitude} label={navTarget.label} />}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.routeRow}>
           <Text style={styles.city}>{trip.origin_city?.name}</Text>
