@@ -9,6 +9,7 @@ import { fetchMyActiveDemLeguiRequest } from '../api/demLegui';
 import { DemLeguiRequest } from '../api/types';
 import { HomeStackParamList, MainTabParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { openNavigation } from '../utils/navigation';
 import { SearchingCarIndicator } from './SearchingCarIndicator';
 
 const POLL_INTERVAL_MS = 8000;
@@ -58,6 +59,13 @@ export function DemLeguiStatusWidget() {
       : t('demLegui.driverArrivingBadge')
     : t('demLegui.waitingForDriverBadge');
 
+  const navTarget =
+    active.trip_status === 'in_progress'
+      ? active.destination_city?.latitude != null && active.destination_city?.longitude != null
+        ? { latitude: active.destination_city.latitude, longitude: active.destination_city.longitude, label: t('demLegui.navigateToDestination') }
+        : null
+      : { latitude: active.pickup_latitude, longitude: active.pickup_longitude, label: t('demLegui.navigateToPickup') };
+
   return (
     <View style={styles.row}>
       <Pressable
@@ -67,12 +75,21 @@ export function DemLeguiStatusWidget() {
         <SearchingCarIndicator size={22} />
         <Text style={styles.label}>{label}</Text>
       </Pressable>
+      {navTarget && (
+        <Pressable
+          style={styles.navButton}
+          onPress={() => openNavigation(navTarget.latitude, navTarget.longitude)}
+          accessibilityLabel={navTarget.label}
+        >
+          <Text style={styles.navIcon}>🧭</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: spacing.sm },
+  row: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -86,4 +103,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   label: { fontSize: 12, fontWeight: '700', color: colors.text },
+  navButton: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navIcon: { fontSize: 15, color: '#fff' },
 });

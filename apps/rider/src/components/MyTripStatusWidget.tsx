@@ -8,6 +8,7 @@ import { fetchMyActiveTrip } from '../api/trips';
 import { Trip } from '../api/types';
 import { HomeStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
+import { openNavigation } from '../utils/navigation';
 
 const POLL_INTERVAL_MS = 15000;
 
@@ -47,18 +48,31 @@ export function MyTripStatusWidget() {
 
   if (!active) return null;
 
+  const destLat = active.destination_city?.latitude;
+  const destLng = active.destination_city?.longitude;
+  const canNavigate = active.status === 'in_progress' && destLat != null && destLng != null;
+
   return (
     <View style={styles.row}>
       <Pressable style={styles.badge} onPress={() => navigation.navigate('TripDetail', { tripId: active.id })}>
         <Text style={styles.label}>{t('tripDetail.inProgressBadge')}</Text>
         {active.progress_percent !== null && <Text style={styles.percent}>{active.progress_percent}%</Text>}
       </Pressable>
+      {canNavigate && (
+        <Pressable
+          style={styles.navButton}
+          onPress={() => openNavigation(destLat as number, destLng as number)}
+          accessibilityLabel={t('tripDetail.navigateToDestination')}
+        >
+          <Text style={styles.navIcon}>🧭</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: spacing.sm },
+  row: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -72,4 +86,13 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 12, fontWeight: '700', color: colors.text },
   percent: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  navButton: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navIcon: { fontSize: 15, color: '#fff' },
 });

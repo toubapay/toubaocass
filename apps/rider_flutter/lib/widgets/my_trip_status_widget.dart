@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_flutter/utils/navigation.dart';
 
 import '../api/trips_api.dart';
 import '../models.dart';
@@ -41,9 +42,11 @@ class _MyTripStatusWidgetState extends State<MyTripStatusWidget> {
   }
 
   void _load() {
-    fetchMyActiveTrip().then((trip) {
-      if (mounted) setState(() => _active = trip);
-    }).catchError((_) {});
+    fetchMyActiveTrip()
+        .then((trip) {
+          if (mounted) setState(() => _active = trip);
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -51,32 +54,76 @@ class _MyTripStatusWidgetState extends State<MyTripStatusWidget> {
     final active = _active;
     if (active == null) return const SizedBox.shrink();
 
+    final destLat = active.destinationCity?.latitude;
+    final destLng = active.destinationCity?.longitude;
+    final canNavigate =
+        active.status == 'in_progress' && destLat != null && destLng != null;
+
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: () => widget.onTap(active.id),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
+              onTap: () => widget.onTap(active.id),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      '🚗 Trajet en cours',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    if (active.progressPercent != null) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        '${active.progressPercent}%',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('🚗 Trajet en cours', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.text)),
-                if (active.progressPercent != null) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  Text('${active.progressPercent}%',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                ],
-              ],
-            ),
-          ),
+            if (canNavigate) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Material(
+                color: AppColors.primary,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => openNavigation(destLat, destLng),
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Center(
+                      child: Text('🧭', style: TextStyle(fontSize: 15)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
