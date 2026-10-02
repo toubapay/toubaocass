@@ -109,6 +109,24 @@
   border: 1.5px solid var(--primary);
 }
 
+.lending-lang-toggle {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lending-lang-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .lending-cta-button.ghost:hover {
   background: rgba(138, 103, 8, 0.08);
   transform: none;
@@ -117,6 +135,20 @@
 @media (max-width: 760px) {
   .lending-nav-links {
     display: none;
+  }
+
+  .lending-nav {
+    gap: 10px;
+  }
+
+  .lending-cta-button {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .lending-lang-toggle {
+    padding: 7px 10px;
+    font-size: 12.5px;
   }
 }
 
@@ -347,11 +379,11 @@
   }
 
   .lending-hero-arrow.prev {
-    left: 24px;
+    inset-inline-start: 24px;
   }
 
   .lending-hero-arrow.next {
-    right: 24px;
+    inset-inline-end: 24px;
   }
 }
 
