@@ -26,6 +26,7 @@ const DemLeguiHistoryPage = lazy(() => import('./pages/DemLeguiHistoryPage').the
 const InboxPage = lazy(() => import('./pages/InboxPage').then((m) => ({ default: m.InboxPage })));
 const InstantDeparturesPage = lazy(() => import('./pages/InstantDeparturesPage').then((m) => ({ default: m.InstantDeparturesPage })));
 const InsurancePage = lazy(() => import('./pages/InsurancePage').then((m) => ({ default: m.InsurancePage })));
+const LandingPage = lazy(() => import('./lending/LandingPage').then((m) => ({ default: m.LandingPage })));
 const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
 const MyBookingsPage = lazy(() => import('./pages/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })));
 const MyDeliveriesPage = lazy(() => import('./pages/MyDeliveriesPage').then((m) => ({ default: m.MyDeliveriesPage })));
@@ -56,6 +57,18 @@ function AppRoutes() {
       <Suspense fallback={<CenteredSpinner />}>
         <Routes>
           <Route path="/track/:type/:id" element={<PublicTrackingPage />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
+  // Public marketing/presentation page — reachable by anyone at base-url/lending
+  // without an account, so it bypasses auth entirely just like /track/.
+  if (location.pathname.startsWith('/lending')) {
+    return (
+      <Suspense fallback={<CenteredSpinner />}>
+        <Routes>
+          <Route path="/lending" element={<LandingPage />} />
         </Routes>
       </Suspense>
     );
