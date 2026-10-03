@@ -1,0 +1,658 @@
+.lending-root {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--background);
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lending-root * {
+  box-sizing: border-box;
+}
+
+.lending-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Header ---------- */
+
+.lending-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(247, 248, 250, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.lending-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lending-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.lending-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.lending-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.lending-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.lending-nav-links a {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.lending-nav-links a:hover {
+  color: var(--primary);
+}
+
+.lending-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px rgba(138, 103, 8, 0.28);
+}
+
+.lending-cta-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(138, 103, 8, 0.36);
+}
+
+.lending-cta-button.ghost {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: none;
+  border: 1.5px solid var(--primary);
+}
+
+.lending-lang-toggle {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.lending-lang-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.lending-cta-button.ghost:hover {
+  background: rgba(138, 103, 8, 0.08);
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .lending-nav-links {
+    display: none;
+  }
+
+  .lending-nav {
+    gap: 10px;
+  }
+
+  .lending-cta-button {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .lending-lang-toggle {
+    padding: 7px 10px;
+    font-size: 12.5px;
+  }
+}
+
+/* ---------- Hero / Slideshow ---------- */
+
+.lending-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary) 0%, #a8820f 48%, var(--primary-dark) 100%);
+  color: #fff;
+}
+
+.lending-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.14), transparent 45%),
+    radial-gradient(circle at 10% 85%, rgba(0, 0, 0, 0.12), transparent 50%);
+  pointer-events: none;
+}
+
+.lending-hero-inner {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 72px 24px 56px;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+}
+
+.lending-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 72px 24px 56px;
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+  pointer-events: none;
+}
+
+.lending-slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  position: relative;
+}
+
+.lending-slide-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lending-slide-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.lending-slide-title {
+  font-size: clamp(28px, 4.2vw, 44px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+
+.lending-slide-subtitle {
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 28px;
+  max-width: 460px;
+}
+
+.lending-slide-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.lending-slide-actions .lending-cta-button {
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.lending-slide-actions .lending-cta-button:hover {
+  background: #fff;
+  opacity: 0.92;
+}
+
+.lending-slide-actions .lending-cta-button.ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.lending-slide-actions .lending-cta-button.ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lending-slide-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lending-slide-emoji-disc {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 120px;
+  line-height: 1;
+}
+
+@media (max-width: 860px) {
+  .lending-slide-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .lending-slide-subtitle {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .lending-slide-actions {
+    justify-content: center;
+  }
+
+  .lending-slide-visual {
+    order: -1;
+  }
+
+  .lending-slide-emoji-disc {
+    width: 160px;
+    height: 160px;
+    font-size: 72px;
+    margin: 0 auto 8px;
+  }
+
+  .lending-hero-inner,
+  .lending-slide {
+    padding-top: 40px;
+    padding-bottom: 36px;
+  }
+}
+
+.lending-hero-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 2;
+}
+
+.lending-hero-arrow {
+  display: none;
+}
+
+.lending-hero-dots {
+  display: flex;
+  gap: 9px;
+}
+
+.lending-hero-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.lending-hero-dot.active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+@media (min-width: 761px) {
+  .lending-hero-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    transition: background 0.15s ease;
+  }
+
+  .lending-hero-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .lending-hero-arrow.prev {
+    inset-inline-start: 24px;
+  }
+
+  .lending-hero-arrow.next {
+    inset-inline-end: 24px;
+  }
+}
+
+/* ---------- Sections ---------- */
+
+.lending-section {
+  padding: 76px 24px;
+}
+
+.lending-section.alt {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.lending-section-head {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 48px;
+}
+
+.lending-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.lending-section-title {
+  font-size: clamp(24px, 3.2vw, 34px);
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.lending-section-subtitle {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ---------- Services grid ---------- */
+
+.lending-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+.lending-service-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.lending-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(19, 26, 23, 0.08);
+  border-color: rgba(138, 103, 8, 0.35);
+}
+
+.lending-service-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+  margin-bottom: 18px;
+}
+
+.lending-service-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.lending-service-card p {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ---------- How it works ---------- */
+
+.lending-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.lending-step {
+  text-align: center;
+}
+
+.lending-step-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.lending-step h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.lending-step p {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .lending-steps {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+/* ---------- Trust band ---------- */
+
+.lending-trust-band {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 36px;
+  padding: 36px 24px;
+  background: var(--accent-soft);
+}
+
+.lending-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.lending-trust-item span.icon {
+  font-size: 20px;
+}
+
+/* ---------- Final CTA ---------- */
+
+.lending-final-cta {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: #fff;
+  text-align: center;
+  padding: 72px 24px;
+}
+
+.lending-final-cta h2 {
+  font-size: clamp(24px, 3.4vw, 34px);
+  font-weight: 800;
+  margin: 0 0 14px;
+}
+
+.lending-final-cta p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 30px;
+}
+
+.lending-final-cta .lending-slide-actions {
+  justify-content: center;
+}
+
+/* ---------- Footer ---------- */
+
+.lending-footer {
+  background: #0f1512;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 56px 24px 28px;
+}
+
+.lending-footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 36px;
+}
+
+.lending-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+
+.lending-footer-brand img {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.lending-footer p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 320px;
+}
+
+.lending-footer h4 {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 16px;
+}
+
+.lending-footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lending-footer ul li a,
+.lending-footer ul li span {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+}
+
+.lending-footer ul li a:hover {
+  color: #fff;
+}
+
+.lending-footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 22px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .lending-footer-grid {
+    grid-template-columns: 1fr;
+  }
+}

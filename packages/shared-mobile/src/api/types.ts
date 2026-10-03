@@ -281,6 +281,8 @@ export interface DemLeguiRequest {
   status: DemLeguiRequestStatus;
   dem_legui_trip_id: number | null;
   eta_minutes?: number | null;
+  trip_status?: DemLeguiTripStatus | null;
+  trip_arrived_at?: string | null;
   created_at: string;
 }
 

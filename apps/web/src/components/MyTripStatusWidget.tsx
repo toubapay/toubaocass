@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchMyActiveTrip } from '../api/trips';
 import type { Trip } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { openNavigation } from '../utils/navigation';
 import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
 // Fallback for when push isn't available — the trip_started push (see
@@ -49,8 +50,12 @@ export function MyTripStatusWidget() {
 
   if (!active) return null;
 
+  const destLat = active.destination_city?.latitude;
+  const destLng = active.destination_city?.longitude;
+  const canNavigate = active.status === 'in_progress' && destLat != null && destLng != null;
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: spacing.sm }}>
+    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm }}>
       <button
         onClick={() => navigate(`/trips/${active.id}`)}
         style={{
@@ -70,6 +75,28 @@ export function MyTripStatusWidget() {
           <span style={{ fontSize: 11, fontWeight: 700, color: colors.primary }}>{active.progress_percent}%</span>
         )}
       </button>
+      {canNavigate && (
+        <button
+          onClick={() => openNavigation(destLat as number, destLng as number)}
+          aria-label={t('tripDetail.navigateToDestination')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
+            border: 'none',
+            borderRadius: radius.lg,
+            backgroundColor: colors.primary,
+            color: '#fff',
+            fontSize: 15,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(19, 26, 23, 0.1)',
+          }}
+        >
+          🧭
+        </button>
+      )}
     </div>
   );
 }

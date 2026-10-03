@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchMyActiveDemLeguiRequest } from '../api/demLegui';
 import type { DemLeguiRequest } from '../api/types';
 import { colors, radius, spacing } from '../theme';
+import { openNavigation } from '../utils/navigation';
 import { SearchingCarIndicator } from './SearchingCarIndicator';
 import { usePushEvent } from 'shared-web/src/hooks/usePushEvent';
 
@@ -71,8 +72,14 @@ export function DemLeguiStatusWidget() {
           ? `${t('demLegui.driverArrivingBadge')} · ${t('demLegui.etaMinutes', { minutes: active.eta_minutes })}`
           : t('demLegui.driverArrivingBadge');
 
+  const navTarget = active.trip_status === 'in_progress'
+    ? active.destination_city?.latitude != null && active.destination_city?.longitude != null
+      ? { lat: active.destination_city.latitude, lng: active.destination_city.longitude, label: t('demLegui.navigateToDestination') }
+      : null
+    : { lat: active.pickup_latitude, lng: active.pickup_longitude, label: t('demLegui.navigateToPickup') };
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: spacing.sm }}>
+    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm }}>
       <button
         onClick={() => navigate(`/services/dem-legui/${active.id}`)}
         style={{
@@ -90,6 +97,28 @@ export function DemLeguiStatusWidget() {
         <SearchingCarIndicator size={22} />
         <span style={{ fontSize: 12, fontWeight: 700, color: colors.text }}>{label}</span>
       </button>
+      {navTarget && (
+        <button
+          onClick={() => openNavigation(navTarget.lat, navTarget.lng)}
+          aria-label={navTarget.label}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
+            border: 'none',
+            borderRadius: radius.lg,
+            backgroundColor: colors.primary,
+            color: '#fff',
+            fontSize: 15,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(19, 26, 23, 0.1)',
+          }}
+        >
+          🧭
+        </button>
+      )}
     </div>
   );
 }

@@ -644,5 +644,108 @@
   "spendingReport": {
     "title": "💳 Mes dépenses",
     "totalLabel": "Total dépensé"
+  },
+  "lending": {
+    "nav": {
+      "services": "Services",
+      "howItWorks": "Comment ça marche",
+      "contact": "Contact",
+      "openApp": "Ouvrir l'application"
+    },
+    "languageToggle": "العربية",
+    "slides": {
+      "intercity": {
+        "eyebrow": "Trajets Intercity",
+        "title": "Voyagez entre les villes en toute sérénité",
+        "subtitle": "Réservez une place dans un trajet partagé entre conducteurs et passagers, à l'heure et au prix qui vous conviennent."
+      },
+      "demLegui": {
+        "eyebrow": "Dem Légui",
+        "title": "Une course à la demande en quelques secondes",
+        "subtitle": "Indiquez où vous êtes et où vous allez — un conducteur en ligne à proximité accepte votre demande."
+      },
+      "livraison": {
+        "eyebrow": "Livraison",
+        "title": "Envoyez un colis, où que vous soyez",
+        "subtitle": "Faites livrer un colis en ville ou entre villes, suivi en direct jusqu'à la remise."
+      },
+      "anando": {
+        "eyebrow": "Anando",
+        "title": "Partagez un trajet instantané",
+        "subtitle": "Comme du covoiturage : publiez ou rejoignez un trajet qui part maintenant."
+      }
+    },
+    "heroCtaPrimary": "Commencer maintenant",
+    "heroCtaSecondary": "Découvrir les services",
+    "prevSlide": "Diapositive précédente",
+    "nextSlide": "Diapositive suivante",
+    "goToSlide": "Aller à la diapositive {{n}}",
+    "trust": {
+      "payment": "Paiement en espèces ou par portefeuille mobile",
+      "tracking": "Suivi en direct de chaque trajet",
+      "ratings": "Conducteurs notés par la communauté",
+      "sos": "Partage de position en cas de besoin"
+    },
+    "services": {
+      "eyebrow": "Nos services",
+      "title": "Tout ce dont vous avez besoin, une seule application",
+      "subtitle": "Du trajet intercity à la livraison de colis, Intercity rassemble tous vos déplacements et envois en un seul endroit.",
+      "intercity": {
+        "title": "Trajets Intercity",
+        "description": "Réservez une place dans un trajet intercity partagé, économique et confortable."
+      },
+      "demLegui": {
+        "title": "Dem Légui",
+        "description": "Demandez une course maintenant, comme un taxi à la demande."
+      },
+      "anando": {
+        "title": "Anando",
+        "description": "Partagez ou trouvez un trajet instantané, comme du covoiturage."
+      },
+      "livraison": {
+        "title": "Livraison",
+        "description": "Envoi de colis en ville et entre villes, suivi en direct."
+      },
+      "cargaison": {
+        "title": "Cargaison",
+        "description": "Transport de marchandises en gros volume."
+      },
+      "camion": {
+        "title": "Camion",
+        "description": "Déménagement et transport de gros objets."
+      },
+      "location": {
+        "title": "Location",
+        "description": "Location de véhicules avec ou sans chauffeur."
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "Comment ça marche",
+      "title": "Trois étapes, et vous êtes parti",
+      "step1": {
+        "title": "Choisissez un service",
+        "description": "Trajet intercity, course à la demande, livraison ou covoiturage instantané : indiquez simplement où vous allez."
+      },
+      "step2": {
+        "title": "Réservez en quelques clics",
+        "description": "Comparez les options disponibles, choisissez votre mode de paiement et confirmez."
+      },
+      "step3": {
+        "title": "Voyagez en toute confiance",
+        "description": "Suivez votre trajet en direct et restez en contact avec votre conducteur jusqu'à l'arrivée."
+      }
+    },
+    "finalCta": {
+      "title": "Prêt à prendre la route ?",
+      "subtitle": "Créez votre compte en quelques instants et réservez votre premier trajet dès aujourd'hui.",
+      "button": "Créer un compte"
+    },
+    "footer": {
+      "blurb": "Une plateforme de mobilité et de livraison qui connecte conducteurs et passagers pour des trajets intercity, des courses à la demande, du covoiturage instantané et l'envoi de colis.",
+      "servicesHeading": "Services",
+      "contactHeading": "Contact",
+      "company": "Promobile Sénégal",
+      "copyright": "© {{year}} Intercity — {{company}}"
+    }
   }
 }

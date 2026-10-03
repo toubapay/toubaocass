@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_flutter/utils/navigation.dart';
 
 import '../api/dem_legui_api.dart';
 import '../models.dart';
@@ -42,9 +43,11 @@ class _DemLeguiStatusWidgetState extends State<DemLeguiStatusWidget> {
   }
 
   void _load() {
-    fetchMyActiveDemLeguiRequest().then((request) {
-      if (mounted) setState(() => _active = request);
-    }).catchError((_) {});
+    fetchMyActiveDemLeguiRequest()
+        .then((request) {
+          if (mounted) setState(() => _active = request);
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -66,33 +69,79 @@ class _DemLeguiStatusWidgetState extends State<DemLeguiStatusWidget> {
       label = 'Chauffeur en route';
     }
 
+    double? navLat;
+    double? navLng;
+    if (active.tripStatus == 'in_progress') {
+      navLat = active.destinationCity?.latitude;
+      navLng = active.destinationCity?.longitude;
+    } else {
+      navLat = active.pickupLatitude;
+      navLng = active.pickupLongitude;
+    }
+
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: () => context.push('/dem-legui/requests/${active.id}'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+              onTap: () => context.push('/dem-legui/requests/${active.id}'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 6,
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.text)),
-              ],
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
+            if (navLat != null && navLng != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Material(
+                color: AppColors.primary,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => openNavigation(navLat!, navLng!),
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Center(
+                      child: Text('🧭', style: TextStyle(fontSize: 15)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
