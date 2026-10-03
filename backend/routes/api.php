@@ -11,6 +11,11 @@ use App\Http\Controllers\Api\Admin\FareSettingsController as AdminFareSettingsCo
 use App\Http\Controllers\Api\Admin\FinancialsController as AdminFinancialsController;
 use App\Http\Controllers\Api\Admin\InsuranceController as AdminInsuranceController;
 use App\Http\Controllers\Api\Admin\KycController as AdminKycController;
+use App\Http\Controllers\Api\Admin\LandingPageSettingsController as AdminLandingPageSettingsController;
+use App\Http\Controllers\Api\Admin\LandingServiceController as AdminLandingServiceController;
+use App\Http\Controllers\Api\Admin\LandingSlideController as AdminLandingSlideController;
+use App\Http\Controllers\Api\Admin\LandingStepController as AdminLandingStepController;
+use App\Http\Controllers\Api\Admin\LandingTrustItemController as AdminLandingTrustItemController;
 use App\Http\Controllers\Api\Admin\LiveTripsController as AdminLiveTripsController;
 use App\Http\Controllers\Api\Admin\ModuleController as AdminModuleController;
 use App\Http\Controllers\Api\Admin\SecurityAlertController as AdminSecurityAlertController;
@@ -35,6 +40,7 @@ use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverReportController;
 use App\Http\Controllers\Api\InboxController;
 use App\Http\Controllers\Api\InsuranceController;
+use App\Http\Controllers\Api\LandingPageController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ModuleStatusController;
 use App\Http\Controllers\Api\ProfileStatsController;
@@ -60,6 +66,7 @@ Route::prefix('auth')->group(function () {
 
 Route::get('cities', [CityController::class, 'index']);
 Route::get('modules/status', [ModuleStatusController::class, 'index']);
+Route::get('landing-page', [LandingPageController::class, 'index']);
 
 // SOS "share my live position" link — public, no login, signature-gated.
 Route::get('track/{type}/{id}', [TrackingController::class, 'show'])
@@ -357,6 +364,40 @@ Route::prefix('admin')->group(function () {
             Route::put('modules/{module}', [AdminModuleController::class, 'update']);
             Route::put('modules/{module}/status', [AdminModuleController::class, 'updateStatus']);
             Route::delete('modules/{module}', [AdminModuleController::class, 'destroy']);
+        });
+
+        // Content/branding for the public /lending marketing page —
+        // design (colors, logo, nav bar) plus the slides/services/trust
+        // band/how-it-works sections, all editable without a deploy.
+        Route::middleware('admin.permission:manage_landing_page')->group(function () {
+            Route::get('landing-page/settings', [AdminLandingPageSettingsController::class, 'show']);
+            Route::put('landing-page/settings', [AdminLandingPageSettingsController::class, 'update']);
+            Route::post('landing-page/settings/logo', [AdminLandingPageSettingsController::class, 'updateLogo']);
+            Route::delete('landing-page/settings/logo', [AdminLandingPageSettingsController::class, 'destroyLogo']);
+
+            Route::get('landing-page/slides', [AdminLandingSlideController::class, 'index']);
+            Route::post('landing-page/slides', [AdminLandingSlideController::class, 'store']);
+            Route::put('landing-page/slides/reorder', [AdminLandingSlideController::class, 'reorder']);
+            Route::put('landing-page/slides/{landingSlide}', [AdminLandingSlideController::class, 'update']);
+            Route::delete('landing-page/slides/{landingSlide}', [AdminLandingSlideController::class, 'destroy']);
+
+            Route::get('landing-page/services', [AdminLandingServiceController::class, 'index']);
+            Route::post('landing-page/services', [AdminLandingServiceController::class, 'store']);
+            Route::put('landing-page/services/reorder', [AdminLandingServiceController::class, 'reorder']);
+            Route::put('landing-page/services/{landingService}', [AdminLandingServiceController::class, 'update']);
+            Route::delete('landing-page/services/{landingService}', [AdminLandingServiceController::class, 'destroy']);
+
+            Route::get('landing-page/trust-items', [AdminLandingTrustItemController::class, 'index']);
+            Route::post('landing-page/trust-items', [AdminLandingTrustItemController::class, 'store']);
+            Route::put('landing-page/trust-items/reorder', [AdminLandingTrustItemController::class, 'reorder']);
+            Route::put('landing-page/trust-items/{landingTrustItem}', [AdminLandingTrustItemController::class, 'update']);
+            Route::delete('landing-page/trust-items/{landingTrustItem}', [AdminLandingTrustItemController::class, 'destroy']);
+
+            Route::get('landing-page/steps', [AdminLandingStepController::class, 'index']);
+            Route::post('landing-page/steps', [AdminLandingStepController::class, 'store']);
+            Route::put('landing-page/steps/reorder', [AdminLandingStepController::class, 'reorder']);
+            Route::put('landing-page/steps/{landingStep}', [AdminLandingStepController::class, 'update']);
+            Route::delete('landing-page/steps/{landingStep}', [AdminLandingStepController::class, 'destroy']);
         });
 
         // Operational trip/delivery management — cancel or reassign a

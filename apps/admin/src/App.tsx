@@ -12,6 +12,7 @@ import { InsurancePoliciesPage } from './pages/insurance/InsurancePoliciesPage';
 import { InsuranceProvidersPage } from './pages/insurance/InsuranceProvidersPage';
 import { KycQueuePage } from './pages/kyc/KycQueuePage';
 import { KycReviewPage } from './pages/kyc/KycReviewPage';
+import { LandingPagePage } from './pages/landingPage/LandingPagePage';
 import { LiveTripsPage } from './pages/live/LiveTripsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ModulesPage } from './pages/modules/ModulesPage';
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="/insurance/policies" element={<InsurancePoliciesPage />} />
         <Route path="/backups" element={<BackupsPage />} />
         <Route path="/modules" element={<ModulesPage />} />
+        <Route path="/landing-page" element={<LandingPagePage />} />
         <Route path="/staff" element={<StaffPage />} />
         <Route path="/audit-log" element={<AuditLogPage />} />
         <Route path="/settings" element={<SystemSettingsPage />} />
