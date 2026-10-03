@@ -32,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/insurance/policies', label: 'Polices vendues', permission: 'manage_insurance' },
   { to: '/backups', label: 'Sauvegardes', permission: 'manage_backups' },
   { to: '/modules', label: 'Modules', permission: 'manage_modules' },
+  { to: '/landing-page', label: 'Page de présentation', permission: 'manage_landing_page' },
   { to: '/staff', label: 'Équipe back-office', permission: 'manage_admins' },
   { to: '/audit-log', label: "Journal d'audit", permission: 'manage_admins' },
   { to: '/settings', label: 'Paramètres', permission: 'manage_system_settings' },

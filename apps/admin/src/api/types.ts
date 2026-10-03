@@ -463,3 +463,77 @@ export interface ApiError {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+export interface LandingNavLink {
+  label_fr: string;
+  label_ar: string;
+  href: string;
+}
+
+export interface LandingPageSettings {
+  brand_name: string;
+  logo_url: string | null;
+  primary_color: string;
+  primary_dark_color: string;
+  accent_color: string;
+  nav_links: LandingNavLink[];
+  open_app_label_fr: string;
+  open_app_label_ar: string;
+  hero_cta_primary_fr: string;
+  hero_cta_primary_ar: string;
+  hero_cta_secondary_fr: string;
+  hero_cta_secondary_ar: string;
+  final_cta_title_fr: string;
+  final_cta_title_ar: string;
+  final_cta_subtitle_fr: string;
+  final_cta_subtitle_ar: string;
+  final_cta_button_fr: string;
+  final_cta_button_ar: string;
+  footer_blurb_fr: string;
+  footer_blurb_ar: string;
+  footer_company_fr: string;
+  footer_company_ar: string;
+}
+
+export interface LandingSlide {
+  id: number;
+  emoji: string;
+  eyebrow_fr: string;
+  eyebrow_ar: string;
+  title_fr: string;
+  title_ar: string;
+  subtitle_fr: string;
+  subtitle_ar: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface LandingService {
+  id: number;
+  icon: string;
+  title_fr: string;
+  title_ar: string;
+  description_fr: string;
+  description_ar: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface LandingTrustItem {
+  id: number;
+  icon: string;
+  text_fr: string;
+  text_ar: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface LandingStep {
+  id: number;
+  title_fr: string;
+  title_ar: string;
+  description_fr: string;
+  description_ar: string;
+  sort_order: number;
+  is_active: boolean;
+}
