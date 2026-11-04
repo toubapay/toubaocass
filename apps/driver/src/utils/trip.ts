@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 import { Trip } from '../api/types';
 
 const DEPARTING_SOON_HOURS = 3;
@@ -25,6 +27,10 @@ export const FILL_STATE_LABEL: Record<BookingFillState, string> = {
   filling: 'Se remplit',
   full: 'Complet',
 };
+
+export function fillStateLabel(t: TFunction, state: BookingFillState): string {
+  return t(`common.fillState.${state}`);
+}
 
 export const RIDE_TYPE_LABEL: Record<string, string> = {
   standard: 'Standard',

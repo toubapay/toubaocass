@@ -42,6 +42,11 @@
       "completed": "Terminé",
       "cancelled": "Annulé"
     },
+    "fillState": {
+      "open": "Disponible",
+      "filling": "Se remplit",
+      "full": "Complet"
+    },
     "deliveryStatus": {
       "pending": "En attente",
       "accepted": "Acceptée",
@@ -273,6 +278,19 @@
     "farePerSeat": "{{fare}} FCFA / place",
     "emptyList": "Vous n'avez publié aucun trajet pour l'instant.",
     "publishNew": "Publier un nouveau trajet",
+    "active": {
+      "titleInProgress": "Trajet en cours",
+      "titleUpcoming": "Prochain trajet",
+      "departsIn": "Départ dans {{time}}",
+      "departingNow": "Départ imminent",
+      "seatsBooked_one": "{{count}} place réservée",
+      "seatsBooked_other": "{{count}} places réservées",
+      "seatsFree_one": "{{count}} place restante",
+      "seatsFree_other": "{{count}} places restantes"
+    },
+    "scheduledCount_one": "{{count}} trajet programmé",
+    "scheduledCount_other": "{{count}} trajets programmés",
+    "scheduledSectionTitle": "Trajets programmés",
     "post": {
       "title": "Publier un trajet",
       "kycNotice": "Votre vérification conducteur doit être approuvée avant de pouvoir publier des trajets. Consultez l'onglet Vérification.",

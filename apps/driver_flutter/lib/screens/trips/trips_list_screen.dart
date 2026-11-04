@@ -13,11 +13,14 @@ import '../../push/push_service.dart';
 import '../../state/auth_provider.dart';
 import '../../state/module_status_provider.dart';
 import '../../theme.dart';
+import '../../widgets/active_trip_card.dart';
 import '../../widgets/delivery_available_tile.dart';
 import '../../widgets/dem_legui_available_tile.dart';
 import '../../widgets/inbox_icon.dart';
 
 const _pollInterval = Duration(seconds: 20);
+
+const _visibleStatuses = {'scheduled', 'full', 'in_progress'};
 
 const _statusColor = {
   'scheduled': AppColors.success,
@@ -34,6 +37,18 @@ const _statusLabel = {
   'completed': 'Terminé',
   'cancelled': 'Annulé',
 };
+
+int _departureTimestamp(Trip trip) => DateTime.parse('${trip.departureDate}T${trip.departureTime}').millisecondsSinceEpoch;
+
+/// In-progress trips first, then whichever of the rest departs soonest.
+Trip? _pickFeaturedTrip(List<Trip> trips) {
+  for (final trip in trips) {
+    if (trip.status == 'in_progress') return trip;
+  }
+  if (trips.isEmpty) return null;
+  final upcoming = [...trips]..sort((a, b) => _departureTimestamp(a).compareTo(_departureTimestamp(b)));
+  return upcoming.first;
+}
 
 class TripsListScreen extends StatefulWidget {
   const TripsListScreen({
@@ -101,6 +116,11 @@ class _TripsListScreenState extends State<TripsListScreen> {
     final currency = NumberFormat.decimalPattern('fr');
     final moduleStatus = context.watch<ModuleStatusProvider>();
     final isOnline = context.watch<AuthProvider>().user?.driverProfile?.isOnline ?? false;
+
+    final visibleTrips = trips.where((trip) => _visibleStatuses.contains(trip.status)).toList();
+    final featuredTrip = _pickFeaturedTrip(visibleTrips);
+    final remainingTrips = visibleTrips.where((trip) => trip.id != featuredTrip?.id).toList()
+      ..sort((a, b) => _departureTimestamp(a).compareTo(_departureTimestamp(b)));
 
     return Scaffold(
       appBar: AppBar(
@@ -233,7 +253,7 @@ class _TripsListScreenState extends State<TripsListScreen> {
                     ),
                   if (moduleStatus.isEnabled('livraison'))
                     DeliveryAvailableTile(onTap: widget.onOpenDeliveries, fetchAvailable: fetchAvailableDeliveries),
-                  if (trips.isEmpty)
+                  if (featuredTrip == null)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Center(
@@ -242,7 +262,18 @@ class _TripsListScreenState extends State<TripsListScreen> {
                       ),
                     )
                   else
-                    ...trips.map((trip) => InkWell(
+                    ActiveTripCard(
+                      trip: featuredTrip,
+                      scheduledCount: visibleTrips.length,
+                      onTap: () => widget.onOpenTrip(featuredTrip.id),
+                    ),
+                  if (remainingTrips.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: Text('Trajets programmés', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    ),
+                  if (remainingTrips.isNotEmpty)
+                    ...remainingTrips.map((trip) => InkWell(
                           onTap: () => widget.onOpenTrip(trip.id),
                           child: Container(
                             padding: const EdgeInsets.all(AppSpacing.md),
