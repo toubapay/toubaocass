@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchMyTrips } from '../api/trips';
 import type { Trip } from '../api/types';
+import { ActiveTripCard } from '../components/ActiveTripCard';
 import { AnandoAvailableToast } from '../components/AnandoAvailableToast';
 import { Button } from '../components/Button';
 import { DemLeguiAvailableCard } from '../components/DemLeguiAvailableCard';
@@ -12,6 +13,20 @@ import { DriverAvailabilityToggle } from '../components/DriverAvailabilityToggle
 import { CenteredSpinner } from '../components/Spinner';
 import { useModuleStatus } from '../context/ModuleStatusContext';
 import { colors, radius, spacing } from '../theme';
+
+const VISIBLE_STATUSES = new Set(['scheduled', 'full', 'in_progress']);
+
+function departureTimestamp(trip: Trip): number {
+  return new Date(`${trip.departure_date}T${trip.departure_time}`).getTime();
+}
+
+/** In-progress trips first, then whichever of the rest departs soonest. */
+function pickFeaturedTrip(trips: Trip[]): Trip | null {
+  const inProgress = trips.find((t) => t.status === 'in_progress');
+  if (inProgress) return inProgress;
+  const upcoming = [...trips].sort((a, b) => departureTimestamp(a) - departureTimestamp(b));
+  return upcoming[0] ?? null;
+}
 
 const STATUS_COLOR: Record<string, string> = {
   scheduled: colors.success,
@@ -48,6 +63,12 @@ export function TripsListPage() {
   }, [load]);
 
   if (loading) return <CenteredSpinner />;
+
+  const visibleTrips = trips.filter((trip) => VISIBLE_STATUSES.has(trip.status));
+  const featuredTrip = pickFeaturedTrip(visibleTrips);
+  const remainingTrips = visibleTrips
+    .filter((trip) => trip.id !== featuredTrip?.id)
+    .sort((a, b) => departureTimestamp(a) - departureTimestamp(b));
 
   return (
     <div>
@@ -137,44 +158,53 @@ export function TripsListPage() {
         </span>
       </button>
 
-      {trips.length === 0 ? (
+      {featuredTrip ? (
+        <ActiveTripCard trip={featuredTrip} scheduledCount={visibleTrips.length} />
+      ) : (
         <p style={{ color: colors.textMuted, fontSize: 16, textAlign: 'center', margin: `${spacing.lg}px 0` }}>
           {t('trips.emptyList')}
         </p>
-      ) : (
-        trips.map((trip) => (
-          <button
-            key={trip.id}
-            onClick={() => navigate(`/trips/${trip.id}`)}
-            style={{
-              display: 'block',
-              width: '100%',
-              textAlign: 'left',
-              backgroundColor: colors.surface,
-              borderRadius: radius.md,
-              padding: spacing.md,
-              marginBottom: spacing.md,
-              border: `1px solid ${colors.border}`,
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, flexShrink: 1, marginRight: spacing.sm }}>
-                {trip.origin_city?.name} → {trip.destination_city?.name}
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: STATUS_COLOR[trip.status] }}>
-                {t(`common.tripStatus.${trip.status}`)}
-              </span>
-            </div>
-            <p style={{ fontSize: 14, color: colors.textMuted, margin: `${spacing.xs}px 0 0` }}>
-              {trip.departure_date} à {trip.departure_time} ·{' '}
-              {t('trips.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
-            </p>
-            <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, margin: `${spacing.xs}px 0 0` }}>
-              {t('trips.farePerSeat', { fare: trip.fare.toLocaleString() })}
-            </p>
-          </button>
-        ))
+      )}
+
+      {remainingTrips.length > 0 && (
+        <>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: colors.textMuted, margin: `${spacing.md}px 0 ${spacing.sm}px` }}>
+            {t('trips.scheduledSectionTitle')}
+          </h2>
+          {remainingTrips.map((trip) => (
+            <button
+              key={trip.id}
+              onClick={() => navigate(`/trips/${trip.id}`)}
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'left',
+                backgroundColor: colors.surface,
+                borderRadius: radius.md,
+                padding: spacing.md,
+                marginBottom: spacing.md,
+                border: `1px solid ${colors.border}`,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: colors.text, flexShrink: 1, marginRight: spacing.sm }}>
+                  {trip.origin_city?.name} → {trip.destination_city?.name}
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: STATUS_COLOR[trip.status] }}>
+                  {t(`common.tripStatus.${trip.status}`)}
+                </span>
+              </div>
+              <p style={{ fontSize: 14, color: colors.textMuted, margin: `${spacing.xs}px 0 0` }}>
+                {trip.departure_date} à {trip.departure_time} ·{' '}
+                {t('trips.seatsRemaining', { available: trip.available_seats, total: trip.total_seats })}
+              </p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: colors.primary, margin: `${spacing.xs}px 0 0` }}>
+                {t('trips.farePerSeat', { fare: trip.fare.toLocaleString() })}
+              </p>
+            </button>
+          ))}
+        </>
       )}
 
       <Button label={t('trips.publishNew')} onClick={() => navigate('/post-trip')} />

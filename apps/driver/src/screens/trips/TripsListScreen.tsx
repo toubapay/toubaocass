@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchMyTrips } from '../../api/trips';
 import { Trip } from '../../api/types';
+import { ActiveTripCard } from '../../components/ActiveTripCard';
 import { AnandoAvailableToast } from '../../components/AnandoAvailableToast';
 import { Button } from '../../components/Button';
 import { DriverAvailabilityToggle } from '../../components/DriverAvailabilityToggle';
@@ -17,6 +18,20 @@ import { colors, radius, spacing } from '../../theme';
 type Props = NativeStackScreenProps<TripsStackParamList, 'TripsList'>;
 
 const POLL_INTERVAL_MS = 20000;
+
+const VISIBLE_STATUSES = new Set(['scheduled', 'full', 'in_progress']);
+
+function departureTimestamp(trip: Trip): number {
+  return new Date(`${trip.departure_date}T${trip.departure_time}`).getTime();
+}
+
+/** In-progress trips first, then whichever of the rest departs soonest. */
+function pickFeaturedTrip(trips: Trip[]): Trip | null {
+  const inProgress = trips.find((t) => t.status === 'in_progress');
+  if (inProgress) return inProgress;
+  const upcoming = [...trips].sort((a, b) => departureTimestamp(a) - departureTimestamp(b));
+  return upcoming[0] ?? null;
+}
 
 const STATUS_COLOR: Record<string, string> = {
   scheduled: colors.success,
@@ -59,6 +74,12 @@ export function TripsListScreen({ navigation }: Props) {
       </Screen>
     );
   }
+
+  const visibleTrips = trips.filter((trip) => VISIBLE_STATUSES.has(trip.status));
+  const featuredTrip = pickFeaturedTrip(visibleTrips);
+  const remainingTrips = visibleTrips
+    .filter((trip) => trip.id !== featuredTrip?.id)
+    .sort((a, b) => departureTimestamp(a) - departureTimestamp(b));
 
   return (
     <Screen>
@@ -106,8 +127,20 @@ export function TripsListScreen({ navigation }: Props) {
       </Pressable>
 
       <FlatList
-        data={trips}
+        data={remainingTrips}
         keyExtractor={(item) => String(item.id)}
+        ListHeaderComponent={
+          <>
+            {featuredTrip && (
+              <ActiveTripCard
+                trip={featuredTrip}
+                scheduledCount={visibleTrips.length}
+                onPress={() => navigation.navigate('TripDetail', { tripId: featuredTrip.id })}
+              />
+            )}
+            {remainingTrips.length > 0 && <Text style={styles.sectionTitle}>{t('trips.scheduledSectionTitle')}</Text>}
+          </>
+        }
         renderItem={({ item }) => (
           <Pressable style={styles.card} onPress={() => navigation.navigate('TripDetail', { tripId: item.id })}>
             <View style={styles.rowBetween}>
@@ -125,9 +158,11 @@ export function TripsListScreen({ navigation }: Props) {
           </Pressable>
         )}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>{t('trips.emptyList')}</Text>
-          </View>
+          featuredTrip ? null : (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>{t('trips.emptyList')}</Text>
+            </View>
+          )
         }
       />
       <Button label={t('trips.publishNew')} onPress={() => navigation.navigate('PostTrip')} />
@@ -138,6 +173,7 @@ export function TripsListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.sm },
   mapCard: {
     flexDirection: 'row',
     alignItems: 'center',

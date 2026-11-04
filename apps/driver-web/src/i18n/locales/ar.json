@@ -42,6 +42,11 @@
       "completed": "منتهية",
       "cancelled": "ملغاة"
     },
+    "fillState": {
+      "open": "متاح",
+      "filling": "يمتلئ",
+      "full": "مكتمل"
+    },
     "deliveryStatus": {
       "pending": "قيد الانتظار",
       "accepted": "مقبولة",
@@ -273,6 +278,19 @@
     "farePerSeat": "{{fare}} FCFA / مقعد",
     "emptyList": "لم تنشر أي رحلة حتى الآن.",
     "publishNew": "نشر رحلة جديدة",
+    "active": {
+      "titleInProgress": "الرحلة الجارية",
+      "titleUpcoming": "الرحلة القادمة",
+      "departsIn": "الانطلاق خلال {{time}}",
+      "departingNow": "الانطلاق قريب جدًا",
+      "seatsBooked_one": "مقعد محجوز واحد",
+      "seatsBooked_other": "{{count}} مقاعد محجوزة",
+      "seatsFree_one": "مقعد واحد متبقٍ",
+      "seatsFree_other": "{{count}} مقاعد متبقية"
+    },
+    "scheduledCount_one": "رحلة واحدة مجدولة",
+    "scheduledCount_other": "{{count}} رحلات مجدولة",
+    "scheduledSectionTitle": "الرحلات المجدولة",
     "post": {
       "title": "نشر رحلة",
       "kycNotice": "يجب أن تتم الموافقة على التحقق الخاص بك كسائق قبل أن تتمكن من نشر الرحلات. راجع علامة التبويب التحقق.",
