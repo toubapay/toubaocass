@@ -1,11 +1,35 @@
 import L from 'leaflet';
-import { CircleMarker, MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet';
+import { useEffect } from 'react';
+import { CircleMarker, MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet';
 
 import type { Trip } from '../api/types';
 import { colors, radius } from '../theme';
 
 function interpolate(a: [number, number], b: [number, number], t: number): [number, number] {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+
+/**
+ * Leaflet measures its container's width once, at construction — inside
+ * this card, that happens while the trips list is still settling its own
+ * layout, so it can latch onto a too-narrow width and never notice the
+ * container has since reached its real size (rendering tiles for only part
+ * of the box, the rest left blank). Recompute once post-layout, and again
+ * on any later resize.
+ */
+function FixStaleSize() {
+  const map = useMap();
+  useEffect(() => {
+    const id = requestAnimationFrame(() => map.invalidateSize());
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(container);
+    return () => {
+      cancelAnimationFrame(id);
+      observer.disconnect();
+    };
+  }, [map]);
+  return null;
 }
 
 function carIcon(bearingDeg: number, idle: boolean) {
@@ -61,6 +85,7 @@ export function MiniRouteMap({ trip }: { trip: Trip }) {
         touchZoom={false}
         attributionControl={false}
       >
+        <FixStaleSize />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Polyline positions={[originPos, destPos]} pathOptions={{ color: colors.primary, weight: 3, dashArray: '5 7' }} />
         <CircleMarker
