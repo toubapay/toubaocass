@@ -290,7 +290,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Admin back-office — separate admin_users identity/guard, not riders/drivers.
 Route::prefix('admin')->group(function () {
-    Route::post('login', [AdminAuthController::class, 'login']);
+    Route::post('login', [AdminAuthController::class, 'login'])->middleware('throttle:admin-login');
 
     Route::middleware(['auth:sanctum', 'admin.auth'])->group(function () {
         Route::get('me', [AdminAuthController::class, 'me']);

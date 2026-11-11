@@ -91,5 +91,14 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(10)->by($key);
         });
+
+        // Admin back-office login — same email+IP keying as otp/pin above, so
+        // one admin account can't be brute-forced and one IP can't spray
+        // many admin emails.
+        RateLimiter::for('admin-login', function (Request $request) {
+            $key = mb_strtolower((string) $request->input('email')).'|'.$request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
     }
 }
