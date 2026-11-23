@@ -167,6 +167,8 @@ export function DemLeguiEnRouteTracker({
               <img
                 src={trip.driver.photo_url}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />
             ) : (
@@ -201,7 +203,13 @@ export function DemLeguiEnRouteTracker({
             </div>
           </div>
           {trip.car?.photo_url ? (
-            <img src={trip.car.photo_url} alt="" style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: radius.sm }} />
+            <img
+              src={trip.car.photo_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: radius.sm }}
+            />
           ) : (
             <span style={{ fontSize: 34 }}>🚗</span>
           )}

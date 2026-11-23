@@ -134,7 +134,13 @@ export function GeneralSettingsTab() {
             {logoBusy ? (
               '…'
             ) : settings.logo_url ? (
-              <img src={settings.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img
+                src={settings.logo_url}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
             ) : (
               <span style={{ fontSize: 24 }}>🚌</span>
             )}
