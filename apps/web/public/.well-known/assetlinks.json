@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.intercity.rider",
+      "sha256_cert_fingerprints": [
+        "FA:D9:C2:5A:94:6A:78:53:F2:1D:5E:14:B1:B3:77:6D:86:3D:D7:9A:9D:12:4D:B4:FB:94:D4:1B:D5:5D:FD:BA"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.intercity.driver",
+      "sha256_cert_fingerprints": [
+        "48:A3:EE:29:0D:00:A3:A3:DC:BE:1B:D0:C1:39:F4:DA:E1:1F:E6:14:38:E0:84:84:0E:AE:02:A0:31:BC:F5:61"
+      ]
+    }
+  }
+]
