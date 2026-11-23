@@ -335,7 +335,7 @@ export function LandingPage() {
           <div className="lending-footer-grid">
             <div>
               <div className="lending-footer-brand">
-                <img src={logoUrl} alt={brandName} />
+                <img src={logoUrl} alt={brandName} loading="lazy" decoding="async" />
                 {brandName}
               </div>
               <p>{footerBlurb}</p>

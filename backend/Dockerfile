@@ -12,7 +12,8 @@ RUN install-php-extensions \
     posix \
     opcache \
     zip \
-    intl
+    intl \
+    gd
 
 # PHP's shipped defaults (upload_max_filesize=2M, post_max_size=8M) are
 # well below what a phone camera photo actually is (routinely 5-15MB) and

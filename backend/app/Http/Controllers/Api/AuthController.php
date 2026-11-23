@@ -13,6 +13,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\OtpService;
 use App\Services\PinService;
+use App\Support\CompressedImageUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -95,7 +96,7 @@ class AuthController extends Controller
             Storage::delete($user->photo_path);
         }
 
-        $user->update(['photo_path' => $request->file('photo')->store('profile-photos')]);
+        $user->update(['photo_path' => CompressedImageUpload::store($request->file('photo'), 'profile-photos')]);
 
         return new UserResource($user->fresh()->load('driverProfile'));
     }

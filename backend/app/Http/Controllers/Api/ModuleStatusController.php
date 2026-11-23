@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Module;
+use App\Services\ModuleRegistry;
 use Illuminate\Http\Request;
 
 class ModuleStatusController extends Controller
@@ -20,15 +20,15 @@ class ModuleStatusController extends Controller
      * off for drivers (or vice versa) without either app needing its own
      * endpoint. Omitting it (unknown caller) returns the master switch only.
      */
-    public function index(Request $request)
+    public function index(Request $request, ModuleRegistry $modules)
     {
         $app = $request->query('app');
 
-        return Module::query()->get(['key', 'is_enabled', 'enabled_for_rider', 'enabled_for_driver'])
-            ->mapWithKeys(fn (Module $module) => [
-                $module->key => $module->is_enabled && match ($app) {
-                    'rider' => $module->enabled_for_rider,
-                    'driver' => $module->enabled_for_driver,
+        return collect($modules->all())
+            ->mapWithKeys(fn (array $module) => [
+                $module['key'] => $module['is_enabled'] && match ($app) {
+                    'rider' => $module['enabled_for_rider'],
+                    'driver' => $module['enabled_for_driver'],
                     default => true,
                 },
             ]);

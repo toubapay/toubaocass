@@ -1,13 +1,27 @@
 import 'package:shared_flutter/api/pagination.dart';
 
 import '../models.dart';
+import '../utils/offline_cache.dart';
 import 'client.dart';
 
 export 'package:shared_flutter/api/pagination.dart';
 
+const _myTripsCacheKey = 'driver_my_trips';
+
 Future<Paginated<Trip>> fetchMyTrips() async {
   final response = await ApiClient.instance.dio.get('/driver/trips');
-  return Paginated.fromJson(response.data as Map<String, dynamic>, Trip.fromJson);
+  final data = response.data as Map<String, dynamic>;
+  saveOfflineCache(_myTripsCacheKey, data);
+  return Paginated.fromJson(data, Trip.fromJson);
+}
+
+/// The driver's last successfully fetched trip list, read back from
+/// on-device storage — used when a fresh fetch fails so the home screen can
+/// still show the last-known trips instead of going blank while offline.
+Future<Paginated<Trip>?> fetchMyTripsFromCache() async {
+  final data = await loadOfflineCache<Map<String, dynamic>>(_myTripsCacheKey, (json) => json as Map<String, dynamic>);
+  if (data == null) return null;
+  return Paginated.fromJson(data, Trip.fromJson);
 }
 
 Future<Trip> fetchMyTrip(int tripId) async {

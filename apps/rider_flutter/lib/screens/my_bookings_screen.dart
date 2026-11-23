@@ -24,6 +24,7 @@ class MyBookingsScreen extends StatefulWidget {
 class _MyBookingsScreenState extends State<MyBookingsScreen> {
   List<Booking> bookings = [];
   bool loading = true;
+  bool showingCachedBookings = false;
 
   @override
   void initState() {
@@ -35,9 +36,26 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     setState(() => loading = true);
     try {
       final result = await fetchMyBookings();
-      setState(() => bookings = result.data);
+      if (mounted) {
+        setState(() {
+          bookings = result.data;
+          showingCachedBookings = false;
+        });
+      }
+    } catch (e) {
+      // No connectivity or the backend is down — fall back to whatever we
+      // last fetched successfully rather than leaving the screen blank.
+      final cached = await fetchMyBookingsFromCache();
+      if (cached != null && mounted) {
+        setState(() {
+          bookings = cached.data;
+          showingCachedBookings = true;
+        });
+      } else {
+        rethrow;
+      }
     } finally {
-      setState(() => loading = false);
+      if (mounted) setState(() => loading = false);
     }
   }
 
@@ -126,8 +144,26 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(AppSpacing.md),
-                      itemCount: bookings.length,
+                      itemCount: bookings.length + (showingCachedBookings ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (showingCachedBookings) {
+                          if (index == 0) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(AppRadius.md),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: const Text(
+                                '📡 Hors connexion — données enregistrées affichées',
+                                style: TextStyle(fontSize: 12.5, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                              ),
+                            );
+                          }
+                          index -= 1;
+                        }
                         final booking = bookings[index];
                         return InkWell(
                           onTap: () => widget.onOpenTrip(booking.trip.id),

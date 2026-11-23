@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\LandingSlideResource;
 use App\Models\LandingSlide;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LandingSlideController extends Controller
 {
@@ -28,6 +29,8 @@ class LandingSlideController extends Controller
         $slide = LandingSlide::create($data);
         $this->auditLog->record($request->user(), 'landing_page.slide.create', "Diapositive \"{$slide->title_fr}\" créée.", $slide);
 
+        Cache::forget('landing_page:public');
+
         return new LandingSlideResource($slide);
     }
 
@@ -35,6 +38,8 @@ class LandingSlideController extends Controller
     {
         $landingSlide->update($request->validated());
         $this->auditLog->record($request->user(), 'landing_page.slide.update', "Diapositive \"{$landingSlide->title_fr}\" modifiée.", $landingSlide, $request->validated());
+
+        Cache::forget('landing_page:public');
 
         return new LandingSlideResource($landingSlide->fresh());
     }
@@ -45,6 +50,8 @@ class LandingSlideController extends Controller
         $landingSlide->delete();
 
         $this->auditLog->record($request->user(), 'landing_page.slide.delete', "Diapositive \"{$title}\" supprimée.");
+
+        Cache::forget('landing_page:public');
 
         return response()->json(null, 204);
     }
@@ -58,6 +65,8 @@ class LandingSlideController extends Controller
         }
 
         $this->auditLog->record($request->user(), 'landing_page.slide.reorder', 'Diapositives réordonnées.');
+
+        Cache::forget('landing_page:public');
 
         return LandingSlideResource::collection(LandingSlide::query()->orderBy('sort_order')->get());
     }

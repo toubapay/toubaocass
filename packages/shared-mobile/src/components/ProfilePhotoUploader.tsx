@@ -1,6 +1,7 @@
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { colors, spacing } from '../theme';
@@ -71,7 +72,7 @@ export function ProfilePhotoUploader({
         {busy ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : photoUrl ? (
-          <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
+          <Image source={{ uri: photoUrl }} style={styles.avatarImage} cachePolicy="memory-disk" />
         ) : (
           <Text style={styles.initial}>{initial}</Text>
         )}

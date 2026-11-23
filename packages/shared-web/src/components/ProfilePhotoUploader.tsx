@@ -78,7 +78,7 @@ export function ProfilePhotoUploader({
           {busy ? (
             <Spinner size={24} />
           ) : photoUrl ? (
-            <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={photoUrl} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <span style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>{initial}</span>
           )}

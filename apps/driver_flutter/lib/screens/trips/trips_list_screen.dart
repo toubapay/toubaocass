@@ -81,6 +81,7 @@ class TripsListScreen extends StatefulWidget {
 class _TripsListScreenState extends State<TripsListScreen> {
   List<Trip> trips = [];
   bool loading = true;
+  bool showingCachedTrips = false;
   int? walletBalance;
   Timer? _pollTimer;
 
@@ -105,7 +106,24 @@ class _TripsListScreenState extends State<TripsListScreen> {
     if (!silent) setState(() => loading = true);
     try {
       final result = await fetchMyTrips();
-      if (mounted) setState(() => trips = result.data);
+      if (mounted) {
+        setState(() {
+          trips = result.data;
+          showingCachedTrips = false;
+        });
+      }
+    } catch (e) {
+      // No connectivity or the backend is down — fall back to whatever we
+      // last fetched successfully rather than leaving the screen blank.
+      final cached = await fetchMyTripsFromCache();
+      if (cached != null && mounted) {
+        setState(() {
+          trips = cached.data;
+          showingCachedTrips = true;
+        });
+      } else if (!silent) {
+        rethrow;
+      }
     } finally {
       if (!silent && mounted) setState(() => loading = false);
     }
@@ -155,6 +173,20 @@ class _TripsListScreenState extends State<TripsListScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 children: [
+                  if (showingCachedTrips)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Text(
+                        '📡 Hors connexion — données enregistrées affichées',
+                        style: TextStyle(fontSize: 12.5, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   InkWell(
                     onTap: widget.onPostTrip,
                     borderRadius: BorderRadius.circular(AppRadius.md),

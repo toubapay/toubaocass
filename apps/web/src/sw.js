@@ -1,7 +1,12 @@
-// Minimal service worker: exists only to satisfy the browser's PWA
-// installability checks (manifest + registered SW with a fetch handler).
-// Deliberately does no caching — trip/booking data changes constantly, so
-// serving stale responses would be worse than no offline support at all.
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { NavigationRoute, registerRoute } from 'workbox-routing';
+import { NetworkFirst } from 'workbox-strategies';
+
+// Injected at build time by vite-plugin-pwa (injectManifest) with the real
+// list of built assets — precaching these is what makes the app shell
+// (JS/CSS/HTML/icons) load offline after the first successful visit.
+precacheAndRoute(self.__WB_MANIFEST);
+
 self.addEventListener('install', () => {
   self.skipWaiting();
 });
@@ -10,9 +15,19 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(fetch(event.request));
-});
+// SPA offline support: a direct/refreshed navigation while offline still
+// gets the precached index.html instead of the browser's own "no internet"
+// page, so client-side routing can take over once back in-app.
+registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
+
+// Mostly-static reference data (cities, module on/off flags, the landing
+// page's marketing content) — safe to serve from cache when offline or the
+// API is slow, but still tries the network first since none of it is
+// frequent enough to justify ever showing it stale on a normal connection.
+registerRoute(
+  ({ url }) => ['/cities', '/modules/status', '/landing-page'].some((path) => url.pathname.endsWith(path)),
+  new NetworkFirst({ cacheName: 'api-reference-data', networkTimeoutSeconds: 4 }),
+);
 
 // Firebase Cloud Messaging: shows a system notification for pushes that
 // arrive while no tab has focus (the foreground case is handled in-app via
@@ -22,7 +37,7 @@ self.addEventListener('fetch', (event) => {
 //
 // Wrapped in try/catch: until real Firebase credentials are filled in
 // above, or if the gstatic.com scripts fail to load, this must not break
-// the core service worker (installability, fetch passthrough) above.
+// the core service worker (precaching, offline navigation) above.
 try {
   importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
   importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');

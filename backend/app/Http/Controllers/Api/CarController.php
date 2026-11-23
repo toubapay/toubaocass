@@ -7,6 +7,7 @@ use App\Http\Requests\Driver\StoreCarRequest;
 use App\Http\Requests\Driver\UpdateCarRequest;
 use App\Http\Resources\CarResource;
 use App\Models\Car;
+use App\Support\CompressedImageUpload;
 use Illuminate\Http\Request;
 
 class CarController extends Controller
@@ -23,7 +24,7 @@ class CarController extends Controller
         $data = $request->safe()->except('photo');
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('cars');
+            $data['photo_path'] = CompressedImageUpload::store($request->file('photo'), 'cars');
         }
 
         $car = $request->user()->cars()->create($data);
@@ -38,7 +39,7 @@ class CarController extends Controller
         $data = $request->safe()->except('photo');
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('cars');
+            $data['photo_path'] = CompressedImageUpload::store($request->file('photo'), 'cars');
         }
 
         $car->update($data);

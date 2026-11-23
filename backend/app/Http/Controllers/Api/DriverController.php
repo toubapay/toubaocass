@@ -9,6 +9,7 @@ use App\Http\Requests\Driver\SubmitKycRequest;
 use App\Http\Resources\DriverProfileResource;
 use App\Models\DriverProfile;
 use App\Services\KycReviewService;
+use App\Support\CompressedImageUpload;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
@@ -33,7 +34,7 @@ class DriverController extends Controller
         $disk = config('filesystems.kyc_disk');
         $userId = $request->user()->id;
 
-        $path = $request->file('license_document')->store("kyc/{$userId}", $disk);
+        $path = CompressedImageUpload::store($request->file('license_document'), "kyc/{$userId}", $disk);
 
         $extracted = $ocr->extractLicenseInfo($path, $disk);
 

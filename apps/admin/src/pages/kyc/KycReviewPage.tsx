@@ -61,7 +61,13 @@ function DocumentPreview({ profileId, field, available }: { profileId: number; f
         ) : error ? (
           <span style={{ fontSize: 13, color: colors.danger }}>Erreur de chargement</span>
         ) : url ? (
-          <img src={url} alt={DOCUMENT_LABELS[field]} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <img
+            src={url}
+            alt={DOCUMENT_LABELS[field]}
+            loading="lazy"
+            decoding="async"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
         ) : (
           <span style={{ fontSize: 13, color: colors.textMuted }}>Chargement…</span>
         )}

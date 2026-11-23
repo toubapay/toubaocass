@@ -226,6 +226,7 @@
   },
   "trips": {
     "listTitle": "Mes trajets",
+    "offlineNotice": "Hors ligne — dernières données connues",
     "instantCardTitle": "Départ immédiat",
     "instantCardSubtitle": "Publiez un trajet maintenant, sans date à choisir",
     "mapCardTitle": "Définir un point de départ sur la carte",

@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\LandingServiceResource;
 use App\Models\LandingService;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LandingServiceController extends Controller
 {
@@ -28,6 +29,8 @@ class LandingServiceController extends Controller
         $service = LandingService::create($data);
         $this->auditLog->record($request->user(), 'landing_page.service.create', "Service \"{$service->title_fr}\" créé.", $service);
 
+        Cache::forget('landing_page:public');
+
         return new LandingServiceResource($service);
     }
 
@@ -35,6 +38,8 @@ class LandingServiceController extends Controller
     {
         $landingService->update($request->validated());
         $this->auditLog->record($request->user(), 'landing_page.service.update', "Service \"{$landingService->title_fr}\" modifié.", $landingService, $request->validated());
+
+        Cache::forget('landing_page:public');
 
         return new LandingServiceResource($landingService->fresh());
     }
@@ -45,6 +50,8 @@ class LandingServiceController extends Controller
         $landingService->delete();
 
         $this->auditLog->record($request->user(), 'landing_page.service.delete', "Service \"{$title}\" supprimé.");
+
+        Cache::forget('landing_page:public');
 
         return response()->json(null, 204);
     }
@@ -58,6 +65,8 @@ class LandingServiceController extends Controller
         }
 
         $this->auditLog->record($request->user(), 'landing_page.service.reorder', 'Services réordonnés.');
+
+        Cache::forget('landing_page:public');
 
         return LandingServiceResource::collection(LandingService::query()->orderBy('sort_order')->get());
     }

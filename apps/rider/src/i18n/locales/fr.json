@@ -227,6 +227,7 @@
   },
   "myBookings": {
     "title": "Mes réservations",
+    "offlineNotice": "Hors ligne — dernières données connues",
     "empty": "Vous n'avez pas encore de réservation. Recherchez un trajet pour commencer.",
     "statusConfirmed": "Confirmée",
     "statusCancelled": "Annulée",
