@@ -1,0 +1,19 @@
+# Signing keys must never be committed — see android/README (or the PR
+# description) for where the real keystore and its passwords are kept.
+*.keystore
+*.jks
+*.keystore.password
+
+# Local SDK path, set by Android Studio / Gradle on whichever machine builds
+# this project — never the same across machines.
+local.properties
+
+# Build output.
+build/
+.gradle/
+*.apk
+*.aab
+
+# Android Studio project files.
+.idea/
+*.iml
