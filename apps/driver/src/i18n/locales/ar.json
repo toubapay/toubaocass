@@ -226,6 +226,7 @@
   },
   "trips": {
     "listTitle": "رحلاتي",
+    "offlineNotice": "غير متصل — آخر بيانات معروفة",
     "instantCardTitle": "مغادرة فورية",
     "instantCardSubtitle": "انشر رحلة الآن دون اختيار تاريخ",
     "mapCardTitle": "تحديد نقطة انطلاق على الخريطة",

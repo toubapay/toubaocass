@@ -14,6 +14,7 @@ import { Screen } from '../../components/Screen';
 import { useModuleStatus } from '../../context/ModuleStatusContext';
 import { TripsStackParamList } from '../../navigation/types';
 import { colors, radius, spacing } from '../../theme';
+import { withOfflineCache } from '../../utils/offlineCache';
 
 type Props = NativeStackScreenProps<TripsStackParamList, 'TripsList'>;
 
@@ -46,11 +47,16 @@ export function TripsListScreen({ navigation }: Props) {
   const { isModuleEnabled } = useModuleStatus();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stale, setStale] = useState(false);
 
   const load = useCallback((opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
-    fetchMyTrips()
-      .then((res) => setTrips(res.data))
+    withOfflineCache('my-trips', fetchMyTrips)
+      .then(({ data, stale }) => {
+        setTrips(data.data);
+        setStale(stale);
+      })
+      .catch(() => {})
       .finally(() => {
         if (!opts?.silent) setLoading(false);
       });
@@ -85,6 +91,7 @@ export function TripsListScreen({ navigation }: Props) {
     <Screen>
       {isModuleEnabled('anando') && <AnandoAvailableToast />}
       <Text style={styles.title}>{t('trips.listTitle')}</Text>
+      {stale && <Text style={styles.offlineNotice}>{t('trips.offlineNotice')}</Text>}
 
       {isModuleEnabled('dem_legui') && <DriverAvailabilityToggle />}
 
@@ -173,6 +180,16 @@ export function TripsListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  offlineNotice: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.md,
+  },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.sm },
   mapCard: {
     flexDirection: 'row',

@@ -231,6 +231,7 @@
   },
   "myBookings": {
     "title": "حجوزاتي",
+    "offlineNotice": "غير متصل — آخر بيانات معروفة",
     "empty": "ليس لديك أي حجز بعد. ابحث عن رحلة للبدء.",
     "statusConfirmed": "مؤكد",
     "statusCancelled": "ملغى",

@@ -12,6 +12,7 @@ import { Screen } from '../components/Screen';
 import { BookingsStackParamList } from '../navigation/types';
 import { colors, radius, spacing } from '../theme';
 import { bookingStage, bookingStageLabel, hasDeparted, hasDepartedMoreThanADayAgo } from '../utils/trip';
+import { withOfflineCache } from '../utils/offlineCache';
 
 const STAGE_COLOR: Record<string, string> = {
   confirmed: colors.success,
@@ -26,12 +27,17 @@ export function MyBookingsScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stale, setStale] = useState(false);
   const [modifyingBookingId, setModifyingBookingId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
-    fetchMyBookings()
-      .then((res) => setBookings(res.data))
+    withOfflineCache('my-bookings', fetchMyBookings)
+      .then(({ data, stale }) => {
+        setBookings(data.data);
+        setStale(stale);
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -86,6 +92,7 @@ export function MyBookingsScreen({ navigation }: Props) {
   return (
     <Screen>
       <Text style={styles.title}>{t('myBookings.title')}</Text>
+      {stale && <Text style={styles.offlineNotice}>{t('myBookings.offlineNotice')}</Text>}
       <FlatList
         data={bookings}
         keyExtractor={(item) => String(item.id)}
@@ -167,6 +174,16 @@ export function MyBookingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  offlineNotice: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.md,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
