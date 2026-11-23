@@ -14,7 +14,9 @@ use App\Http\Resources\InsuranceProviderResource;
 use App\Models\Car;
 use App\Models\InsuranceProvider;
 use App\Services\Insurance\InsuranceComparisonService;
+use App\Support\CompressedImageUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class InsuranceController extends Controller
 {
@@ -22,9 +24,12 @@ class InsuranceController extends Controller
 
     public function providers()
     {
-        return InsuranceProviderResource::collection(
-            InsuranceProvider::where('is_active', true)->orderBy('name')->get()
+        $providers = Cache::rememberForever(
+            'insurance_providers:active',
+            fn () => InsuranceProvider::where('is_active', true)->orderBy('name')->get(),
         );
+
+        return InsuranceProviderResource::collection($providers);
     }
 
     public function quote(QuoteInsuranceRequest $request)
@@ -71,9 +76,9 @@ class InsuranceController extends Controller
         $disk = config('filesystems.kyc_disk');
         $userId = $request->user()->id;
 
-        $frontPath = $request->file('carte_grise_front')->store("insurance-documents/{$userId}", $disk);
+        $frontPath = CompressedImageUpload::store($request->file('carte_grise_front'), "insurance-documents/{$userId}", $disk);
         $backPath = $request->hasFile('carte_grise_back')
-            ? $request->file('carte_grise_back')->store("insurance-documents/{$userId}", $disk)
+            ? CompressedImageUpload::store($request->file('carte_grise_back'), "insurance-documents/{$userId}", $disk)
             : null;
 
         $extracted = $ocr->extractVehicleInfo($frontPath, $backPath, $disk);

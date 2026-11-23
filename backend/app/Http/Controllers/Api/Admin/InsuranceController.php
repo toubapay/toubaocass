@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\InsurancePolicyResource;
 use App\Http\Resources\Admin\InsuranceProviderResource;
 use App\Models\InsurancePolicy;
 use App\Models\InsuranceProvider;
+use Illuminate\Support\Facades\Cache;
 
 class InsuranceController extends Controller
 {
@@ -22,6 +23,7 @@ class InsuranceController extends Controller
     public function storeProvider(StoreInsuranceProviderRequest $request)
     {
         $provider = InsuranceProvider::create($request->validated());
+        Cache::forget('insurance_providers:active');
 
         return new InsuranceProviderResource($provider);
     }
@@ -29,6 +31,7 @@ class InsuranceController extends Controller
     public function updateProvider(UpdateInsuranceProviderRequest $request, InsuranceProvider $insuranceProvider)
     {
         $insuranceProvider->update($request->validated());
+        Cache::forget('insurance_providers:active');
 
         return new InsuranceProviderResource($insuranceProvider->fresh());
     }

@@ -16,6 +16,8 @@ class ModuleRegistry
 {
     private const CACHE_PREFIX = 'module_enabled:';
 
+    private const ALL_CACHE_KEY = 'module_enabled:__all';
+
     /**
      * @return array{is_enabled: bool, enabled_for_rider: bool, enabled_for_driver: bool}
      */
@@ -60,5 +62,29 @@ class ModuleRegistry
     public function forget(string $key): void
     {
         Cache::forget(self::CACHE_PREFIX.$key);
+        Cache::forget(self::ALL_CACHE_KEY);
+    }
+
+    /**
+     * Bulk form of flags(), for the public /modules/status endpoint — one
+     * cached list instead of one cache entry per key. Kept in sync with the
+     * per-key cache above since forget() clears both together.
+     *
+     * @return array<int, array{key: string, is_enabled: bool, enabled_for_rider: bool, enabled_for_driver: bool}>
+     */
+    public function all(): array
+    {
+        return Cache::rememberForever(self::ALL_CACHE_KEY, function () {
+            return Module::query()
+                ->orderBy('key')
+                ->get(['key', 'is_enabled', 'enabled_for_rider', 'enabled_for_driver'])
+                ->map(fn (Module $module) => [
+                    'key' => $module->key,
+                    'is_enabled' => $module->is_enabled,
+                    'enabled_for_rider' => $module->enabled_for_rider,
+                    'enabled_for_driver' => $module->enabled_for_driver,
+                ])
+                ->all();
+        });
     }
 }

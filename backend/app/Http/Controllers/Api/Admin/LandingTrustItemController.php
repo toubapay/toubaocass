@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\LandingTrustItemResource;
 use App\Models\LandingTrustItem;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LandingTrustItemController extends Controller
 {
@@ -28,6 +29,8 @@ class LandingTrustItemController extends Controller
         $item = LandingTrustItem::create($data);
         $this->auditLog->record($request->user(), 'landing_page.trust_item.create', "Repère de confiance \"{$item->text_fr}\" créé.", $item);
 
+        Cache::forget('landing_page:public');
+
         return new LandingTrustItemResource($item);
     }
 
@@ -35,6 +38,8 @@ class LandingTrustItemController extends Controller
     {
         $landingTrustItem->update($request->validated());
         $this->auditLog->record($request->user(), 'landing_page.trust_item.update', "Repère de confiance \"{$landingTrustItem->text_fr}\" modifié.", $landingTrustItem, $request->validated());
+
+        Cache::forget('landing_page:public');
 
         return new LandingTrustItemResource($landingTrustItem->fresh());
     }
@@ -45,6 +50,8 @@ class LandingTrustItemController extends Controller
         $landingTrustItem->delete();
 
         $this->auditLog->record($request->user(), 'landing_page.trust_item.delete', "Repère de confiance \"{$text}\" supprimé.");
+
+        Cache::forget('landing_page:public');
 
         return response()->json(null, 204);
     }
@@ -58,6 +65,8 @@ class LandingTrustItemController extends Controller
         }
 
         $this->auditLog->record($request->user(), 'landing_page.trust_item.reorder', 'Repères de confiance réordonnés.');
+
+        Cache::forget('landing_page:public');
 
         return LandingTrustItemResource::collection(LandingTrustItem::query()->orderBy('sort_order')->get());
     }

@@ -64,9 +64,12 @@ Route::prefix('auth')->group(function () {
     Route::post('pin/login', [AuthController::class, 'loginWithPin'])->middleware('throttle:pin');
 });
 
-Route::get('cities', [CityController::class, 'index']);
-Route::get('modules/status', [ModuleStatusController::class, 'index']);
-Route::get('landing-page', [LandingPageController::class, 'index']);
+// max_age tuned to how often each payload actually changes: cities are
+// effectively static (no admin write path at all), modules/landing-page
+// content can change same-day via the admin panel.
+Route::get('cities', [CityController::class, 'index'])->middleware('cache.headers:public;max_age=86400;etag');
+Route::get('modules/status', [ModuleStatusController::class, 'index'])->middleware('cache.headers:public;max_age=3600;etag');
+Route::get('landing-page', [LandingPageController::class, 'index'])->middleware('cache.headers:public;max_age=3600;etag');
 
 // SOS "share my live position" link — public, no login, signature-gated.
 Route::get('track/{type}/{id}', [TrackingController::class, 'show'])
@@ -281,7 +284,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('dem-legui/trips/{demLeguiTrip}/location', [DemLeguiController::class, 'updateTripLocation']);
 
         // Assurance (vehicle insurance comparison & purchase).
-        Route::get('insurance/providers', [InsuranceController::class, 'providers']);
+        // `public` on an authenticated route is deliberate: this payload is
+        // identical for every caller (not per-user data), so a shared cache
+        // serving it across users is correct, not a leak.
+        Route::get('insurance/providers', [InsuranceController::class, 'providers'])->middleware('cache.headers:public;max_age=86400;etag');
         Route::post('insurance/quotes', [InsuranceController::class, 'quote']);
         Route::post('insurance/policies', [InsuranceController::class, 'purchase'])->middleware('module:assurance');
         Route::get('insurance/policies', [InsuranceController::class, 'index']);

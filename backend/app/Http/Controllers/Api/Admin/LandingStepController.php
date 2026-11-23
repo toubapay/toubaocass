@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\LandingStepResource;
 use App\Models\LandingStep;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LandingStepController extends Controller
 {
@@ -28,6 +29,8 @@ class LandingStepController extends Controller
         $step = LandingStep::create($data);
         $this->auditLog->record($request->user(), 'landing_page.step.create', "Étape \"{$step->title_fr}\" créée.", $step);
 
+        Cache::forget('landing_page:public');
+
         return new LandingStepResource($step);
     }
 
@@ -35,6 +38,8 @@ class LandingStepController extends Controller
     {
         $landingStep->update($request->validated());
         $this->auditLog->record($request->user(), 'landing_page.step.update', "Étape \"{$landingStep->title_fr}\" modifiée.", $landingStep, $request->validated());
+
+        Cache::forget('landing_page:public');
 
         return new LandingStepResource($landingStep->fresh());
     }
@@ -45,6 +50,8 @@ class LandingStepController extends Controller
         $landingStep->delete();
 
         $this->auditLog->record($request->user(), 'landing_page.step.delete', "Étape \"{$title}\" supprimée.");
+
+        Cache::forget('landing_page:public');
 
         return response()->json(null, 204);
     }
@@ -58,6 +65,8 @@ class LandingStepController extends Controller
         }
 
         $this->auditLog->record($request->user(), 'landing_page.step.reorder', 'Étapes réordonnées.');
+
+        Cache::forget('landing_page:public');
 
         return LandingStepResource::collection(LandingStep::query()->orderBy('sort_order')->get());
     }
