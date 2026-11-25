@@ -17,7 +17,7 @@
   "maskableIconUrl": "http://localhost:5902/driver/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/tmp/claude-0/-home-user-toubaocass/74111a04-f519-52bd-aa43-43b0a789835b/scratchpad/twa-setup/keystores/driver.keystore",
+    "path": "/home/user/toubaocass/apps/driver-twa/driver.keystore",
     "alias": "upload"
   },
   "appVersionName": "1.0.0",
@@ -34,7 +34,7 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://intercity-frontends.onrender.com/driver/",
-  "minSdkVersion": 21,
+  "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
